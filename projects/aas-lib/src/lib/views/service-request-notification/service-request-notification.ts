@@ -13,6 +13,7 @@ import {
     effect,
     inject,
     OnDestroy,
+    Signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';
@@ -20,10 +21,12 @@ import { Observable, of } from 'rxjs';
 import { LeafView } from '../leaf-view';
 import { ToolbarService } from '../../services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { encodeBase64Url } from '../../utilities';
+import { encodeBase64Url, toString } from '../../utilities';
 import { StartService } from '../../services/start.service';
 import { RouterLink } from '@angular/router';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
+import { LangChangeEvent, TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'fhg-service-request-notification',
@@ -36,6 +39,8 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
 export class ServiceRequestNotification extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
+    private readonly langChange: Signal<LangChangeEvent | undefined>;
+    private readonly currentLang: Signal<string>;
 
     public constructor() {
         super();
@@ -46,6 +51,10 @@ export class ServiceRequestNotification extends LeafView implements OnDestroy {
                 this.toolbar.set(template);
             }
         });
+
+        const translate = inject(TranslateService);
+        this.langChange = toSignal(translate.onLangChange);
+        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
@@ -78,4 +87,98 @@ export class ServiceRequestNotification extends LeafView implements OnDestroy {
 
         return this.start.save();
     }
+
+    public readonly requestId = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'ServiceRequestNotificationId', this.currentLang());
+    });
+
+    public readonly shortText = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'ShortText', this.currentLang());
+    });
+
+    public readonly status = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'Status', this.currentLang());
+    });
+
+    public readonly priority = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'Priority', this.currentLang());
+    });
+
+    public readonly detailedInformation = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'DetailedInformation.LongText', this.currentLang());
+    });
+
+    public readonly ReportedByNumber = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'ReportedBy.CustomerNumber', this.currentLang());
+    });
+
+    public readonly ReportedByName = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'ReportedBy.ContactInformation.NameOfContact', this.currentLang());
+    });
+
+    public readonly ReportedByDepartment = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'ReportedBy.ContactInformation.Department', this.currentLang());
+    });
+
+    public readonly ReportedByEmail = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'ReportedBy.ContactInformation.Email', this.currentLang());
+    });
+
+    public readonly ReportedByPhone = computed(() => {
+        const submodel = this.submodel();
+        if (submodel === undefined) {
+            return '-';
+        }
+
+        return toString(submodel, 'ReportedBy.ContactInformation.Phone', this.currentLang());
+    });
+
+    
+
+
 }
