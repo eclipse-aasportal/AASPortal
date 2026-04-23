@@ -434,9 +434,10 @@ export class AASComponent implements OnInit, OnDestroy {
             return 'bi-graph-up';
         if (semId.toLowerCase().includes('structure') || submodel.idShort.toLowerCase().includes('structure'))
             return 'bi-diagram-3';
-        if (semId.toLowerCase().includes('servicerequest') || submodel.idShort.toLowerCase().includes('servicerequest'))
+        if (semId.toLowerCase().includes('assetstatus') || submodel.idShort.toLowerCase().includes('assetstatus'))
             return 'bi-info-circle';
-
+        if (semId.toLowerCase().includes('servicerequest') || submodel.idShort.toLowerCase().includes('servicerequest'))
+            return 'bi-person-gear';
 
         return 'bi-question-circle';
     }
