@@ -76,11 +76,10 @@ export class App {
     }
 
     private notFoundHandler = (req: Request, res: Response): void => {
-        this.logger.warning(
-            `[NotFound] ${req.method} ${req.originalUrl} (path: ${req.path}) (accept: ${req.headers.accept ?? 'n/a'})`,
-        );
-        res.status(404).send({
-            message: 'Not Found',
-        });
+        if (req.method === 'GET' && req.accepts('html')) {
+            res.sendFile(this.variable.WEB_ROOT + '/index.html');
+        } else {
+            res.status(404).send({ message: 'Not Found' });
+        }
     };
 }
