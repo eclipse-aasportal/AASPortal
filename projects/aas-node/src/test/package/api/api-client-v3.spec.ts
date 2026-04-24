@@ -37,11 +37,10 @@ describe('ApiClientV3', () => {
         });
 
         it('returns the URL to "property1"', () => {
-            const aasId = Buffer.from('http://localhost/test/aas').toString('base64url');
             const smId = Buffer.from('http://localhost/test/submodel1').toString('base64url');
             const nodeId = smId + '#property1';
             expect(client.resolveNodeId(shell, nodeId)).toEqual(
-                `http://localhost:1234/shells/${aasId}/submodels/${smId}/submodel-elements/property1`,
+                `http://localhost:1234/submodels/${smId}/submodel-elements/property1`,
             );
         });
     });

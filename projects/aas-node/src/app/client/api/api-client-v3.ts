@@ -178,12 +178,11 @@ export class ApiClientV3 extends ApiClient {
         return await this.http.getReadable(url, this.endpoint.headers);
     }
 
-    public override resolveNodeId(shell: aas.AssetAdministrationShell, nodeId: string): string {
-        const aasId = encodeBase64Url(shell.id);
+    public override resolveNodeId(_: aas.AssetAdministrationShell, nodeId: string): string {
         const index = nodeId.indexOf('#');
         const smId = nodeId.substring(0, index);
         const idShortPath = nodeId.substring(index + 1);
-        return this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${idShortPath}`).href;
+        return this.resolve(`submodels/${smId}/submodel-elements/${idShortPath}`).href;
     }
 
     public override async getPackage(aasId: string): Promise<NodeJS.ReadableStream> {
@@ -215,12 +214,11 @@ export class ApiClientV3 extends ApiClient {
         await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
-    public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
+    public override async invoke(_: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
         if (!operation.path) {
             throw new Error('Invalid argument ""operation.');
         }
 
-        const aasId = encodeBase64Url(env.assetAdministrationShells[0].id);
         const smId = encodeBase64Url(operation.path.id);
         const idShortPath = operation.path.idShortPath;
         const request: OperationRequest = {};
@@ -235,7 +233,7 @@ export class ApiClientV3 extends ApiClient {
 
         const result: OperationResult = JSON.parse(
             await this.http.postJson(
-                this.resolve(`shells/${aasId}/submodels/${smId}/submodel-elements/${idShortPath}/invoke`),
+                this.resolve(`submodels/${smId}/submodel-elements/${idShortPath}/invoke`),
                 request,
                 this.endpoint.headers,
             ),
