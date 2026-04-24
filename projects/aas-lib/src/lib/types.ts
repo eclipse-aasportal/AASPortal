@@ -113,6 +113,7 @@ export type RouteData = Data &
 export type ViewRoute = Route & { path: ViewRouteName; data: RouteData };
 
 export type ViewRouteName =
+    | 'AssetStatus'
     | 'Browser'
     | 'CarbonFootprint'
     | 'ContactInformation'
