@@ -18,15 +18,15 @@ export class HttpSubscription extends SocketSubscription {
     private timeoutId?: NodeJS.Timeout;
 
     public constructor(
-        private readonly server: ApiClient,
-        private readonly client: SocketClient,
+        private readonly api: ApiClient,
+        private readonly socket: SocketClient,
         message: LiveRequest,
         env: aas.Environment,
     ) {
         super();
 
         this.items = message.nodes.map(
-            node => new HttpSocketItem(node, server.resolveNodeId(env.assetAdministrationShells[0], node.nodeId)),
+            node => new HttpSocketItem(node, api.resolveNodeId(env.assetAdministrationShells[0], node.nodeId)),
         );
     }
 
@@ -50,7 +50,7 @@ export class HttpSubscription extends SocketSubscription {
         for (const item of this.items) {
             try {
                 item.node.value = changeType(
-                    await this.server.readValue(item.url, item.node.valueType),
+                    await this.api.readValue(item.url, item.node.valueType),
                     item.node.valueType,
                 );
 
@@ -62,7 +62,7 @@ export class HttpSubscription extends SocketSubscription {
         }
 
         if (nodes.length > 0) {
-            this.client.notify({
+            this.socket.notify({
                 type: 'LiveNode[]',
                 data: nodes,
             });
