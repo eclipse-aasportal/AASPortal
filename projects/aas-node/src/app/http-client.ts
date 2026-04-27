@@ -11,15 +11,12 @@ import { Readable } from 'stream';
 import { singleton } from 'tsyringe';
 import { ApplicationError } from 'aas-core';
 import { parseUrl } from './utilities.js';
-import { HttpCache } from './http-cache.js';
 
 /**
  * A simple HTTP client for making requests to servers.
  */
 @singleton()
 export class HttpClient {
-    private readonly cache = new HttpCache(200);
-
     /**
      * Gets an object of type `T` from a server.
      * @template T The type of the object.
@@ -29,19 +26,13 @@ export class HttpClient {
      */
     public async getJson<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
         const href = url.href;
-        let value = this.cache.get(href) as T | undefined;
-        if (value !== undefined) {
-            return value;
-        }
-
         const response = await fetch(href, { method: 'GET', headers });
         if (!response.ok) {
-            throw new ApplicationError(response.statusText, {}, response.status);
+            const message = await response.text().catch(() => 'GET request failed');
+            throw new ApplicationError(message, {}, response.status);
         }
 
-        value = (await response.json()) as T;
-        this.cache.set(href, value);
-        return value;
+        return (await response.json()) as T;
     }
 
     public async getJsonLive<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
