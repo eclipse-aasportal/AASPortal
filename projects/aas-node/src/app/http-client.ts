@@ -44,6 +44,15 @@ export class HttpClient {
         return value;
     }
 
+    public async getJsonLive<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
+        const response = await fetch(url.href, { method: 'GET', headers });
+        if (!response.ok) {
+            throw new ApplicationError(response.statusText, {}, response.status);
+        }
+
+        return (await response.json()) as T;
+    }
+
     /**
      * Sends a GET request to the specified URL and returns the response body as a Node.js ReadableStream.
      * @param url - The URL to send the GET request to.
