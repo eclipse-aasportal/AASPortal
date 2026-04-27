@@ -24,9 +24,60 @@
         </div>
         <fhg-thumbnail-qrcode [document]="document()"></fhg-thumbnail-qrcode>
     </div>
-    @for (item of items(); track item.idShort; let i = $index) {
-        <div>{{ item.idShort }}</div>
-    }
+
+    <hr/>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 my-2">
+        @if (checkCategory("StatusCapacity")) {
+        <div class="col">
+            <div class="card h-100" [class]="statusBorderClass(getStatusValue('StatusCapacity', 'StatusCapacityValue'))">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">Status Capacity</h6>
+                    <h3 class="text-center mb-3" [class]="statusTextClass(getStatusValue('StatusCapacity', 'StatusCapacityValue'))">{{getStatusValue("StatusCapacity", "StatusCapacityValue")}}</h3>
+                    <p>{{getStatusValue("StatusCapacity", "StatusCapacityDescription")}}</p>
+                    <small class="text-muted mt-auto">{{getStatusValue("StatusCapacity", "StatuStautsCapacityTimestamp")}}</small>
+                </div>
+            </div>
+        </div>
+        }
+        @if (checkCategory("StatusMaintenance")) {
+        <div class="col">
+            <div class="card h-100" [class]="statusBorderClass(getStatusValue('StatusMaintenance', 'StatusMaintenanceValue'))">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">Status Maintenance</h6>
+                    <h3 class="text-center mb-3" [class]="statusTextClass(getStatusValue('StatusMaintenance', 'StatusMaintenanceValue'))">{{getStatusValue("StatusMaintenance", "StatusMaintenanceValue")}}</h3>
+                    <p>{{getStatusValue("StatusMaintenance", "StatusMaintenanceDescription")}}</p>
+                    <small class="text-muted mt-auto">{{getStatusValue("StatusMaintenance", "StatusMaintenanceTimestamp")}}</small>
+                </div>
+            </div>
+        </div>
+        }
+        @if (checkCategory("StatusOperations")) {
+        <div class="col">
+            <div class="card h-100" [class]="statusBorderClass(getStatusValue('StatusOperations', 'StatusOperationsValue'))">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">Status Operations</h6>
+                    <h3 class="text-center mb-3" [class]="statusTextClass(getStatusValue('StatusOperations', 'StatusOperationsValue'))">{{getStatusValue("StatusOperations", "StatusOperationsValue")}}</h3>
+                    <p>{{getStatusValue("StatusOperations", "StatusOperationsDescription")}}</p>
+                    <small class="text-muted mt-auto">{{getStatusValue("StatusOperations", "StatusOperationsTimeStamp")}}</small>
+                </div>
+            </div>
+        </div>
+        }
+        @if (checkCategory("StatusDataSharing")) {
+        <div class="col">
+            <div class="card h-100" [class]="statusBorderClass(getStatusValue('StatusDataSharing', 'StatusDataSharingValue'))">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">Status DataSharing</h6>
+                    <h3 class="text-center mb-3" [class]="statusTextClass(getStatusValue('StatusDataSharing', 'StatusDataSharingValue'))">{{getStatusValue("StatusDataSharing", "StatusDataSharingValue")}}</h3>
+                    <p>{{getStatusValue("StatusDataSharing", "StatusDataSharingDescription")}}</p>
+                    <small class="text-muted mt-auto">{{getStatusValue("StatusDataSharing", "StautsDataSharingTimestamp")}}</small>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
 </div>
 
 <ng-template #toolbar>

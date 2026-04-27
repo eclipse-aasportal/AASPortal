@@ -24,6 +24,7 @@ import { encodeBase64Url } from '../../utilities';
 import { StartService } from '../../services/start.service';
 import { RouterLink } from '@angular/router';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
+import { aas, isProperty, isSubmodelElementCollection, isSubmodelElementList } from 'aas-core';
 
 @Component({
     selector: 'fhg-asset-status',
@@ -59,6 +60,49 @@ export class AssetStatus extends LeafView implements OnDestroy {
 
         return submodel.submodelElements;
     });
+
+    public statusBorderClass(value: string): string {
+        const v = value.toLowerCase();
+        if (v === 'running') return 'border-success border-2';
+        if (v === 'fault') return 'border-danger border-2';
+        return 'border-warning border-2';
+    }
+
+    public statusTextClass(value: string): string {
+        const v = value.toLowerCase();
+        if (v === 'running') return 'text-success';
+        if (v === 'fault') return 'text-danger';
+        return 'text-status-unknown';
+    }
+
+    public checkCategory(category: string): Boolean {
+        const items = this.items();
+        const collection = items.find(
+            (element): element is aas.SubmodelElementCollection =>
+                isSubmodelElementList(element) && element.idShort.toLowerCase() === category.toLowerCase(),
+        );
+        return collection ? true : false 
+    }
+
+    public getStatusValue(category: string, valueName: string): string {
+        const items = this.items();
+        const collection = items.find(
+            (element): element is aas.SubmodelElementCollection =>
+                isSubmodelElementList(element) && element.idShort.toLowerCase() === category.toLowerCase(),
+        );
+        if (!collection) return '-';
+
+        const last = collection.value?.[collection.value.length - 1];
+        if (!isSubmodelElementCollection(last)) return '-';
+
+        const prop = last.value?.find(
+            (element): element is aas.Property =>
+                isProperty(element) && element.idShort.toLowerCase() === valueName.toLowerCase(),
+        );
+
+        return prop?.value ?? '-1';
+    }
+
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
