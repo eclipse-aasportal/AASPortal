@@ -1,0 +1,339 @@
+{
+    "assetAdministrationShells": [
+        {
+            "idShort": "Kannegiesser_XFM",
+            "displayName": [
+                {
+                    "language": "en",
+                    "text": "Kannegiesser XFM"
+                }
+            ],
+            "id": "https://www.smartfactory-owl.de/kannegiesser/xfm",
+            "assetInformation": {
+                "assetKind": "Instance",
+                "globalAssetId": "https://www.smartfactory-owl.de/kannegiesser/xfm"
+            },
+            "submodels": [
+                {
+                    "type": "ModelReference",
+                    "keys": [
+                        {
+                            "type": "Submodel",
+                            "value": "https://www.smartfactory-owl.de/kannegiesser/xfm/AssetStatus"
+                        }
+                    ]
+                }
+            ],
+            "modelType": "AssetAdministrationShell"
+        }
+    ],
+    "submodels": [
+        {
+            "idShort": "AssetStatus",
+            "description": [
+                {
+                    "language": "en",
+                    "text": "..."
+                }
+            ],
+            "id": "https://www.smartfactory-owl.de/kannegiesser/xfm/AssetStatus",
+            "kind": "Instance",
+            "submodelElements": [
+                {
+                    "idShort": "StatusCapacity",
+                    "semanticId": {
+                        "type": "ExternalReference",
+                        "keys": [
+                            {
+                                "type": "GlobalReference",
+                                "value": "https://example.com/UC4/Trumpf/DataSharing/StatusCapacity"
+                            }
+                        ]
+                    },
+                    "typeValueListElement": "SubmodelElementCollection",
+                    "value": [
+                        {
+                            "idShort": "",
+                            "value": [
+                                {
+                                    "idShort": "StatusCapacityValue",
+                                    "displayName": [
+                                        {
+                                            "language": "en",
+                                            "text": "Pipeline running empty"
+                                        }
+                                    ],
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "Value for the crash time as timestamp."
+                                        }
+                                    ],
+                                    "valueType": "xs:string",
+                                    "value": "running",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "StatusCapacityDescription",
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "..."
+                                        }
+                                    ],
+                                    "valueType": "xs:string",
+                                    "value": "Risk of idle time and downtime increases.",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "StatuStautsCapacityTimestamp",
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "..."
+                                        }
+                                    ],
+                                    "valueType": "xs:dateTime",
+                                    "value": "2025-11-19T14:11",
+                                    "modelType": "Property"
+                                }
+                            ],
+                            "modelType": "SubmodelElementCollection"
+                        }
+                    ],
+                    "modelType": "SubmodelElementList"
+                },
+                {
+                    "idShort": "StatusMaintenance",
+                    "description": [
+                        {
+                            "language": "en",
+                            "text": "..."
+                        }
+                    ],
+                    "semanticId": {
+                        "type": "ExternalReference",
+                        "keys": [
+                            {
+                                "type": "GlobalReference",
+                                "value": "https://example.com/UC4/Trumpf/DataSharing/StatusMaintenance"
+                            }
+                        ]
+                    },
+                    "typeValueListElement": "SubmodelElementCollection",
+                    "value": [
+                        {
+                            "idShort": "",
+                            "value": [
+                                {
+                                    "idShort": "StatusMaintenanceValue",
+                                    "displayName": [
+                                        {
+                                            "language": "en",
+                                            "text": "Critical Condition"
+                                        }
+                                    ],
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "..."
+                                        }
+                                    ],
+                                    "valueType": "xs:string",
+                                    "value": "running",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "StatusMaintenanceDescription",
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "Description of the maintenance operation."
+                                        }
+                                    ],
+                                    "valueType": "xs:string",
+                                    "value": "Components are running",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "StatusMaintenanceTimestamp",
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "..."
+                                        },
+                                        {
+                                            "language": "de",
+                                            "text": "..."
+                                        }
+                                    ],
+                                    "valueType": "xs:dateTime",
+                                    "value": "2025-11-19T14:11",
+                                    "modelType": "Property"
+                                }
+                            ],
+                            "modelType": "SubmodelElementCollection"
+                        }
+                    ],
+                    "modelType": "SubmodelElementList"
+                },
+                {
+                    "idShort": "StatusOperations",
+                    "description": [
+                        {
+                            "language": "de",
+                            "text": "..."
+                        }
+                    ],
+                    "semanticId": {
+                        "type": "ExternalReference",
+                        "keys": [
+                            {
+                                "type": "GlobalReference",
+                                "value": "https://example.com/UC4/Trumpf/DataSharing/StatusOperations"
+                            }
+                        ]
+                    },
+                    "typeValueListElement": "SubmodelElementCollection",
+                    "value": [
+                        {
+                            "idShort": "",
+                            "description": [
+                                {
+                                    "language": "en",
+                                    "text": ".."
+                                }
+                            ],
+                            "value": [
+                                {
+                                    "idShort": "StatusOperationsValue",
+                                    "displayName": [
+                                        {
+                                            "language": "en",
+                                            "text": "Not executing"
+                                        }
+                                    ],
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "..."
+                                        }
+                                    ],
+                                    "valueType": "xs:string",
+                                    "value": "idle",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "StatusOperationsDescription",
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "..."
+                                        }
+                                    ],
+                                    "valueType": "xs:string",
+                                    "value": "The unit is available & functional and is not performing any activity. It waits for an action from outside to start or restart an activity.",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "StatusOperationsTimeStamp",
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "..."
+                                        },
+                                        {
+                                            "language": "de",
+                                            "text": "..."
+                                        }
+                                    ],
+                                    "valueType": "xs:dateTime",
+                                    "value": "2025-11-19T14:11",
+                                    "modelType": "Property"
+                                }
+                            ],
+                            "modelType": "SubmodelElementCollection"
+                        }
+                    ],
+                    "modelType": "SubmodelElementList"
+                },
+                {
+                    "idShort": "StatusDataSharing",
+                    "description": [
+                        {
+                            "language": "de",
+                            "text": "..."
+                        }
+                    ],
+                    "semanticId": {
+                        "type": "ExternalReference",
+                        "keys": [
+                            {
+                                "type": "GlobalReference",
+                                "value": "https://example.com/UC4/Trumpf/DataSharing/StatusDataSharing"
+                            }
+                        ]
+                    },
+                    "typeValueListElement": "SubmodelElementCollection",
+                    "value": [
+                        {
+                            "idShort": "",
+                            "value": [
+                                {
+                                    "idShort": "StatusDataSharingValue",
+                                    "displayName": [
+                                        {
+                                            "language": "en",
+                                            "text": "Healthchecks failed"
+                                        }
+                                    ],
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "..."
+                                        }
+                                    ],
+                                    "valueType": "xs:string",
+                                    "value": "running",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "StatusDataSharingDescription",
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "...."
+                                        }
+                                    ],
+                                    "valueType": "xs:string",
+                                    "value": "Connector and mqtt broker are running",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "StautsDataSharingTimestamp",
+                                    "description": [
+                                        {
+                                            "language": "en",
+                                            "text": "..."
+                                        },
+                                        {
+                                            "language": "de",
+                                            "text": "..."
+                                        }
+                                    ],
+                                    "valueType": "xs:dateTime",
+                                    "value": "2025-11-19T14:11",
+                                    "modelType": "Property"
+                                }
+                            ],
+                            "modelType": "SubmodelElementCollection"
+                        }
+                    ],
+                    "modelType": "SubmodelElementList"
+                }
+            ],
+            "modelType": "Submodel"
+        }
+    ],
+    "conceptDescriptions": []
+}

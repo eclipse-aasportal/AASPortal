@@ -27,7 +27,7 @@ export abstract class Cache<TKey, TValue> {
             return undefined;
         }
 
-        if (Date.now() - value[1] > this.expiration) {
+        if (Date.now() - value[1] >= this.expiration) {
             this.map.delete(key);
             return undefined;
         }

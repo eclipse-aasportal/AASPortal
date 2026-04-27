@@ -33,9 +33,18 @@ import {
     NAMEPLATE_HSU,
     TECHNICAL_DATA_1_2,
 } from './views-constants';
+import { AssetStatus } from './asset-status/asset-status';
 
 /** The routes to the specific views. */
 export const viewRoutes: ViewRoute[] = [
+    {
+        path: 'AssetStatus',
+        component: AssetStatus,
+        data: {
+            type: 'Leaf',
+            idShorts: ['AssetStatus'],
+        },
+    },
     {
         path: 'Browser',
         component: DocumentBrowserView,

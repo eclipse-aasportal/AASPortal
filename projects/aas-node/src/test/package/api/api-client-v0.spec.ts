@@ -29,7 +29,7 @@ describe('ApiClientV0', function () {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        http = createSpyObj<HttpClient>(['getJson', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
+        http = createSpyObj<HttpClient>(['getJson', 'getJsonLive', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
         client = new ApiClientV0(logger, http, {
             name: 'AASX Server',
             type: 'AAS_API',
@@ -116,7 +116,7 @@ describe('ApiClientV0', function () {
 
     describe('readValue', () => {
         it('reads the current value of a data element', async () => {
-            http.getJson.mockResolvedValue({ value: '42' });
+            http.getJsonLive.mockResolvedValue({ value: '42' });
             await expect(client.readValue('http://localhost:1234', 'xs:int')).resolves.toBe(42);
         });
     });

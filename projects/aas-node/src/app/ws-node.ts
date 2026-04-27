@@ -109,7 +109,7 @@ export class WSNode extends EventEmitter {
         this.logger.error(`WebSocket server error: ${error?.message}`);
     };
 
-    private onClientClose = (code: number, reason: string, client: SocketClient): void => {
+    private onClientClose = (_code: number, _reason: string, client: SocketClient): void => {
         this.emit('close', client);
 
         client.off('message', this.onClientMessage);

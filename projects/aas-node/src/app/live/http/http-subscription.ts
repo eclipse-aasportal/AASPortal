@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, changeType, LiveNode, LiveRequest, noop } from 'aas-core';
+import { aas, changeType, LiveNode, LiveRequest } from 'aas-core';
 import { HttpSocketItem } from './http-socket-item.js';
 import { SocketClient } from '../socket-client.js';
 import { ApiClient } from '../../client/api/api-client.js';
@@ -49,15 +49,12 @@ export class HttpSubscription extends SocketSubscription {
         const nodes: Array<LiveNode> = [];
         for (const item of this.items) {
             try {
-                item.node.value = changeType(
-                    await this.api.readValue(item.url, item.node.valueType),
-                    item.node.valueType,
-                );
-
+                const raw = await this.api.readValue(item.url, item.node.valueType);
+                item.node.value = changeType(raw, item.node.valueType);
                 item.node.timeStamp = Date.now();
                 nodes.push(item.node);
-            } catch {
-                noop();
+            } catch (error) {
+                console.error(`readValue failed for ${item.url}:`, error);
             }
         }
 
