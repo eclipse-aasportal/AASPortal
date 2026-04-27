@@ -21,7 +21,7 @@ describe('ApiClientV3', () => {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        http = createSpyObj<HttpClient>(['getJson', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
+        http = createSpyObj<HttpClient>(['getJson', 'getJsonLive', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
         client = new ApiClientV3(logger, http, {
             name: 'AASX Server',
             type: 'AAS_API',
