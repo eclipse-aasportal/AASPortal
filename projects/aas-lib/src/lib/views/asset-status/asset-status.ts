@@ -75,13 +75,13 @@ export class AssetStatus extends LeafView implements OnDestroy {
         return 'text-status-unknown';
     }
 
-    public checkCategory(category: string): Boolean {
+    public checkCategory(category: string): boolean {
         const items = this.items();
         const collection = items.find(
             (element): element is aas.SubmodelElementCollection =>
                 isSubmodelElementList(element) && element.idShort.toLowerCase() === category.toLowerCase(),
         );
-        return collection ? true : false 
+        return collection ? true : false;
     }
 
     public getStatusValue(category: string, valueName: string): string {
@@ -102,7 +102,6 @@ export class AssetStatus extends LeafView implements OnDestroy {
 
         return prop?.value ?? '-1';
     }
-
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
