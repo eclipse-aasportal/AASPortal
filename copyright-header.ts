@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,",
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,",
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft",
  * zur Foerderung der angewandten Forschung e.V.",
  *
@@ -14,7 +14,7 @@ import os from 'os';
 const jsHeader = [
     '/******************************************************************************',
     ' *',
-    ' * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,',
+    ' * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,',
     ' * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft',
     ' * zur Foerderung der angewandten Forschung e.V.',
     ' *',
@@ -25,7 +25,7 @@ const jsHeader = [
 const htmlHeader = [
     '<!-----------------------------------------------------------------------------',
     ' !',
-    ' ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,',
+    ' ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,',
     ' ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft',
     ' ! zur Foerderung der angewandten Forschung e.V.',
     ' !',
@@ -286,7 +286,7 @@ async function checkFilesAsync(dirs: string[]): Promise<void> {
      * @param {string} file The destination file.
      * @param {string[]} text The text;
      */
-    async function writeFileAsync(file: string, text: string[]) {
-        await fs.promises.writeFile(file, text.join(os.EOL));
+    async function writeFileAsync(file: string, text: string[]): Promise<void> {
+        await fs.promises.writeFile(file, text.join(os.EOL) + os.EOL);
     }
 }

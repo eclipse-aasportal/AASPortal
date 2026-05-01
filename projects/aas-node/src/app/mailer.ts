@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -40,7 +40,7 @@ export class Mailer {
      * @param email The e-mail of the new user.
      */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public sendPassword(email: string, password: string) {
+    public sendPassword(email: string, password: string): void {
         throw new Error('Sending e-mails not implemented');
     }
 }

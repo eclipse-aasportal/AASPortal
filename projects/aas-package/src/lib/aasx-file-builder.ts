@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -92,7 +92,6 @@ export abstract class AasxFileBuilder<T extends AasxFile> {
         zip.file('aasx/_rels/aasx-origin.rels', this.aasxRels);
         zip.file('aasx/data.xml', xml);
         zip.file('aasx/aasx-origin', 'Intentionally empty.');
-        zip.folder('aasx/suppl');
         await aasx.save();
         return aasx;
     }

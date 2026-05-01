@@ -1,17 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import path from 'path';
-import fs from 'fs';
-import { nanoid } from 'nanoid';
 import { aas, ApplicationError, jsonization, toAssetAdministrationShell, toJsonValue, types } from 'aas-core';
 
-import { DatabaseEnvironment, DatabaseKey, PackageItem, IdentifiableItem } from '../database-types.js';
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
 import { ERROR } from '../../error.js';
@@ -37,81 +33,29 @@ export class AddShellCommand extends DatabaseCommand {
     }
 
     public async execute(): Promise<aas.AssetAdministrationShell> {
-        const filename = this.shell.idShort + '.aasx';
-        const sourceFile = path.join(this.database.tmpDir, filename);
-        if (fs.existsSync(sourceFile)) {
-            await fs.promises.unlink(sourceFile);
-        }
-
         const result = jsonization.assetAdministrationShellFromJsonable(toJsonValue(this.shell));
         if (result.error) {
             throw result.error;
         }
 
         const value = result.mustValue();
-        const env = new types.Environment([value], [], []);
-        await this.packageBuilder.build(sourceFile, env);
-
-        const packageKey = this.database.packages.createKey();
-        const packageId = nanoid();
-        const key = await this.addAssetAdministrationShell(value, packageKey);
-
-        const environment: DatabaseEnvironment = {
-            assetAdministrationShells: [key],
-            submodels: [],
-            conceptDescriptions: [],
-        };
-
-        await this.addPackage({ key: packageKey, id: packageId, filename, environment }, sourceFile);
+        await this.addAssetAdministrationShell(value);
         return toAssetAdministrationShell(value);
     }
 
-    private async addAssetAdministrationShell(
-        shell: types.AssetAdministrationShell,
-        packageKey: DatabaseKey,
-    ): Promise<DatabaseKey> {
+    private async addAssetAdministrationShell(shell: types.AssetAdministrationShell): Promise<void> {
         let key = await this.table.findKey(shell.id);
-        if (key) {
+        if (key !== undefined) {
             throw new ApplicationError(ERROR.AAS_ALREADY_EXISTS, { id: shell.id }, 409);
         }
 
-        key = this.table.createKey();
-        const page = await this.table.getEditablePage(key);
-        const item: IdentifiableItem = {
-            key,
-            id: shell.id,
-            idShort: shell.idShort,
-            packageKeys: [packageKey],
-        };
-
-        const index = key % this.table.pageSize;
-        ++page.count;
-        if (index < page.items.length) {
-            page.items[index] = item;
-        } else if (index === page.items.length) {
-            page.items.push(item);
-        } else {
-            throw new Error('Invalid operation.');
-        }
-
-        await this.table.setKey(shell.id, key);
-        await this.table.writeFile(shell, key);
-        return key;
-    }
-
-    private async addPackage(item: PackageItem, aasxFile: string): Promise<void> {
-        const table = this.database.packages;
-        await table.add(aasxFile, item.key);
-        await table.setKey(item.id, item.key);
-        const index = item.key % this.table.pageSize;
-        const page = await table.getEditablePage(item.key);
-        ++page.count;
-        if (index < page.items.length) {
-            page.items[index] = item;
-        } else if (index === page.items.length) {
-            page.items.push(item);
-        } else {
-            throw new Error('Invalid operation.');
+        key = await this.table.insert(toAssetAdministrationShell(shell));
+        const globalAssetId = shell.assetInformation.globalAssetId;
+        if (globalAssetId) {
+            const assetIndex = this.database.assetIndex;
+            const globalAssetKey =
+                (await assetIndex.findKey(globalAssetId)) ?? (await assetIndex.create(globalAssetId));
+            await this.database.assetIndex.add(globalAssetKey, this.table, key);
         }
     }
 }

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -260,7 +260,7 @@ describe('MySqlIndex', () => {
         it('selects the first page', async () => {
             const results: MySqlDocument[] = [];
             connection.query.mockResolvedValue([results, []]);
-            await expect(index.getPage('Endpoint 1', undefined, 10)).resolves.toEqual({
+            await expect(index.getEndpointDocuments('Endpoint 1', undefined, 10)).resolves.toEqual({
                 paging_metadata: { cursor: undefined },
                 result: [],
             });

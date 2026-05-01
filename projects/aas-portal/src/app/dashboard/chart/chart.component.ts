@@ -1,18 +1,18 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, effect, ElementRef, input, viewChild } from '@angular/core';
-import { WebSocketSubject } from 'rxjs/webSocket';
+import { ChangeDetectionStrategy, Component, effect, ElementRef, inject, input, viewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
 import { Dashboard } from '../dashboard';
 import { DashboardApiService } from '../dashboard-api.service';
-import { WebSocketFactoryService } from 'aas-lib';
+import { WebSocketService } from 'aas-lib';
 import { ChartConfigurationTuple, DashboardChart } from '../dashboard-types';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -26,13 +26,11 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class ChartComponent extends Dashboard {
     private configuration?: ChartConfigurationTuple;
-    private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
+    private webSocketSubscription?: Subscription;
+    private readonly webSocket = inject(WebSocketService);
 
-    public constructor(
-        api: DashboardApiService,
-        private readonly webServiceFactory: WebSocketFactoryService,
-    ) {
-        super(api);
+    public constructor() {
+        super(inject(DashboardApiService));
 
         effect(() => {
             const chart = this.chart();
@@ -68,9 +66,9 @@ export class ChartComponent extends Dashboard {
                 const chartContainer = this.chartContainer();
                 if (chartContainer) {
                     this.configuration = this.createChart(chart, chartContainer.nativeElement);
-                    if (this.webSocketSubject) {
+                    if (this.webSocketSubscription) {
                         for (const request of requests) {
-                            this.webSocketSubject.next(this.createMessage(request));
+                            this.webSocket.sendMessage(this.createMessage(request));
                         }
                     }
                 }
@@ -92,17 +90,16 @@ export class ChartComponent extends Dashboard {
     }
 
     private openWebSocket(): void {
-        this.webSocketSubject = this.webServiceFactory.create();
-        this.webSocketSubject.subscribe({
+        this.webSocketSubscription = this.webSocket.getMessages().subscribe({
             next: this.socketOnMessage,
             error: this.socketOnError,
         });
     }
 
     private closeWebSocket(): void {
-        if (this.webSocketSubject) {
-            this.webSocketSubject.unsubscribe();
-            this.webSocketSubject = null;
+        if (this.webSocketSubscription) {
+            this.webSocketSubscription.unsubscribe();
+            this.webSocketSubscription = undefined;
         }
     }
 

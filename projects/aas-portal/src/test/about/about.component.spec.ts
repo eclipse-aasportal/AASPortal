@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,11 +9,11 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { AppInfo } from 'aas-core';
-import { IndexChangeService, StartService, ToolbarService } from 'aas-lib';
+import { IndexChange, StartService, ToolbarService } from 'aas-lib';
 import { AboutComponent } from '../../app/about/about.component';
 import { AboutApiService } from '../../app/about/about-api.service';
 import { createSpyObj, FakeLoader } from '../mocks';
@@ -21,7 +21,7 @@ import { createSpyObj, FakeLoader } from '../mocks';
 describe('AboutComponent', () => {
     let api: Mocked<AboutApiService>;
     let start: Mocked<StartService>;
-    let indexChange: Mocked<IndexChangeService>;
+    let indexChange: Mocked<IndexChange>;
 
     beforeEach(async () => {
         const info: AppInfo = {
@@ -40,7 +40,7 @@ describe('AboutComponent', () => {
         api = createSpyObj<AboutApiService>(['getInfo', 'getMessages']);
         api.getInfo.mockReturnValue(of(info));
         api.getMessages.mockReturnValue(of([]));
-        indexChange = createSpyObj<IndexChangeService>({}, { documentCount: signal(42), endpointCount: signal(2) });
+        indexChange = createSpyObj<IndexChange>({}, { documentCount: signal(42), endpointCount: signal(2) });
 
         await TestBed.configureTestingModule({
             providers: [
@@ -57,20 +57,18 @@ describe('AboutComponent', () => {
                     useValue: start,
                 },
                 {
-                    provide: IndexChangeService,
+                    provide: IndexChange,
                     useValue: indexChange,
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                AboutComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [AboutComponent],
         }).compileComponents();
     });
 

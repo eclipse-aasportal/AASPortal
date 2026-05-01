@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { aas, changeType, LiveNode, LiveRequest, noop } from 'aas-core';
+import { aas, changeType, LiveNode, LiveRequest } from 'aas-core';
 import { HttpSocketItem } from './http-socket-item.js';
 import { SocketClient } from '../socket-client.js';
 import { ApiClient } from '../../client/api/api-client.js';
@@ -18,15 +18,15 @@ export class HttpSubscription extends SocketSubscription {
     private timeoutId?: NodeJS.Timeout;
 
     public constructor(
-        private readonly server: ApiClient,
-        private readonly client: SocketClient,
+        private readonly api: ApiClient,
+        private readonly socket: SocketClient,
         message: LiveRequest,
         env: aas.Environment,
     ) {
         super();
 
         this.items = message.nodes.map(
-            node => new HttpSocketItem(node, server.resolveNodeId(env.assetAdministrationShells[0], node.nodeId)),
+            node => new HttpSocketItem(node, api.resolveNodeId(env.assetAdministrationShells[0], node.nodeId)),
         );
     }
 
@@ -49,20 +49,17 @@ export class HttpSubscription extends SocketSubscription {
         const nodes: Array<LiveNode> = [];
         for (const item of this.items) {
             try {
-                item.node.value = changeType(
-                    await this.server.readValue(item.url, item.node.valueType),
-                    item.node.valueType,
-                );
-
+                const raw = await this.api.readValue(item.url, item.node.valueType);
+                item.node.value = changeType(raw, item.node.valueType);
                 item.node.timeStamp = Date.now();
                 nodes.push(item.node);
-            } catch {
-                noop();
+            } catch (error) {
+                console.error(`readValue failed for ${item.url}:`, error);
             }
         }
 
         if (nodes.length > 0) {
-            this.client.notify({
+            this.socket.notify({
                 type: 'LiveNode[]',
                 data: nodes,
             });

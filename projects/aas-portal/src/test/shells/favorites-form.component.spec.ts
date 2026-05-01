@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { FavoritesFormComponent } from '../../app/shells/favorites-form/favorites-form.component';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
@@ -35,17 +35,15 @@ describe('FavoritesFormComponent', () => {
                     provide: FavoritesService,
                     useValue: service,
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                FavoritesFormComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [FavoritesFormComponent],
         }).compileComponents();
     });
 

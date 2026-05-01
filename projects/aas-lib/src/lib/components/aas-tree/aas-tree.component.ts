@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,7 +8,6 @@
 
 import { FormsModule } from '@angular/forms';
 import { Route, RouterLinkWithHref } from '@angular/router';
-import { WebSocketSubject } from 'rxjs/webSocket';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -56,7 +55,7 @@ import { AASTreeApi } from './aas-tree-api';
 import { LiveState } from '../../types';
 import { basename, encodeBase64Url, findRouteForShell, findRouteForSubmodel } from '../../utilities';
 import { VIEW_ROUTES } from '../../views/views-routes';
-import { WebSocketFactoryService } from '../../services/web-socket-factory.service';
+import { WebSocketService } from '../../services/web-socket.service';
 import { NotifyService } from '../notify/notify.service';
 import { MaxLengthPipe } from '../../pipes/max-length.pipe';
 import {
@@ -69,6 +68,7 @@ import {
     TreeType,
     TreeValueType,
 } from '../tree/tree.component';
+import { Subscription } from 'rxjs';
 
 export type AASNodeOptions = {
     index: number;
@@ -107,10 +107,10 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
     private readonly viewRoutes = inject(VIEW_ROUTES);
     private readonly notify = inject(NotifyService);
     private readonly document$ = signal(initialState.document);
-    private readonly webSocketFactory = inject(WebSocketFactoryService);
+    private readonly webSocket = inject(WebSocketService);
     private readonly map = new Map<string, TreeNode>();
     private readonly liveNodes: LiveNode[] = [];
-    private webSocketSubject?: WebSocketSubject<WebSocketData>;
+    private webSocketSubscription?: Subscription;
 
     public constructor() {
         super();
@@ -171,7 +171,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
     }
 
     public override ngOnDestroy(): void {
-        this.webSocketSubject?.unsubscribe();
+        this.webSocketSubscription?.unsubscribe();
         super.ngOnDestroy();
     }
 
@@ -545,13 +545,12 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
     private play(): void {
         const document = this.document();
         if (document) {
-            this.webSocketSubject = this.webSocketFactory.create();
-            this.webSocketSubject.subscribe({
+            this.webSocketSubscription = this.webSocket.getMessages().subscribe({
                 next: this.onMessage,
                 error: this.onError,
             });
 
-            this.webSocketSubject.next(this.createMessage(document));
+            this.webSocket.sendMessage(this.createMessage(document));
         }
     }
 
@@ -560,9 +559,9 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         this.map.clear();
         this.liveNodes.splice(0, this.liveNodes.length);
 
-        if (this.webSocketSubject) {
-            this.webSocketSubject.unsubscribe();
-            this.webSocketSubject = undefined;
+        if (this.webSocketSubscription) {
+            this.webSocketSubscription.unsubscribe();
+            this.webSocketSubscription = undefined;
         }
     }
 

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,18 +9,21 @@
 import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { AASCursor, AASDocument, AASEndpoint, AASPagedResult, aas } from 'aas-core';
-import { first, map, mergeMap, Observable, of, tap } from 'rxjs';
+import { first, map, mergeMap, Observable } from 'rxjs';
 import { encodeBase64Url } from '../utilities';
 import { AuthService } from '../components/auth/auth.service';
-import { CacheService } from './cache.service';
 
-/** The API of the digital nameplate. */
+/**
+ * This service provides methods to interact with the AAS endpoints API,
+ * allowing for management of endpoints and retrieval of AAS documents and their content.
+ * It includes functionality for adding, updating, and removing endpoints, as well as fetching
+ * documents and handling file uploads and downloads related to AAS packages.
+ */
 @Injectable({ providedIn: 'root' })
 export class EndpointsApi {
     private readonly document = inject(DOCUMENT);
     private readonly http = inject(HttpClient);
     private readonly auth = inject(AuthService);
-    private readonly cache = inject(CacheService);
 
     /**
      * Returns all configured AAS endpoints.
@@ -77,12 +80,7 @@ export class EndpointsApi {
                       ? `/api/v1/documents/${encodeBase64Url(id)}`
                       : `/api/v1/documents/asset/${encodeBase64Url(id)}`;
 
-                const document: AASDocument | undefined = this.cache.get(url);
-                if (document === undefined) {
-                    return this.http.get<AASDocument>(url).pipe(tap(data => this.cache.set(url, data)));
-                }
-
-                return of(document);
+                return this.http.get<AASDocument>(url);
             }),
         );
     }
@@ -95,12 +93,7 @@ export class EndpointsApi {
      */
     public getContent(id: string, endpoint: string): Observable<aas.Environment> {
         const url = `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/content`;
-        const env: aas.Environment | undefined = this.cache.get(url);
-        if (env === undefined) {
-            return this.http.get<aas.Environment>(url).pipe(tap(data => this.cache.set(url, data)));
-        }
-
-        return of(env);
+        return this.http.get<aas.Environment>(url);
     }
 
     /**
@@ -129,7 +122,7 @@ export class EndpointsApi {
      * @param language (Optional) The language code to localize the documents.
      * @returns An Observable emitting the paginated result of documents. If the result is cached, returns the cached value as an Observable.
      */
-    public getDocuments(cursor: AASCursor, filter?: string, language?: string): Observable<AASPagedResult> {
+    public getDocs(cursor: AASCursor, filter?: string, language?: string): Observable<AASPagedResult> {
         let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
         if (filter) {
             url += `&filter=${encodeBase64Url(filter)}`;
@@ -138,12 +131,7 @@ export class EndpointsApi {
             }
         }
 
-        const result: AASPagedResult | undefined = this.cache.get(url);
-        if (result === undefined) {
-            return this.http.get<AASPagedResult>(url).pipe(tap(data => this.cache.set(url, data)));
-        }
-
-        return of(result);
+        return this.http.get<AASPagedResult>(url);
     }
 
     /**

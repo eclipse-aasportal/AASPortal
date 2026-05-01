@@ -166,6 +166,7 @@
     },
     "Shells": {
         "ADD_ENDPOINT": "Hinzufügen...",
+        "AssetStatus": "Asset-Status",
         "Browser": "Browser",
         "CarbonFootprint": "CO2-Fußabdruck",
         "ContactInformation": "Kontaktinformationen",
@@ -180,6 +181,7 @@
         "OperationalData": "Operative Daten",
         "PLACEHOLDER_FILTER": "Filter",
         "REMOVE_ENDPOINT": "Entfernen...",
+        "ServiceRequestNotification": "Serviceanfrage",
         "TechnicalData": "Technische Daten",
         "UPDATE_ENDPOINT": "Bearbeiten..."
     },
@@ -380,5 +382,11 @@
     },
     "HierarchicalStructure": {
         "TITLE": "Hierarchische Strukturen"
+    },
+    "ServiceRequestNotification": {
+        "TITLE": "Serviceanfrage"
+    },
+    "AssetStatus": {
+        "TITLE": "Asset-Status"
     }
 }

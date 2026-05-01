@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -58,7 +58,6 @@ describe('NameplateView', () => {
     let document: AASDocument;
 
     beforeEach(async () => {
-        api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         start = createSpyObj<StartService>(['add', 'save']);
         document = {
             address: '',
@@ -79,6 +78,7 @@ describe('NameplateView', () => {
             },
         );
 
+        api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
         api.getDocument.mockReturnValue(of(document));
 
         await TestBed.configureTestingModule({

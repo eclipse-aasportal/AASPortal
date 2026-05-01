@@ -1,30 +1,22 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, OnInit, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, OnInit, signal, inject, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgbNav, NgbNavItem, NgbNavLink } from '@ng-bootstrap/ng-bootstrap/nav';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
-import { WebSocketSubject } from 'rxjs/webSocket';
-import { noop, WebSocketData } from 'aas-core';
-import {
-    CacheService,
-    NotifyComponent,
-    ProgressComponent,
-    ToolbarService,
-    WebSocketFactoryService,
-    WINDOW,
-} from 'aas-lib';
+import { noop } from 'aas-core';
+import { NotifyComponent, ProgressComponent, ToolbarService, WebSocketService, WINDOW } from 'aas-lib';
 
 import { environment } from '../../environments/environment';
 import { Stats } from '../types';
+import { Subscription } from 'rxjs';
 
 export const enum LinkId {
     SHELLS,
@@ -58,21 +50,18 @@ export interface LinkDescriptor {
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MainComponent implements OnInit {
+export class MainComponent implements OnInit, OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly window = inject(WINDOW);
-    private readonly cache = inject(CacheService);
+    private readonly webSocket = inject(WebSocketService);
 
-    private readonly subject: WebSocketSubject<WebSocketData>;
+    private readonly subscription: Subscription;
     private readonly stats$ = signal<Stats>({ packages: NaN, shells: NaN, submodels: NaN, conceptDescriptions: NaN });
 
     public constructor() {
-        const factory = inject(WebSocketFactoryService);
-        this.subject = factory.create();
-        this.subject.pipe(takeUntilDestroyed()).subscribe(data => {
+        this.subscription = this.webSocket.getMessages().subscribe(data => {
             if (data.type === 'stats') {
                 this.stats$.set(data.data as Stats);
-                this.cache.clear();
             }
         });
     }
@@ -114,7 +103,12 @@ export class MainComponent implements OnInit {
     public readonly stats = this.stats$.asReadonly();
 
     public ngOnInit(): void {
-        this.subject.next({ type: 'getStats', data: null });
+        this.webSocket.sendMessage({ type: 'getStats', data: null });
+    }
+
+    public ngOnDestroy(): void {
+        this.subscription.unsubscribe();
+        this.webSocket.closeConnection();
     }
 
     public onKeyDown($event: KeyboardEvent): void {

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -14,8 +14,7 @@ import { AsyncPipe, CommonModule, NgTemplateOutlet } from '@angular/common';
 import { noop } from 'aas-core';
 import {
     AuthComponent,
-    CacheService,
-    IndexChangeService,
+    IndexChange,
     LocalizeComponent,
     NotifyComponent,
     ProgressComponent,
@@ -24,7 +23,6 @@ import {
 } from 'aas-lib';
 
 import { environment } from '../../environments/environment';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export const enum LinkId {
     START = 0,
@@ -67,14 +65,7 @@ export interface LinkDescriptor {
 export class MainComponent {
     protected readonly route = inject(ActivatedRoute);
     private readonly toolbar = inject(ToolbarService);
-    private readonly indexChange = inject(IndexChangeService);
-    private readonly cache = inject(CacheService);
-
-    public constructor() {
-        this.indexChange.message.pipe(takeUntilDestroyed()).subscribe(() => {
-            this.cache.clear();
-        });
-    }
+    private readonly indexChange = inject(IndexChange);
 
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
 

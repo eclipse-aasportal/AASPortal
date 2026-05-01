@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -54,7 +54,8 @@ export class AASTable {
     private readonly filter = inject(AASTableFilter);
     private readonly items$ = computed(() => {
         const selected = new Set(untracked(this.selected));
-        return this.documents().map(document => this.createItem(document, selected.has(document)));
+        const documents = this.documents();
+        return documents.map(document => this.createItem(document, selected.has(document)));
     });
 
     public constructor() {
@@ -90,6 +91,12 @@ export class AASTable {
         const rows = this.items();
         return rows.length > 0 && rows.every(row => row.selected());
     });
+
+    public getTrackId(item: AASTableItem): string {
+        const content = item.document.content;
+        const status: string = content ? 'loaded' : content === null ? 'unloaded' : 'unavailable';
+        return `${item.endpoint}-${item.id}-${status}`;
+    }
 
     public getRouterLink(row: AASTableItem): unknown[] | undefined {
         return ['/aas', { endpoint: encodeBase64Url(row.endpoint), id: encodeBase64Url(row.id) }];
