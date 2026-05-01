@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -99,6 +99,10 @@ describe('Convert', () => {
 
         it('converts an array', () => {
             expect(convertToString([1, 2])).toEqual('[1, 2]');
+        });
+
+        it('converts an Error', () => {
+            expect(convertToString(new Error('This is an error.'))).toBe('This is an error.');
         });
 
         it('converts an object', () => {

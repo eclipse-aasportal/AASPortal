@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -73,6 +73,10 @@ export interface WorkerData {
 export interface ScanEndpointData extends WorkerData {
     type: 'ScanEndpointData';
     endpoint: AASEndpoint;
+}
+
+export function isScanEndpointData(data: WorkerData): data is ScanEndpointData {
+    return data.type === 'ScanEndpointData';
 }
 
 export type EventListener = (...args: unknown[]) => void;

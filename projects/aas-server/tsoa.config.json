@@ -12,15 +12,10 @@
             "http"
         ],
         "securityDefinitions": {
-            "bearerAuth": {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "JWT"
-            },
             "api_key": {
                 "type": "apiKey",
-                "name": "access_token",
-                "in": "query"
+                "name": "x-api-key",
+                "in": "header"
             }
         },
         "yaml": false

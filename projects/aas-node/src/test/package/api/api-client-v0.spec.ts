@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -29,7 +29,7 @@ describe('ApiClientV0', function () {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        http = createSpyObj<HttpClient>(['getJson', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
+        http = createSpyObj<HttpClient>(['getJson', 'getJsonLive', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
         client = new ApiClientV0(logger, http, {
             name: 'AASX Server',
             type: 'AAS_API',
@@ -41,16 +41,18 @@ describe('ApiClientV0', function () {
         vitest.restoreAllMocks();
     });
 
-    describe('getShells', () => {
+    describe('getDocuments', () => {
         it('returns the AAS list', async () => {
-            http.getJson.mockResolvedValue(listaas);
-            const result = await client.getShells();
-            expect(result.result).toEqual([
-                'AssistanceSystem_Dte',
-                'CunaCup_Becher1',
-                'CunaCup_Becher2',
-                'DTOrchestrator',
-            ]);
+            http.getJson.mockImplementation(async url => {
+                if (url.href.endsWith('/server/listaas')) {
+                    return listaas;
+                }
+
+                return becher1;
+            });
+
+            const result = await client.getDocuments(undefined);
+            expect(result.result.length).toBe(4);
         });
     });
 
@@ -86,7 +88,7 @@ describe('ApiClientV0', function () {
 
     describe('openRead', () => {
         it('can open a file', async () => {
-            const stream: NodeJS.ReadableStream = new Readable({
+            const stream: Readable = new Readable({
                 read(): void {
                     this.push(
                         JSON.stringify({
@@ -114,7 +116,7 @@ describe('ApiClientV0', function () {
 
     describe('readValue', () => {
         it('reads the current value of a data element', async () => {
-            http.getJson.mockResolvedValue({ value: '42' });
+            http.getJsonLive.mockResolvedValue({ value: '42' });
             await expect(client.readValue('http://localhost:1234', 'xs:int')).resolves.toBe(42);
         });
     });

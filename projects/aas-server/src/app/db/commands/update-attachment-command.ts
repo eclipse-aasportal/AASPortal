@@ -1,28 +1,24 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import fs from 'fs';
 import { dirname, join } from 'path/posix';
-import { ApplicationError, extensionToMimeType, types } from 'aas-core';
+import { ApplicationError, extensionToMimeType, toSubmodel, types } from 'aas-core';
 
 import { DatabaseCommand } from '../database-command.js';
 import { Database } from '../database.js';
-import { checkSubmodelIsReferenced, normalize, selectISubmodelElement } from '../../utilities.js';
+import { normalize, selectISubmodelElement } from '../../utilities.js';
 import { ERROR } from '../../error.js';
-import { KeyList } from '../key-list.js';
-import { AasxPackage } from '../../aasx-package.js';
 
 export class UpdateAttachmentCommand extends DatabaseCommand {
     public constructor(
         database: Database,
         resolve: () => void,
         reject: (reason: Error) => void,
-        private readonly aasId: string | undefined,
         private readonly smId: string,
         private readonly idShortPath: string,
         private readonly path: string,
@@ -32,13 +28,7 @@ export class UpdateAttachmentCommand extends DatabaseCommand {
     }
 
     public override async execute(): Promise<void> {
-        if (this.aasId) {
-            const aas = await this.database.getShell(this.aasId);
-            checkSubmodelIsReferenced(aas, this.smId);
-        }
-
         const key = await this.database.submodels.getKey(this.smId);
-        const item = await this.database.submodels.getItem(key);
         const submodel = await this.database.submodels.readSubmodel(key);
         const element = selectISubmodelElement(submodel, this.idShortPath);
         if (!(element instanceof types.File)) {
@@ -49,18 +39,7 @@ export class UpdateAttachmentCommand extends DatabaseCommand {
         const dir = dirname(oldValue) ?? 'suppl';
         element.value = join(dir, this.filename);
         element.contentType = extensionToMimeType(this.filename) ?? '';
-        await this.database.submodels.writeFile(submodel, key);
-
-        for (const packageKey of new KeyList(item.packageKeys)) {
-            const aasxFile = await this.database.packages.createBackup(packageKey);
-            const aasx = await AasxPackage.createFromFile(aasxFile);
-
-            if (oldValue) {
-                aasx.remove(oldValue);
-            }
-
-            await aasx.write(element.value, fs.createReadStream(this.path));
-            await aasx.save();
-        }
+        await this.database.submodels.writeObject(toSubmodel(submodel), key);
+        await this.database.submodels.writeAsset(key, element.value, this.path);
     }
 }

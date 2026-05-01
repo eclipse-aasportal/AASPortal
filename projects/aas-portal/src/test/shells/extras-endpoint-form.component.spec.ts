@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ExtrasEndpointFormComponent } from '../../app/shells/extras-endpoint-form/extras-endpoint-form.component';
@@ -34,15 +34,17 @@ describe('ExtrasEndpointFormComponent', () => {
         service.scan.mockReturnValue(of(void 0));
 
         await TestBed.configureTestingModule({
-            providers: [NgbActiveModal, provideZonelessChangeDetection()],
-            imports: [
-                TranslateModule.forRoot({
+            providers: [
+                NgbActiveModal,
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [ExtrasEndpointFormComponent],
         }).compileComponents();
 
         TestBed.overrideComponent(ExtrasEndpointFormComponent, {

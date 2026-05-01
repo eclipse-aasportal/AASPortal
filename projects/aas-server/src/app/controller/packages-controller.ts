@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -24,8 +24,8 @@ import {
 } from 'tsoa';
 
 import { noop, PackageDescription, PagedResult } from 'aas-core';
+import { decodeBase64Url } from 'aas-package';
 
-import { decodeBase64Url } from '../utilities.js';
 import { PackageRepository } from '../package-repository.js';
 
 /**
@@ -46,7 +46,7 @@ export class PackagesController extends Controller {
      * @param aasId Identifier of the AAS which must exist in each matching AASX package (BASE64-URL encoded).
      */
     @Get('')
-    @Security('bearerAuth', ['package.read'])
+    @Security({ api_key: [] })
     @OperationId('GetAllAASXPackageIds')
     public getPackages(
         @Query() aasId?: string,
@@ -62,7 +62,7 @@ export class PackagesController extends Controller {
      * @returns Requested AASX package.
      */
     @Get('/{packageId}')
-    @Security('bearerAuth', ['package.read'])
+    @Security({ api_key: [] })
     @OperationId('GetAASXByPackageId')
     @SuccessResponse(200)
     public async getPackage(@Path() packageId: string): Promise<NodeJS.ReadableStream> {
@@ -84,7 +84,7 @@ export class PackagesController extends Controller {
      * @returns The identifier of the added package.
      */
     @Post('')
-    @Security('bearerAuth', ['package.create'])
+    @Security({ api_key: [] })
     @SuccessResponse(201)
     @OperationId('PostAASXPackage')
     public async addPackage(
@@ -104,7 +104,7 @@ export class PackagesController extends Controller {
      * @param aasIds Included AAS Ids.
      */
     @Put('/{packageId}')
-    @Security('bearerAuth', ['package.update'])
+    @Security({ api_key: [] })
     @OperationId('PutAASXPackageById')
     public updatePackage(
         @Path() packageId: string,
@@ -121,7 +121,7 @@ export class PackagesController extends Controller {
      * @param packageId Package ID from the package list (BASE64-URL encoded).
      */
     @Delete('/{packageId}')
-    @Security('bearerAuth', ['package.delete'])
+    @Security({ api_key: [] })
     @OperationId('DeleteAASXPackageById')
     public async deletePackage(@Path() packageId: string): Promise<void> {
         await this.repository.delete(decodeBase64Url(packageId));

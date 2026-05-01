@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,17 +8,22 @@
 
 import fs from 'fs';
 import path from 'path';
-import { PagedResult } from 'aas-core';
-import { DatabaseKey, DatabaseTableData, TablePage, DataTableItem } from './database-types.js';
+import { GenericCache, normalize, PagedResult } from 'aas-core';
+import { encodeBase64Url } from 'aas-package';
+import { DatabaseKey, DatabaseTableData, TablePage, DataTableItem, Table, Index, IndexRef } from './database-types.js';
 import { Database } from './database.js';
 import { HashTable } from './hash-table.js';
 import { KeyList } from './key-list.js';
 import { Cursor } from '../types.js';
-import { encodeBase64Url, toCursor } from '../utilities.js';
+import { toCursor } from '../utilities.js';
+import { ERROR } from '../error.js';
+import { DatabaseIndex } from './database-index.js';
 
-export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
+export abstract class DatabaseTable<TItem extends DataTableItem = DataTableItem, TObject = object> {
     private readonly map: HashTable;
     private readonly modifiedPages = new Map<number, TablePage<TItem>>();
+    private readonly objCache = new GenericCache<DatabaseKey, TObject>(100);
+    private readonly pageCache = new GenericCache<number, TablePage<TItem>>(100);
 
     protected constructor(
         public readonly name: string,
@@ -30,6 +35,8 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
     ) {
         this.map = new HashTable(this.database, this.data, this.pageSize, this.dir);
     }
+
+    public abstract readonly index: Table;
 
     public get nextKey(): DatabaseKey {
         return this.data.nextKey;
@@ -53,25 +60,19 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
         return recycler.pop();
     }
 
+    public abstract getKey(id: string): Promise<DatabaseKey>;
+
     public findKey(id: string): Promise<DatabaseKey | undefined> {
         return this.map.get(id);
-    }
-
-    public async setKey(id: string, key: DatabaseKey): Promise<void> {
-        await this.map.set(id, key);
-    }
-
-    public deleteKey(id: string): Promise<boolean> {
-        return this.map.delete(id);
     }
 
     public async getPage(
         limit: number,
         cursor: string | undefined,
         predicate?: (item: TItem) => boolean,
-    ): Promise<PagedResult<TResult>> {
+    ): Promise<PagedResult<TObject>> {
         const { previous, next } = toCursor(cursor);
-        if (next !== null && !previous) {
+        if (next !== null) {
             return await this.getNextPage(limit, next, predicate);
         }
 
@@ -83,20 +84,112 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
         return page.items[key % this.pageSize];
     }
 
+    public async insert(obj: TObject): Promise<DatabaseKey> {
+        const key = this.createKey();
+        const page = await this.getEditablePage(key);
+        const item = this.createItem(key, obj);
+        const index = key % this.pageSize;
+        ++page.count;
+        if (index < page.items.length) {
+            page.items[index] = item;
+        } else if (index === page.items.length) {
+            page.items.push(item);
+        } else {
+            throw new Error('Invalid operation.');
+        }
+
+        await this.map.set(item.id, key);
+        await this.writeObject(obj, key);
+        return key;
+    }
+
+    public async update(key: DatabaseKey, obj: TObject, deleteAssets: boolean = false): Promise<void> {
+        await this.writeObject(obj, key);
+        if (deleteAssets) {
+            await this.updateDir(this.getAssetsDir(key));
+        }
+    }
+
+    public async delete(id: string): Promise<void> {
+        const key = await this.getKey(id);
+        const index = key % this.pageSize;
+        const page = await this.getEditablePage(key);
+        const refs = page.items[index]?.indexRefs;
+        if (refs) {
+            for (const [t, k] of refs) {
+                await this.database.getIndex(t).remove(k, this.index, key);
+            }
+        }
+
+        page.items[index] = null;
+        if (page.items.every(item => item === null)) {
+            await this.deletePage(page);
+        }
+
+        new KeyList(this.data.recycled).add(key);
+        await this.deleteFile(this.getFilePath(key));
+        await this.deleteDir(this.getAssetsDir(key));
+        await this.map.delete(id);
+        this.objCache.delete(key);
+    }
+
     public getFilePath(key: DatabaseKey): string {
         return path.join(this.dir, Math.trunc(key / this.pageSize).toString(), 'files', key + this.extension);
     }
 
-    public async readJson(key: DatabaseKey): Promise<TResult> {
-        return JSON.parse((await fs.promises.readFile(this.getFilePath(key))).toString()) as TResult;
+    public getAssetsDir(key: DatabaseKey): string {
+        return path.join(this.dir, Math.trunc(key / this.pageSize).toString(), 'assets', key.toString());
     }
 
-    public deleteFile(key: DatabaseKey): Promise<void> {
-        return new Promise(resolve => {
-            new KeyList(this.data.recycled).add(key);
-            this.database.fileDeleted(this.getFilePath(key));
-            resolve();
-        });
+    public async setIndexLink(key: DatabaseKey, index: DatabaseIndex, indexKey: DatabaseKey): Promise<void> {
+        const page = await this.getEditablePage(key);
+        const i = key % this.pageSize;
+        const item = page.items[i];
+        if (!item) {
+            throw new Error('Invalid operation.');
+        }
+
+        item.indexRefs.push([index.index, indexKey]);
+    }
+
+    public readAsset(key: DatabaseKey, filename: string): NodeJS.ReadableStream {
+        const file = path.join(this.getAssetsDir(key), normalize(filename));
+        return fs.createReadStream(file);
+    }
+
+    public async writeAsset(key: DatabaseKey, filename: string, source: string | NodeJS.ReadableStream): Promise<void> {
+        const dest = path.join(this.getAssetsDir(key), path.normalize(filename));
+        const dir = path.dirname(dest);
+        if (!fs.existsSync(dir)) {
+            await fs.promises.mkdir(dir, { recursive: true });
+        }
+
+        if (fs.existsSync(dest)) {
+            const backup = path.join(path.dirname(dest), '~' + path.basename(dest));
+            if (!fs.existsSync(backup)) {
+                await fs.promises.copyFile(dest, backup);
+                this.database.fileUpdated(backup, dest);
+            }
+
+            if (typeof source === 'string') {
+                await fs.promises.copyFile(source, dest);
+            } else {
+                source.pipe(fs.createWriteStream(dest));
+            }
+        } else {
+            if (typeof source === 'string') {
+                await fs.promises.copyFile(source, dest);
+            } else {
+                source.pipe(fs.createWriteStream(dest));
+            }
+
+            this.database.fileAdded(dest);
+        }
+    }
+
+    public async deleteAsset(key: DatabaseKey, filename: string): Promise<void> {
+        const file = path.join(this.getAssetsDir(key), path.normalize(filename));
+        await this.deleteFile(file);
     }
 
     public begin(): Promise<void> {
@@ -117,7 +210,63 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
         this.modifiedPages.clear();
     }
 
-    public async getEditablePage(key: DatabaseKey): Promise<TablePage<TItem>> {
+    public async readObject(key: DatabaseKey): Promise<TObject> {
+        let obj = this.objCache.get(key);
+        if (obj) {
+            return obj;
+        }
+
+        obj = JSON.parse((await fs.promises.readFile(this.getFilePath(key))).toString()) as TObject;
+        this.objCache.set(key, obj);
+        return obj;
+    }
+
+    public async writeObject(obj: TObject, key: DatabaseKey): Promise<void> {
+        const pageNumber = Math.trunc(key / this.pageSize);
+        const dir = path.join(this.dir, pageNumber.toString(), 'files');
+        const file = path.join(dir, key + '.json');
+        if (fs.existsSync(file)) {
+            const backup = path.join(dir, '~' + key + '.json');
+            if (fs.existsSync(backup)) {
+                await fs.promises.writeFile(file, JSON.stringify(obj));
+            } else {
+                await fs.promises.copyFile(file, backup);
+                await fs.promises.writeFile(file, JSON.stringify(obj));
+                this.database.fileUpdated(backup, file);
+            }
+        } else {
+            if (!fs.existsSync(dir)) {
+                await fs.promises.mkdir(dir, { recursive: true });
+            }
+
+            await fs.promises.writeFile(file, JSON.stringify(obj));
+            this.database.fileAdded(file);
+        }
+
+        this.objCache.set(key, obj);
+    }
+
+    public async getItem(key: DatabaseKey): Promise<TItem> {
+        const item = await this.get(key);
+        if (!item) {
+            throw new Error(ERROR.INVALID_OPERATION);
+        }
+
+        return item;
+    }
+
+    public async getIndexRefs(key: DatabaseKey, index?: Index): Promise<IndexRef[]> {
+        const item = await this.get(key);
+        if (!item) {
+            throw new Error(ERROR.INVALID_OPERATION);
+        }
+
+        return index ? item.indexRefs.filter(([t]) => t === index) : item.indexRefs;
+    }
+
+    protected abstract createItem(key: DatabaseKey, obj: TObject): TItem;
+
+    private async getEditablePage(key: DatabaseKey): Promise<TablePage<TItem>> {
         const pageNumber = Math.trunc(key / this.pageSize);
         let page = this.modifiedPages.get(pageNumber);
         if (!page) {
@@ -128,31 +277,25 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
         return page;
     }
 
-    public async readPage(pageNumber: number): Promise<TablePage<TItem>> {
+    private async readPage(pageNumber: number): Promise<TablePage<TItem>> {
+        let page = this.pageCache.get(pageNumber);
+        if (page) {
+            return page;
+        }
+
         const file = path.join(this.dir, pageNumber.toString(), 'page.json');
         if (!fs.existsSync(file)) {
-            return { key: pageNumber, count: 0, items: [] };
+            page = { page: pageNumber, count: 0, items: [] };
+        } else {
+            page = JSON.parse((await fs.promises.readFile(file)).toString()) as TablePage<TItem>;
         }
 
-        return JSON.parse((await fs.promises.readFile(file)).toString());
+        this.pageCache.set(pageNumber, page);
+        return page;
     }
-
-    public async createBackup(key: DatabaseKey): Promise<string> {
-        const pageNumber = Math.trunc(key / this.pageSize);
-        const file = path.join(this.dir, pageNumber.toString(), 'files', key + this.extension);
-        const backup = path.join(this.dir, pageNumber.toString(), 'files', '~' + key + this.extension);
-        if (!fs.existsSync(backup)) {
-            await fs.promises.copyFile(file, backup);
-            this.database.fileUpdated(backup, file);
-        }
-
-        return file;
-    }
-
-    protected abstract readPageItem(item: TItem): Promise<TResult>;
 
     private async writePage(page: TablePage<TItem>): Promise<void> {
-        const pageDir = path.join(this.dir, page.key.toString());
+        const pageDir = path.join(this.dir, page.page.toString());
         const file = path.join(pageDir, 'page.json');
         if (fs.existsSync(file)) {
             const backup = path.join(pageDir, '~page.json');
@@ -173,11 +316,18 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
         }
     }
 
+    private async deletePage(page: TablePage<TItem>): Promise<void> {
+        const pageDir = path.join(this.dir, page.page.toString());
+        await fs.promises.rm(pageDir, { recursive: true, force: true });
+        await this.deleteDir(pageDir);
+        this.pageCache.delete(page.page);
+    }
+
     private async getNextPage(
         limit: number,
         next: string | undefined,
         predicate?: (item: TItem) => boolean,
-    ): Promise<PagedResult<TResult>> {
+    ): Promise<PagedResult<TObject>> {
         let index = 0;
         const cursor: Cursor = {};
         if (next) {
@@ -196,7 +346,7 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
             };
         }
 
-        const result: TResult[] = [];
+        const result: TObject[] = [];
         for await (const item of this.forward(index)) {
             if (result.length >= limit) {
                 cursor.next = item.key.toString();
@@ -204,13 +354,13 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
             }
 
             if (predicate === undefined || predicate(item)) {
-                result.push(await this.readPageItem(item));
+                result.push(await this.readObject(item.key));
             }
         }
 
         return {
             result,
-            paging_metadata: cursor.next ? { cursor: encodeBase64Url(JSON.stringify(cursor)) } : {},
+            paging_metadata: cursor.next !== undefined ? { cursor: encodeBase64Url(JSON.stringify(cursor)) } : {},
         };
     }
 
@@ -218,7 +368,7 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
         limit: number,
         previous: string | null | undefined,
         predicate?: (item: TItem) => boolean,
-    ): Promise<PagedResult<TResult>> {
+    ): Promise<PagedResult<TObject>> {
         const index = previous ? Number(previous) : this.data.size - 1;
         if (isNaN(index) || index < 0 || index >= this.data.size) {
             throw new Error('Invalid operation.');
@@ -229,7 +379,7 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
             cursor.next = previous;
         }
 
-        const result: TResult[] = [];
+        const result: TObject[] = [];
         for await (const item of this.reverse(index)) {
             if (result.length >= limit) {
                 cursor.previous = item.key.toString();
@@ -237,13 +387,13 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
             }
 
             if (predicate === undefined || predicate(item)) {
-                result.push(await this.readPageItem(item));
+                result.push(await this.readObject(item.key));
             }
         }
 
         return {
             result: result.reverse(),
-            paging_metadata: cursor.previous ? { cursor: encodeBase64Url(JSON.stringify(cursor)) } : {},
+            paging_metadata: cursor.previous !== undefined ? { cursor: encodeBase64Url(JSON.stringify(cursor)) } : {},
         };
     }
 
@@ -284,6 +434,36 @@ export abstract class DatabaseTable<TItem extends DataTableItem, TResult> {
             }
 
             --index;
+        }
+    }
+
+    private async deleteFile(file: string): Promise<void> {
+        if (fs.existsSync(file)) {
+            const backup = path.join(path.dirname(file), '~' + path.basename(file));
+            if (!fs.existsSync(backup)) {
+                await fs.promises.rename(file, backup);
+                this.database.fileDeleted(backup, file);
+            }
+        }
+    }
+
+    private async updateDir(dir: string): Promise<void> {
+        if (fs.existsSync(dir)) {
+            const backup = path.join(path.dirname(dir), '~' + path.basename(dir));
+            if (!fs.existsSync(backup)) {
+                await fs.promises.rename(dir, backup);
+                this.database.dirUpdated(backup, dir);
+            }
+        }
+    }
+
+    private async deleteDir(dir: string): Promise<void> {
+        if (fs.existsSync(dir)) {
+            const backup = path.join(path.dirname(dir), '~' + path.basename(dir));
+            if (!fs.existsSync(backup)) {
+                await fs.promises.rename(dir, backup);
+                this.database.dirDeleted(backup, dir);
+            }
         }
     }
 }

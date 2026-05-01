@@ -1,0 +1,200 @@
+{
+    "assetAdministrationShells": [
+        {
+            "idShort": "Kannegiesser_XFM",
+            "displayName": [
+                {
+                    "language": "en",
+                    "text": "Kannegiesser XFM"
+                }
+            ],
+            "id": "https://www.smartfactory-owl.de/kannegiesser/xfm",
+            "assetInformation": {
+                "assetKind": "Instance",
+                "globalAssetId": "https://www.smartfactory-owl.de/kannegiesser/xfm"
+            },
+            "submodels": [
+                {
+                    "type": "ModelReference",
+                    "keys": [
+                        {
+                            "type": "Submodel",
+                            "value": "019db960-37bc-753e-9baf-9eeb0c390cd5"
+                        }
+                    ]
+                }
+            ],
+            "modelType": "AssetAdministrationShell"
+        }
+    ],
+    "submodels": [
+        {
+            "idShort": "ServiceRequestNotification",
+            "id": "019db960-37bc-753e-9baf-9eeb0c390cd5",
+            "kind": "Instance",
+            "submodelElements": [
+                {
+                    "idShort": "ServiceRequestNotificationId",
+                    "valueType": "xs:string",
+                    "value": "019db960-37bc-753e-9baf-9eeb0c390cd5",
+                    "modelType": "Property"
+                },
+                {
+                    "idShort": "Status",
+                    "valueType": "xs:string",
+                    "value": "sent",
+                    "modelType": "Property"
+                },
+                {
+                    "idShort": "ShortText",
+                    "valueType": "xs:string",
+                    "value": "Something wrong",
+                    "modelType": "Property"
+                },
+                {
+                    "idShort": "RelatedAsset",
+                    "entityType": "SelfManagedEntity",
+                    "globalAssetId": "https://www.smartfactory-owl.de/kannegiesser/xfm",
+                    "modelType": "Entity"
+                },
+                {
+                    "idShort": "Priority",
+                    "valueType": "xs:string",
+                    "value": "very high",
+                    "modelType": "Property"
+                },
+                {
+                    "idShort": "ServiceType",
+                    "valueType": "xs:string",
+                    "modelType": "Property"
+                },
+                {
+                    "idShort": "ReportedTo",
+                    "value": [
+                        {
+                            "idShort": "ContactInformation",
+                            "value": [
+                                {
+                                    "idShort": "NameOfContact",
+                                    "value": [
+                                        {
+                                            "language": "en",
+                                            "text": "Unknown"
+                                        }
+                                    ],
+                                    "modelType": "MultiLanguageProperty"
+                                },
+                                {
+                                    "idShort": "RoleOfContactPerson",
+                                    "valueType": "xs:string",
+                                    "value": "Unknown",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "Phone",
+                                    "value": [
+                                        {
+                                            "language": "en",
+                                            "text": "Unknown"
+                                        }
+                                    ],
+                                    "modelType": "MultiLanguageProperty"
+                                },
+                                {
+                                    "idShort": "Department",
+                                    "value": [
+                                        {
+                                            "language": "en",
+                                            "text": "Unknown"
+                                        }
+                                    ],
+                                    "modelType": "MultiLanguageProperty"
+                                },
+                                {
+                                    "idShort": "Email",
+                                    "valueType": "xs:string",
+                                    "modelType": "Property"
+                                }
+                            ],
+                            "modelType": "SubmodelElementCollection"
+                        }
+                    ],
+                    "modelType": "SubmodelElementCollection"
+                },
+                {
+                    "idShort": "ReportedBy",
+                    "value": [
+                        {
+                            "idShort": "CustomerNumber",
+                            "valueType": "xs:string",
+                            "modelType": "Property"
+                        },
+                        {
+                            "idShort": "ContactInformation",
+                            "value": [
+                                {
+                                    "idShort": "NameOfContact",
+                                    "value": [
+                                        {
+                                            "language": "en",
+                                            "text": "Max Mustermann"
+                                        }
+                                    ],
+                                    "modelType": "MultiLanguageProperty"
+                                },
+                                {
+                                    "idShort": "RoleOfContactPerson",
+                                    "valueType": "xs:string",
+                                    "value": "Developer",
+                                    "modelType": "Property"
+                                },
+                                {
+                                    "idShort": "Phone",
+                                    "value": [
+                                        {
+                                            "language": "en",
+                                            "text": "+49123456789"
+                                        }
+                                    ],
+                                    "modelType": "MultiLanguageProperty"
+                                },
+                                {
+                                    "idShort": "Department",
+                                    "value": [
+                                        {
+                                            "language": "en",
+                                            "text": "Logistics"
+                                        }
+                                    ],
+                                    "modelType": "MultiLanguageProperty"
+                                },
+                                {
+                                    "idShort": "Email",
+                                    "valueType": "xs:string",
+                                    "value": "max@mustermann.de",
+                                    "modelType": "Property"
+                                }
+                            ],
+                            "modelType": "SubmodelElementCollection"
+                        }
+                    ],
+                    "modelType": "SubmodelElementCollection"
+                },
+                {
+                    "idShort": "DetailedInformation",
+                    "value": [
+                        {
+                            "idShort": "LongText",
+                            "valueType": "xs:string",
+                            "value": "Something seems wrong, but I cannot say what it is.",
+                            "modelType": "Property"
+                        }
+                    ],
+                    "modelType": "SubmodelElementCollection"
+                }
+            ],
+            "modelType": "Submodel"
+        }
+    ],
+    "conceptDescriptions": []
+}

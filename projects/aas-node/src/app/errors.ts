@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -28,4 +28,5 @@ export const ERRORS = {
     InvalidEndpointUrl: 'Error.INVALID_ENDPOINT_URL',
     InvokeOperationFailed: 'Error.INVOKE_OPERATION_FAILED',
     UploadAasxFileFailed: 'Error.UPLOAD_AASX_FILE_FAILED',
+    AASNotFoundByAssetLink: 'Error.AAS_NOT_FOUND_BY_ASSET_LINK',
 };

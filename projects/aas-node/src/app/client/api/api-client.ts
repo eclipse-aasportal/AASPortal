@@ -1,21 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import {
-    aas,
-    AASEndpoint,
-    convertFromString,
-    DefaultType,
-    getSemanticId,
-    LiveRequest,
-    PagedResult,
-    traverse,
-} from 'aas-core';
+import { aas, AASEndpoint, convertFromString, DefaultType, getSemanticId, LiveRequest, traverse } from 'aas-core';
 
 import { HttpClient } from '../../http-client.js';
 import { Logger } from '../../logging/logger.js';
@@ -97,19 +88,13 @@ export abstract class ApiClient extends AASClient {
     }
 
     /**
-     * Gets the names of the Asset Administration Shells contained in the current AASX server.
-     * @returns The names of the AASs contained in the current AASX server.
-     */
-    public abstract getShells(cursor?: string): Promise<PagedResult<string>>;
-
-    /**
      * Reads the current value from a submodel element.
      * @param url The path of the submodel element value.
      * @param valueType The
      * @returns The current value.
      */
     public async readValue(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
-        const property = await this.http.getJson<PropertyValue>(new URL(url), this.endpoint.headers);
+        const property = await this.http.getJsonLive<PropertyValue>(new URL(url), this.endpoint.headers);
         return convertFromString(property.value, valueType);
     }
 

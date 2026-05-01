@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -21,7 +21,7 @@ import {
 } from '@angular/core';
 
 import { Library } from 'aas-core';
-import { IndexChangeService, LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
+import { IndexChange, LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
 import { AboutApiService } from './about-api.service';
 import { environment } from '../../environments/environment';
 
@@ -36,7 +36,7 @@ export class AboutComponent implements OnInit, OnDestroy {
     private readonly api = inject(AboutApiService);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
-    private readonly indexChange = inject(IndexChangeService);
+    private readonly indexChange = inject(IndexChange);
     private readonly version$ = signal('');
     private readonly libraries$ = signal<Library[]>([]);
 

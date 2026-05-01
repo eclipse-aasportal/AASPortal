@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { aas, AASDocument, AASEndpoint, LiveRequest } from 'aas-core';
+import { aas, AASDocument, AASEndpoint, LiveRequest, PagedResult } from 'aas-core';
 import { computeCrc32 } from 'aas-package';
 import { Logger } from '../logging/logger.js';
 import { SocketClient } from '../live/socket-client.js';
@@ -20,15 +20,34 @@ export abstract class AASClient {
         public readonly endpoint: AASEndpoint,
     ) {}
 
-    /** Indicates whether an active connection is established. */
+    /**
+     * Indicates whether an active connection is established.
+     */
     public abstract readonly isOpen: boolean;
 
-    /** Indicates whether the AAS source is read-only. */
+    /**
+     * Indicates whether the AAS source is read-only.
+     */
     public abstract readonly readOnly: boolean;
 
-    /** Indicates whether the AAS source provides live data. */
+    /**
+     * Indicates whether the AAS source provides live data.
+     */
     public abstract readonly onlineReady: boolean;
 
+    /**
+     * Gets the documents of the current endpoint.
+     * @param cursor The cursor for the next page or undefined for the first page.
+     * @param limit The maximum number of items per page.
+     * @returns The documents of the current endpoint.
+     */
+    public abstract getDocuments(cursor: string | undefined, limit?: number): Promise<PagedResult<AASDocument>>;
+
+    /**
+     * Creates a document for the given address.
+     * @param address The address of the document to create.
+     * @returns The created document.
+     */
     public async createDocument(address: string): Promise<AASDocument> {
         const environment = await this.getEnvironment(address);
         const aas = environment.assetAdministrationShells[0];
@@ -94,6 +113,10 @@ export abstract class AASClient {
      */
     public abstract getFile(address: string, file: aas.File): Promise<NodeJS.ReadableStream>;
 
+    /**
+     * Determines the address of the AAS in the concrete AASClient context.
+     * @param aasxFile The path of the AASX package file.
+     */
     public abstract determineAddress(aasxFile: string): Promise<string | undefined>;
 
     /**
@@ -151,6 +174,12 @@ export abstract class AASClient {
     ): Promise<string | undefined>;
 
     /**
+     * Returns a list of Asset Administration Shell ids based on asset identifier key-value-pairs.
+     * @param assetId The Asset identifier.
+     */
+    public abstract getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<string[]>;
+
+    /**
      * Resolves a new URL from the base URL and the specified URL.
      * @param url The URL.
      * @returns A new URL.
@@ -166,7 +195,7 @@ export abstract class AASClient {
         return resolvedUrl;
     }
 
-    private async createThumbnail(address: string): Promise<string | undefined> {
+    protected async createThumbnail(address: string): Promise<string | undefined> {
         try {
             return await createThumbnail(await this.getThumbnail(address));
         } catch {
