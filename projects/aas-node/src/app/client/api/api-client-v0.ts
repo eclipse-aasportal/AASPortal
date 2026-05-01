@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { aas, AASEndpoint, noop, PagedResult } from 'aas-core';
+import { aas, AASDocument, AASEndpoint, noop, PagedResult } from 'aas-core';
 import { aasV2, JsonReaderV2, JsonWriterV2 } from 'aas-package';
 import { Logger } from '../../logging/logger.js';
 import { ApiClient } from './api-client.js';
@@ -25,14 +25,22 @@ export class ApiClientV0 extends ApiClient {
 
     public readonly onlineReady = true;
 
-    public async getShells(cursor?: string): Promise<PagedResult<string>> {
+    public async getDocuments(cursor?: string): Promise<PagedResult<AASDocument>> {
         noop(cursor);
         const result = await this.http.getJson<AASList>(this.resolve('/server/listaas'));
+        const idShorts = result.aaslist.map(entry => {
+            const items = entry.split(' : ');
+            return items[1].trim();
+        });
+
+        const envs = await Promise.all(
+            idShorts.map(idShort =>
+                this.http.getJson<aasV2.AssetAdministrationShellEnvironment>(this.resolve(`/aas/${idShort}/aasenv`)),
+            ),
+        );
+
         return {
-            result: result.aaslist.map(entry => {
-                const items = entry.split(' : ');
-                return items[1].trim();
-            }),
+            result: envs.map(env => this.toDocument(env)),
             paging_metadata: {},
         };
     }
@@ -76,23 +84,42 @@ export class ApiClientV0 extends ApiClient {
     }
 
     public override getPackage(): Promise<NodeJS.ReadableStream> {
-        throw new Error('Not implemented.');
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     public override insertPackage(): Promise<void> {
-        throw new Error('Not implemented.');
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     public override deletePackage(): Promise<void> {
-        throw new Error('Not implemented.');
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     public invoke(): Promise<aas.Operation> {
-        throw new Error('Not implemented.');
+        return Promise.reject(new Error('Not implemented.'));
     }
 
     public getBlobValue(): Promise<string | undefined> {
-        throw new Error('Not implemented.');
+        return Promise.reject(new Error('Not implemented.'));
+    }
+
+    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<string[]> {
+        return Promise.reject(new Error('Not implemented.'));
+    }
+
+    private toDocument(env: aasV2.AssetAdministrationShellEnvironment): AASDocument {
+        const shell = env.assetAdministrationShells[0];
+        return {
+            address: shell.idShort,
+            assetId: shell.asset.keys[0].value,
+            content: null,
+            crc32: 0,
+            endpoint: this.endpoint.name,
+            id: shell.identification.id,
+            idShort: shell.idShort,
+            readonly: true,
+            timestamp: Date.now(),
+        };
     }
 
     private async getFileUrlAsync(idShort: string, address: string): Promise<URL> {

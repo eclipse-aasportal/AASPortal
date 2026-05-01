@@ -1,0 +1,68 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="container h-100">
+    <div class="d-flex flex-column text-center">
+        <div class="bg-primary text-center py-2 my-2 fs-5" translate>ServiceRequestNotification.TITLE</div>
+        <div class="d-flex flex-row justify-content-end">
+            <div class="d-flex flex-column" style="width: fit-content">
+                <label class="text-start" style="font-size: 10px; font-weight: bold">AAS Overview</label>
+                <button
+                    [routerLink]="openAASOverview()"
+                    type="button"
+                    class="btn btn-primary"
+                    style="font-size: 1.5rem; width: min-content"
+                >
+                    <i class="bi bi-box-arrow-up-right"></i>
+                </button>
+            </div>
+        </div>
+        <fhg-thumbnail-qrcode [document]="document()"></fhg-thumbnail-qrcode>
+    </div>
+    <div class="col-md-6 bg-primary-subtle p-3 mb-1" style="width:fit-content;">
+        <p><b>Reported by:</b></p>
+        <div class="d-flex flew-row">
+            <div class="ms-4 me-4">
+                <div class="d-flex flex-column data-entry">
+                    <label class="label"><b>Name:</b></label>
+                    <label class="ms-2">{{ReportedByName()}}</label>
+                </div>
+
+                <div class="d-flex flex-column data-entry">
+                    <label class="label"><b>Department:</b></label>
+                    <label class="ms-2">{{ReportedByDepartment()}}</label>
+                </div>
+            </div>
+            <div>
+                <div class="d-flex flex-column data-entry">
+                    <label class="label"><b>E-Mail:</b></label>
+                    <label class="ms-2">{{ReportedByEmail()}}</label>
+                </div>
+
+                <div class="d-flex flex-column data-entry">
+                    <label class="label"><b>Phonenumber:</b></label>
+                    <label class="ms-2">{{ReportedByPhone()}}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 bg-primary-subtle p-3">
+        <p class="mb-0"><small class="text-muted">{{requestId()}}</small></p>
+        <p class="mb-0 fs-5" ><b>{{shortText()}}</b> - {{status()}}</p>
+        <p><b>Priority:</b> {{priority()}}</p>
+        <p class="p-1 w-75">{{detailedInformation()}}</p>
+    </div>
+</div>
+
+<ng-template #toolbar>
+    <div class="input-group me-2 my-1">
+        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+            <i class="bi bi-house-add"></i>
+        </button>
+    </div>
+</ng-template>

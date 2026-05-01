@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -91,12 +91,10 @@ export interface AASDocument extends AASDocumentId {
     modified?: boolean;
     /** Indicates whether communication can be established with the system represented by the AAS. */
     onlineReady?: boolean;
-    /** The identifier of the parent AAS in a hierarchy. */
-    parentId?: string | null;
     /** Indicates whether the document can be edited. */
     readonly: boolean;
     /** A thumbnail. */
-    thumbnail?: string;
+    thumbnail?: string | null;
     /** The time at which the document was created. */
     timestamp: number;
 }
@@ -210,9 +208,9 @@ export type AASNodeMessageType =
     | 'Added'
     | 'Removed'
     | 'Update'
-    | 'Offline'
     | 'EndpointAdded'
     | 'EndpointRemoved'
+    | 'EndpointUpdate'
     | 'Reset';
 
 /** Server message. */
@@ -224,11 +222,11 @@ export type AASNodeMessage = {
           type: 'Reset';
       }
     | {
-          type: 'Added' | 'Removed' | 'Update' | 'Offline';
+          type: 'Added' | 'Removed' | 'Update';
           document: AASDocument;
       }
     | {
-          type: 'EndpointAdded' | 'EndpointRemoved';
+          type: 'EndpointAdded' | 'EndpointRemoved' | 'EndpointUpdate';
           endpoint: AASEndpoint;
       }
 );

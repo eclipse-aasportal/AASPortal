@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -14,6 +14,7 @@ export const ERROR = {
     CONCEPT_DESCRIPTION_DOES_NOT_EXIST: 'Error.CONCEPT_DESCRIPTION_DOES_NOT_EXIST',
     DESERIALIZATION_ERROR: 'Error.DESERIALIZATION_ERROR',
     FILE_HAS_NO_ATTACHMENT: 'Error.FILE_HAS_NO_ATTACHMENT',
+    INVALID_ASSET_ID: 'Error.INVALID_ASSET_ID',
     INVALID_ID_SHORT_PATH: 'Error.INVALID_ID_SHORT_PATH',
     INVALID_OPERATION: 'Error.INVALID_OPERATION',
     INVALID_PACKAGE_ID: 'Error.INVALID_PACKAGE_ID',

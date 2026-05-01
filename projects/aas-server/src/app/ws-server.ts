@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -127,7 +127,7 @@ export class WSServer {
         this.logger.error(`WebSocket server error: ${error?.message}`);
     };
 
-    private readonly shutdownHandler = (signal: unknown) => {
+    private readonly shutdownHandler = (signal: unknown): void => {
         this.logger.info(`Caught ${signal}, gracefully shutting down`);
         this.app.online = false;
         container.dispose();

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -21,7 +21,7 @@ describe('ApiClientV3', () => {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        http = createSpyObj<HttpClient>(['getJson', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
+        http = createSpyObj<HttpClient>(['getJson', 'getJsonLive', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
         client = new ApiClientV3(logger, http, {
             name: 'AASX Server',
             type: 'AAS_API',
@@ -37,11 +37,10 @@ describe('ApiClientV3', () => {
         });
 
         it('returns the URL to "property1"', () => {
-            const aasId = Buffer.from('http://localhost/test/aas').toString('base64url');
             const smId = Buffer.from('http://localhost/test/submodel1').toString('base64url');
             const nodeId = smId + '#property1';
             expect(client.resolveNodeId(shell, nodeId)).toEqual(
-                `http://localhost:1234/shells/${aasId}/submodels/${smId}/submodel-elements/property1`,
+                `http://localhost:1234/submodels/${smId}/submodel-elements/property1`,
             );
         });
     });

@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -36,7 +36,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (item of items(); track item) {
+                @for (item of items(); track getTrackId(item)) {
                     <tr class="align-middle">
                         <td>
                             <input

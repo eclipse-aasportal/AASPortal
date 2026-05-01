@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -16,12 +16,12 @@ import cors from 'cors';
 import morgan from 'morgan';
 import swaggerUi, { JsonObject } from 'swagger-ui-express';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 
 import { Variable } from './variable.js';
 import { LOGGER, Logger } from './logging/logger.js';
 import { RegisterRoutes } from './routes/routes.js';
 import { errorHandler } from './error-handler.js';
-import { generateCodeChallenge, generateRandomString } from './utilities.js';
 
 const shutdownTime = 15000;
 
@@ -68,6 +68,7 @@ export class App {
             }),
         );
 
+        this.app.use(compression());
         this.app.use(cookieParser());
         this.app.use(json());
         this.app.use(urlencoded({ extended: true }));
@@ -85,73 +86,8 @@ export class App {
             setTimeout(() => res.send('Finally! OK'), shutdownTime);
         });
 
-        // 1. Redirect to Keycloak login page
-        this.app.get('/login', async (req, res) => {
-            const state = generateRandomString(24);
-            const code_verifier = generateRandomString(43);
-            const code_challenge = await generateCodeChallenge(code_verifier);
-            this.verifiers.set(state, code_verifier);
-            const authUrl = new URL(this.variable.KEYCLOAK_AUTHORIZATION_URL);
-            authUrl.searchParams.set('response_type', 'code');
-            authUrl.searchParams.set('client_id', this.variable.CLIENT_ID);
-            authUrl.searchParams.set('redirect_uri', this.variable.REDIRECT_URI);
-            authUrl.searchParams.set('state', state);
-            authUrl.searchParams.set('scope', 'openid');
-            authUrl.searchParams.set('code_challenge_method', 'S256');
-            authUrl.searchParams.set('code_challenge', code_challenge);
-            res.redirect(authUrl.href);
-        });
-
-        // 2. Callback after successful login
-        this.app.get('/callback', async (req, res) => {
-            const { code, state } = req.query;
-            if (typeof code !== 'string' || typeof state !== 'string') {
-                res.status(400).send('Invalid callback request');
-                return;
-            }
-
-            const code_verifier = this.verifiers.get(state);
-            if (!code_verifier) {
-                res.status(400).send('Invalid callback request');
-                return;
-            }
-
-            this.verifiers.delete(state);
-
-            // Exchange the authorization code for tokens using fetch
-            const response = await fetch(this.variable.KEYCLOAK_TOKEN_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    grant_type: 'authorization_code',
-                    code: code,
-                    redirect_uri: this.variable.REDIRECT_URI,
-                    client_id: this.variable.CLIENT_ID,
-                    code_verifier: code_verifier,
-                }),
-            });
-
-            if (!response.ok) {
-                res.status(500).send('Failed to exchange authorization code for tokens');
-                return;
-            }
-
-            const data = (await response.json()) as Record<string, unknown>;
-            const { access_token, id_token } = data;
-
-            // Store tokens in cookies or session
-            res.cookie('access_token', access_token, { httpOnly: true, secure: true });
-            res.cookie('id_token', id_token, { httpOnly: true, secure: true });
-
-            // Redirect to a protected page after successful login
-            res.redirect('/profile');
-        });
-
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
-        this.app.get('/', this.getIndex);
         if (this.variable.ENABLE_STATIC_FILES) {
             this.app.use(express.static(this.variable.WEB_ROOT));
         }
@@ -159,10 +95,6 @@ export class App {
         this.app.use(errorHandler);
         this.app.use(this.notFoundHandler);
     }
-
-    private getIndex = (req: Request, res: Response): void => {
-        res.sendFile(this.variable.WEB_ROOT + '/index.html');
-    };
 
     private notFoundHandler = (_req: Request, res: Response): void => {
         res.status(404).send({

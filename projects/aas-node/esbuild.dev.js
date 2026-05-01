@@ -21,7 +21,7 @@ await esbuild.build({
 });
 
 await esbuild.build({
-    entryPoints: ['./src/app/aas-scan-worker.ts'],
+    entryPoints: ['./src/app/aas-scan.ts'],
     outdir: './dist',
     bundle: true,
     platform: 'node',
