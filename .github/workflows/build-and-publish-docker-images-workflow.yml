@@ -37,7 +37,7 @@ jobs:
         with:
           file: ./Dockerfile
           context: .
-          build-args: GITHUB_RUN_NUMBER=${{ github.run_number }} GITHUB_REF_NAME=${{ github.ref_name }}
+          build-args: --env GITHUB_RUN_NUMBER=${{ github.run_number }} --env GITHUB_REF_NAME=${{ github.ref_name }}
           push: true
           tags: fraunhoferiosb/aasportal_aio:${{env.IMAGE_TAG}}
 
@@ -46,7 +46,7 @@ jobs:
         with:
           file: ./Dockerfile.aas-portal
           context: .
-          build-args: GITHUB_RUN_NUMBER=${{ github.run_number }} GITHUB_REF_NAME=${{ github.ref_name }}
+          build-args: --env GITHUB_RUN_NUMBER=${{ github.run_number }} --env GITHUB_REF_NAME=${{ github.ref_name }}
           push: true
           tags: fraunhoferiosb/aasportal_aasportal:${{env.IMAGE_TAG}}
 
@@ -55,6 +55,6 @@ jobs:
         with:
           file: ./Dockerfile.aas-node
           context: .
-          build-args: GITHUB_RUN_NUMBER=${{ github.run_number }} GITHUB_REF_NAME=${{ github.ref_name }}
+          build-args: --env GITHUB_RUN_NUMBER=${{ github.run_number }} -env GITHUB_REF_NAME=${{ github.ref_name }}
           push: true
           tags: fraunhoferiosb/aasportal_aasserver:${{env.IMAGE_TAG}}
