@@ -1,10 +1,11 @@
 {
     "name": "aas-portal-project",
-    "version": "3.6.16",
+    "version": "3.6.0",
     "description": "Web-based visualization and control of asset administration shells.",
     "type": "module",
     "scripts": {
         "create-app-info": "node --no-warnings --loader ts-node/esm create-app-info.ts",
+        "set-version": "node --no-warnings --loader ts-node/esm set-version.ts",
         "tsoa": "npm run tsoa -w=aas-node",
         "docker:build": "docker build -f Dockerfile -t aasportal . && docker run -d --name AASPortal -p 80:80 --restart=always aasportal",
         "podman:build": "podman build -f Dockerfile -t aasportal . && podman run -d --name AASPortal -p 80:80 --restart=always aasportal",

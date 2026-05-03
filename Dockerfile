@@ -1,11 +1,14 @@
 # Creates an all-in-one Docker image
 ARG NODE_IMAGE=node:24.12.0-alpine
+ARG GITHUB_RUN_NUMBER
+ARG GITHUB_REF_NAME
 
 FROM $NODE_IMAGE AS build
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
-RUN node --no-warnings --loader ts-node/esm create-app-info.ts
+RUN npm run set-version $GITHUB_RUN_NUMBER $GITHUB_REF_NAME
+RUN npm run create-app-info
 RUN npm run build
 
 FROM $NODE_IMAGE AS aasportal
