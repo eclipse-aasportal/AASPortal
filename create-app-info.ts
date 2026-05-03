@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,",
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,",
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft",
  * zur Foerderung der angewandten Forschung e.V.",
  *
@@ -108,7 +108,6 @@ async function readLibrariesAsync(project: Package): Promise<Library[]> {
     }
 
     libraries.sort((a, b) => a.name.localeCompare(b.name));
-
     return libraries;
 }
 
@@ -156,6 +155,5 @@ async function loadLicenseText(nodeModulesFolder: string, packageName: string): 
     }
 
     console.warn(`${packageName} has no license file.`);
-
     return '';
 }
