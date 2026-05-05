@@ -2,12 +2,12 @@
 ARG NODE_IMAGE=node:24.15.0-alpine
 
 FROM $NODE_IMAGE AS build
-ARG GITHUB_RUN_NUMBER
-ARG GITHUB_REF_NAME
+ARG GITHUB_RUN_NUMBER=490
+ARG GITHUB_REF_NAME=development
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
-RUN npm run set-version -- $GITHUB_RUN_NUMBER $GITHUB_REF_NAME
+RUN npm run set-version $GITHUB_RUN_NUMBER $GITHUB_REF_NAME
 RUN npm run create-app-info
 RUN npm run build
 
