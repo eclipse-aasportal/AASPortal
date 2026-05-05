@@ -1,10 +1,10 @@
 # Dockerfile to build client app
 ARG NGINX_IMAGE=nginx:latest
 ARG NODE_IMAGE=node:24.15.0-alpine
-ARG GITHUB_RUN_NUMBER
-ARG GITHUB_REF_NAME
 
 FROM $NODE_IMAGE AS build
+ARG GITHUB_RUN_NUMBER=490
+ARG GITHUB_REF_NAME=development
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
