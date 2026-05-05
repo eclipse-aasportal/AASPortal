@@ -10,61 +10,48 @@ import { readFile, writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
-interface Package {
-    name: string;
-    version: string;
-    description: string;
-    author: string;
-    homepage: string;
-    license: string;
-    dependencies: Record<string, string>;
-    devDependencies: Record<string, string>;
-}
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /** Offset for v3.6 */
-const offset = 1560;
+const offset = 490;
 
 await main();
 
 async function main(): Promise<void> {
-    const packageFile = join(__dirname, 'package.json');
-    let project: Package;
     try {
-        project = await JSON.parse((await readFile(packageFile)).toString());
-        if (await setVersion(project)) {
-            await writeFile(packageFile, JSON.stringify(project, undefined, 4));
-            console.info(`Version set to ${project.version}.`);
+        const arg = process.env.GITHUB_RUN_NUMBER || process.argv.at(2);
+        const branch = process.env.GITHUB_REF_NAME || process.argv.at(3);
+
+        if (!arg) {
+            console.error('GITHUB_RUN_NUMBER is not set. Version will not be updated.');
+            process.exit(-1);
         }
+
+        const runNumber = parseInt(arg, 10);
+        if (isNaN(runNumber)) {
+            console.error(`Invalid GITHUB_RUN_NUMBER: ${arg}`);
+            process.exit(-1);
+        }
+
+        const patch = runNumber - offset;
+        await setVersion(join(__dirname, 'package.json'), patch, branch);
+        await setVersion(join(__dirname, 'projects/aas-node/package.json'), patch, branch);
+        await setVersion(join(__dirname, 'projects/aas-server/package.json'), patch, branch);
     } catch (error) {
         console.error(error);
-        return;
+        process.exit(-1);
     }
 }
 
-async function setVersion(project: Package): Promise<boolean> {
-    const arg = process.env.GITHUB_RUN_NUMBER || process.argv.at(2);
-    const branch = process.env.GITHUB_REF_NAME || process.argv.at(3);
-
-    if (!arg) {
-        console.warn('GITHUB_RUN_NUMBER is not set. Version will not be updated.');
-        return false;
-    }
-
-    const runNumber = parseInt(arg, 10);
-    if (isNaN(runNumber)) {
-        console.error(`Invalid GITHUB_RUN_NUMBER: ${arg}`);
-        return false;
-    }
-
+async function setVersion(file: string, patch: number, branch: string | undefined): Promise<void> {
+    const project = await JSON.parse((await readFile(file)).toString());
     const [mayor, minor] = project.version.split('.').map(Number);
-    const patch = runNumber - offset;
     let version = `${mayor}.${minor}.${patch}`;
     if (branch !== 'main') {
         version += branch === 'staging' ? '-rc' : '-dev';
     }
 
     project.version = version;
-    return true;
+    await writeFile(file, JSON.stringify(project, undefined, 4));
+    console.log(`${file}: Version set to ${version}`);
 }

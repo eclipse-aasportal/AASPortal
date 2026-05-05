@@ -1,7 +1,7 @@
 # Getting Started
 ## Prerequisites
 - Visual Studio Code
-- Node.js v24.12.0
+- Node.js v24.15.0
 - GIT 2.36.0.windows.1
 - Docker Desktop 4.x
 
