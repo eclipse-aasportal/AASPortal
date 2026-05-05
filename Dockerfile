@@ -1,9 +1,9 @@
 # Creates an all-in-one Docker image
 ARG NODE_IMAGE=node:24.15.0-alpine
-ARG GITHUB_RUN_NUMBER
-ARG GITHUB_REF_NAME
 
 FROM $NODE_IMAGE AS build
+ARG GITHUB_RUN_NUMBER
+ARG GITHUB_REF_NAME
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
