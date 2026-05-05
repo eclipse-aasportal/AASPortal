@@ -47,8 +47,10 @@ async function setVersion(file: string, patch: number, branch: string | undefine
     const project = await JSON.parse((await readFile(file)).toString());
     const [mayor, minor] = project.version.split('.').map(Number);
     let version = `${mayor}.${minor}.${patch}`;
-    if (branch !== 'main') {
-        version += branch === 'staging' ? '-rc' : '-dev';
+    if (branch === 'development') {
+        version += '-dev';
+    } else if (branch === 'staging') {
+        version += '-rc';
     }
 
     project.version = version;
