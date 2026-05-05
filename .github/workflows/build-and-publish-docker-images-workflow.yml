@@ -37,7 +37,9 @@ jobs:
         with:
           file: ./Dockerfile
           context: .
-          build-args: --build-arg GITHUB_RUN_NUMBER=${{ github.run_number }} --build-arg GITHUB_REF_NAME=${{ github.ref_name }}
+          build-args: |
+            GITHUB_RUN_NUMBER=${{ github.run_number }}
+            GITHUB_REF_NAME=${{ github.ref_name }}
           push: true
           tags: fraunhoferiosb/aasportal_aio:${{env.IMAGE_TAG}}
 
