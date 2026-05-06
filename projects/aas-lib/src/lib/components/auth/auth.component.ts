@@ -7,9 +7,11 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { catchError, mergeMap, Observable, of } from 'rxjs';
+import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap/dropdown';
+import { Router } from '@angular/router';
 import { NotifyService } from '../notify/notify.service';
 import { TranslateDirective } from '@ngx-translate/core';
-import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap/dropdown';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -22,24 +24,16 @@ import { AuthService } from './auth.service';
 export class AuthComponent {
     private readonly auth = inject(AuthService);
     private readonly notify = inject(NotifyService);
+    private readonly router = inject(Router);
 
-    public readonly userAuthenticated = this.auth.authenticated;
+    public readonly isAuthenticated = this.auth.isAuthenticated;
 
     public readonly userName = this.auth.name;
 
-    public register(): void {
-        this.auth.register().subscribe({ error: error => this.notify.error(error) });
-    }
-
-    public login(): void {
-        this.auth.login().subscribe({ error: error => this.notify.error(error) });
-    }
-
-    public logout(): void {
-        this.auth.logout().subscribe({ error: error => this.notify.error(error) });
-    }
-
-    public updateUserProfile(): void {
-        this.auth.updateUserProfile().subscribe({ error: error => this.notify.error(error) });
+    public logout(): Observable<void> {
+        return this.auth.logout().pipe(
+            catchError(error => of(this.notify.handleError(error))),
+            mergeMap(() => this.router.navigateByUrl('/start').then(() => void 0)),
+        );
     }
 }

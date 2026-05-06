@@ -21,7 +21,7 @@ export class DocumentsController extends Controller {
     }
 
     /**
-     * Returns a limited number of AAS documents from a given position. Limit and position are stored in a cursor object.
+     * @summary Returns a limited number of AAS documents from a given position. Limit and position are stored in a cursor object.
      * @param cursor The current cursor.
      * @param filter A filter expression.
      * @param language The filter expression language.
@@ -42,7 +42,7 @@ export class DocumentsController extends Controller {
     }
 
     /**
-     * The total count of AAS documents over all endpoints.
+     * @summary The total count of AAS documents over all endpoints.
      * @returns The total count of AAS documents.
      */
     @Get('count')
@@ -52,7 +52,7 @@ export class DocumentsController extends Controller {
     }
 
     /**
-     * Gets the first occurrence of an AAS document with the specified identifier.
+     * @summary Gets the first occurrence of an AAS document with the specified identifier.
      * @param id The AAS identifier.
      * @returns The first occurrence of an AAS document with the specified identifier.
      */

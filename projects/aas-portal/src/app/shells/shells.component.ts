@@ -256,7 +256,7 @@ export class ShellsComponent implements OnDestroy {
 
                 return this.api.addEndpoint(result);
             }),
-            catchError(error => this.notify.error(error)),
+            catchError(error => of(this.notify.error(error))),
         );
     }
 
@@ -283,7 +283,7 @@ export class ShellsComponent implements OnDestroy {
 
                 return this.api.updateEndpoint(result);
             }),
-            catchError(error => this.notify.error(error)),
+            catchError(error => of(this.notify.error(error))),
         );
     }
 
@@ -315,7 +315,7 @@ export class ShellsComponent implements OnDestroy {
             }),
             mergeMap(endpoints => from(endpoints ?? [])),
             mergeMap(endpoint => this.api.removeEndpoint(endpoint)),
-            catchError(error => this.notify.error(error)),
+            catchError(error => of(this.notify.error(error))),
         );
     }
 
@@ -342,7 +342,7 @@ export class ShellsComponent implements OnDestroy {
     public downloadPackages(): Observable<void> {
         return from(this.state.selected()).pipe(
             mergeMap(document => this.api.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx')),
-            catchError(error => this.notify.error(error)),
+            catchError(error => of(this.notify.error(error))),
         );
     }
 
@@ -383,7 +383,10 @@ export class ShellsComponent implements OnDestroy {
                         ),
                         mergeMap(result => from(result ? this.state.selected() : [])),
                         mergeMap(document => this.api.deleteDocument(document.id, document.endpoint)),
-                        catchError(error => this.notify.error(error)),
+                        catchError(error => {
+                            this.notify.error(error);
+                            return of(void 0);
+                        }),
                     );
                 }
             }),

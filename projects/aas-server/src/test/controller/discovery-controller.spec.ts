@@ -37,7 +37,7 @@ describe('DiscoveryController', () => {
         discovery = createSpyObj<Discovery>(['getAASIdsByAssetLink']);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
-        authentication.expressAuthentication.mockResolvedValue({ owner: 'test-user' });
+        authentication.expressAuthentication.mockResolvedValue({ label: 'test-user' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
@@ -59,11 +59,11 @@ describe('DiscoveryController', () => {
         const cursor = encodeBase64Url(JSON.stringify({ previous: null, next: null }));
         const response = await request(app)
             .get('/api/v3/lookup/shells')
-            .query({assetIds: [encodeBase64Url('AssetLink1')], limit: 123, cursor })
+            .query({ assetIds: [encodeBase64Url('AssetLink1')], limit: 123, cursor })
             .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(200);
-        expect(discovery.getAASIdsByAssetLink).toHaveBeenCalledWith( ['AssetLink1'], 123, cursor);
+        expect(discovery.getAASIdsByAssetLink).toHaveBeenCalledWith(['AssetLink1'], 123, cursor);
         expect(response.body).toEqual({ result: [], paging_metadata: {} });
     });
 });

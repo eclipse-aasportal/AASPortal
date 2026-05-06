@@ -6,27 +6,26 @@
  *
  *****************************************************************************/
 
-import { Injectable, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
+import { ErrorHandler, inject, Injectable, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { noop } from 'aas-core';
 import { MessageEntry } from '../../types';
 import { messageToString } from '../../utilities';
 
-export enum LogType {
-    Error,
-    Warning,
-    Info,
-    Debug,
-}
+export const LogType = {
+    Error: 'Error',
+    Warning: 'Warning',
+    Info: 'Info',
+    Debug: 'Debug',
+} as const;
+
+export type LogType = (typeof LogType)[keyof typeof LogType];
 
 @Injectable({
     providedIn: 'root',
 })
-export class NotifyService {
+export class NotifyService implements ErrorHandler {
+    private readonly translate = inject(TranslateService);
     private readonly _messages = signal<MessageEntry[]>([]);
-
-    public constructor(private translate: TranslateService) {}
 
     public readonly messages = this._messages.asReadonly();
 
@@ -34,17 +33,18 @@ export class NotifyService {
      * Displays an error message.
      * @param error The error message.
      */
-    public async error(error: unknown, args?: Record<string, string | number | boolean | undefined>): Promise<void> {
+    public error(error: unknown, args?: Record<string, unknown>): void {
         if (!error) {
             return;
         }
 
-        const text = typeof error === 'string' ? this.translate.instant(error, args) : await this.resolveError(error);
+        const text =
+            typeof error === 'string' ? this.translate.instant(error, args) : messageToString(error, this.translate);
 
         this._messages.update(values => [
             ...values,
             {
-                header: this.translate.instant('Notify.CAPTION_ERROR'),
+                header: this.translate.instant('Notify.ERROR'),
                 text,
                 classname: 'bg-danger',
                 autohide: false,
@@ -57,7 +57,7 @@ export class NotifyService {
      * Displays an information to the user.
      * @param message The message.
      */
-    public info(message: string, args?: Record<string, string | number | boolean | undefined>): void {
+    public info(message: string, args?: Record<string, unknown>): void {
         if (!message) {
             return;
         }
@@ -65,7 +65,7 @@ export class NotifyService {
         this._messages.update(values => [
             ...values,
             {
-                header: this.translate.instant('Notify.CAPTION_INFO'),
+                header: this.translate.instant('Notify.INFO'),
                 text: this.translate.instant(message, args),
                 classname: 'bg-info',
                 autohide: true,
@@ -90,46 +90,10 @@ export class NotifyService {
     }
 
     /**
-     * Prints a message to the browser console.
-     * @param type The message type.
-     * @param message The message.
+     * Handles an error by displaying it as a message to the user.
+     * @param error The error to handle.
      */
-    public log(type: LogType, message: unknown): void {
-        if (message) {
-            switch (type) {
-                case LogType.Error:
-                    console.error(message);
-                    break;
-                case LogType.Debug:
-                    console.debug(message);
-                    break;
-                case LogType.Warning:
-                    console.warn(message);
-                    break;
-                default:
-                    console.log(message);
-                    break;
-            }
-        }
-    }
-
-    private async resolveError(error: unknown): Promise<string> {
-        let message = error;
-        if (error instanceof HttpErrorResponse) {
-            if (error.error instanceof Blob) {
-                if (error.error.type === 'application/json') {
-                    try {
-                        const buffer = await error.error.arrayBuffer();
-                        message = JSON.parse(new TextDecoder().decode(buffer));
-                    } catch {
-                        noop();
-                    }
-                }
-            } else {
-                message = error.error;
-            }
-        }
-
-        return messageToString(message, this.translate);
+    public handleError(error: unknown): void {
+        console.error(error);
     }
 }

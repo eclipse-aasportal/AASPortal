@@ -8,10 +8,11 @@
 
 import { DependencyContainer } from 'tsyringe';
 import path from 'path/posix';
+import { LOGGER, Logger } from 'aas-package';
+
 import { AASIndex } from './aas-index.js';
 import { Variable } from '../variable.js';
 import { MySqlIndex } from './mysql/mysql-index.js';
-import { LOGGER, Logger } from '../logging/logger.js';
 import { urlToString } from '../utilities.js';
 import { KeywordDirectory } from './keyword-directory.js';
 import { SqliteIndex } from './sqlite/sqlite-index.js';

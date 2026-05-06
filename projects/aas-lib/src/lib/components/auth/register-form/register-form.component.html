@@ -6,50 +6,62 @@
  !
  !---------------------------------------------------------------------------->
 
-<form (ngSubmit)="submit()">
-    <div class="modal-header">
-        <h5 class="modal-title text-info">
+<main class="form-register position-absolute top-50 start-50 translate-middle">
+    <form novalidate (submit)="submit($event)">
+        <h5 class="text-info text-center">
             <i class="bi bi-person-circle"></i>
-            <span class="ms-2" translate>CAPTION_REGISTRATION</span>
+            <span class="ms-2" translate>RegisterForm.CAPTION</span>
         </h5>
-        <button type="button" class="btn-close" (click)="cancel()" aria-label="Cancel"></button>
-    </div>
-    <div class="modal-body">
-        @for (message of messages(); track message) {
-        <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
-            <div class="d-flex">{{message}}</div>
-        </ngb-toast>
-        }
         <div class="form-floating mb-3">
-            <input #inputEMail type="email" class="form-control" id="intputRegisterEMail" [(ngModel)]="userId"
-                name="userId" placeholder="example@email.com" (input)="onInputEMail()">
-            <label for="intputRegisterEMail" translate>LABEL_EMAIL</label>
+            <input #inputEMail type="email" class="form-control" id="intputRegisterEMail" [formField]="email" />
+            <label for="intputRegisterEMail" translate>RegisterForm.EMAIL</label>
+            @if (email().touched() && email().invalid()) {
+                <ul class="text-danger fs-7">
+                    @for (error of email().errors(); track error) {
+                        <li>{{ error.message | translate }}</li>
+                    }
+                </ul>
+            }
         </div>
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="intputRegisterName" [(ngModel)]="name" name="name"
-                [placeholder]="defaultName()">
-            <label for="intputRegisterName" translate>LABEL_NAME</label>
-        </div>
-        @if (!passwordAsEMail()) {
-        <div class="form-floating mb-3">
-            <input type="password" class="form-control" id="inputRegisterPassword" [(ngModel)]="password1"
-                name="password1" placeholder="password">
-            <label for="inputRegisterPassword" translate>LABEL_PASSWORD</label>
+            <input
+                type="text"
+                class="form-control"
+                id="AID_USER_NAME"
+                [formField]="name"
+            />
+            <label for="AID_USER_NAME" translate>RegisterForm.NAME</label>
         </div>
         <div class="form-floating mb-3">
-            <input type="password" class="form-control" id="inputRegisterConfirmPassword" [(ngModel)]="password2"
-                name="password2" placeholder="confirm password">
-            <label for="inputRegisterConfirmPassword" translate>LABEL_CONFIRM_PASSWORD</label>
+            <input type="password" class="form-control" id="AID_PASSWORD_1" [formField]="password1" />
+            <label for="AID_PASSWORD_1" translate>RegisterForm.PASSWORD</label>
+            @if (password1().touched() && password1().invalid()) {
+                <div class="text-danger fs-7">
+                    @for (error of password1().errors(); track error) {
+                        <p>{{ error.message | translate}}</p>
+                    }
+                </div>
+            }
         </div>
-        <div class="form-check mb-3">
-            <label class="form-check-label" for="stayLoggedIn" translate>LABEL_STAY_LOGGED_IN</label>
-            <input class="form-check-input" type="checkbox" id="stayLoggedIn" [(ngModel)]="stayLoggedIn"
-                name="stayLoggedIn">
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="AID_PASSWORD_2" [formField]="password2" />
+            <label for="AID_PASSWORD_2" translate>RegisterForm.CONFIRM_PASSWORD</label>
+            @if (password2().touched() && password2().invalid()) {
+                <div class="text-danger fs-7">
+                    @for (error of password2().errors(); track error) {
+                        <p>{{ error.message | translate }}</p>
+                    }
+                </div>
+            }
         </div>
-        }
-    </div>
-    <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" translate>CMD_OK</button>
-        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>CMD_CANCEL</button>
-    </div>
-</form>
+        <button
+            type="submit"
+            class="btn btn-primary w-100"
+            id="AID_REGISTER_OK"
+            [disabled]="registerForm().invalid()"
+            translate
+        >
+            RegisterForm.OK
+        </button>
+    </form>
+</main>

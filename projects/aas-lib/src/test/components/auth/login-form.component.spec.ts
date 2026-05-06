@@ -6,46 +6,51 @@
  *
  *****************************************************************************/
 
-import { afterEach, beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { of, throwError } from 'rxjs';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 
-import { AuthApiService } from '../../../lib/components/auth/auth-api.service';
-import { ERRORS, INFO } from '../../../lib/messages';
-import { LoginFormComponent, LoginFormResult } from '../../../lib/components/auth/login-form/login-form.component';
-import { FakeLoader } from '../../mocks';
+import { LoginFormComponent } from '../../../lib/components/auth/login-form/login-form.component';
+import { createSpyObj, FakeLoader } from '../../mocks';
+import { AuthService } from '../../../lib/components/auth/auth.service';
+import { NotifyService } from '../../../lib/components/notify/notify.service';
 
 describe('LoginFormComponent', () => {
-    let modal: NgbActiveModal;
-    let api: AuthApiService;
+    let auth: Mocked<AuthService>;
+    let router: Mocked<Router>;
 
     beforeEach(async () => {
+        auth = createSpyObj<AuthService>(['login'], {});
+        router = createSpyObj<Router>(['navigateByUrl']);
+
         await TestBed.configureTestingModule({
             imports: [
                 LoginFormComponent,
-                TranslateModule.forRoot({
+            ],
+            providers: [
+                {
+                    provide: AuthService,
+                    useValue: auth,
+                },
+                {
+                    provide: NotifyService,
+                    useValue: createSpyObj<NotifyService>(['error']),
+                },
+                {
+                    provide: Router,
+                    useValue: router,
+                },
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
-            ],
-            providers: [
-                NgbModal,
-                NgbActiveModal,
-                provideHttpClient(withInterceptorsFromDi()),
-                provideHttpClientTesting(),
                 provideZonelessChangeDetection(),
             ],
         }).compileComponents();
-
-        modal = TestBed.inject(NgbActiveModal);
-        api = TestBed.inject(AuthApiService);
     });
 
     it('should create', () => {
@@ -53,122 +58,5 @@ describe('LoginFormComponent', () => {
         const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();
-    });
-
-    it('submits a valid user', async () => {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        const result: LoginFormResult = { token: 'a_token', stayLoggedIn: true };
-        vitest.spyOn(modal, 'close').mockImplementation((...args) => expect(args[0]).toEqual(result));
-        vitest.spyOn(api, 'login').mockReturnValue(of({ token: 'a_token' }));
-
-        component.userId.set('john.doe@email.com');
-        component.password.set('1234.Abcd');
-        component.stayLoggedIn.set(true);
-        await component.submit();
-        expect(component.messages().length).toEqual(0);
-        expect(modal.close).toHaveBeenCalled();
-    });
-
-    it('does not login a user with empty e-mail', async () => {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        component.userId.set('');
-        component.password.set('1234.Abcd');
-        await component.submit();
-        expect(component.messages().length).toEqual(1);
-        expect(component.messages()[0].text).toEqual(ERRORS.EMAIL_REQUIRED);
-    });
-
-    it('does not login a user with invalid e-mail', async () => {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        component.userId.set('invalidEMail');
-        component.password.set('1234.abcd');
-        await component.submit();
-        expect(component.messages().length).toEqual(1);
-        expect(component.messages()[0].text).toEqual(ERRORS.INVALID_EMAIL);
-    });
-
-    it('does not login a user with empty password', async () => {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        component.userId.set('john.doe@email.com');
-        component.password.set('');
-        await component.submit();
-        expect(component.messages().length).toEqual(1);
-        expect(component.messages()[0].text).toEqual(ERRORS.PASSWORD_REQUIRED);
-    });
-
-    it('does not login a user with invalid password', async () => {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        component.userId.set('john.doe@email.com');
-        component.password.set('123');
-        await component.submit();
-        expect(component.messages().length).toEqual(1);
-        expect(component.messages()[0].text).toEqual(ERRORS.INVALID_PASSWORD);
-    });
-
-    it('does not login an unknown user', async () => {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        vitest.spyOn(modal, 'close').mockReturnValue();
-        vitest.spyOn(api, 'login').mockReturnValue(throwError(() => new Error('Unknown user')));
-
-        component.userId.set('unknown.user@email.com');
-        component.password.set('1234.abcd');
-        await component.submit();
-        expect(component.messages().length).toEqual(1);
-        expect(component.messages()[0].text).toEqual('Unknown user');
-    });
-
-    it('supports the reset of a forgotten password', async function () {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        vitest.spyOn(api, 'resetPassword').mockReturnValue(of(void 0));
-        component.userId.set('john.doe@email.com');
-        await component.resetPassword();
-        expect(component.messages().length).toEqual(1);
-        expect(component.messages()[0].text).toEqual(INFO.NEW_PASSWORD_SENT);
-    });
-
-    it('can not reset password when e-mail is empty', async () => {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        component.userId.set('');
-        await component.resetPassword();
-        expect(component.messages().length).toEqual(1);
-        expect(component.messages()[0].text).toEqual(ERRORS.EMAIL_REQUIRED);
-    });
-
-    it('an not reset password when e-mail is invalid', async () => {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        component.userId.set('invalidEMail');
-        await component.resetPassword();
-        expect(component.messages().length).toEqual(1);
-        expect(component.messages()[0].text).toEqual(ERRORS.INVALID_EMAIL);
-    });
-
-    it('supports navigation to the registration', function () {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
-        fixture.detectChanges();
-        vitest.spyOn(modal, 'close').mockImplementation((...args) =>
-            expect(args[0]).toEqual({ action: 'register' } as LoginFormResult),
-        );
-
-        component.registerUser();
-        expect(modal.close).toHaveBeenCalled();
     });
 });

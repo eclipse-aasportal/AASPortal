@@ -11,15 +11,13 @@ import { container } from 'tsyringe';
 import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
-import { LOGGER, Logger } from '../../app/logging/logger.js';
+import { LOGGER, Logger } from 'aas-package';
 import { AppInfo } from 'aas-core';
 import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 
 import { ApplicationInfo } from '../../app/application-info.js';
-import { AuthService } from '../../app/auth/auth-service.js';
 import { createSpyObj } from '../mocks.js';
 import { Variable } from '../../app/variable.js';
-import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
@@ -27,22 +25,19 @@ import { errorHandler } from '../assets/error-handler.js';
 describe('AppController', () => {
     let app: Express;
     let logger: Logger;
-    let auth: Mocked<AuthService>;
     let applicationInfo: Mocked<ApplicationInfo>;
     let variable: Mocked<Variable>;
     let authentication: Mocked<Authentication>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
+        variable = createSpyObj<Variable>({}, {});
 
         applicationInfo = createSpyObj<ApplicationInfo>(['getAsync']);
 
-        authentication = createSpyObj<Authentication>(['check']);
-        authentication.check.mockResolvedValue(editorPayload);
+        authentication = createSpyObj<Authentication>(['authentication']);
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
 
-        container.registerInstance(AuthService, auth);
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
         container.registerInstance(ApplicationInfo, applicationInfo);
@@ -79,8 +74,7 @@ describe('AppController', () => {
         };
 
         applicationInfo.getAsync.mockReturnValue(new Promise<AppInfo>(resolve => resolve(data)));
-        const response = await request(app).get('/api/v1/app/info').set('Authorization', `Bearer ${getToken()}`);
-
+        const response = await request(app).get('/api/v1/app/info');
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(data);
     });

@@ -32,7 +32,7 @@ describe('AASTable', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: createSpyObj<NotifyService>(['error', 'info', 'log']),
+                    useValue: createSpyObj<NotifyService>(['error', 'info']),
                 },
                 {
                     provide: ActivatedRoute,

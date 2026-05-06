@@ -40,7 +40,7 @@ describe('AASTreeComponent', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: createSpyObj<NotifyService>(['error', 'info', 'log']),
+                    useValue: createSpyObj<NotifyService>(['error', 'info']),
                 },
                 {
                     provide: WINDOW,

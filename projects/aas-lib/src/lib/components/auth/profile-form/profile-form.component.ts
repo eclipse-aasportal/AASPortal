@@ -6,107 +6,139 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
-import { getUserNameFromEMail, isValidEMail, isValidPassword, stringFormat, UserProfile } from 'aas-core';
-import { messageToString } from '../../../utilities';
-import { ERRORS } from '../../../messages';
-import { AuthApiService } from '../auth-api.service';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { NgbAccordionModule, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+import { form, FormField, readonly, validate } from '@angular/forms/signals';
+import { Router } from '@angular/router';
+import { catchError, Observable } from 'rxjs';
 
-export interface ProfileFormResult {
-    action?: string;
-    token?: string;
+import { AuthService } from '../auth.service';
+import { NotifyService } from '../../notify/notify.service';
+
+export interface ProfileData {
+    id: string;
+    name: string;
+    password: string;
+    password1: string;
+    password2: string;
 }
 
 @Component({
     selector: 'fhg-profile',
     templateUrl: './profile-form.component.html',
     styleUrls: ['./profile-form.component.scss'],
-    imports: [NgbToast, FormsModule, NgbCollapse, TranslateDirective],
+    imports: [NgbCollapse, NgbAccordionModule, TranslateDirective, TranslatePipe, FormField],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileFormComponent {
-    private profile?: UserProfile;
+    private readonly auth = inject(AuthService);
+    private readonly notify = inject(NotifyService);
+    private readonly router = inject(Router);
+    private readonly updateUserModel = signal<ProfileData>({
+        id: '',
+        name: '',
+        password: '',
+        password1: '',
+        password2: '',
+    });
 
-    public constructor(
-        private modal: NgbActiveModal,
-        private translate: TranslateService,
-        private api: AuthApiService,
-    ) {}
+    public constructor() {
+        effect(() => {
+            const user = this.auth.user();
+            if (user?.id) {
+                this.profileForm.id().value.set(user.id);
+            }
 
-    public readonly id = signal('');
+            if (user?.name) {
+                this.profileForm.name().value.set(user.name);
+            }
+        });
+    }
 
-    public readonly name = signal('');
+    public readonly profileForm = form(this.updateUserModel, schemaPath => {
+        readonly(schemaPath.id);
+        validate(schemaPath.password, ({ value, valueOf }) => {
+            const password = value();
+            const password1 = valueOf(schemaPath.password1);
+            const password2 = valueOf(schemaPath.password2);
+            if ((password2 || password1) && !password) {
+                return {
+                    kind: 'passwordRequired',
+                    message: 'RegisterForm.PASSWORD_REQUIRED',
+                };
+            }
 
-    public readonly defaultName = signal('name');
+            return null;
+        });
 
-    public readonly password1 = signal('');
+        validate(schemaPath.password1, ({ value }) => {
+            const password1 = value();
+            if (password1.length > 0 && password1.length < 8) {
+                return {
+                    kind: 'passwordMinLength',
+                    message: 'RegisterForm.PASSWORD_MIN_LENGTH',
+                };
+            }
 
-    public readonly password2 = signal('');
+            return null;
+        });
+
+        validate(schemaPath.password2, ({ value, valueOf }) => {
+            const password2 = value();
+            const password1 = valueOf(schemaPath.password1);
+            if (password2 !== password1) {
+                return {
+                    kind: 'passwordMismatch',
+                    message: 'RegisterForm.PASSWORDS_DO_NOT_MATCH',
+                };
+            }
+
+            return null;
+        });
+    });
+
+    public readonly email = this.profileForm.id;
+
+    public readonly name = this.profileForm.name;
+
+    public readonly password = this.profileForm.password;
+
+    public readonly password1 = this.profileForm.password1;
+
+    public readonly password2 = this.profileForm.password2;
 
     public readonly isCollapsed = signal(true);
 
-    public readonly messages = signal<string[]>([]);
-
-    public initialize(profile: UserProfile): void {
-        this.profile = profile;
-        this.id.set(profile.id);
-        this.name.set(profile.name);
+    public deleteAccount(): Observable<void> {
+        return this.auth.deleteAccount().pipe(
+            catchError(error => {
+                this.notify.error(error);
+                this.router.navigateByUrl('/start').then(() => void 0);
+                return new Observable<void>();
+            }),
+        );
     }
 
-    public onInputEMail(): void {
-        this.defaultName.set(getUserNameFromEMail(this.id()));
-    }
-
-    public deleteUser(): void {
-        const result: ProfileFormResult = { action: 'deleteUser' };
-        this.modal.close(result);
-    }
-
-    public submit(): void {
-        this.clearMessages();
-        if (!this.id()) {
-            this.pushMessage(stringFormat(this.translate.instant(ERRORS.EMAIL_REQUIRED)));
-        } else if (!isValidEMail(this.id())) {
-            this.pushMessage(stringFormat(this.translate.instant(ERRORS.INVALID_EMAIL)));
-        } else if (this.password1()) {
-            if (!isValidPassword(this.password1())) {
-                this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
-            } else if (this.password1() !== this.password2()) {
-                this.pushMessage(this.translate.instant(ERRORS.PASSWORDS_NOT_EQUAL));
-            }
-        }
-
-        if (this.messages.length === 0 && this.profile) {
-            const newProfile: UserProfile = {
-                id: this.id(),
-                name: this.name() ?? getUserNameFromEMail(this.id()),
-                password: this.password1(),
-            };
-
-            this.api.updateProfile(this.profile.id, newProfile).subscribe({
-                next: value => {
-                    const result: ProfileFormResult = { token: value.token };
-                    this.modal.close(result);
+    public submit(event: Event): void {
+        event.preventDefault();
+        const data = this.updateUserModel();
+        this.auth
+            .updateAccount({ id: data.id, name: data.name, password: data.password, newPassword: data.password1 })
+            .subscribe({
+                next: () => {
+                    this.isCollapsed.set(true);
                 },
                 error: error => {
-                    this.pushMessage(messageToString(error, this.translate));
+                    this.notify.error(error);
+                    this.profileForm().reset({
+                        id: this.auth.email() ?? '',
+                        name: this.auth.name() ?? '',
+                        password: '',
+                        password1: '',
+                        password2: '',
+                    });
                 },
             });
-        }
-    }
-
-    public cancel(): void {
-        this.modal.close();
-    }
-
-    private pushMessage(message: string): void {
-        this.messages.set([message]);
-    }
-
-    private clearMessages(): void {
-        this.messages.set([]);
     }
 }

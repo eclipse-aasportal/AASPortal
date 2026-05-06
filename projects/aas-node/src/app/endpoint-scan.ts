@@ -8,7 +8,7 @@
 
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
-import { LOGGER, Logger } from './logging/logger.js';
+import { LOGGER, Logger } from 'aas-package';
 import { AASDocument } from 'aas-core';
 import { ScanEndpointData, ScanEndpointResult, ScanResultKind } from './types.js';
 import { toUint8Array } from './utilities.js';

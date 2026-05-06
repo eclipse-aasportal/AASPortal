@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { NotifyComponent } from '../../../lib/components/notify/notify.component';

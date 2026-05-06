@@ -12,9 +12,9 @@ import { Worker, SHARE_ENV } from 'worker_threads';
 import fs from 'fs';
 import path from 'path/posix';
 import { noop } from 'aas-core';
+import { LOGGER, Logger } from 'aas-package';
 
 import { ScanResultKind, ScanResult, WorkerData } from '../types.js';
-import { LOGGER, Logger } from '../logging/logger.js';
 import { Variable } from '../variable.js';
 
 /** Represents a worker task for scanning an endpoint. */

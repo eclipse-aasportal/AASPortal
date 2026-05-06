@@ -10,21 +10,45 @@
     <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarLocalize" role="button">
         <div class="d-inline-flex">
             <div class="px-2"><i class="bi bi-person-circle"></i></div>
-            <div>{{userName()}}</div>
+            <div>{{ userName() }}</div>
         </div>
     </a>
     <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
-        @if (!userAuthenticated()) {
-        <a type="button" class="dropdown-item" (click)="login()" (keydown.enter)="login()" tabindex="1"
-            translate>CMD_LOGIN</a>
-        <a type="button" class="dropdown-item" (click)="register()" (keydown.enter)="register()" tabindex="2"
-            translate>CMD_REGISTER_USER</a>
-        }
-        @else {
-        <a type="button" class="dropdown-item" (click)="logout()" (keydown.enter)="logout()" tabindex="4"
-            translate>CMD_LOGOUT</a>
-        <a type="button" class="dropdown-item" (click)="updateUserProfile()" (keydown.enter)="updateUserProfile()"
-            tabindex="3" translate>CMD_UPDATE_PROFILE</a>
+        @if (!isAuthenticated()) {
+            <a
+                type="button"
+                class="dropdown-item"
+                href="api/login"
+                tabindex="1"
+                translate
+                >Auth.LOGIN</a
+            >
+            <a
+                type="button"
+                class="dropdown-item"
+                href="/register"
+                tabindex="2"
+                translate
+                >Auth.REGISTER_USER</a
+            >
+        } @else {
+            <a
+                type="button"
+                class="dropdown-item"
+                (click)="logout().subscribe()"
+                (keydown.enter)="logout().subscribe()"
+                tabindex="3"
+                translate
+                >Auth.LOGOUT</a
+            >
+            <a
+                type="button"
+                class="dropdown-item"
+                href="/profile"
+                tabindex="4"
+                translate
+                >Auth.UPDATE_PROFILE</a
+            >
         }
     </div>
 </div>

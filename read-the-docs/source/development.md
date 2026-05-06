@@ -113,8 +113,8 @@ NODE_ENV=production npm run build   # Production optimized
 // Shared tsconfig options
 {
     "compilerOptions": {
-        "target": "ES2022",
-        "module": "ES2022",
+        "target": "ES2024",
+        "module": "ES2024",
         "moduleResolution": "node",
         "strict": true,
         "skipLibCheck": true,
