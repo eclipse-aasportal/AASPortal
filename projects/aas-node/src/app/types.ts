@@ -6,8 +6,22 @@
  *
  *****************************************************************************/
 
-import { Endpoint, AASDocument, TemplateDescriptor, AASEndpoint } from 'aas-core';
+import { Endpoint, AASDocument, TemplateDescriptor, AASEndpoint, UserRole } from 'aas-core';
 import { aasV2 } from 'aas-package';
+
+// Extend Express Request type to include 'user'
+declare module 'express-serve-static-core' {
+    interface Request {
+        user?: { id: string; name: string; role: UserRole };
+    }
+}
+
+declare module 'express-session' {
+    interface SessionData {
+        code_verifier?: string;
+        state?: string;
+    }
+}
 
 export interface AASRegistryModelType {
     name: 'AssetAdministrationShellDescriptor' | 'Asset';

@@ -10,6 +10,7 @@ import { inject, singleton } from 'tsyringe';
 import fs from 'fs';
 import path from 'path';
 import { Readable } from 'stream';
+import { LOGGER, Logger } from 'aas-package';
 import {
     AASDocument,
     LiveRequest,
@@ -29,12 +30,11 @@ import {
 import { ImageProcessing } from '../image-processing.js';
 import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 import { ScanResultKind, ScanResult, ScanEndpointResult, ScanEndpointData } from '../types.js';
-import { LOGGER, Logger } from '../logging/logger.js';
 import { Parallel } from './parallel.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
-import { AASClientFactory } from '../client/aas-client-factory.js';
+import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { Variable } from '../variable.js';
 import { WSNode } from '../ws-node.js';
 import { ERRORS } from '../errors.js';
@@ -53,7 +53,7 @@ export class AASProvider {
         @inject(Variable) private readonly variable: Variable,
         @inject(LOGGER) private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
-        @inject(AASClientFactory) private readonly clientFactory: AASClientFactory,
+        @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
         @inject(AAS_INDEX) private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
@@ -234,9 +234,9 @@ export class AASProvider {
                     }
                 }
             } else if (isBlob(dataElement)) {
-                const value = await client.getBlobValue(document.content, smId, idShortPath);
+                const value = await client.getBlobValue(smId, idShortPath);
                 const readable = new Readable();
-                readable.push(JSON.stringify({ value }));
+                readable.push(value);
                 readable.push(null);
                 stream = readable;
             } else {
@@ -467,7 +467,7 @@ export class AASProvider {
                 env = await client.getEnvironment(document.address);
             }
 
-            return await client.invoke(env, operation);
+            return await client.invoke(operation);
         } finally {
             await client.close();
         }

@@ -39,7 +39,7 @@ describe('PackagesController', () => {
         repository = createSpyObj<PackageRepository>(['add', 'delete', 'getPackage', 'update', 'getPackages']);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
-        authentication.expressAuthentication.mockResolvedValue({ owner: 'test-user' });
+        authentication.expressAuthentication.mockResolvedValue({ label: 'test-user' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);

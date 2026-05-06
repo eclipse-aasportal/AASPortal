@@ -6,11 +6,13 @@
  *
  *****************************************************************************/
 
-import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { lastValueFrom, of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
+import { createSpyObj } from '../mocks';
+import { CookieService } from '../../lib/services/cookie.service';
 import { AuthService } from '../../lib/components/auth/auth.service';
 import {
     START_TILE_TYPES,
@@ -19,7 +21,6 @@ import {
     StartTile,
     StartTileType,
 } from '../../lib/services/start.service';
-import { createSpyObj } from '../mocks';
 
 @Component({
     selector: 'fhg-test-card',
@@ -31,11 +32,14 @@ export class TestCardComponent {}
 
 describe('StartService', () => {
     let service: StartService;
+    let cookies: Mocked<CookieService>;
     let auth: Mocked<AuthService>;
 
     beforeEach(() => {
-        auth = createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
-        auth.getCookie.mockReturnValue(of(undefined));
+        cookies = createSpyObj<CookieService>(['getCookie', 'setCookie', 'deleteCookie']);
+        cookies.getCookie.mockReturnValue(of(undefined));
+        auth = createSpyObj<AuthService>([], { user: signal(null) });
+
         TestBed.configureTestingModule({
             providers: [
                 {
@@ -50,6 +54,10 @@ describe('StartService', () => {
                 {
                     provide: START_TILES,
                     useValue: [{ id: 'test', type: 'TestCard', inputs: {} } satisfies StartTile],
+                },
+                {
+                    provide: CookieService,
+                    useValue: cookies,
                 },
                 {
                     provide: AuthService,
@@ -116,10 +124,10 @@ describe('StartService', () => {
 
     describe('save', () => {
         it('should save the tiles', async () => {
-            auth.setCookie.mockReturnValue(of(void 0));
+            cookies.setCookie.mockReturnValue(of(void 0));
             service.add('TestCard', 'new', {});
             await lastValueFrom(service.save());
-            expect(auth.setCookie).toHaveBeenCalled();
+            expect(cookies.setCookie).toHaveBeenCalled();
         });
     });
 });

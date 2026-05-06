@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, map, mergeMap, skipWhile } from 'rxjs';
 import { AASDocument } from 'aas-core';
-import { AuthService } from 'aas-lib';
+import { AuthService, CookieService } from 'aas-lib';
 
 export type FavoritesList = {
     name: string;
@@ -23,14 +23,16 @@ const cookieName = 'v2.Favorites';
 
 @Injectable({ providedIn: 'root' })
 export class FavoritesService {
+    private readonly auth = inject(AuthService);
+    private readonly cookies = inject(CookieService);
     private readonly state$ = signal<FavoritesState>({ active: '', items: [] });
 
-    public constructor(private readonly auth: AuthService) {
+    public constructor() {
         this.auth.ready
             .pipe(
                 skipWhile(ready => ready === false),
                 takeUntilDestroyed(),
-                mergeMap(() => this.auth.getCookie(cookieName)),
+                mergeMap(() => this.cookies.getCookie(cookieName)),
                 map(value => {
                     if (value) {
                         this.state$.set(JSON.parse(value));
@@ -70,10 +72,10 @@ export class FavoritesService {
 
     public save(): Observable<void> {
         if (this.state$().items.length === 0) {
-            return this.auth.deleteCookie(cookieName);
+            return this.cookies.deleteCookie(cookieName);
         }
 
-        return this.auth.setCookie(cookieName, JSON.stringify(this.state$()));
+        return this.cookies.setCookie(cookieName, JSON.stringify(this.state$()));
     }
 
     private addFavorites(

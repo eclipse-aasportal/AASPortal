@@ -7,107 +7,54 @@
  *****************************************************************************/
 
 import { inject, Injectable, computed, signal } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, catchError, from, map, mergeMap, Observable, of, throwError } from 'rxjs';
-import { jwtDecode } from 'jwt-decode';
-import { ApplicationError, Credentials, stringFormat, UserProfile, UserRole, JWTPayload, toBoolean } from 'aas-core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap/modal';
-
-import { ERRORS } from '../../messages';
-import { LoginFormComponent, LoginFormResult } from '../auth/login-form/login-form.component';
-import { ProfileFormComponent, ProfileFormResult } from '../auth/profile-form/profile-form.component';
-import { RegisterFormComponent, RegisterFormResult } from '../auth/register-form/register-form.component';
-import { AuthApiService } from './auth-api.service';
-import { WINDOW } from '../../services/window.service';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { map, Observable, of, switchMap, take, throwError } from 'rxjs';
+import { UserProfile, UserRole, User, Credentials } from 'aas-core';
+import { encodeBase64Url } from '../../utilities';
+import { HttpCache } from '../../services/http-cache';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AuthService {
-    private readonly modal = inject(NgbModal);
-    private readonly translate = inject(TranslateService);
-    private readonly api = inject(AuthApiService);
-    private readonly window = inject(WINDOW);
-    private readonly token$ = signal<string | undefined>(undefined);
-    private readonly payload$ = signal<JWTPayload | undefined>(undefined);
-    private readonly ready$ = new BehaviorSubject(false);
+    private readonly http = inject(HttpClient);
+    private readonly cache = inject(HttpCache);
+    private readonly activeRoute = inject(ActivatedRoute);
+    private readonly user$ = signal<User | null | undefined>(undefined);
 
     public constructor() {
-        const stayLoggedIn = toBoolean(this.window.localStorage.getItem('.StayLoggedIn'));
-        const token = this.window.localStorage.getItem('.Token');
-        if (stayLoggedIn && token && this.isValid(token)) {
-            const payload = jwtDecode(token) as JWTPayload;
-            if (payload && payload.sub) {
-                this.loginUser(token, payload.sub).subscribe({
-                    next: () => this.ready$.next(true),
-                    error: () => this.ready$.next(true),
-                });
-
-                return;
-            }
-        }
-
-        this.ready$.next(true);
+        this.http.get<User | null>('/api/me').subscribe({
+            next: user => {
+                this.user$.set(user);
+                this.cache.clear();
+            },
+            error: error => {
+                this.user$.set(null);
+                this.cache.clear();
+                console.error(error);
+            },
+        });
     }
 
     /** Signals that an authentication was performed. */
-    public readonly ready = this.ready$.asObservable();
+    public readonly ready = toObservable(computed(() => this.user$() !== undefined));
 
     /** The e-mail of the current user. */
-    public readonly email = computed(() => this.payload$()?.sub);
+    public readonly email = computed(() => this.user$()?.id);
 
     /** The name or alias of the current user. */
-    public readonly name = computed(() => this.payload$()?.name);
+    public readonly name = computed(() => this.user$()?.name);
 
     /** The current user role. */
-    public readonly role = computed(() => this.payload$()?.role);
+    public readonly role = computed(() => this.user$()?.role);
 
     /** Indicates whether the current user is authenticated. */
-    public readonly authenticated = computed(() => {
-        return this.payload$() ? true : false;
-    });
+    public readonly isAuthenticated = computed(() => this.user$() != null);
 
-    /** The current active payload. */
-    public readonly payload = this.payload$.asReadonly();
-
-    /** The current JSON web token. */
-    public readonly token = this.token$.asReadonly();
-
-    /**
-     * User login.
-     * @param credentials The credentials.
-     */
-    public login(credentials?: Credentials): Observable<void> {
-        if (credentials) {
-            return this.api.login(credentials).pipe(map(result => this.setPayload(result.token)));
-        }
-
-        return of(this.modal.open(LoginFormComponent, { backdrop: 'static', animation: true, keyboard: true })).pipe(
-            mergeMap(modalRef => {
-                const stayLoggedIn = toBoolean(this.window.localStorage.getItem('.StayLoggedIn'));
-                const token = this.window.localStorage.getItem('.Token');
-                if (stayLoggedIn && token) {
-                    modalRef.componentInstance.stayLoggedIn.set(stayLoggedIn);
-                }
-
-                return from<Promise<LoginFormResult | undefined>>(modalRef.result);
-            }),
-            mergeMap(result => {
-                if (result?.token) {
-                    this.setPayload(result.token);
-                    if (result.stayLoggedIn) {
-                        this.window.localStorage.setItem('.StayLoggedIn', 'true');
-                    } else if (toBoolean(this.window.localStorage.getItem('.StayLoggedIn'))) {
-                        this.window.localStorage.removeItem('.StayLoggedIn');
-                    }
-                } else if (result?.action === 'register') {
-                    return this.register();
-                }
-
-                return of(void 0);
-            }),
-        );
-    }
+    /** The current active user. */
+    public readonly user = this.user$.asReadonly();
 
     /**
      * Ensures that the current user has the expected rights.
@@ -118,95 +65,73 @@ export class AuthService {
             return of(void 0);
         }
 
-        return this.login().pipe(
-            map(() => {
-                if (!this.isAuthorized(roles)) {
-                    throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, undefined, 401);
+        return of(void 0);
+    }
+
+    /**
+     * Performs user authentication using the provided credentials.
+     * Sends a POST request to the '/api/login' endpoint with the credentials,
+     * receives the authenticated User object, and updates the internal user state.
+     * @param credentials The credentials object containing the login information.
+     * @returns An observable that completes once the user state is updated.
+     */
+    public login(credentials: Credentials): Observable<void> {
+        return this.activeRoute.queryParamMap.pipe(
+            take(1),
+            switchMap(params => {
+                const callback = params.get('redirect_uri');
+                if (!callback) {
+                    return throwError(() => new Error('Missing redirect URI in query parameters'));
                 }
+
+                const queryParams = new HttpParams({
+                    fromObject: {
+                        client_id: params.get('client_id')!,
+                        state: params.get('state')!,
+                        code_challenge_method: params.get('code_challenge_method')!,
+                        code_challenge: params.get('code_challenge')!,
+                    },
+                });
+
+                return this.http.post<User>(callback, credentials, { params: queryParams });
             }),
+            map(user => this.user$.set(user)),
         );
     }
 
-    /** Logs out the current user. */
+    /**
+     * Logs out the current user by sending a POST request to the '/api/logout' endpoint.
+     * Upon successful completion, resets the internal user state to null,
+     * indicating that no user is authenticated.
+     * @returns An observable that completes once the logout process and user state update are finished.
+     */
     public logout(): Observable<void> {
-        if (!this.email()) {
-            return throwError(() => new Error('Invalid operation.'));
-        }
-
-        this.window.localStorage.removeItem('.Token');
-        this.window.localStorage.removeItem('.StayLoggedIn');
-        this.payload$.set(undefined);
-        return of(void 0);
+        return this.http.post('/api/logout', null, { responseType: 'text' }).pipe(map(() => this.user$.set(null)));
     }
 
     /**
      * Registers a new user.
      * @param profile The profile of the new user.
      */
-    public register(profile?: UserProfile): Observable<void> {
-        if (profile) {
-            return this.api.register(profile).pipe(map(result => this.setPayload(result.token)));
-        }
-
-        return of(this.modal.open(RegisterFormComponent, { backdrop: 'static', animation: true, keyboard: true })).pipe(
-            mergeMap(modalRef => from<Promise<RegisterFormResult | undefined>>(modalRef.result)),
-            map(result => {
-                if (result) {
-                    this.setPayload(result.token);
-                    if (result.stayLoggedIn) {
-                        this.window.localStorage.setItem('.StayLoggedIn', 'true');
-                    } else {
-                        this.window.localStorage.removeItem('.StayLoggedIn');
-                    }
-                }
-            }),
-        );
+    public createAccount(profile?: UserProfile): Observable<void> {
+        return this.http.post('/api/accounts', profile, { responseType: 'text' }).pipe(map(() => void 0));
     }
 
     /**
      * Updates the profile of the current user.
      * @param profile The updated user profile.
      */
-    public updateUserProfile(profile?: UserProfile): Observable<void> {
-        const payload = this.payload$();
-        if (!payload || !payload.sub || !payload.name) {
-            return throwError(() => new Error('Invalid operation.'));
-        }
-
-        if (profile) {
-            return this.api.updateProfile(payload.sub, profile).pipe(map(result => this.setPayload(result.token)));
-        }
-
-        return of(this.modal.open(ProfileFormComponent, { backdrop: 'static', animation: true, keyboard: true })).pipe(
-            mergeMap(form => {
-                form.componentInstance.initialize({ id: payload.sub, name: payload.name });
-                return from<Promise<ProfileFormResult>>(form.result);
-            }),
-            mergeMap(result => {
-                if (result?.token) {
-                    this.setPayload(result.token);
-                } else if (result?.action === 'deleteUser') {
-                    const message = stringFormat(this.translate.instant('CMD_DELETE_USER'), this.email);
-                    if (this.window.confirm(message)) {
-                        return this.deleteUser();
-                    }
-                }
-
-                return of(void 0);
-            }),
-        );
+    public updateAccount(profile: UserProfile): Observable<void> {
+        return this.http.patch<User>('/api/accounts', profile).pipe(map(user => this.user$.set(user)));
     }
 
     /**
      * Deletes the account of the current authenticated user.
      */
-    public deleteUser(): Observable<void> {
-        const payload = this.payload$();
-        if (!payload || !payload.sub || !payload.name) {
-            throw new Error('Invalid operation');
-        }
-
-        return this.api.delete(payload.sub).pipe(mergeMap(() => this.logout()));
+    public deleteAccount(): Observable<void> {
+        return this.http
+            .delete(`/api/accounts/${encodeBase64Url(this.email() ?? '')}`, { responseType: 'text' })
+            .pipe(map(() => this.user$.set(null)));
     }
 
     /**
@@ -224,93 +149,5 @@ export class AuthService {
         }
 
         return expected.indexOf(role) >= 0;
-    }
-
-    /**
-     * Indicates whether a cookie with the specified name exists.
-     * @param name The cookie name.
-     * @returns `true` if the cookie exists; otherwise, `false`.
-     */
-    public checkCookie(name: string): Observable<boolean> {
-        return of(this.payload$()).pipe(
-            mergeMap(payload => {
-                if (payload && payload.sub) {
-                    return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie != null));
-                }
-
-                return of(this.window.localStorage.getItem(name) != null);
-            }),
-        );
-    }
-
-    /**
-     * Gets the value of the cookie with the specified name.
-     * @param name The cookie name.
-     * @returns The cookie value.
-     */
-    public getCookie(name: string): Observable<string | undefined> {
-        return of(this.payload$()).pipe(
-            mergeMap(payload => {
-                if (payload && payload.sub) {
-                    return this.api.getCookie(payload.sub, name).pipe(map(cookie => cookie?.data));
-                }
-
-                return of(this.window.localStorage.getItem(name) ?? undefined);
-            }),
-        );
-    }
-
-    /**
-     * Sets the value of the cookie with the specified name.
-     * @param name The cookie name.
-     * @param data The cookie value.
-     */
-    public setCookie(name: string, data: string): Observable<void> {
-        const payload = this.payload$();
-        if (payload && payload.sub) {
-            const id = payload.sub;
-            return this.api.setCookie(id, { name, data });
-        } else {
-            this.window.localStorage.setItem(name, data);
-            return of(void 0);
-        }
-    }
-
-    /**
-     * Deletes the cookie with the specified name.
-     * @param name The cookie name.
-     */
-    public deleteCookie(name: string): Observable<void> {
-        const payload = this.payload$();
-        if (payload && payload.sub) {
-            const id = payload.sub;
-            return this.api.deleteCookie(id, name);
-        } else {
-            this.window.localStorage.removeItem(name);
-            return of(void 0);
-        }
-    }
-
-    private loginUser(token: string, id: string): Observable<void> {
-        return this.api.getProfile(id).pipe(
-            map(() => this.setPayload(token)),
-            catchError(() => this.logout()),
-        );
-    }
-
-    private isValid(token: string): boolean {
-        try {
-            const value = jwtDecode(token) as JWTPayload;
-            return value.exp == null || Date.now() / 1000 < value.exp;
-        } catch {
-            return false;
-        }
-    }
-
-    private setPayload(token: string): void {
-        this.window.localStorage.setItem('.Token', token);
-        this.token$.set(token);
-        const payload = jwtDecode(token) as JWTPayload;
-        this.payload$.set(payload);
     }
 }

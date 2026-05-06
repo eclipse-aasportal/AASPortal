@@ -11,12 +11,14 @@ import { container, inject, singleton } from 'tsyringe';
 import { ApplicationError, noop } from 'aas-core';
 
 import { Variable } from '../variable.js';
+import { API_KEY_HANDLER, ApiKeyHandler } from '../auth/api-key-handler.js';
+import { ERROR } from '../error.js';
 
 /**
  * User type populated onto `express` when authentication is successful
  */
 export type TsoaExpressUser = {
-    owner: string;
+    label: string;
 };
 
 /**
@@ -32,7 +34,10 @@ export type TsoaExpressAuthenticator = (
 export class Authentication {
     private static instance?: Authentication;
 
-    public constructor(@inject(Variable) private readonly variable: Variable) {}
+    public constructor(
+        @inject(Variable) private readonly variable: Variable,
+        @inject(API_KEY_HANDLER) private readonly apiKeyHandler: ApiKeyHandler,
+    ) {}
 
     /**
      * Authenticates the current request,
@@ -59,20 +64,25 @@ export class Authentication {
         scopes?: string[],
     ): Promise<TsoaExpressUser> {
         noop(scopes);
-        if (!this.variable.ENABLE_AUTH) {
-            return { owner: 'undefined' };
+        if (!this.variable.API_KEY_HANDLER) {
+            return { label: '' };
         }
 
-        if (securityName === 'api_key') {
-            const apiKey = request.header('x-api-key') || request.query['api_key'];
-            if (!apiKey) {
-                throw new ApplicationError('Unauthorized', {}, 401);
-            }
-        } else {
-            throw new ApplicationError('Unauthorized', {}, 401);
+        if (securityName !== 'api_key') {
+            throw new ApplicationError(ERROR.INTERNAL_SERVER_ERROR, {}, 500);
         }
 
-        return { owner: 'ToDo' };
+        const apiKey = request.header('x-api-key') || request.query['api_key'];
+        if (!apiKey || typeof apiKey !== 'string') {
+            throw new ApplicationError(ERROR.BAD_REQUEST, {}, 401);
+        }
+
+        const data = await this.apiKeyHandler.get(apiKey);
+        if (!data) {
+            throw new ApplicationError(ERROR.UNAUTHORIZED_ACCESS, {}, 401);
+        }
+
+        return { label: data.label };
     }
 }
 

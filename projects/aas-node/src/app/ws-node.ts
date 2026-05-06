@@ -10,14 +10,14 @@ import { inject, singleton } from 'tsyringe';
 import { WebSocket, WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
-import { WebSocketData } from 'aas-core';
 import EventEmitter from 'events';
 import fs from 'fs';
+import { WebSocketData } from 'aas-core';
+import { LOGGER, Logger } from 'aas-package';
 
 import { App } from './app.js';
 import { Variable } from './variable.js';
 import { SocketClient } from './live/socket-client.js';
-import { LOGGER, Logger } from './logging/logger.js';
 
 /* istanbul ignore next */
 @singleton()

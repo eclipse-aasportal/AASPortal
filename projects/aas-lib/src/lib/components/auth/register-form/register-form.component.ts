@@ -6,104 +6,73 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { isValidEMail, isValidPassword, UserProfile, getUserNameFromEMail } from 'aas-core';
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { email, form, minLength, required, FormField, validate } from '@angular/forms/signals';
+import { Router } from '@angular/router';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 
-import { AuthApiService } from '../auth-api.service';
-import { ERRORS } from '../../../messages';
-import { messageToString } from '../../../utilities';
+import { NotifyService } from '../../notify/notify.service';
+import { AuthService } from '../auth.service';
 
-export interface RegisterFormResult {
-    stayLoggedIn: boolean;
-    token: string;
+export interface RegistrationData {
+    id: string;
+    name: string;
+    password1: string;
+    password2: string;
 }
 
 @Component({
     selector: 'fhg-register',
     templateUrl: './register-form.component.html',
     styleUrls: ['./register-form.component.scss'],
-    imports: [NgbToast, FormsModule, TranslateDirective],
+    imports: [TranslateDirective, TranslatePipe, FormField],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterFormComponent {
-    public constructor(
-        private modal: NgbActiveModal,
-        private translate: TranslateService,
-        private api: AuthApiService,
-    ) {}
+    private readonly router = inject(Router);
+    private readonly auth = inject(AuthService);
+    private readonly notify = inject(NotifyService);
+    private readonly registerModel = signal<RegistrationData>({ id: '', name: '', password1: '', password2: '' });
 
-    public readonly userId = signal('');
-
-    public readonly name = signal('');
-
-    public readonly defaultName = signal('name');
-
-    public readonly password1 = signal('');
-
-    public readonly password2 = signal('');
-
-    public readonly stayLoggedIn = signal(false);
-
-    public readonly passwordAsEMail = signal(false);
-
-    public readonly messages = signal<string[]>([]);
-
-    public onInputEMail(): void {
-        this.defaultName.set(getUserNameFromEMail(this.userId()));
-    }
-
-    public submit(): void {
-        this.clearMessages();
-        if (!this.userId()) {
-            this.pushMessage(this.translate.instant(ERRORS.EMAIL_REQUIRED));
-        } else if (!isValidEMail(this.userId())) {
-            this.pushMessage(this.translate.instant(ERRORS.INVALID_EMAIL, { id: this.userId() }));
-        } else if (!this.passwordAsEMail()) {
-            if (!this.password1()) {
-                this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
-            } else if (!isValidPassword(this.password1())) {
-                this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
-            } else if (this.password1() !== this.password2()) {
-                this.pushMessage(this.translate.instant(ERRORS.PASSWORDS_NOT_EQUAL));
+    public registerForm = form(this.registerModel, schemaPath => {
+        required(schemaPath.id, { message: 'RegisterForm.EMAIL_REQUIRED' });
+        email(schemaPath.id, { message: 'RegisterForm.INVALID_EMAIL' });
+        required(schemaPath.password1, { message: 'RegisterForm.PASSWORD_REQUIRED' });
+        minLength(schemaPath.password1, 8, { message: 'RegisterForm.PASSWORD_MIN_LENGTH' });
+        required(schemaPath.password2, { message: 'RegisterForm.CONFIRM_PASSWORD_REQUIRED' });
+        validate(schemaPath.password2, ({ value, valueOf }) => {
+            const password2 = value();
+            const password1 = valueOf(schemaPath.password1);
+            if (password2 !== password1) {
+                return {
+                    kind: 'passwordMismatch',
+                    message: 'RegisterForm.PASSWORDS_DO_NOT_MATCH',
+                };
             }
-        }
 
-        if (this.messages().length === 0) {
-            const profile: UserProfile = {
-                id: this.userId(),
-                name: this.name() ?? getUserNameFromEMail(this.userId()),
-                password: this.password1(),
-            };
+            return null;
+        });
+    });
 
-            let result: RegisterFormResult | undefined;
-            this.api.register(profile).subscribe({
-                next: value => {
-                    if (!this.passwordAsEMail()) {
-                        result = {
-                            stayLoggedIn: this.stayLoggedIn(),
-                            token: value.token,
-                        };
+    public readonly email = this.registerForm.id;
 
-                        this.modal.close(result);
-                    }
-                },
-                error: error => this.pushMessage(messageToString(error, this.translate)),
-            });
-        }
-    }
+    public readonly name = this.registerForm.name;
 
-    public cancel(): void {
-        this.modal.close();
-    }
+    public readonly password1 = this.registerForm.password1;
 
-    private pushMessage(message: string): void {
-        this.messages.set([message]);
-    }
+    public readonly password2 = this.registerForm.password2;
 
-    private clearMessages(): void {
-        this.messages.set([]);
+    public submit(event: Event): void {
+        event.preventDefault();
+        const data = this.registerModel();
+        this.auth.createAccount({ id: data.id, name: data.name, password: data.password1 }).subscribe({
+            next: () => {
+                this.router.navigateByUrl('/api/login');
+            },
+            error: error => {
+                this.notify.error(error);
+                this.registerForm().reset({ id: '', name: '', password1: '', password2: '' });
+            },
+        });
     }
 }

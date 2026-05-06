@@ -8,11 +8,10 @@
 
 import fs from 'fs';
 import { basename } from 'path';
-import { encodeBase64Url, JsonReaderV3, JsonWriterV3 } from 'aas-package';
+import { encodeBase64Url, JsonReaderV3, JsonWriterV3, Logger } from 'aas-package';
 import { aas, AASEndpoint, ApplicationError, traverse, getSemanticId, PagedResult, AASDocument, Cache } from 'aas-core';
 
 import { ApiClient } from './api-client.js';
-import { Logger } from '../../logging/logger.js';
 import { ERRORS } from '../../errors.js';
 import { HttpClient } from '../../http-client.js';
 
@@ -214,7 +213,7 @@ export class ApiClientV3 extends ApiClient {
         await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
-    public override async invoke(_: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
+    public override async invoke(operation: aas.Operation): Promise<aas.Operation> {
         if (!operation.path) {
             throw new Error('Invalid argument ""operation.');
         }
@@ -249,11 +248,7 @@ export class ApiClientV3 extends ApiClient {
         return { ...operation, outputVariables: result.outputVariables, inoutputVariables: result.inoutputVariables };
     }
 
-    public async getBlobValue(
-        env: aas.Environment,
-        submodelId: string,
-        idShortPath: string,
-    ): Promise<string | undefined> {
+    public override async getBlobValue(submodelId: string, idShortPath: string): Promise<string | undefined> {
         const blob = await this.http.getJson<aas.Blob>(
             this.resolve(`submodels/${submodelId}/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
             this.endpoint.headers,

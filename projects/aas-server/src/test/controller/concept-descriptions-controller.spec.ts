@@ -29,7 +29,7 @@ describe('ConceptDescriptionsController', () => {
     let app: Express;
     let logger: Logger;
     let variable: Mocked<Variable>;
-    let authentication:Mocked<Authentication>;
+    let authentication: Mocked<Authentication>;
     let repository: Mocked<ConceptDescriptionRepository>;
 
     beforeEach(() => {
@@ -43,7 +43,7 @@ describe('ConceptDescriptionsController', () => {
         ]);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
-        authentication.expressAuthentication.mockResolvedValue({ owner: 'test-user' });
+        authentication.expressAuthentication.mockResolvedValue({ label: 'test-user' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);

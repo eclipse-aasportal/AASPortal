@@ -6,117 +6,49 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
-import { Credentials, isValidEMail, isValidPassword } from 'aas-core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { form, required, email, FormField } from '@angular/forms/signals';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 
-import { messageToString } from '../../../utilities';
-import { MessageEntry } from '../../../types';
-import { AuthApiService } from '../auth-api.service';
-import { INFO, ERRORS } from '../../../messages';
-
-export interface LoginFormResult {
-    action?: string;
-    stayLoggedIn?: boolean;
-    token?: string;
-}
+import { Credentials } from 'aas-core';
+import { NotifyService } from '../../notify/notify.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
     selector: 'fhg-login',
     templateUrl: './login-form.component.html',
     styleUrls: ['./login-form.component.scss'],
-    imports: [NgbToast, FormsModule, TranslateDirective],
+    imports: [TranslateDirective, TranslatePipe, FormField],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginFormComponent {
-    private newPasswordSent = false;
+    private readonly auth = inject(AuthService);
+    private readonly notify = inject(NotifyService);
+    private readonly route = inject(Router);
+    private readonly loginModel = signal<Credentials>({ id: '', password: '' });
 
-    public constructor(
-        private modal: NgbActiveModal,
-        private translate: TranslateService,
-        private api: AuthApiService,
-    ) {}
+    public readonly loginForm = form(this.loginModel, schemaPath => {
+        required(schemaPath.id, { message: 'LoginForm.EMAIL_REQUIRED' });
+        email(schemaPath.id, { message: 'LoginForm.EMAIL_INVALID' });
+        required(schemaPath.password, { message: 'LoginForm.PASSWORD_REQUIRED' });
+    });
 
-    public readonly passwordPerEMail = signal(false);
+    public readonly email = this.loginForm.id;
 
-    public readonly userId = signal('');
+    public readonly password = this.loginForm.password;
 
-    public readonly password = signal('');
-
-    public readonly stayLoggedIn = signal(false);
-
-    public readonly messages = signal<MessageEntry[]>([]);
-
-    public async resetPassword(): Promise<void> {
-        this.clearMessages();
-        if (!this.newPasswordSent) {
-            if (!this.userId()) {
-                this.pushMessage(this.translate.instant(ERRORS.EMAIL_REQUIRED));
-            } else if (!isValidEMail(this.userId())) {
-                this.pushMessage(this.translate.instant(ERRORS.INVALID_EMAIL, { id: this.userId() }));
-            } else {
-                try {
-                    this.pushMessage(
-                        this.translate.instant(INFO.NEW_PASSWORD_SENT, { id: this.userId }),
-                        'bg-info w-100',
-                    );
-                } catch (error) {
-                    this.pushMessage(messageToString(error, this.translate));
-                } finally {
-                    this.newPasswordSent = true;
-                }
-            }
-        }
-    }
-
-    public registerUser(): void {
-        this.modal.close({ action: 'register' } as LoginFormResult);
-    }
-
-    public submit(): void {
-        this.clearMessages();
-        if (!this.userId()) {
-            this.pushMessage(this.translate.instant(ERRORS.EMAIL_REQUIRED));
-        } else if (!isValidEMail(this.userId())) {
-            this.pushMessage(this.translate.instant(ERRORS.INVALID_EMAIL));
-        } else if (!this.password()) {
-            this.pushMessage(this.translate.instant(ERRORS.PASSWORD_REQUIRED));
-        } else if (!isValidPassword(this.password())) {
-            this.pushMessage(this.translate.instant(ERRORS.INVALID_PASSWORD));
-        } else {
-            const credentials: Credentials = { id: this.userId(), password: this.password() };
-            this.api.login(credentials).subscribe({
-                next: value => {
-                    const result: LoginFormResult = {
-                        stayLoggedIn: this.stayLoggedIn(),
-                        token: value.token,
-                    };
-
-                    this.modal.close(result);
-                },
-                error: error => this.pushMessage(messageToString(error, this.translate)),
-            });
-        }
-    }
-
-    public cancel(): void {
-        this.modal.close();
-    }
-
-    private pushMessage(text: string, type = 'bg-danger w-100'): void {
-        this.messages.set([
-            {
-                text: text,
-                classname: type,
-                autohide: false,
-                delay: 0,
+    public submit(event: Event): void {
+        event.preventDefault();
+        const credentials = this.loginModel();
+        this.auth.login(credentials).subscribe({
+            next: () => {
+                this.route.navigateByUrl('..');
             },
-        ]);
-    }
-
-    private clearMessages(): void {
-        this.messages.set([]);
+            error: error => {
+                this.notify.error(error);
+                this.loginForm().reset({ id: '', password: '' });
+            },
+        });
     }
 }

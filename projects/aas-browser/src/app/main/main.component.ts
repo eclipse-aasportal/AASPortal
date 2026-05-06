@@ -11,12 +11,14 @@ import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@ang
 import { NgbNav, NgbNavItem, NgbNavLink } from '@ng-bootstrap/ng-bootstrap/nav';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 import { noop } from 'aas-core';
 import { NotifyComponent, ProgressComponent, ToolbarService, WebSocketService, WINDOW } from 'aas-lib';
 
 import { environment } from '../../environments/environment';
 import { Stats } from '../types';
 import { Subscription } from 'rxjs';
+import { AuthComponent } from '../auth/auth.component';
 
 export const enum LinkId {
     SHELLS,
@@ -47,6 +49,8 @@ export interface LinkDescriptor {
         AsyncPipe,
         NotifyComponent,
         ProgressComponent,
+        AuthComponent,
+        TranslatePipe,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -60,7 +60,7 @@ export function slash(path: string): string {
         return path;
     }
 
-    return path.replace(/\\/g, '/');
+    return path.replaceAll('\\', '/');
 }
 
 export async function createThumbnail(readable: NodeJS.ReadableStream | undefined): Promise<string | undefined> {

@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
+
 import { NotifyService } from '../../../lib/components/notify/notify.service';
 import { AuthService } from '../../../lib/components/auth/auth.service';
 import { AuthComponent } from '../../../lib/components/auth/auth.component';
@@ -21,7 +22,7 @@ describe('AuthComponent', () => {
     beforeEach(async () => {
         auth = createSpyObj<AuthService>(['login'], {
             name: signal<string | undefined>(undefined),
-            authenticated: signal(false),
+            isAuthenticated: signal(false),
         });
 
         await TestBed.configureTestingModule({
