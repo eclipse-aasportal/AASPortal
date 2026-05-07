@@ -267,12 +267,14 @@
     "LABEL_WARNING": "Warnungen",
     "LoginForm": {
         "CAPTION": "Login",
+        "CREATE_ACCOUNT": "Ein Konto erstellen.",
+        "EMAIL_REQUIRED":"E-Mail erforderlich.",
         "EMAIL": "E-Mail",
         "INVALID_EMAIL": "Keine gültige E-Mail.",
-        "PASSWORD": "Passwort",
         "LOGIN": "Anmelden",
         "NOT_REGISTERED": "Nicht registriert?",
-        "CREATE_ACCOUNT": "Ein Konto erstellen."
+        "PASSWORD_REQUIRED":"Passwort erforderlich.",
+        "PASSWORD": "Passwort"
     },
     "Main": {
         "AAS": "VWS",

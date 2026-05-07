@@ -8,11 +8,11 @@
 
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { email, form, minLength, required, FormField, validate } from '@angular/forms/signals';
-import { Router } from '@angular/router';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 
 import { NotifyService } from '../../notify/notify.service';
 import { AuthService } from '../auth.service';
+import { WINDOW } from '../../../services/window.service';
 
 export interface RegistrationData {
     id: string;
@@ -29,7 +29,7 @@ export interface RegistrationData {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterFormComponent {
-    private readonly router = inject(Router);
+    private readonly window = inject(WINDOW);
     private readonly auth = inject(AuthService);
     private readonly notify = inject(NotifyService);
     private readonly registerModel = signal<RegistrationData>({ id: '', name: '', password1: '', password2: '' });
@@ -67,7 +67,7 @@ export class RegisterFormComponent {
         const data = this.registerModel();
         this.auth.createAccount({ id: data.id, name: data.name, password: data.password1 }).subscribe({
             next: () => {
-                this.router.navigateByUrl('/api/login');
+                this.window.location.href = '/api/login';
             },
             error: error => {
                 this.notify.error(error);
