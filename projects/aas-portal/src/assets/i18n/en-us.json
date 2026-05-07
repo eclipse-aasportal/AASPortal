@@ -268,10 +268,12 @@
     "LoginForm": {
         "CAPTION": "Login",
         "CREATE_ACCOUNT": "Create an account.",
+        "EMAIL_REQUIRED":"E-mail is required.",
         "EMAIL": "E-Mail",
         "INVALID_EMAIL": "Not a valid e-mail.",
         "LOGIN": "Login",
         "NOT_REGISTERED": "Not registered?",
+        "PASSWORD_REQUIRED":"Password required.",
         "PASSWORD": "Password"
     },
     "Main": {
