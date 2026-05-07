@@ -63,15 +63,4 @@ jobs:
             GITHUB_RUN_NUMBER=${{ github.run_number }}
             GITHUB_REF_NAME=${{ github.ref_name }}
           push: true
-          tags: fraunhoferiosb/aasportal_aasserver:${{env.IMAGE_TAG}}
-
-      # - name: Build and push AASServer image
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     file: ./Dockerfile.aas-server
-      #     context: .
-      #     build-args: |
-      #       GITHUB_RUN_NUMBER=${{ github.run_number }}
-      #       GITHUB_REF_NAME=${{ github.ref_name }}
-      #     push: true
-      #     tags: fraunhoferiosb/aasportal_aasserver:${{env.IMAGE_TAG}}
+          tags: fraunhoferiosb/aasportal_aasnode:${{env.IMAGE_TAG}}
