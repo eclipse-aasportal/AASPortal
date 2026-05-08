@@ -270,7 +270,7 @@
         "CREATE_ACCOUNT": "Ein Konto erstellen.",
         "EMAIL_REQUIRED":"E-Mail erforderlich.",
         "EMAIL": "E-Mail",
-        "INVALID_EMAIL": "Keine gültige E-Mail.",
+        "EMAIL_INVALID": "Keine gültige E-Mail.",
         "LOGIN": "Anmelden",
         "NOT_REGISTERED": "Nicht registriert?",
         "PASSWORD_REQUIRED":"Passwort erforderlich.",

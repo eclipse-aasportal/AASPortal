@@ -49,6 +49,7 @@ swagger.yaml
 /projects/aas-node/src/app/routes
 /projects/ass-node/src/assets/app-info.json
 /projects/aas-portal/src/start
+/projects/aas-portal/src/assets/welcome
 /projects/aas-server/data
 /projects/aas-server/src/app/routes
 /projects/aas-server/src/assets/swagger.json

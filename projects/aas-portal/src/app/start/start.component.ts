@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { EMPTY, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
 import {
     ChangeDetectionStrategy,
@@ -47,7 +47,7 @@ export class StartComponent implements OnDestroy {
     }
 
     /** The specific Start page toolbar. */
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('startToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     /** The available favorites. */
     public readonly items = this.state.items;
@@ -96,7 +96,7 @@ export class StartComponent implements OnDestroy {
     public remove(): Observable<void> {
         const selectedItems = this.items().filter(item => item.selected());
         if (selectedItems.length === 0) {
-            return EMPTY;
+            return of(void 0);
         }
 
         selectedItems.forEach(item => this.start.remove(item.tile));
@@ -107,7 +107,7 @@ export class StartComponent implements OnDestroy {
     public moveLeft(): Observable<void> {
         const index = this.items().findIndex(item => item.selected());
         if (index === -1 || index === 0) {
-            return EMPTY;
+            return of(void 0);
         }
 
         this.start.tiles.update(state => {
@@ -125,7 +125,7 @@ export class StartComponent implements OnDestroy {
     public moveRight(): Observable<void> {
         const index = this.items().findIndex(item => item.selected());
         if (index === -1 || index === this.items().length - 1) {
-            return EMPTY;
+            return of(void 0);
         }
 
         this.start.tiles.update(state => {
