@@ -43,7 +43,7 @@ export class LoginFormComponent {
         const credentials = this.loginModel();
         this.auth.login(credentials).subscribe({
             next: () => {
-                this.route.navigateByUrl('..');
+                this.route.navigateByUrl('/start');
             },
             error: error => {
                 this.notify.error(error);

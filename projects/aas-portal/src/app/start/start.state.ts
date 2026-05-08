@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { marked } from 'marked';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { catchError, map, merge, mergeMap, of, switchMap } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -37,10 +37,7 @@ export class StartState {
     private readonly http = inject(HttpClient);
     private readonly translate = inject(TranslateService);
     private readonly sanitizer = inject(DomSanitizer);
-    private readonly items$ = signal<StartTileItem[]>([]);
     private readonly start = inject(StartService);
-
-    public constructor() {}
 
     /** The favorites. */
     public readonly items = computed(() => {
@@ -65,23 +62,22 @@ export class StartState {
 
     /** The welcome page. */
     public readonly welcome = toSignal(
-        this.translate.onLangChange.pipe(
-            map(event => event.lang),
-            switchMap(lang =>
+        merge(this.translate.onLangChange.pipe(map(event => event.lang)), of(this.translate.getCurrentLang())).pipe(
+            mergeMap(lang =>
                 this.http.get(`/assets/welcome/${lang}/welcome.md`, { responseType: 'text' }).pipe(
                     catchError(() => {
                         return this.http
                             .get('/assets/welcome/en-us/welcome.md', { responseType: 'text' })
                             .pipe(catchError(() => of(errorWelcome)));
                     }),
-                    switchMap(md => {
-                        return marked.parse(md, { async: true });
-                    }),
-                    map(html => {
-                        return this.sanitizer.bypassSecurityTrustHtml(html);
-                    }),
                 ),
             ),
+            switchMap(md => {
+                return marked.parse(md, { async: true });
+            }),
+            map(html => {
+                return this.sanitizer.bypassSecurityTrustHtml(html);
+            }),
         ),
     );
 }
