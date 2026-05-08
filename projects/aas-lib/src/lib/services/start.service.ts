@@ -6,10 +6,11 @@
  *
  *****************************************************************************/
 
-import { effect, inject, Injectable, InjectionToken, signal, Type } from '@angular/core';
-import { catchError, EMPTY, lastValueFrom, map, mergeMap, Observable, of } from 'rxjs';
+import { inject, Injectable, InjectionToken, linkedSignal, Type } from '@angular/core';
+import { catchError, map, Observable, of } from 'rxjs';
 import { AuthService } from '../components/auth/auth.service';
 import { CookieService } from './cookie.service';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 export type StartTileType = {
     name: string;
@@ -37,30 +38,21 @@ export class StartService {
     private readonly cookies = inject(CookieService);
     private readonly auth = inject(AuthService);
     private readonly types = inject(START_TILE_TYPES);
+    private readonly startTiles = inject(START_TILES);
 
-    public constructor() {
-        const tiles = inject(START_TILES);
+    private myResource = rxResource({
+        params: () => this.auth.user(),
+        stream: () =>
+            this.cookies.getCookie(cookieName).pipe(
+                map(data =>
+                    data ? (JSON.parse(data) as StartTile[]).filter(item => this.getType(item.type)) : this.startTiles,
+                ),
+                catchError(() => of(this.startTiles)),
+            ),
+        defaultValue: this.startTiles,
+    });
 
-        effect(async () => {
-            const user = this.auth.user();
-            if (user === undefined) {
-                return;
-            }
-
-            const data = await lastValueFrom(this.cookies.getCookie(cookieName));
-            if (data === undefined) {
-                this.tiles.set(tiles);
-            } else {
-                try {
-                    this.tiles.set((JSON.parse(data) as StartTile[]).filter(item => this.getType(item.type)));
-                } catch {
-                    this.tiles.set(tiles);
-                }
-            }
-        });
-    }
-
-    public readonly tiles = signal<StartTile[]>(inject(START_TILES));
+    public readonly tiles = linkedSignal(() => this.myResource.value());
 
     public getType(name: string): StartTileType | undefined {
         return this.types.find(item => item.name === name);
@@ -84,13 +76,11 @@ export class StartService {
     }
 
     public save(): Observable<void> {
-        return of(this.tiles()).pipe(
-            map(tiles => JSON.stringify(tiles)),
-            catchError(error => {
-                console.error(error);
-                return EMPTY;
-            }),
-            mergeMap(value => this.cookies.setCookie(cookieName, value)),
-        );
+        try {
+            return this.cookies.setCookie(cookieName, JSON.stringify(this.tiles()));
+        } catch (error) {
+            console.error('Failed to save start tiles', error);
+            return of(void 0);
+        }
     }
 }
