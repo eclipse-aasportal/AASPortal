@@ -464,6 +464,7 @@ export class ShellsComponent implements OnDestroy {
     public addToStart(): Observable<void> {
         for (const document of this.state.selected()) {
             this.start.add('Favorite', `${document.endpoint}.${document.id}`, {
+                href: `/aas;endpoint=${encodeBase64Url(document.endpoint)};id=${encodeBase64Url(document.id)}`,
                 id: document.id,
                 endpoint: document.endpoint,
             });

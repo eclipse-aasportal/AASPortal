@@ -40,7 +40,7 @@ export class StartService {
     private readonly types = inject(START_TILE_TYPES);
     private readonly startTiles = inject(START_TILES);
 
-    private myResource = rxResource({
+    private tilesResource = rxResource({
         params: () => this.auth.user(),
         stream: () =>
             this.cookies.getCookie(cookieName).pipe(
@@ -52,7 +52,7 @@ export class StartService {
         defaultValue: this.startTiles,
     });
 
-    public readonly tiles = linkedSignal(() => this.myResource.value());
+    public readonly tiles = linkedSignal(() => this.tilesResource.value());
 
     public getType(name: string): StartTileType | undefined {
         return this.types.find(item => item.name === name);
