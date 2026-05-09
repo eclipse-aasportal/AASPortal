@@ -276,7 +276,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                     } satisfies DashboardChart,
                     requests: this.getRequests(item.sources),
                     page: this.service.activePage().name,
-                    href: `/dashboard?page=${this.service.activePage().name}`,
+                    href: `/dashboard;page=${this.service.activePage().name}`,
                 })
             ) {
                 return EMPTY;
