@@ -57,7 +57,7 @@ export class ApiClientV1 extends ApiClient {
     public readonly onlineReady = true;
 
     public async getDocuments(cursor?: string): Promise<PagedResult<AASDocument>> {
-        const result = await this.http.getJson<aasV2.AssetAdministrationShell[]>(
+        const result = await this.http.get<aasV2.AssetAdministrationShell[]>(
             this.resolve('shells'),
             this.endpoint.headers,
         );
@@ -78,7 +78,7 @@ export class ApiClientV1 extends ApiClient {
     }
 
     public async getEnvironment(id: string): Promise<aas.Environment> {
-        const shell = await this.http.getJson<aasV2.AssetAdministrationShell>(
+        const shell = await this.http.get<aasV2.AssetAdministrationShell>(
             this.resolve(`shells/${encodeBase64Url(id)}`),
             this.endpoint.headers,
         );
@@ -129,7 +129,7 @@ export class ApiClientV1 extends ApiClient {
 
     public override async getPackage(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.http.getJson(
+        const descriptors: PackageDescriptor[] = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
             this.endpoint.headers,
         );
@@ -149,7 +149,7 @@ export class ApiClientV1 extends ApiClient {
 
     public override async deletePackage(aasIdentifier: string): Promise<void> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.http.getJson(
+        const descriptors: PackageDescriptor[] = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
             this.endpoint.headers,
         );
@@ -199,7 +199,7 @@ export class ApiClientV1 extends ApiClient {
 
     public async getBlobValue(submodelId: string, idShortPath: string): Promise<string | undefined> {
         const smId = encodeBase64Url(submodelId);
-        const blob = await this.http.getJson<aas.Blob>(
+        const blob = await this.http.get<aas.Blob>(
             this.resolve(`submodels/${smId}/submodel/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
             this.endpoint.headers,
         );
@@ -222,7 +222,7 @@ export class ApiClientV1 extends ApiClient {
                 const submodelId = encodeBase64Url(reference.keys[0].value);
                 try {
                     submodels.push(
-                        await this.http.getJson<aasV2.Submodel>(
+                        await this.http.get<aasV2.Submodel>(
                             this.resolve(`submodels/${submodelId}/submodel`),
                             this.endpoint.headers,
                         ),
@@ -261,7 +261,7 @@ export class ApiClientV1 extends ApiClient {
                 }
 
                 try {
-                    const conceptDescription = await this.http.getJson<aas.ConceptDescription>(
+                    const conceptDescription = await this.http.get<aas.ConceptDescription>(
                         this.resolve(`concept-descriptions/${encodeBase64Url(semanticId)}`),
                         this.endpoint.headers,
                     );

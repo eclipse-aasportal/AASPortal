@@ -167,7 +167,7 @@ export abstract class EndpointClient {
     public abstract getBlobValue(submodelId: string, idShortPath: string): Promise<string | undefined>;
 
     /**
-     * Returns a list of Asset Administration Shell ids based on asset identifier key-value-pairs.
+     * Returns a list of Asset Administration Shell identifiers based on the specified asset identifier.
      * @param assetId The Asset identifier.
      */
     public abstract getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<PagedResult<string>>;
