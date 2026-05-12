@@ -8,7 +8,8 @@
 
 import net from 'net';
 import { Readable } from 'stream';
-import { singleton } from 'tsyringe';
+import { Logger, LOGGER } from 'aas-package';
+import { inject, singleton } from 'tsyringe';
 import { ApplicationError } from 'aas-core';
 import { parseUrl } from './utilities.js';
 
@@ -17,6 +18,8 @@ import { parseUrl } from './utilities.js';
  */
 @singleton()
 export class HttpClient {
+    public constructor(@inject(LOGGER) private readonly logger: Logger) {}
+
     /**
      * Gets an object of type `T` from a server.
      * @template T The type of the object.
@@ -26,7 +29,9 @@ export class HttpClient {
      */
     public async getJson<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
         const href = url.href;
+        const start = Date.now();
         const response = await fetch(href, { method: 'GET', headers });
+        this.logger.info(`GET ${href} - ${response.status} (${Date.now() - start} ms)`);
         if (!response.ok) {
             const message = await response.text().catch(() => 'GET request failed');
             throw new ApplicationError(message, {}, response.status);
@@ -35,10 +40,17 @@ export class HttpClient {
         return (await response.json()) as T;
     }
 
+    /**
+     * Gets an object of type `T` from a server (no cache, no logging).
+     * @param url The URL to send the GET request to.
+     * @param headers The additional outgoing http headers.
+     * @returns The requested value.
+     */
     public async getJsonLive<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
         const response = await fetch(url.href, { method: 'GET', headers });
         if (!response.ok) {
-            throw new ApplicationError(response.statusText, {}, response.status);
+            const message = await response.text().catch(() => 'GET request failed');
+            throw new ApplicationError(message, {}, response.status);
         }
 
         return (await response.json()) as T;
