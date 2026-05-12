@@ -263,7 +263,7 @@ export class ApiClientV3 extends ApiClient {
 
     public override async getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<string[]> {
         return this.http.getJson(
-            this.resolve(`lookup/shells?assetId=${encodeBase64Url(assetId)}`),
+            this.resolve(`lookup/shells?assetIds=${encodeBase64Url(assetId)}`),
             this.endpoint.headers,
         );
     }
