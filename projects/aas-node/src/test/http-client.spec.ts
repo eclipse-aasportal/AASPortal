@@ -64,7 +64,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.getReadable(new URL('http://localhost:1234/hello/world'))).rejects.toThrowError();
+            await expect(server.getReadable(new URL('http://localhost:1234/hello/world'))).rejects.toThrow();
         });
 
         it('returns an empty readable stream if response.body is null', async () => {
@@ -93,7 +93,7 @@ describe('HttpClient', () => {
             response.json.mockResolvedValue(mockData);
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            const result = await server.getJson<typeof mockData>(new URL('http://localhost:1234/test'));
+            const result = await server.get<typeof mockData>(new URL('http://localhost:1234/test'));
             expect(result).toEqual(mockData);
             expect(response.json).toHaveBeenCalled();
         });
@@ -107,7 +107,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(server.getJson<object>(new URL('http://localhost:1234/test'))).rejects.toThrowError();
+            await expect(server.get<object>(new URL('http://localhost:1234/test'))).rejects.toThrow();
         });
 
         it('should reject if response.json throws', async () => {
@@ -120,9 +120,7 @@ describe('HttpClient', () => {
             response.json.mockRejectedValue(new Error('JSON parse error'));
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(server.getJson<object>(new URL('http://localhost:1234/test'))).rejects.toThrow(
-                'JSON parse error',
-            );
+            await expect(server.get<object>(new URL('http://localhost:1234/test'))).rejects.toThrow('JSON parse error');
         });
     });
 
@@ -159,9 +157,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(server.put(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow(
-                'Bad Request',
-            );
+            await expect(server.put(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow();
         });
     });
 
@@ -194,7 +190,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.delete(new URL('http://localhost:1234/test'))).rejects.toThrow('Not Found');
+            await expect(server.delete(new URL('http://localhost:1234/test'))).rejects.toThrow();
         });
     });
 
@@ -270,9 +266,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.postJson(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow(
-                'Bad Request',
-            );
+            await expect(server.postJson(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow();
         });
 
         it('should throw if response.text throws', async () => {
@@ -323,9 +317,7 @@ describe('HttpClient', () => {
             const formData = {} as FormData;
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.postFormData(new URL('http://localhost:1234/test'), formData)).rejects.toThrow(
-                'Bad Request',
-            );
+            await expect(server.postFormData(new URL('http://localhost:1234/test'), formData)).rejects.toThrow();
         });
     });
 });

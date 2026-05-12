@@ -23,7 +23,7 @@ describe('ApiClientV3', () => {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        http = createSpyObj<HttpClient>(['getJson', 'getJsonLive', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
+        http = createSpyObj<HttpClient>(['get', 'getLive', 'getReadable', 'postJson', 'postFormData', 'put', 'delete']);
         client = new ApiClientV3(logger, http, {
             name: 'AASX Server',
             type: 'AAS_API',
@@ -56,11 +56,11 @@ describe('ApiClientV3', () => {
                 conceptDescriptions: [],
             };
 
-            http.getJson.mockResolvedValue(aas);
+            http.get.mockResolvedValue(aas);
             http.put.mockResolvedValue(void 0);
 
             await expect(client.setEnvironment(aas.id, content)).resolves.toBe(void 0);
-            expect(http.getJson).toHaveBeenCalled();
+            expect(http.get).toHaveBeenCalled();
             expect(http.put).toHaveBeenCalled();
         });
 
@@ -72,11 +72,11 @@ describe('ApiClientV3', () => {
                 conceptDescriptions: [],
             };
 
-            http.getJson.mockRejectedValue(new Error());
+            http.get.mockRejectedValue(new Error());
             http.postJson.mockResolvedValue('OK');
 
             await expect(client.setEnvironment(aas.id, content)).resolves.toBe(void 0);
-            expect(http.getJson).toHaveBeenCalled();
+            expect(http.get).toHaveBeenCalled();
             expect(http.postJson).toHaveBeenCalled();
         });
     });
