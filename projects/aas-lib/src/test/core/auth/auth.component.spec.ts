@@ -11,9 +11,9 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 
-import { NotifyService } from '../../../lib/components/notify/notify.service';
-import { AuthService } from '../../../lib/components/auth/auth.service';
-import { AuthComponent } from '../../../lib/components/auth/auth.component';
+import { NotifyService } from '../../../lib/core/notify/notify.service';
+import { AuthService } from '../../../lib/core/auth/auth.service';
+import { AuthComponent } from '../../../lib/core/auth/auth.component';
 import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('AuthComponent', () => {

@@ -33,6 +33,7 @@
         "SCHEDULE": "Update endpoint index",
         "DISABLED": "disabled",
         "MANUAL": "manual",
+        "OK": "OK",
         "ONCE": "once",
         "EVERY": "cyclic",
         "MINUTES": "Minutes",
@@ -77,7 +78,6 @@
         "SHOW": "Show..."
     },
     "CMD_CALL": "Call",
-    "CMD_CANCEL": "Cancel",
     "CMD_CHANGE_PASSWORD": "Change password",
     "CMD_CLOSE": "Close",
     "CMD_CREATE_WORKSPACE": "Group...",
@@ -87,7 +87,6 @@
     "CMD_DOWNLOAD": "Download",
     "CMD_EDIT_WORKSPACE": "Edit group...",
     "CMD_HIDE_LICENSE_TEXT": "Hide license text",
-    "CMD_OK": "OK",
     "CMD_OPEN_AAS": "Open AAS",
     "CMD_OPERATION_CALL": "Call",
     "CMD_REMOVE": "Remove",
@@ -111,10 +110,15 @@
     "COLUMN_URL": "URL",
     "COLUMN_VALUE": "Value",
     "COLUMN_VERSION": "Version",
-    "CONFIRM_DELETE_DOCUMENT": "Do you really want to delete documents {0}?",
     "CONFIRM_DELETE_FILE": "Permanently delete {0}?",
     "CONFIRM_DELETE_FILES": "Permanently delete {0} files?",
     "CONFIRM_DELETE_USER": "Do you want to delete the account '{0}'?",
+    "ConfirmDialog": {
+        "CANCEL": "Cancel",
+        "CAPTION": "Confirm",
+        "NO": "No",
+        "YES": "Yes"
+    },
     "ContactInformation": {
         "TITLE": "Contact Information"
     },
@@ -188,7 +192,7 @@
         "NAME": "Name",
         "COUNT": "Count",
         "UPDATE": "Update",
-        "CONFIRM_RESET_CONFIGURATION": "Do you want to restore the default AASNodePortal configuration?",
+        "CONFIRM_RESET_INDEX": "Do you want to reset the endpoint index?",
         "RESET": "Reset",
         "CLOSE": "Close",
         "disabled": "disabled",
@@ -208,7 +212,8 @@
         "ADD_NEW": "New favorites list",
         "COUNT": "{0} favorite(s)",
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' is used several times.",
-        "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name."
+        "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name.",
+        "OK": "OK"
     },
     "FILE_PATH": "File URL",
     "GUEST_USER": "Guest",
@@ -268,12 +273,12 @@
     "LoginForm": {
         "CAPTION": "Login",
         "CREATE_ACCOUNT": "Create an account.",
-        "EMAIL_REQUIRED":"E-mail is required.",
+        "EMAIL_REQUIRED": "E-mail is required.",
         "EMAIL": "E-Mail",
         "EMAIL_INVALID": "Not a valid e-mail.",
         "LOGIN": "Login",
         "NOT_REGISTERED": "Not registered?",
-        "PASSWORD_REQUIRED":"Password required.",
+        "PASSWORD_REQUIRED": "Password required.",
         "PASSWORD": "Password"
     },
     "Main": {
@@ -331,6 +336,11 @@
         "PASSWORD_REQUIRED": "Password required.",
         "PASSWORDS_DO_NOT_MATCH": "The passwords do not match."
     },
+    "PromptDialog": {
+        "CANCEL": "Cancel",
+        "CAPTION": "Prompt",
+        "OK": "OK"
+    },
     "QueryParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel element name expected at position {0}.",
         "END_OF_TEXT_NOT_FOUND": "The end of the text, starting at position {0}, was not found.",
@@ -359,7 +369,9 @@
         "PASSWORDS_DO_NOT_MATCH": "The passwords do not match."
     },
     "RemoveEndpointForm": {
-        "CAPTION": "Remove AAS Endpoint"
+        "CANCEL": "Cancel",
+        "CAPTION": "Remove AAS Endpoint",
+        "OK": "OK"
     },
     "ROUTE_FILE_SYSTEM": "File system",
     "ROUTE_OPC_UA": "OPC UA",
@@ -368,6 +380,7 @@
         "AssetStatus": "Asset status",
         "Browser": "Browser",
         "CarbonFootprint": "Carbon footprint",
+        "CONFIRM_DELETE_DOCUMENT": "Do you really want to delete documents {{documents}}?",
         "ContactInformation": "Contact information",
         "CustomerFeedback": "User feedback",
         "DigitalProductPassport": "Product passport",
@@ -381,7 +394,6 @@
         "PLACEHOLDER_FILTER": "Filter",
         "REMOVE_ENDPOINT": "Remove...",
         "ServiceRequestNotification": "Service request notification",
-        "ServiceRequestNotification": "Service request notification",
         "TechnicalData": "Technical data",
         "UPDATE_ENDPOINT": "Edit..."
     },
@@ -391,27 +403,29 @@
     "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
     "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
     "UpdateEndpointForm": {
-        "CAPTION": "Update AAS Endpoint",
-        "ENDPOINTS": "Endpoints",
-        "FileSystem": "File system",
         "AAS_API": "AAS API",
-        "WebDAV": "WebDAV",
+        "CANCEL": "Cancel",
+        "CAPTION": "Update AAS Endpoint",
+        "DISABLED": "disabled",
+        "ENDPOINTS": "Endpoints",
+        "EVERY": "cyclic",
+        "FileSystem": "File system",
+        "HEADER": "Header",
+        "HEADERS": "HTTP headers",
+        "HOURS": "Hours",
+        "MANUAL": "manual",
+        "MINUTES": "Minutes",
+        "OK": "OK",
+        "ONCE": "once",
         "OPC_UA": "OPC UA",
-        "URL": "URL",
         "PLACEHOLDER_URL_FILE": "file:///",
         "PLACEHOLDER_URL_HTTP": "http(s)://",
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
         "SCHEDULE": "Update endpoint index",
-        "DISABLED": "disabled",
-        "MANUAL": "manual",
-        "ONCE": "once",
-        "EVERY": "cyclic",
-        "MINUTES": "Minutes",
-        "HOURS": "Hours",
-        "HEADERS": "HTTP headers",
-        "HEADER": "Header",
-        "VALUE": "Value"
+        "URL": "URL",
+        "VALUE": "Value",
+        "WebDAV": "WebDAV"
     },
     "TechnicalData": {
         "TITLE": "Technical Data"

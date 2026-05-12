@@ -16,7 +16,7 @@ import { AASDocument, WebSocketData } from 'aas-core';
 
 import { AASTreeComponent } from '../../../lib/components/aas-tree/aas-tree.component';
 import { sampleDocument } from '../../assets/sample-document';
-import { NotifyService } from '../../../lib/components/notify/notify.service';
+import { NotifyService } from '../../../lib/core/notify/notify.service';
 import { WebSocketService } from '../../../lib/services/web-socket.service';
 import { WINDOW } from '../../../lib/services/window.service';
 import { AASTreeApi } from '../../../lib/components/aas-tree/aas-tree-api';

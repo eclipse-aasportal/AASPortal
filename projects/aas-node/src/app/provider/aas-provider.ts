@@ -29,7 +29,7 @@ import {
 
 import { ImageProcessing } from '../image-processing.js';
 import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
-import { ScanResultKind, ScanResult, ScanEndpointResult, ScanEndpointData } from '../types.js';
+import { ScanResultKind, ScanResult, ScanEndpointResult, ScanEndpointData, isScanEndpointResult } from '../types.js';
 import { Parallel } from './parallel.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
@@ -599,7 +599,7 @@ export class AASProvider {
 
     private parallelOnMessage = async (result: ScanResult): Promise<void> => {
         try {
-            if (this.isScanEndpointResult(result)) {
+            if (isScanEndpointResult(result)) {
                 switch (result.kind) {
                     case ScanResultKind.Update:
                         await this.onUpdate(result);
@@ -617,10 +617,6 @@ export class AASProvider {
         }
     };
 
-    private isScanEndpointResult(result: ScanResult): result is ScanEndpointResult {
-        return result.type === 'ScanEndpointResult';
-    }
-
     private parallelOnEnd = async (result: ScanResult): Promise<void> => {
         const task = this.taskHandler.get(result.taskId);
         if (task === undefined || task.owner !== this) {
@@ -631,6 +627,8 @@ export class AASProvider {
         if (endpoint !== undefined) {
             task.state = 'idle';
             task.end = Date.now();
+
+            this.sender.send({ type: 'End', endpoint: endpoint });
 
             const type = endpoint.schedule?.type;
             if (type === 'once' || type === 'manual' || type === 'disabled') {
@@ -653,12 +651,8 @@ export class AASProvider {
             return;
         }
 
-        try {
-            await this.index.update(document);
-            this.sender.send({ type: 'Update', document: { ...document, content: null } });
-        } catch (error) {
-            this.logger.error(error);
-        }
+        await this.index.update(document);
+        this.sender.send({ type: 'Update', document: { ...document, content: null } });
     }
 
     private async onAdded(result: ScanEndpointResult): Promise<void> {
@@ -668,13 +662,9 @@ export class AASProvider {
             return;
         }
 
-        try {
-            await this.index.insert(document);
-            this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
-            this.sender.send({ type: 'Added', document });
-        } catch (error) {
-            this.logger.error(error);
-        }
+        await this.index.insert(document);
+        this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
+        this.sender.send({ type: 'Added', document });
     }
 
     private async onRemoved(result: ScanEndpointResult): Promise<void> {
@@ -684,13 +674,9 @@ export class AASProvider {
         }
 
         const document = result.document;
-        try {
-            await this.index.delete(result.endpoint.name, document.id);
-            this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
-            this.sender.send({ type: 'Removed', document: { ...document, content: null } });
-        } catch (error) {
-            this.logger.error(error);
-        }
+        await this.index.delete(result.endpoint.name, document.id);
+        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
+        this.sender.send({ type: 'Removed', document: { ...document, content: null } });
     }
 
     private async getDocumentById(

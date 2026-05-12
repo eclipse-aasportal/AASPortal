@@ -16,6 +16,7 @@
         "ABOUT": "Info über..."
     },
     "AddEndpointForm": {
+        "CANCEL": "Abbrechen",
         "CAPTION": "AAS-Endpunkt hinzufügen",
         "FileSystem": "Dateisystem",
         "AAS_API": "AAS API",
@@ -34,6 +35,7 @@
         "DISABLED": "deaktiviert",
         "MANUAL": "manuell",
         "ONCE": "einmalig",
+        "OK": "OK",
         "EVERY": "zyklisch",
         "MINUTES": "Minuten",
         "HOURS": "Stunden",
@@ -63,7 +65,6 @@
     "CAPTION_REMOVE_WORKSPACE": "Gruppe löschen",
     "CAPTION_UPLOAD_FILE": "AASX-Datei hochladen",
     "CMD_CALL": "Anruf",
-    "CMD_CANCEL": "Abbrechen",
     "CMD_CHANGE_PASSWORD": "Passwort ändern",
     "CMD_CLOSE": "Schließen",
     "CMD_CREATE_WORKSPACE": "Gruppieren...",
@@ -73,7 +74,6 @@
     "CMD_DOWNLOAD": "Herunterladen",
     "CMD_EDIT_WORKSPACE": "Gruppe bearbeiten...",
     "CMD_HIDE_LICENSE_TEXT": "Lizenztext verbergen",
-    "CMD_OK": "OK",
     "CMD_OPEN_AAS": "VWS öffnen",
     "CMD_OPERATION_CALL": "Aufrufen",
     "CMD_REMOVE": "Entfernen",
@@ -112,7 +112,12 @@
     "COLUMN_VALUE": "Wert",
     "COLUMN_VARIANT": "Variante",
     "COLUMN_VERSION": "Version",
-    "CONFIRM_DELETE_DOCUMENT": "Möchten Sie wirklich die Dokumente {0} löschen?",
+    "ConfirmDialog": {
+        "CANCEL": "Abbrechen",
+        "CAPTION": "Bestätigung",
+        "NO": "Nein",
+        "YES": "Ja"
+    },
     "CONFIRM_DELETE_FILE": "{0} unwiderruflich löschen?",
     "CONFIRM_DELETE_FILES": "{0} Dateien unwiderruflich löschen?",
     "CONFIRM_DELETE_USER": "Möchten Sie das Konto '{0}' löschen?",
@@ -189,7 +194,7 @@
         "NAME": "Name",
         "COUNT": "Anzahl",
         "UPDATE": "Aktualisierung",
-        "CONFIRM_RESET_CONFIGURATION": "Möchten Sie die AASNodePortal Standardkonfiguration wiederherstellen?",
+        "CONFIRM_RESET_INDEX": "Möchten Sie das Endpunkt-?",
         "RESET": "Reset",
         "CLOSE": "Schließen",
         "disabled": "deaktiviert",
@@ -205,11 +210,13 @@
         "SHOW": "Anzeigen..."
     },
     "FavoritesForm": {
+        "CANCEL": "Abbrechen",
         "CAPTION": "Favoriten",
         "ADD_NEW": "Neue Favoritenliste",
         "COUNT": "{0} Favorit(en)",
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' ist mehrfach verwendet.",
-        "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name."
+        "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name.",
+        "OK": "OK"
     },
     "GUEST_USER": "Gast",
     "HandoverDocumentation": {
@@ -268,12 +275,12 @@
     "LoginForm": {
         "CAPTION": "Login",
         "CREATE_ACCOUNT": "Ein Konto erstellen.",
-        "EMAIL_REQUIRED":"E-Mail erforderlich.",
+        "EMAIL_REQUIRED": "E-Mail erforderlich.",
         "EMAIL": "E-Mail",
         "EMAIL_INVALID": "Keine gültige E-Mail.",
         "LOGIN": "Anmelden",
         "NOT_REGISTERED": "Nicht registriert?",
-        "PASSWORD_REQUIRED":"Passwort erforderlich.",
+        "PASSWORD_REQUIRED": "Passwort erforderlich.",
         "PASSWORD": "Passwort"
     },
     "Main": {
@@ -331,6 +338,11 @@
         "PASSWORD_REQUIRED": "Passwort erforderlich.",
         "PASSWORDS_DO_NOT_MATCH": "Die Passwörter stimmen nicht überein."
     },
+    "PromptDialog": {
+        "CANCEL": "Abbrechen",
+        "CAPTION": "Eingabeaufforderung",
+        "OK": "OK"
+    },
     "QueryParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {0} erwartet.",
         "END_OF_TEXT_NOT_FOUND": "Das Ende des Textes, beginnend an Position {0}, wurde nicht gefunden.",
@@ -361,13 +373,16 @@
         "PASSWORDS_DO_NOT_MATCH": "Die Passworte stimmen nicht überein."
     },
     "RemoveEndpointForm": {
-        "CAPTION": "AAS-Endpunkt entfernen"
+        "CANCEL": "Abbrechen",
+        "CAPTION": "AAS-Endpunkt entfernen",
+        "OK": "OK"
     },
     "Shells": {
         "ADD_ENDPOINT": "Hinzufügen...",
         "AssetStatus": "Asset-Status",
         "Browser": "Browser",
         "CarbonFootprint": "CO2-Fußabdruck",
+        "CONFIRM_DELETE_DOCUMENT": "Möchten Sie wirklich die Dokumente {{documents}} löschen?",
         "ContactInformation": "Kontaktinformationen",
         "CustomerFeedback": "Nutzer-Feedback",
         "DigitalProductPassport": "Produktpass",
@@ -394,27 +409,29 @@
         "TITLE": "Technische Daten"
     },
     "UpdateEndpointForm": {
-        "CAPTION": "AAS-Endpunkt bearbeiten",
-        "ENDPOINTS": "Endpunkte",
-        "FileSystem": "Dateisystem",
         "AAS_API": "AAS API",
-        "WebDAV": "WebDAV",
+        "CANCEL": "Abbrechen",
+        "CAPTION": "AAS-Endpunkt bearbeiten",
+        "DISABLED": "deaktiviert",
+        "ENDPOINTS": "Endpunkte",
+        "EVERY": "zyklisch",
+        "FileSystem": "Dateisystem",
+        "HEADER": "Feld",
+        "HEADERS": "HTTP-Header-Felder",
+        "HOURS": "Stunden",
+        "MANUAL": "manuell",
+        "MINUTES": "Minuten",
+        "OK": "OK",
+        "ONCE": "einmalig",
         "OPC_UA": "OPC UA",
-        "URL": "URL",
         "PLACEHOLDER_URL_FILE": "file:///",
         "PLACEHOLDER_URL_HTTP": "http(s)://",
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
         "SCHEDULE": "Endpunkt-Index aktualisieren",
-        "DISABLED": "deaktiviert",
-        "MANUAL": "manuell",
-        "ONCE": "einmalig",
-        "EVERY": "zyklisch",
-        "MINUTES": "Minuten",
-        "HOURS": "Stunden",
-        "HEADERS": "HTTP-Header-Felder",
-        "HEADER": "Feld",
-        "VALUE": "Wert"
+        "URL": "URL",
+        "VALUE": "Wert",
+        "WebDAV": "WebDAV"
     },
     "ServiceRequestNotification": {
         "TITLE": "Serviceanfrage"

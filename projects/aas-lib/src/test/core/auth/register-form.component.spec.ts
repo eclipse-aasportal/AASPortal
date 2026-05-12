@@ -8,27 +8,27 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Router } from '@angular/router';
 
-import { LoginFormComponent } from '../../../lib/components/auth/login-form/login-form.component';
 import { createSpyObj, FakeLoader } from '../../mocks';
-import { AuthService } from '../../../lib/components/auth/auth.service';
-import { NotifyService } from '../../../lib/components/notify/notify.service';
+import { RegisterFormComponent } from '../../../lib/core/auth/register-form/register-form.component';
+import { AuthService } from '../../../lib/core/auth/auth.service';
+import { NotifyService } from '../../../lib/core/notify/notify.service';
+import { WINDOW } from '../../../lib/services/window.service';
 
-describe('LoginFormComponent', () => {
+describe('RegisterFormComponent', () => {
+    let fixture: ComponentFixture<RegisterFormComponent>;
+    let component: RegisterFormComponent;
     let auth: Mocked<AuthService>;
-    let router: Mocked<Router>;
+    let window: Mocked<Window>;
 
     beforeEach(async () => {
-        auth = createSpyObj<AuthService>(['login'], {});
-        router = createSpyObj<Router>(['navigateByUrl']);
+        auth = createSpyObj<AuthService>([]);
+        window = createSpyObj<Window>([], { location: createSpyObj<Location>([], { href: '' }) });
 
         await TestBed.configureTestingModule({
-            imports: [
-                LoginFormComponent,
-            ],
+            imports: [RegisterFormComponent],
             providers: [
                 {
                     provide: AuthService,
@@ -39,8 +39,8 @@ describe('LoginFormComponent', () => {
                     useValue: createSpyObj<NotifyService>(['error']),
                 },
                 {
-                    provide: Router,
-                    useValue: router,
+                    provide: WINDOW,
+                    useValue: window,
                 },
                 provideTranslateService({
                     loader: {
@@ -51,11 +51,12 @@ describe('LoginFormComponent', () => {
                 provideZonelessChangeDetection(),
             ],
         }).compileComponents();
+
+        fixture = TestBed.createComponent(RegisterFormComponent);
+        component = fixture.componentInstance;
     });
 
     it('should create', () => {
-        const fixture = TestBed.createComponent(LoginFormComponent);
-        const component = fixture.componentInstance;
         fixture.detectChanges();
         expect(component).toBeTruthy();
     });

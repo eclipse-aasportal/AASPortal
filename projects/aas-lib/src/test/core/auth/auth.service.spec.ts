@@ -16,8 +16,8 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 
 import { User } from 'aas-core';
 import { WINDOW } from '../../../lib/services/window.service';
-import { NotifyService } from '../../../lib/components/notify/notify.service';
-import { AuthService } from '../../../lib/components/auth/auth.service';
+import { NotifyService } from '../../../lib/core/notify/notify.service';
+import { AuthService } from '../../../lib/core/auth/auth.service';
 import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('AuthService', () => {

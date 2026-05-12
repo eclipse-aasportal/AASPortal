@@ -211,7 +211,8 @@ export type AASNodeMessageType =
     | 'EndpointAdded'
     | 'EndpointRemoved'
     | 'EndpointUpdate'
-    | 'Reset';
+    | 'Reset'
+    | 'End';
 
 /** Server message. */
 export type AASNodeMessage = {
@@ -227,6 +228,10 @@ export type AASNodeMessage = {
       }
     | {
           type: 'EndpointAdded' | 'EndpointRemoved' | 'EndpointUpdate';
+          endpoint: AASEndpoint;
+      }
+    | {
+          type: 'End';
           endpoint: AASEndpoint;
       }
 );

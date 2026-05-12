@@ -13,7 +13,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { createSpyObj } from '../mocks';
 import { CookieService } from '../../lib/services/cookie.service';
-import { AuthService } from '../../lib/components/auth/auth.service';
+import { AuthService } from '../../lib/core/auth/auth.service';
 import {
     START_TILE_TYPES,
     START_TILES,

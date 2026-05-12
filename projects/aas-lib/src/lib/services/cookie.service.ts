@@ -12,7 +12,7 @@ import { catchError, map, Observable, of } from 'rxjs';
 import { Cookie } from 'aas-core';
 
 import { WINDOW } from './window.service';
-import { AuthService } from '../components/auth/auth.service';
+import { AuthService } from '../core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root',

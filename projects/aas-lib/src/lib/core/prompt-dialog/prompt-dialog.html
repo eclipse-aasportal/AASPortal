@@ -1,0 +1,36 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<form (submit)="submit($event)">
+    <div class="modal-header text-info">
+        <h4 class="modal-title">
+            <i class="bi bi-terminal"></i>
+            <span class="ms-2" translate>PromptDialog.CAPTION</span>
+        </h4>
+        <button type="button" class="btn-close" (click)="cancel()"></button>
+    </div>
+    <div class="modal-body">
+        <label for="AID_PROMPT_TEXT">{{ label() }}</label>
+        <input type="text" class="form-control" id="AID_PROMPT_TEXT" [formField]="text" />
+        @if (text().touched() && text().invalid()) {
+            <ul class="text-danger fs-7">
+                @for (error of text().errors(); track error) {
+                    <li>{{ error.message }}</li>
+                }
+            </ul>
+        }
+    </div>
+    <div class="modal-footer">
+        <button type="button" id="AID_PROMPT_CANCEL" class="btn btn-secondary" (click)="cancel()" translate>
+            PromptDialog.CANCEL
+        </button>
+        <button type="submit" id="AID_PROMPT_OK" class="btn btn-primary" [disabled]="form().invalid()" translate>
+            PromptDialog.OK
+        </button>
+    </div>
+</form>

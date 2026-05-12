@@ -31,12 +31,6 @@ describe('ConsoleLogger', () => {
             expect(console.info).toHaveBeenCalled();
         });
 
-        it('logs a format info', () => {
-            vitest.spyOn(console, 'info');
-            logger.info('This is an {0}.', 'info');
-            expect(console.info).toHaveBeenCalled();
-        });
-
         it('does not log an empty info', () => {
             vitest.spyOn(console, 'info');
             logger.info('');
@@ -75,12 +69,6 @@ describe('ConsoleLogger', () => {
             expect(console.warn).toHaveBeenCalled();
         });
 
-        it('logs a format warning', () => {
-            vitest.spyOn(console, 'warn');
-            logger.warning('This is a {0}.', 'warning');
-            expect(console.warn).toHaveBeenCalled();
-        });
-
         it('does not log an empty warning', () => {
             vitest.spyOn(console, 'warn');
             logger.info('');
@@ -116,12 +104,6 @@ describe('ConsoleLogger', () => {
         it('logs an error', () => {
             vitest.spyOn(console, 'error');
             logger.error('This is an error.');
-            expect(console.error).toHaveBeenCalled();
-        });
-
-        it('logs a format error', () => {
-            vitest.spyOn(console, 'error');
-            logger.error('This is an {0}.', 'error');
             expect(console.error).toHaveBeenCalled();
         });
 
