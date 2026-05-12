@@ -261,7 +261,7 @@ export class ApiClientV3 extends ApiClient {
         return blob.value;
     }
 
-    public override async getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<string[]> {
+    public override async getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<PagedResult<string>> {
         return this.http.getJson(
             this.resolve(`lookup/shells?assetIds=${encodeBase64Url(assetId)}`),
             this.endpoint.headers,
