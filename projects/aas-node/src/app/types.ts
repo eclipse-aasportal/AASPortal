@@ -74,6 +74,10 @@ export interface ScanEndpointResult extends ScanResult {
     document: AASDocument;
 }
 
+export function isScanEndpointResult(result: ScanResult): result is ScanEndpointResult {
+    return result.type === 'ScanEndpointResult';
+}
+
 /** The result of a template scan. */
 export interface ScanTemplatesResult extends ScanResult {
     templates: TemplateDescriptor[];

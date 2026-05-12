@@ -15,6 +15,7 @@ import {
     inject,
     input,
     model,
+    output,
     signal,
     untracked,
     WritableSignal,
@@ -56,7 +57,7 @@ import { LiveState } from '../../types';
 import { basename, encodeBase64Url, findRouteForShell, findRouteForSubmodel } from '../../utilities';
 import { VIEW_ROUTES } from '../../views/views-routes';
 import { WebSocketService } from '../../services/web-socket.service';
-import { NotifyService } from '../notify/notify.service';
+import { NotifyService } from '../../core/notify/notify.service';
 import { MaxLengthPipe } from '../../pipes/max-length.pipe';
 import {
     Tree,
@@ -137,10 +138,14 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
 
         effect(() => {
             if (this.live() === 'online') {
-                this.goOnline();
+                this.goLive();
             } else {
-                this.goOffline();
+                this.endLive();
             }
+        });
+
+        effect(() => {
+            this.selectedElements.emit(this.selectedNodes().map(node => node.id));
         });
     }
 
@@ -153,6 +158,11 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
      * The current live status.
      */
     public readonly live = model<LiveState>('offline');
+
+    /**
+     * The currently selected elements in the tree. This is used to synchronize the selection with other components, e.g., the value view.
+     */
+    public readonly selectedElements = output<aas.Referable[]>();
 
     /**
      * Finds and navigates to the next search result in the tree.
@@ -532,40 +542,45 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         return reference?.keys.map(key => key.value).join('.') ?? '-';
     }
 
-    private goOnline(): void {
+    private goLive(): void {
         try {
-            this.prepareOnline();
-            this.play();
-        } catch {
-            this.live.set('offline');
-            this.goOffline();
-        }
-    }
+            this.liveNodes.splice(0, this.liveNodes.length);
+            this.map.clear();
+            const tree: AASTree = untracked(this.tree).map(node => {
+                if (node.selected && isProperty(node.id)) {
+                    const property = node.id;
+                    if (property.nodeId) {
+                        this.liveNodes.push({
+                            nodeId: property.nodeId,
+                            valueType: property.valueType ?? 'undefined',
+                        });
 
-    private play(): void {
-        const document = this.document();
-        if (document) {
-            this.webSocketSubscription = this.webSocket.getMessages().subscribe({
-                next: this.onMessage,
-                error: this.onError,
+                        node = { ...node, value: signal(property.value), valueType: 'signal' };
+                        this.map.set(property.nodeId, node);
+                    }
+                }
+
+                return node;
             });
 
-            this.webSocket.sendMessage(this.createMessage(document));
+            this.update({ tree, selectionDisabled: true });
+
+            const document = this.document();
+            if (document) {
+                this.webSocketSubscription = this.webSocket.getMessages().subscribe({
+                    next: this.onMessage,
+                    error: this.onError,
+                });
+
+                this.webSocket.sendMessage(this.createMessage(document));
+            }
+        } catch {
+            this.live.set('offline');
+            this.endLive();
         }
     }
 
-    private goOffline(): void {
-        this.prepareOffline();
-        this.map.clear();
-        this.liveNodes.splice(0, this.liveNodes.length);
-
-        if (this.webSocketSubscription) {
-            this.webSocketSubscription.unsubscribe();
-            this.webSocketSubscription = undefined;
-        }
-    }
-
-    private prepareOffline(): void {
+    private endLive(): void {
         const nodes = new Set(this.map.values());
         const tree = untracked(this.tree).map(node => {
             if (nodes.has(node)) {
@@ -577,29 +592,13 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         });
 
         this.update({ tree, selectionDisabled: false });
-    }
-
-    private prepareOnline(): void {
-        this.liveNodes.splice(0, this.liveNodes.length);
         this.map.clear();
-        const tree: AASTree = untracked(this.tree).map(node => {
-            if (node.selected && isProperty(node.id)) {
-                const property = node.id;
-                if (property.nodeId) {
-                    this.liveNodes.push({
-                        nodeId: property.nodeId,
-                        valueType: property.valueType ?? 'undefined',
-                    });
+        this.liveNodes.splice(0, this.liveNodes.length);
 
-                    node = { ...node, value: signal(property.value), valueType: 'signal' };
-                    this.map.set(property.nodeId, node);
-                }
-            }
-
-            return node;
-        });
-
-        this.update({ tree, selectionDisabled: true });
+        if (this.webSocketSubscription) {
+            this.webSocketSubscription.unsubscribe();
+            this.webSocketSubscription = undefined;
+        }
     }
 
     private createMessage(document: AASDocument): WebSocketData {

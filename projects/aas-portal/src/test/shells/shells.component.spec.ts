@@ -11,6 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -59,6 +60,7 @@ describe('ShellsComponent', () => {
     let start: Mocked<StartService>;
     let httpClient: Mocked<HttpClient>;
     let auth: Mocked<AuthService>;
+    let modal: Mocked<NgbModal>;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
@@ -102,6 +104,8 @@ describe('ShellsComponent', () => {
             name: signal(''),
         });
 
+        modal = createSpyObj<NgbModal>(['open']);
+
         await TestBed.configureTestingModule({
             providers: [
                 { 
@@ -135,6 +139,10 @@ describe('ShellsComponent', () => {
                 {
                     provide: StartService,
                     useValue: start,
+                },
+                {
+                    provide: NgbModal,
+                    useValue: modal,
                 },
                 provideTranslateService({
                     loader: {

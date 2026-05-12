@@ -16,7 +16,7 @@ import { WebSocketData } from 'aas-core';
 import { createSpyObj, MockWebSocketService } from '../mocks';
 import { WebSocketService } from '../../lib/services/web-socket.service';
 import { IndexChange } from '../../lib/services/index-change';
-import { AuthService } from '../../lib/components/auth/auth.service';
+import { AuthService } from '../../lib/core/auth/auth.service';
 
 describe('IndexChange', () => {
     let service: IndexChange;

@@ -12,10 +12,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 
-import { ProfileFormComponent } from '../../../lib/components/auth/profile-form/profile-form.component';
+import { ProfileFormComponent } from '../../../lib/core/auth/profile-form/profile-form.component';
 import { createSpyObj, FakeLoader } from '../../mocks';
-import { AuthService } from '../../../lib/components/auth/auth.service';
-import { NotifyService } from '../../../lib/components/notify/notify.service';
+import { AuthService } from '../../../lib/core/auth/auth.service';
+import { NotifyService } from '../../../lib/core/notify/notify.service';
 
 describe('ProfileFormComponent', () => {
     let fixture: ComponentFixture<ProfileFormComponent>;

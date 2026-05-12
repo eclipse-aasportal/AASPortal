@@ -11,9 +11,9 @@ import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { aas, TemplateDescriptor, types} from 'aas-core';
+import { aas, TemplateDescriptor, types } from 'aas-core';
 
-import { NotifyService } from '../../lib/components/notify/notify.service';
+import { NotifyService } from '../../lib/core/notify/notify.service';
 import { TemplateService } from '../../lib/services/template.service';
 import { createSpyObj, mockFetchJson, restoreFetch } from '../mocks';
 

@@ -13,7 +13,7 @@ import { signal } from '@angular/core';
 
 import { CookieService } from '../../lib/services/cookie.service';
 import { createSpyObj } from '../mocks';
-import { AuthService } from '../../lib/components/auth/auth.service';
+import { AuthService } from '../../lib/core/auth/auth.service';
 import { WINDOW, WindowService } from '../../lib/services/window.service';
 
 describe('CookieService', () => {

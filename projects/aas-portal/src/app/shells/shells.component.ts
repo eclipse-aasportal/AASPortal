@@ -27,16 +27,16 @@ import {
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, concatMap, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
-import { AASDocument, AASEndpoint, QueryParser, stringFormat } from 'aas-core';
+import { AASDocument, AASEndpoint, QueryParser } from 'aas-core';
 import {
     AASTable,
     AuthService,
+    ConfirmDialog,
     EndpointsApi,
     NotifyService,
     ProgressService,
     StartService,
     ToolbarService,
-    WINDOW,
     encodeBase64Url,
     viewRoutes,
 } from 'aas-lib';
@@ -78,7 +78,6 @@ import { INFO } from '../messages';
  * - Modal dialogs for user interactions
  */
 export class ShellsComponent implements OnDestroy {
-    private readonly window = inject(WINDOW);
     private readonly state = inject(ShellsState);
     private readonly router = inject(Router);
     private readonly modal = inject(NgbModal);
@@ -370,15 +369,15 @@ export class ShellsComponent implements OnDestroy {
                     return this.favorites.save();
                 } else {
                     return this.auth.ensureAuthorized('editor').pipe(
-                        map(() =>
-                            this.window.confirm(
-                                stringFormat(
-                                    this.translate.instant('CONFIRM_DELETE_DOCUMENT'),
-                                    this.state
+                        mergeMap(() =>
+                            ConfirmDialog.open(
+                                this.modal,
+                                this.translate.instant('Shells.CONFIRM_DELETE_DOCUMENT', {
+                                    documents: this.state
                                         .selected()
                                         .map(item => item.idShort)
                                         .join(', '),
-                                ),
+                                }),
                             ),
                         ),
                         mergeMap(result => from(result ? this.state.selected() : [])),

@@ -11,7 +11,7 @@ import { AASNodeMessage, AASNodeMessageType, WebSocketData } from 'aas-core';
 import { HttpClient } from '@angular/common/http';
 import { first, map, mergeMap, Observable, Subscription, zip } from 'rxjs';
 import { WebSocketService } from './web-socket.service';
-import { AuthService } from '../components/auth/auth.service';
+import { AuthService } from '../core/auth/auth.service';
 import { HttpCache } from './http-cache';
 
 type State = {

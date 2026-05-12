@@ -11,8 +11,8 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
-import { NotifyService } from '../../../lib/components/notify/notify.service';
-import { NotifyComponent } from '../../../lib/components/notify/notify.component';
+import { NotifyService } from '../../../lib/core/notify/notify.service';
+import { NotifyComponent } from '../../../lib/core/notify/notify.component';
 import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('NotifyComponent', () => {
