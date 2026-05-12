@@ -169,7 +169,7 @@ export class AasxDirectory extends EndpointClient {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<string[]> {
+    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<PagedResult<string>> {
         return Promise.reject(new Error('Not implemented.'));
     }
 

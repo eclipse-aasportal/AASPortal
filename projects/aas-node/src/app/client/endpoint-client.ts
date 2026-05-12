@@ -170,7 +170,7 @@ export abstract class EndpointClient {
      * Returns a list of Asset Administration Shell ids based on asset identifier key-value-pairs.
      * @param assetId The Asset identifier.
      */
-    public abstract getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<string[]>;
+    public abstract getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<PagedResult<string>>;
 
     /**
      * Resolves a new URL from the base URL and the specified URL.

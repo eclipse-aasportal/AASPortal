@@ -211,7 +211,7 @@ export class ApiClientV1 extends ApiClient {
         return blob.value;
     }
 
-    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<string[]> {
+    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<PagedResult<string>> {
         return Promise.reject(new Error('Not implemented.'));
     }
 

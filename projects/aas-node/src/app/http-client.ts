@@ -29,9 +29,8 @@ export class HttpClient {
      */
     public async getJson<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
         const href = url.href;
-        const start = Date.now();
+        this.logger.info(`GET ${href}`);
         const response = await fetch(href, { method: 'GET', headers });
-        this.logger.info(`GET ${href} - ${response.status} (${Date.now() - start} ms)`);
         if (!response.ok) {
             const message = await response.text().catch(() => 'GET request failed');
             throw new ApplicationError(message, {}, response.status);

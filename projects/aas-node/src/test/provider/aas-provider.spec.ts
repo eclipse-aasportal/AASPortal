@@ -109,7 +109,11 @@ describe('AASProvider', function () {
 
         it('gets a document by Asset ID', async () => {
             index.find.mockResolvedValue(undefined);
-            client.getAllAssetAdministrationShellIdsByAssetLink.mockResolvedValue(['TestAAS']);
+            client.getAllAssetAdministrationShellIdsByAssetLink.mockResolvedValue({
+                result: ['TestAAS'],
+                paging_metadata: { cursor: '' },
+            });
+
             client.getEnvironment.mockResolvedValue(content);
             client.createDocument.mockResolvedValue(document);
             await expect(aasProvider.getDocument('Samples', 'Asset', 'TestAsset')).resolves.toEqual(document);
@@ -119,8 +123,12 @@ describe('AASProvider', function () {
 
         it('throws an error if endpoint is undefined and document not contained in index', async () => {
             index.find.mockResolvedValue(undefined);
-            client.getAllAssetAdministrationShellIdsByAssetLink.mockResolvedValue([]);
-            await expect(aasProvider.getDocument(undefined, 'Asset', 'TestAsset')).rejects.toThrowError();
+            client.getAllAssetAdministrationShellIdsByAssetLink.mockResolvedValue({
+                result: [],
+                paging_metadata: { cursor: '' },
+            });
+
+            await expect(aasProvider.getDocument(undefined, 'Asset', 'TestAsset')).rejects.toThrow();
         });
     });
 });

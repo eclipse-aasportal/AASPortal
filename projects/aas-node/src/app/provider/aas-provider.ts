@@ -691,10 +691,12 @@ export class AASProvider {
             if (modelType === 'AssetAdministrationShell') {
                 address = id;
             } else {
-                address = (await client.getAllAssetAdministrationShellIdsByAssetLink(id)).at(0);
-                if (!address) {
+                const result = await client.getAllAssetAdministrationShellIdsByAssetLink(id);
+                if (!result.result || result.result.length === 0) {
                     throw new ApplicationError(ERRORS.AASNotFoundByAssetLink, { assetId: id }, 404);
                 }
+
+                address = result.result[0];
             }
 
             return await client.createDocument(address);
