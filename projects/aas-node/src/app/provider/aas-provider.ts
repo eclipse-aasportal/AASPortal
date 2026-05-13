@@ -143,11 +143,19 @@ export class AASProvider {
             }
         }
 
-        if (!endpoint) {
-            throw new ApplicationError(ERRORS.AASNotFound, { id }, 404);
+        if (endpoint) {
+            return await this.getDocumentById(endpoint, modelType, id);
         }
 
-        return await this.getDocumentById(endpoint, modelType, id);
+        for (const item of await this.index.getEndpoints()) {
+            try {
+                return await this.getDocumentById(item.name, modelType, id);
+            } catch {
+                continue;
+            }
+        }
+
+        throw new ApplicationError(ERRORS.AASNotFound, { id }, 404);
     }
 
     /**
@@ -692,7 +700,7 @@ export class AASProvider {
                 address = id;
             } else {
                 const result = await client.getAllAssetAdministrationShellIdsByAssetLink(id);
-                if (!result.result || result.result.length === 0) {
+                if (!result.result?.length) {
                     throw new ApplicationError(ERRORS.AASNotFoundByAssetLink, { assetId: id }, 404);
                 }
 
