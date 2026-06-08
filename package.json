@@ -120,7 +120,7 @@
         "@types/supertest": "^6.0.3",
         "@types/swagger-ui-express": "^4.1.8",
         "@types/ws": "^8.18.1",
-        "@vitest/coverage-v8": "^4.0.16",
+        "@vitest/coverage-v8": "^4.1.8",
         "angular-eslint": "21.1.0",
         "esbuild": "^0.26.0",
         "eslint": "^9.39.2",
@@ -138,6 +138,6 @@
         "typedoc": "^0.28.15",
         "typescript": "^5.9.3",
         "typescript-eslint": "8.51.0",
-        "vitest": "^4.0.16"
+        "vitest": "^4.1.8"
     }
 }
