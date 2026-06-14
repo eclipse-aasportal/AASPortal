@@ -122,7 +122,7 @@
         "@types/ws": "^8.18.1",
         "@vitest/coverage-v8": "^4.0.16",
         "angular-eslint": "21.1.0",
-        "esbuild": "^0.26.0",
+        "esbuild": "^0.28.1",
         "eslint": "^9.39.2",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.4",
