@@ -7,11 +7,11 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { AuthService } from 'aas-lib';
+import { AuthService, CookieService } from 'aas-lib';
 import { DashboardService } from '../../app/dashboard/dashboard.service';
 
 import data from '../assets/test-pages.json';
@@ -19,11 +19,13 @@ import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('DashboardService', () => {
     let service: DashboardService;
+    let cookies: Mocked<CookieService>;
     let auth: Mocked<AuthService>;
 
     beforeEach(() => {
-        auth = createSpyObj<AuthService>(['getCookie'], { ready: of(true) });
-        auth.getCookie.mockReturnValue(of(JSON.stringify(data)));
+        cookies = createSpyObj<CookieService>(['getCookie']);
+        cookies.getCookie.mockReturnValue(of(JSON.stringify(data)));
+        auth = createSpyObj<AuthService>([], { ready: of(true) });
 
         TestBed.configureTestingModule({
             imports: [],
@@ -31,6 +33,10 @@ describe('DashboardService', () => {
                 {
                     provide: AuthService,
                     useValue: auth,
+                },
+                {
+                    provide: CookieService,
+                    useValue: cookies,
                 },
                 provideTranslateService({
                     loader: {

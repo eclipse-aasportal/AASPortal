@@ -98,6 +98,7 @@
                         [document]="document()"
                         [allowSelection]="true"
                         [enableValue]="true"
+                        (selectedElements)="setSelectedElements($event)"
                     >
                     </fhg-aas-tree>
                 </ng-template>

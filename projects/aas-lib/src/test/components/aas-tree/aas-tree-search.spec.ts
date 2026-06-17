@@ -11,7 +11,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AASTreeSearch } from '../../../lib/components/aas-tree/aas-tree-search';
-import { NotifyService } from '../../../lib/components/notify/notify.service';
+import { NotifyService } from '../../../lib/core/notify/notify.service';
 import { createSpyObj, FakeLoader } from '../../mocks';
 
 describe('AASTreeSearch', () => {
@@ -31,7 +31,7 @@ describe('AASTreeSearch', () => {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
-                })
+                }),
             ],
             imports: [],
         });

@@ -22,6 +22,7 @@ import { ChartEditComponent } from '../../app/dashboard/chart-edit/chart-edit.co
 
 import data from '../assets/test-pages.json';
 import { createSpyObj, FakeLoader, MockWebSocketService } from '../mocks';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-chart-edit',
@@ -39,6 +40,7 @@ describe('DashboardComponent', () => {
     let start: Mocked<StartService>;
     let service: Mocked<DashboardService>;
     let window: Mocked<WindowService>;
+    let modal: Mocked<NgbModal>;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'save']);
@@ -62,6 +64,8 @@ describe('DashboardComponent', () => {
         window = createSpyObj<WindowService>(['prompt', 'addEventListener', 'removeEventListener'], {
             innerWidth: 700,
         });
+
+        modal = createSpyObj<NgbModal>(['open']);
 
         await TestBed.configureTestingModule({
             providers: [
@@ -92,6 +96,10 @@ describe('DashboardComponent', () => {
                 {
                     provide: DashboardService,
                     useValue: service,
+                },
+                {
+                    provide: NgbModal,
+                    useValue: modal,
                 },
                 provideRouter([]),
                 provideZonelessChangeDetection(),

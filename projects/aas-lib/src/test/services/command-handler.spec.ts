@@ -13,7 +13,7 @@ import { noop } from 'aas-core';
 import { Command } from '../../lib/services/command';
 import { CommandHandler } from '../../lib/services/command-handler';
 import { createSpyObj } from '../mocks';
-import { NotifyService } from '../../lib/components/notify/notify.service';
+import { NotifyService } from '../../lib/core/notify/notify.service';
 
 class TestCommand extends Command {
     public constructor(

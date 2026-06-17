@@ -6,11 +6,13 @@
  *
  *****************************************************************************/
 
+import 'reflect-metadata';
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { Connection } from 'mysql2/promise';
 import { AASEndpoint } from 'aas-core';
+import { Logger } from 'aas-package';
+
 import { MySqlIndex } from '../../../app/index/mysql/mysql-index.js';
-import { Logger } from '../../../app/logging/logger.js';
 import { Variable } from '../../../app/variable.js';
 import { KeywordDirectory } from '../../../app/index/keyword-directory.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from '../../../app/index/mysql/mysql-types.js';

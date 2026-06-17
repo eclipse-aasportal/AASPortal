@@ -9,6 +9,7 @@
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
+import { catchError, concatMap, EMPTY, map, Observable, of } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -25,7 +26,6 @@ import { encodeBase64Url, NotifyService, ProgressService, ToolbarService, WINDOW
 
 import { ShellsDataItem, ShellsService } from './shells.service';
 import { MaxLengthPipe } from '../max-length.pipe';
-import { catchError, concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Component({
     selector: 'fhg-shells',

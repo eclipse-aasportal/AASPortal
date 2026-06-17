@@ -8,7 +8,8 @@
 
 import net from 'net';
 import { Readable } from 'stream';
-import { singleton } from 'tsyringe';
+import { Logger, LOGGER } from 'aas-package';
+import { inject, singleton } from 'tsyringe';
 import { ApplicationError } from 'aas-core';
 import { parseUrl } from './utilities.js';
 
@@ -17,15 +18,18 @@ import { parseUrl } from './utilities.js';
  */
 @singleton()
 export class HttpClient {
+    public constructor(@inject(LOGGER) private readonly logger: Logger) {}
+
     /**
-     * Gets an object of type `T` from a server.
+     * Gets a JSON value of type `T` from a server.
      * @template T The type of the object.
      * @param url The URL of the object.
      * @param headers Additional outgoing http headers.
      * @returns The requested object.
      */
-    public async getJson<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
+    public async get<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
         const href = url.href;
+        this.logger.info(`GET ${href}`);
         const response = await fetch(href, { method: 'GET', headers });
         if (!response.ok) {
             const message = await response.text().catch(() => 'GET request failed');
@@ -35,10 +39,17 @@ export class HttpClient {
         return (await response.json()) as T;
     }
 
-    public async getJsonLive<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
+    /**
+     * Gets a JSON value of type `T` from a server (no cache, no logging).
+     * @param url The URL to send the GET request to.
+     * @param headers The additional outgoing http headers.
+     * @returns The requested value.
+     */
+    public async getLive<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
         const response = await fetch(url.href, { method: 'GET', headers });
         if (!response.ok) {
-            throw new ApplicationError(response.statusText, {}, response.status);
+            const message = await response.text().catch(() => 'GET request failed');
+            throw new ApplicationError(message, {}, response.status);
         }
 
         return (await response.json()) as T;
@@ -54,7 +65,8 @@ export class HttpClient {
     public async getReadable(url: URL, headers?: Record<string, string>): Promise<NodeJS.ReadableStream> {
         const response = await fetch(url.href, { method: 'GET', headers });
         if (!response.ok) {
-            throw new ApplicationError(response.statusText, {}, response.status);
+            const message = await response.text().catch(() => 'GET request failed');
+            throw new ApplicationError(message, {}, response.status);
         }
 
         if (!response.body) {
@@ -84,7 +96,8 @@ export class HttpClient {
         });
 
         if (!response.ok) {
-            throw new ApplicationError(response.statusText, {}, response.status);
+            const message = await response.text().catch(() => 'PUT request failed');
+            throw new ApplicationError(message, {}, response.status);
         }
     }
 
@@ -100,7 +113,55 @@ export class HttpClient {
         });
 
         if (!response.ok) {
-            throw new ApplicationError(response.statusText, {}, response.status);
+            const message = await response.text().catch(() => 'DELETE request failed');
+            throw new ApplicationError(message, {}, response.status);
+        }
+    }
+
+    /**
+     * Sends a POST request with a JSON payload to the specified URL.
+     * @param url - The target URL to which the POST request will be sent.
+     * @param obj - The object to be serialized as JSON and sent in the request body.
+     * @param headers - Optional additional headers to include in the request.
+     * @returns A promise that resolves to the response body as a string.
+     * @throws {Error} If the HTTP response status is not OK (status code outside the range 200-299).
+     */
+    public async postJson(url: URL, obj: object, headers: Record<string, string> = {}): Promise<string> {
+        const response = await fetch(url.href, {
+            method: 'POST',
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(obj),
+        });
+
+        if (!response.ok) {
+            const message = await response.text().catch(() => 'POST request failed');
+            throw new ApplicationError(message, {}, response.status);
+        }
+
+        return await response.text();
+    }
+
+    /**
+     * Sends a POST request with multipart/form-data using the provided FormData object.
+     * @param url - The endpoint URL to which the form data will be posted.
+     * @param formData - The FormData object containing the data to be sent in the request body.
+     * @param headers - Optional additional headers to include in the request.
+     * @returns A promise that resolves when the request completes successfully.
+     * @throws {Error} If the response status is not OK (i.e., not in the 2xx range).
+     */
+    public async postFormData(url: URL, formData: FormData, headers: Record<string, string> = {}): Promise<void> {
+        const response = await fetch(url.href, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const message = await response.text().catch(() => 'POST request failed');
+            throw new ApplicationError(message, {}, response.status);
         }
     }
 
@@ -131,50 +192,5 @@ export class HttpClient {
                     reject(new Error(`${url} does not exist.`));
                 });
         });
-    }
-
-    /**
-     * Sends a POST request with a JSON payload to the specified URL.
-     * @param url - The target URL to which the POST request will be sent.
-     * @param obj - The object to be serialized as JSON and sent in the request body.
-     * @param headers - Optional additional headers to include in the request.
-     * @returns A promise that resolves to the response body as a string.
-     * @throws {Error} If the HTTP response status is not OK (status code outside the range 200-299).
-     */
-    public async postJson(url: URL, obj: object, headers: Record<string, string> = {}): Promise<string> {
-        const response = await fetch(url.href, {
-            method: 'POST',
-            headers: {
-                ...headers,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(obj),
-        });
-
-        if (!response.ok) {
-            throw new ApplicationError(response.statusText, {}, response.status);
-        }
-
-        return await response.text();
-    }
-
-    /**
-     * Sends a POST request with multipart/form-data using the provided FormData object.
-     * @param url - The endpoint URL to which the form data will be posted.
-     * @param formData - The FormData object containing the data to be sent in the request body.
-     * @param headers - Optional additional headers to include in the request.
-     * @returns A promise that resolves when the request completes successfully.
-     * @throws {Error} If the response status is not OK (i.e., not in the 2xx range).
-     */
-    public async postFormData(url: URL, formData: FormData, headers: Record<string, string> = {}): Promise<void> {
-        const response = await fetch(url.href, {
-            method: 'POST',
-            headers,
-            body: formData,
-        });
-
-        if (!response.ok) {
-            throw new ApplicationError(response.statusText, {}, response.status);
-        }
     }
 }

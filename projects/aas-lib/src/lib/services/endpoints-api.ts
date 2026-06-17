@@ -11,7 +11,7 @@ import { HttpClient, HttpEvent } from '@angular/common/http';
 import { AASCursor, AASDocument, AASEndpoint, AASPagedResult, aas } from 'aas-core';
 import { first, map, mergeMap, Observable } from 'rxjs';
 import { encodeBase64Url } from '../utilities';
-import { AuthService } from '../components/auth/auth.service';
+import { AuthService } from '../core/auth/auth.service';
 
 /**
  * This service provides methods to interact with the AAS endpoints API,

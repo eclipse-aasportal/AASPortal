@@ -10,6 +10,7 @@ import { inject, singleton } from 'tsyringe';
 import fs from 'fs';
 import path from 'path';
 import { Readable } from 'stream';
+import { LOGGER, Logger } from 'aas-package';
 import {
     AASDocument,
     LiveRequest,
@@ -28,13 +29,12 @@ import {
 
 import { ImageProcessing } from '../image-processing.js';
 import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
-import { ScanResultKind, ScanResult, ScanEndpointResult, ScanEndpointData } from '../types.js';
-import { LOGGER, Logger } from '../logging/logger.js';
+import { ScanResultKind, ScanResult, ScanEndpointResult, ScanEndpointData, isScanEndpointResult } from '../types.js';
 import { Parallel } from './parallel.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
-import { AASClientFactory } from '../client/aas-client-factory.js';
+import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { Variable } from '../variable.js';
 import { WSNode } from '../ws-node.js';
 import { ERRORS } from '../errors.js';
@@ -53,7 +53,7 @@ export class AASProvider {
         @inject(Variable) private readonly variable: Variable,
         @inject(LOGGER) private readonly logger: Logger,
         @inject(Parallel) private readonly parallel: Parallel,
-        @inject(AASClientFactory) private readonly clientFactory: AASClientFactory,
+        @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
         @inject(AAS_INDEX) private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
@@ -143,11 +143,19 @@ export class AASProvider {
             }
         }
 
-        if (!endpoint) {
-            throw new ApplicationError(ERRORS.AASNotFound, { id }, 404);
+        if (endpoint) {
+            return await this.getDocumentById(endpoint, modelType, id);
         }
 
-        return await this.getDocumentById(endpoint, modelType, id);
+        for (const item of await this.index.getEndpoints()) {
+            try {
+                return await this.getDocumentById(item.name, modelType, id);
+            } catch {
+                continue;
+            }
+        }
+
+        throw new ApplicationError(ERRORS.AASNotFound, { id }, 404);
     }
 
     /**
@@ -234,9 +242,9 @@ export class AASProvider {
                     }
                 }
             } else if (isBlob(dataElement)) {
-                const value = await client.getBlobValue(document.content, smId, idShortPath);
+                const value = await client.getBlobValue(smId, idShortPath);
                 const readable = new Readable();
-                readable.push(JSON.stringify({ value }));
+                readable.push(value);
                 readable.push(null);
                 stream = readable;
             } else {
@@ -467,7 +475,7 @@ export class AASProvider {
                 env = await client.getEnvironment(document.address);
             }
 
-            return await client.invoke(env, operation);
+            return await client.invoke(operation);
         } finally {
             await client.close();
         }
@@ -599,7 +607,7 @@ export class AASProvider {
 
     private parallelOnMessage = async (result: ScanResult): Promise<void> => {
         try {
-            if (this.isScanEndpointResult(result)) {
+            if (isScanEndpointResult(result)) {
                 switch (result.kind) {
                     case ScanResultKind.Update:
                         await this.onUpdate(result);
@@ -617,10 +625,6 @@ export class AASProvider {
         }
     };
 
-    private isScanEndpointResult(result: ScanResult): result is ScanEndpointResult {
-        return result.type === 'ScanEndpointResult';
-    }
-
     private parallelOnEnd = async (result: ScanResult): Promise<void> => {
         const task = this.taskHandler.get(result.taskId);
         if (task === undefined || task.owner !== this) {
@@ -631,6 +635,8 @@ export class AASProvider {
         if (endpoint !== undefined) {
             task.state = 'idle';
             task.end = Date.now();
+
+            this.sender.send({ type: 'End', endpoint: endpoint });
 
             const type = endpoint.schedule?.type;
             if (type === 'once' || type === 'manual' || type === 'disabled') {
@@ -653,12 +659,8 @@ export class AASProvider {
             return;
         }
 
-        try {
-            await this.index.update(document);
-            this.sender.send({ type: 'Update', document: { ...document, content: null } });
-        } catch (error) {
-            this.logger.error(error);
-        }
+        await this.index.update(document);
+        this.sender.send({ type: 'Update', document: { ...document, content: null } });
     }
 
     private async onAdded(result: ScanEndpointResult): Promise<void> {
@@ -668,13 +670,9 @@ export class AASProvider {
             return;
         }
 
-        try {
-            await this.index.insert(document);
-            this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
-            this.sender.send({ type: 'Added', document });
-        } catch (error) {
-            this.logger.error(error);
-        }
+        await this.index.insert(document);
+        this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
+        this.sender.send({ type: 'Added', document });
     }
 
     private async onRemoved(result: ScanEndpointResult): Promise<void> {
@@ -684,13 +682,9 @@ export class AASProvider {
         }
 
         const document = result.document;
-        try {
-            await this.index.delete(result.endpoint.name, document.id);
-            this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
-            this.sender.send({ type: 'Removed', document: { ...document, content: null } });
-        } catch (error) {
-            this.logger.error(error);
-        }
+        await this.index.delete(result.endpoint.name, document.id);
+        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
+        this.sender.send({ type: 'Removed', document: { ...document, content: null } });
     }
 
     private async getDocumentById(
@@ -705,10 +699,12 @@ export class AASProvider {
             if (modelType === 'AssetAdministrationShell') {
                 address = id;
             } else {
-                address = (await client.getAllAssetAdministrationShellIdsByAssetLink(id)).at(0);
-                if (!address) {
+                const result = await client.getAllAssetAdministrationShellIdsByAssetLink(id);
+                if (!result.result?.length) {
                     throw new ApplicationError(ERRORS.AASNotFoundByAssetLink, { assetId: id }, 404);
                 }
+
+                address = result.result[0];
             }
 
             return await client.createDocument(address);

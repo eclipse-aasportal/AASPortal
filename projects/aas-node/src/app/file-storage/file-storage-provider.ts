@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
+import { LOGGER, Logger } from 'aas-package';
+
 import { FileStorage } from './file-storage.js';
 import { LocalFileStorage } from './local-file-storage.js';
 import { Variable } from '../variable.js';
 import { WebDAVStorage } from './webdav-storage.js';
-import { LOGGER, Logger } from '../logging/logger.js';
 import { urlToString } from '../utilities.js';
 
 @singleton()

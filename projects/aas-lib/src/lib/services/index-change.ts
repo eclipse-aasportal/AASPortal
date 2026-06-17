@@ -11,7 +11,8 @@ import { AASNodeMessage, AASNodeMessageType, WebSocketData } from 'aas-core';
 import { HttpClient } from '@angular/common/http';
 import { first, map, mergeMap, Observable, Subscription, zip } from 'rxjs';
 import { WebSocketService } from './web-socket.service';
-import { AuthService } from '../components/auth/auth.service';
+import { AuthService } from '../core/auth/auth.service';
+import { HttpCache } from './http-cache';
 
 type State = {
     documentCount: number;
@@ -28,6 +29,7 @@ type State = {
 })
 export class IndexChange implements OnDestroy {
     private readonly http = inject(HttpClient);
+    private readonly cache = inject(HttpCache);
     private readonly auth = inject(AuthService);
     private readonly webSocket = inject(WebSocketService);
     private readonly subscription: Subscription;
@@ -122,19 +124,23 @@ export class IndexChange implements OnDestroy {
                     break;
                 case 'Removed':
                     this.state.update(state => ({ ...state, documentCount: state.documentCount - count }));
+                    this.cache.clear();
                     break;
                 case 'Update':
                     this.state.update(state => ({ ...state, changedDocuments: state.changedDocuments + count }));
+                    this.cache.clear();
                     break;
                 case 'EndpointAdded':
                     this.state.update(state => ({ ...state, endpointCount: state.endpointCount + count }));
                     break;
                 case 'EndpointRemoved':
                     this.state.update(state => ({ ...state, endpointCount: state.endpointCount - count }));
+                    this.cache.clear();
                     break;
                 case 'Reset':
                     this.state.update(state => ({ ...state, documentCount: 0, changedDocuments: 0 }));
                     this.reset.emit();
+                    this.cache.clear();
                     break;
             }
         }

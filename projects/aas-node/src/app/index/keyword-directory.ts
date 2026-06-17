@@ -9,8 +9,9 @@
 import fs from 'fs';
 import path from 'path';
 import { inject, singleton } from 'tsyringe';
+import { LOGGER, Logger } from 'aas-package';
+
 import { Variable } from '../variable.js';
-import { LOGGER, Logger } from '../logging/logger.js';
 
 @singleton()
 export class KeywordDirectory {

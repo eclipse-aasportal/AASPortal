@@ -13,7 +13,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { AASTable } from '../../../lib/components/aas-table/aas-table';
-import { NotifyService } from '../../../lib/components/notify/notify.service';
+import { NotifyService } from '../../../lib/core/notify/notify.service';
 import { createDocument } from '../../assets/test-document';
 import { createSpyObj, FakeLoader } from '../../mocks';
 import { ActivatedRoute } from '@angular/router';
@@ -32,7 +32,7 @@ describe('AASTable', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: createSpyObj<NotifyService>(['error', 'info', 'log']),
+                    useValue: createSpyObj<NotifyService>(['error', 'info']),
                 },
                 {
                     provide: ActivatedRoute,

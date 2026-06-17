@@ -168,13 +168,13 @@ export interface DirEntry {
     url: string | null;
 }
 
-/**  */
-export interface ErrorData {
-    type: string;
+/** Defines an error message. */
+export type ErrorData = {
     name: string;
     message: string;
-    args?: Record<string, string | number | boolean | undefined>;
-}
+    status: number;
+    args?: Record<string, unknown>;
+};
 
 /** Defines the message types. */
 export type MessageType = 'Error' | 'Warning' | 'Info';
@@ -211,7 +211,8 @@ export type AASNodeMessageType =
     | 'EndpointAdded'
     | 'EndpointRemoved'
     | 'EndpointUpdate'
-    | 'Reset';
+    | 'Reset'
+    | 'End';
 
 /** Server message. */
 export type AASNodeMessage = {
@@ -227,6 +228,10 @@ export type AASNodeMessage = {
       }
     | {
           type: 'EndpointAdded' | 'EndpointRemoved' | 'EndpointUpdate';
+          endpoint: AASEndpoint;
+      }
+    | {
+          type: 'End';
           endpoint: AASEndpoint;
       }
 );
@@ -258,23 +263,43 @@ export interface PagedResult<T> {
 }
 
 /**
- * Represents an application-level error with an associated name, optional HTTP status code,
- * and optional contextual arguments. Extends the built-in Error to preserve stack traces
- * and standard error behavior while carrying additional metadata for error handling and responses.
- *
- * @param name - The error name/message that describes the error.
- * @param args - Optional error message arguments (string|number|boolean).
- * @param statusCode - Optional numeric status code (e.g. HTTP status). Defaults to 500.
+ * Represents an application-level error.
  */
 export class ApplicationError extends Error {
+    /**
+     * Constructs a new ApplicationError instance.
+     *
+     * Initializes the error with a specific message, optional arguments for additional error context,
+     * and an optional status code (defaults to 500 if not provided). Sets the error name to the message.
+     *
+     * @param message - Describes the nature of the error.
+     * @param args - Optional contextual data related to the error message.
+     * @param statusCode - Optional HTTP or application status code associated with the error. Defaults to 500.
+     */
     public constructor(
-        name: string,
-        public readonly args?: Record<string, string | number | boolean | undefined>,
+        message: string,
+        public readonly args?: Record<string, unknown>,
         public readonly statusCode = 500,
     ) {
-        super(name);
+        super(message);
+    }
 
-        this.name = name;
+    /**
+     * Converts the ApplicationError instance into an ErrorData object.
+     *
+     * This method serializes the error details, including the error name, message, and status code,
+     * into an object conforming to the ErrorData interface. This format is suitable for transmitting
+     * error information to clients or external systems in a standardized way.
+     *
+     * @returns {ErrorData} The serialized error containing name, message, and status code.
+     */
+    public toJson(): ErrorData {
+        const data: ErrorData = { name: this.name, message: this.message, status: this.statusCode };
+        if (this.args) {
+            data.args = this.args;
+        }
+
+        return data;
     }
 }
 

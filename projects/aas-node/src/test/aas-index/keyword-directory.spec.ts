@@ -7,12 +7,13 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
+import { fileURLToPath } from 'url';
 import { describe, beforeEach, it, expect, Mocked } from 'vitest';
+import { Logger } from 'aas-package';
+
 import { KeywordDirectory } from '../../app/index/keyword-directory.js';
-import { Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { createSpyObj } from '../mocks.js';
-import { fileURLToPath } from 'url';
 
 describe('KeywordDirectory', () => {
     let keywords: KeywordDirectory;

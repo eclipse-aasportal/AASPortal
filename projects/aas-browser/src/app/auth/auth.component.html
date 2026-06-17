@@ -1,0 +1,21 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div ngbDropdown class="d-inline-block">
+    <a class="nav-link" tabindex="0" id="AID_INPUT_API_KEY" role="button" (click)="login()">
+        <div class="d-inline-flex">
+            <div class="px-2 fs-4">
+                @if (isAuthenticated()) {
+                    <i class="bi bi-unlock"></i>
+                } @else {
+                    <i class="bi bi-lock"></i>
+                }
+            </div>
+        </div>
+    </a>
+</div>

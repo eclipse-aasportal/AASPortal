@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { Logger } from '../../../app/logging/logger.js';
+import { Logger } from 'aas-package';
 import { KeywordDirectory } from '../../../app/index/keyword-directory.js';
 import { SqliteIndex } from '../../../app/index/sqlite/sqlite-index.js';
 import { createSpyObj } from '../../mocks.js';

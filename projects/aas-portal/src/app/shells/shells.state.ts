@@ -12,7 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { httpResource } from '@angular/common/http';
 import { catchError, from, map, mergeMap, Observable, of, skipWhile, Subject, switchMap } from 'rxjs';
 import { AASCursor, AASDocument, AASDocumentId, AASPagedResult } from 'aas-core';
-import { AuthService, encodeBase64Url, EndpointsApi } from 'aas-lib';
+import { AuthService, CookieService, encodeBase64Url, EndpointsApi } from 'aas-lib';
 import { FavoritesService } from './favorites.service';
 
 export type PageOptions = {
@@ -41,6 +41,7 @@ const initialData: ShellsData = {
 })
 export class ShellsState {
     private readonly filterText$ = signal(initialData.filterText);
+    private readonly cookies = inject(CookieService);
     private readonly auth = inject(AuthService);
     private readonly translate = inject(TranslateService);
     private readonly favorites = inject(FavoritesService);
@@ -74,7 +75,7 @@ export class ShellsState {
             .pipe(
                 skipWhile(ready => ready === false),
                 takeUntilDestroyed(),
-                mergeMap(() => this.auth.getCookie(cookieName)),
+                mergeMap(() => this.cookies.getCookie(cookieName)),
             )
             .subscribe(value => {
                 if (value) {
@@ -169,7 +170,7 @@ export class ShellsState {
      * @returns An Observable that resolves to void when the cookie has been set successfully.
      */
     public save(): Observable<void> {
-        return this.auth.setCookie(
+        return this.cookies.setCookie(
             cookieName,
             JSON.stringify({
                 limit: this.limit(),

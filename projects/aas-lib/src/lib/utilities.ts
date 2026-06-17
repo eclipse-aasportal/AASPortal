@@ -51,16 +51,16 @@ export function messageToString(message: unknown, translate: TranslateService): 
     let text: string;
     if (message instanceof ApplicationError) {
         text = translate.instant(message.message, message.args);
-    } else if (message instanceof Error) {
-        text = message.message;
     } else if (typeof message === 'string') {
         text = message;
     } else if (message instanceof HttpErrorResponse) {
         if (isErrorData(message.error)) {
             text = translate.instant(message.error.message, message.error.args);
         } else {
-            text = message.message ?? `${message.status} ${message.statusText}`;
+            text = message.message ?? `${message.status} ${message.message}`;
         }
+    } else if (message instanceof Error) {
+        text = message.message;
     } else if (isErrorData(message)) {
         text = translate.instant(message.message, message.args);
     } else {
