@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,14 +10,15 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { lastValueFrom, of } from 'rxjs';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { AuthService } from 'aas-lib';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { AuthService, CookieService } from 'aas-lib';
 import { AASDocument } from 'aas-core';
 import { FavoritesList, FavoritesService, FavoritesState } from '../../app/shells/favorites.service';
 import { createSpyObj, FakeLoader } from '../mocks';
 
 describe('FavoritesService', () => {
     let service: FavoritesService;
+    let cookies: Mocked<CookieService>;
     let auth: Mocked<AuthService>;
     const favorite: AASDocument = {
         address: 'http://localhost/aas',
@@ -42,10 +43,11 @@ describe('FavoritesService', () => {
     };
 
     beforeEach(() => {
-        auth = createSpyObj<AuthService>(['getCookie', 'setCookie', 'deleteCookie'], { ready: of(true) });
-        auth.getCookie.mockReturnValue(of(JSON.stringify(state)));
-        auth.setCookie.mockReturnValue(of(void 0));
-        auth.deleteCookie.mockReturnValue(of(void 0));
+        cookies = createSpyObj<CookieService>(['getCookie', 'setCookie', 'deleteCookie']);
+        cookies.getCookie.mockReturnValue(of(JSON.stringify(state)));
+        cookies.setCookie.mockReturnValue(of(void 0));
+        cookies.deleteCookie.mockReturnValue(of(void 0));
+        auth = createSpyObj<AuthService>([], { ready: of(true) });
 
         TestBed.configureTestingModule({
             providers: [
@@ -54,15 +56,17 @@ describe('FavoritesService', () => {
                     provide: AuthService,
                     useValue: auth,
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                TranslateModule.forRoot({
+                {
+                    provide: CookieService,
+                    useValue: cookies,
+                },
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
         });
 
@@ -134,7 +138,7 @@ describe('FavoritesService', () => {
     describe('save', () => {
         it('saves the current favorites lists', async () => {
             await lastValueFrom(service.save());
-            expect(auth.setCookie).toHaveBeenCalledWith('v2.Favorites', JSON.stringify(state));
+            expect(cookies.setCookie).toHaveBeenCalledWith('v2.Favorites', JSON.stringify(state));
         });
     });
 });

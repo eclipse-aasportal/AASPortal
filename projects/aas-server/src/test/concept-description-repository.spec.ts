@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -12,26 +12,22 @@ import { fileURLToPath } from 'node:url';
 
 import { Variable } from '../app/variable.js';
 import { ConceptDescriptionRepository } from '../app/concept-description-repository.js';
-import { HttpCache } from '../app/http-cache.js';
 import { createDatabase, createSpyObj } from './mocks.js';
 
 describe('ConceptDescriptionRepository', () => {
     let variable: Variable;
-    let cache: HttpCache;
 
     beforeEach(() => {
         variable = createSpyObj<Variable>(
             {},
             { DATA: fileURLToPath(new URL('./assets/tmp/data', import.meta.url)), PAGE_SIZE: 100, CACHE_SIZE: 100 },
         );
-
-        cache = new HttpCache(variable);
     });
 
     describe('getConceptDescriptions', () => {
         it('gets all concept descriptions', async () => {
             const db = await createDatabase();
-            const repository = new ConceptDescriptionRepository(variable, db, cache);
+            const repository = new ConceptDescriptionRepository(variable, db);
             const result = await repository.getConceptDescriptions();
             expect(result.result.length).toBe(19);
         });
@@ -40,7 +36,7 @@ describe('ConceptDescriptionRepository', () => {
     describe('getConceptDescription', () => {
         it('gets a concept description', async () => {
             const db = await createDatabase();
-            const repository = new ConceptDescriptionRepository(variable, db, cache);
+            const repository = new ConceptDescriptionRepository(variable, db);
             const cd = await repository.getConceptDescription(
                 'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassificationSystem',
             );
@@ -52,7 +48,7 @@ describe('ConceptDescriptionRepository', () => {
 
         it('throws an Error (unknown concept description)', async () => {
             const db = await createDatabase();
-            const repository = new ConceptDescriptionRepository(variable, db, cache);
+            const repository = new ConceptDescriptionRepository(variable, db);
             await expect(repository.getConceptDescription('unknown')).rejects.toThrow();
         });
     });
@@ -60,7 +56,7 @@ describe('ConceptDescriptionRepository', () => {
     describe('deleteConceptDescription', () => {
         it('gets a concept description', async () => {
             const db = await createDatabase();
-            const repository = new ConceptDescriptionRepository(variable, db, cache);
+            const repository = new ConceptDescriptionRepository(variable, db);
             await expect(
                 repository.deleteConceptDescription(
                     'www.vdi2770.com/blatt1/Entwurf/Okt18/cd/DocumentClassification/ClassificationSystem',
@@ -70,7 +66,7 @@ describe('ConceptDescriptionRepository', () => {
 
         it('throws an Error (unknown concept description)', async () => {
             const db = await createDatabase();
-            const repository = new ConceptDescriptionRepository(variable, db, cache);
+            const repository = new ConceptDescriptionRepository(variable, db);
             await expect(repository.deleteConceptDescription('unknown')).rejects.toThrow();
         });
     });

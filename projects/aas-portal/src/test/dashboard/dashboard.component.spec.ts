@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,11 +10,9 @@ import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest'
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
-import { EMPTY, Subject } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { WebSocketSubject } from 'rxjs/webSocket';
-import { WebSocketData } from 'aas-core';
-import { NotifyService, StartService, WebSocketFactoryService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
+import { NotifyService, StartService, WebSocketService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
 
 import { DashboardComponent } from '../../app/dashboard/dashboard.component';
 import { DashboardApiService } from '../../app/dashboard/dashboard-api.service';
@@ -23,7 +21,8 @@ import { DashboardChartItem, DashboardState } from '../../app/dashboard/dashboar
 import { ChartEditComponent } from '../../app/dashboard/chart-edit/chart-edit.component';
 
 import data from '../assets/test-pages.json';
-import { createSpyObj, FakeLoader } from '../mocks';
+import { createSpyObj, FakeLoader, MockWebSocketService } from '../mocks';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-chart-edit',
@@ -38,19 +37,15 @@ export class TestChartEditComponent {
 }
 
 describe('DashboardComponent', () => {
-    let webSocketSubject: WebSocketSubject<WebSocketData>;
-    let webSocketFactory: Mocked<WebSocketFactoryService>;
     let start: Mocked<StartService>;
     let service: Mocked<DashboardService>;
     let window: Mocked<WindowService>;
+    let modal: Mocked<NgbModal>;
 
     beforeEach(async () => {
-        webSocketSubject = new Subject<WebSocketData>() as unknown as WebSocketSubject<WebSocketData>;
-        webSocketFactory = createSpyObj<WebSocketFactoryService>(['create']);
-        webSocketFactory.create.mockReturnValue(webSocketSubject);
         start = createSpyObj<StartService>(['add', 'save']);
 
-        vi.useFakeTimers
+        vi.useFakeTimers();
 
         HTMLCanvasElement.prototype.getContext = () => {
             return null;
@@ -70,11 +65,13 @@ describe('DashboardComponent', () => {
             innerWidth: 700,
         });
 
+        modal = createSpyObj<NgbModal>(['open']);
+
         await TestBed.configureTestingModule({
             providers: [
                 {
-                    provide: WebSocketFactoryService,
-                    useValue: webSocketFactory,
+                    provide: WebSocketService,
+                    useValue: new MockWebSocketService(),
                 },
                 {
                     provide: NotifyService,
@@ -99,6 +96,10 @@ describe('DashboardComponent', () => {
                 {
                     provide: DashboardService,
                     useValue: service,
+                },
+                {
+                    provide: NgbModal,
+                    useValue: modal,
                 },
                 provideRouter([]),
                 provideZonelessChangeDetection(),

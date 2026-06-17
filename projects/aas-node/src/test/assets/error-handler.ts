@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -18,7 +18,7 @@ export const errorHandler = (err: Error, req: Request, res: Response): void => {
             details: err?.fields,
         });
     } else if (err instanceof ApplicationError) {
-        if (err.name === ERRORS.UnauthorizedAccess) {
+        if (err.name === ERRORS.UNAUTHORIZED) {
             res.status(401).json({
                 message: 'Unauthorized',
             });

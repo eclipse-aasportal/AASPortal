@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -201,10 +201,9 @@ export function getEndpointType(url: string | URL): AASEndpointType {
  * @returns `true` if the value appears to be an ErrorData; otherwise `false`.
  */
 export function isErrorData(value: unknown): value is ErrorData {
-    if (!value) {
+    if (!value || typeof value !== 'object') {
         return false;
     }
 
-    const errorData = value as ErrorData;
-    return errorData.message !== undefined && errorData.name !== undefined && errorData.type !== undefined;
+    return typeof (value as ErrorData).message === 'string' && typeof (value as ErrorData).name === 'string';
 }

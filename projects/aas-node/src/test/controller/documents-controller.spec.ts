@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -13,15 +13,12 @@ import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import { AASCursor, AASPagedResult } from 'aas-core';
-import { encodeBase64Url } from 'aas-package';
+import { encodeBase64Url, LOGGER, Logger } from 'aas-package';
 
-import { LOGGER, Logger } from '../../app/logging/logger.js';
-import { AuthService } from '../../app/auth/auth-service.js';
 import { AASProvider } from '../../app/provider/aas-provider.js';
 import { sampleDocument } from '../assets/sample-document.js';
 import { createSpyObj } from '../mocks.js';
 import { Variable } from '../../app/variable.js';
-import { editorPayload, getToken } from '../assets/json-web-token.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../assets/error-handler.js';
@@ -29,15 +26,13 @@ import { errorHandler } from '../assets/error-handler.js';
 describe('DocumentsController', () => {
     let app: Express;
     let logger: Logger;
-    let auth: Mocked<AuthService>;
     let aasProvider: Mocked<AASProvider>;
     let variable: Mocked<Variable>;
     let authentication: Mocked<Authentication>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
-        auth = createSpyObj<AuthService>(['hasUser', 'login', 'getCookie', 'getCookies', 'setCookie', 'deleteCookie']);
+        variable = createSpyObj<Variable>({}, {});
 
         aasProvider = createSpyObj<AASProvider>([
             'updateDocument',
@@ -52,10 +47,9 @@ describe('DocumentsController', () => {
             'reset',
         ]);
 
-        authentication = createSpyObj<Authentication>(['check']);
-        authentication.check.mockResolvedValue(editorPayload);
+        authentication = createSpyObj<Authentication>(['authentication']);
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
 
-        container.registerInstance(AuthService, auth);
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
         container.registerInstance(AASProvider, aasProvider);
@@ -73,9 +67,9 @@ describe('DocumentsController', () => {
 
     it('getDocument: /api/v1/documents/{id}', async () => {
         aasProvider.getDocument.mockResolvedValue(sampleDocument);
-        const response = await request(app)
-            .get('/api/v1/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA')
-            .set('Authorization', `Bearer ${getToken()}`);
+        const response = await request(app).get(
+            '/api/v1/documents/aHR0cDovL2N1c3RvbWVyLmNvbS9hYXMvOTE3NV83MDEzXzcwOTFfOTE2OA',
+        );
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(sampleDocument);
@@ -84,9 +78,9 @@ describe('DocumentsController', () => {
 
     it('getDocument: /api/v1/documents/asset/{id}', async () => {
         aasProvider.getDocument.mockResolvedValue(sampleDocument);
-        const response = await request(app)
-            .get('/api/v1/documents/asset/aHR0cDovL2N1c3RvbWVyLmNvbS9hc3NldHMvS0hCVlpKU1FLSVk')
-            .set('Authorization', `Bearer ${getToken()}`);
+        const response = await request(app).get(
+            '/api/v1/documents/asset/aHR0cDovL2N1c3RvbWVyLmNvbS9hc3NldHMvS0hCVlpKU1FLSVk',
+        );
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(sampleDocument);
@@ -98,10 +92,7 @@ describe('DocumentsController', () => {
         aasProvider.getDocuments.mockResolvedValue(page);
         const cursor = encodeBase64Url(JSON.stringify({ previous: null, limit: 10 } as AASCursor));
         const filter = encodeBase64Url('#prop:Name=Value');
-        const response = await request(app)
-            .get(`/api/v1/documents?cursor=${cursor}&filter=${filter}`)
-            .set('Authorization', `Bearer ${getToken()}`);
-
+        const response = await request(app).get(`/api/v1/documents?cursor=${cursor}&filter=${filter}`);
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(page);
         expect(aasProvider.getDocuments).toHaveBeenCalled();

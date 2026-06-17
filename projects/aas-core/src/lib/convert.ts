@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -12,6 +12,7 @@ import {
     ConceptDescription,
     DataTypeDefXsd,
     Environment,
+    Identifiable,
     LangString,
     Submodel,
     SubmodelElement,
@@ -257,6 +258,10 @@ export function convertToString(value: unknown, localeId?: string): string {
 
     if (Array.isArray(value)) {
         return `[${getItems(value).join(', ')}]`;
+    }
+
+    if (value instanceof Error) {
+        return value.message;
     }
 
     if (typeof value === 'object') {
@@ -889,6 +894,10 @@ export function toEnvironment(value: types.Environment): Environment {
     return jsonization.toJsonable(value) as Environment;
 }
 
+export function toIdentifiable(value: types.IIdentifiable): Identifiable {
+    return jsonization.toJsonable(value) as unknown as Identifiable;
+}
+
 export function toAssetAdministrationShell(value: types.AssetAdministrationShell): AssetAdministrationShell {
     return jsonization.toJsonable(value) as unknown as AssetAdministrationShell;
 }
@@ -903,6 +912,18 @@ export function toConceptDescription(value: types.ConceptDescription): ConceptDe
 
 export function toSubmodelElement(value: types.ISubmodelElement): SubmodelElement {
     return jsonization.toJsonable(value) as unknown as SubmodelElement;
+}
+
+export function fromAssetAdministrationShell(value: AssetAdministrationShell): types.AssetAdministrationShell {
+    return jsonization.assetAdministrationShellFromJsonable(value as unknown as jsonization.JsonObject).mustValue();
+}
+
+export function fromSubmodel(value: Submodel): types.Submodel {
+    return jsonization.submodelFromJsonable(value as unknown as jsonization.JsonObject).mustValue();
+}
+
+export function fromConceptDescription(value: ConceptDescription): types.ConceptDescription {
+    return jsonization.conceptDescriptionFromJsonable(value as unknown as jsonization.JsonObject).mustValue();
 }
 
 /**

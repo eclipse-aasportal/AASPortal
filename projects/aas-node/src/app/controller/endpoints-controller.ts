@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -41,7 +41,7 @@ export class EndpointsController extends Controller {
      * @returns All current available endpoints.
      */
     @Get('')
-    @Security('bearerAuth', ['reader', 'editor', 'admin'])
+    @Security('oauth2', ['reader', 'editor', 'admin'])
     @OperationId('getEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
         return await this.aasProvider.getEndpoints();
@@ -73,7 +73,7 @@ export class EndpointsController extends Controller {
      * @param endpoint The endpoint data.
      */
     @Post('')
-    @Security('bearerAuth', ['editor', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('addEndpoint')
     public async addEndpoint(@Body() endpoint: AASEndpoint): Promise<void> {
         await this.aasProvider.addEndpoint(endpoint);
@@ -85,7 +85,7 @@ export class EndpointsController extends Controller {
      * @param endpoint The endpoint to update.
      */
     @Put('{name}')
-    @Security('bearerAuth', ['editor', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('updateEndpoint')
     public async updateEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         if (decodeBase64Url(name) !== endpoint.name) {
@@ -100,7 +100,7 @@ export class EndpointsController extends Controller {
      * @param name The endpoint name.
      */
     @Delete('{name}')
-    @Security('bearerAuth', ['editor', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('deleteEndpoint')
     public async deleteEndpoint(@Path() name: string): Promise<void> {
         await this.aasProvider.removeEndpoint(decodeBase64Url(name));
@@ -110,7 +110,7 @@ export class EndpointsController extends Controller {
      * @summary Resets the endpoint configuration.
      */
     @Delete('')
-    @Security('bearerAuth', ['editor', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('reset')
     public async reset(): Promise<void> {
         await this.aasProvider.reset();
@@ -121,7 +121,7 @@ export class EndpointsController extends Controller {
      * @param name The endpoint name (Base64-URL encoded).
      */
     @Put('{name}/scan')
-    @Security('bearerAuth', ['editor', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('startEndpointScan')
     public async startEndpointScan(@Path() name: string): Promise<void> {
         await this.aasProvider.startEndpointScan(decodeBase64Url(name));
@@ -149,7 +149,7 @@ export class EndpointsController extends Controller {
      * @returns A readable stream.
      */
     @Get('{endpoint}/packages/{id}')
-    @Security('bearerAuth', ['reader', 'editor', 'admin'])
+    @Security('oauth2', ['reader', 'editor', 'admin'])
     @OperationId('getPackage')
     public async getPackage(@Path() endpoint: string, @Path() id: string): Promise<NodeJS.ReadableStream> {
         return await this.aasProvider.getPackage(decodeBase64Url(endpoint), decodeBase64Url(id));
@@ -161,7 +161,7 @@ export class EndpointsController extends Controller {
      * @param file The AASX package file.
      */
     @Post('{endpoint}/packages')
-    @Security('bearerAuth', ['editor', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('insertPackages')
     public async insertPackages(@Path() endpoint: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
         await this.aasProvider.insertPackages(decodeBase64Url(endpoint), file);
@@ -173,7 +173,7 @@ export class EndpointsController extends Controller {
      * @param id The AAS identifier (Base64-URL encoded).
      */
     @Delete('{endpoint}/packages/{id}')
-    @Security('bearerAuth', ['editor', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('deletePackage')
     public async deletePackage(@Path() endpoint: string, @Path() id: string): Promise<void> {
         await this.aasProvider.deletePackage(decodeBase64Url(endpoint), decodeBase64Url(id));
@@ -256,7 +256,7 @@ export class EndpointsController extends Controller {
      * @returns The messages of the update process.
      */
     @Put('{endpoint}/documents/{id}')
-    @Security('bearerAuth', ['editor', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('updateDocument')
     public async updateDocument(
         @Path() endpoint: string,
@@ -274,7 +274,7 @@ export class EndpointsController extends Controller {
      * @returns The executed `Operation`.
      */
     @Post('{endpoint}/documents/{id}/invoke')
-    @Security('bearerAuth', ['editor', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('invokeOperation')
     public async invokeOperation(
         @Path() endpoint: string,

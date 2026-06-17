@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,10 +10,13 @@ export const ERROR = {
     AAS_ALREADY_EXISTS: 'Error.AAS_ALREADY_EXISTS',
     AAS_DOES_NOT_EXIST: 'Error.AAS_DOES_NOT_EXIST',
     AASX_PACKAGE_DOES_NOT_EXIST: 'Error.AASX_PACKAGE_DOES_NOT_EXISTs',
+    BAD_REQUEST: 'Error.BAD_REQUEST',
     CONCEPT_DESCRIPTION_ALREADY_EXISTS: 'Error.CONCEPT_DESCRIPTION_ALREADY_EXISTS',
     CONCEPT_DESCRIPTION_DOES_NOT_EXIST: 'Error.CONCEPT_DESCRIPTION_DOES_NOT_EXIST',
     DESERIALIZATION_ERROR: 'Error.DESERIALIZATION_ERROR',
     FILE_HAS_NO_ATTACHMENT: 'Error.FILE_HAS_NO_ATTACHMENT',
+    INTERNAL_SERVER_ERROR: 'Error.INTERNAL_SERVER_ERROR',
+    INVALID_ASSET_ID: 'Error.INVALID_ASSET_ID',
     INVALID_ID_SHORT_PATH: 'Error.INVALID_ID_SHORT_PATH',
     INVALID_OPERATION: 'Error.INVALID_OPERATION',
     INVALID_PACKAGE_ID: 'Error.INVALID_PACKAGE_ID',

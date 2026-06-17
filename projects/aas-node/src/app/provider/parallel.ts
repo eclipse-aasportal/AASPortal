@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -12,9 +12,9 @@ import { Worker, SHARE_ENV } from 'worker_threads';
 import fs from 'fs';
 import path from 'path/posix';
 import { noop } from 'aas-core';
+import { LOGGER, Logger } from 'aas-package';
 
 import { ScanResultKind, ScanResult, WorkerData } from '../types.js';
-import { LOGGER, Logger } from '../logging/logger.js';
 import { Variable } from '../variable.js';
 
 /** Represents a worker task for scanning an endpoint. */
@@ -35,7 +35,6 @@ class WorkerTask extends EventEmitter {
 
     public execute(worker: Worker): void {
         this._worker = worker;
-
         worker.on('message', this.workerOnMessage);
         worker.on('error', this.workerOnError);
         worker.on('exit', this.workerOnExit);
@@ -47,6 +46,7 @@ class WorkerTask extends EventEmitter {
             this._worker.off('message', this.workerOnMessage);
             this._worker.off('exit', this.workerOnExit);
             this._worker.off('error', this.workerOnError);
+            this._worker = undefined;
         }
     }
 
@@ -76,7 +76,7 @@ class WorkerTask extends EventEmitter {
 export class Parallel extends EventEmitter {
     private readonly script: string;
     private readonly waiting = new Array<WorkerTask>();
-    private readonly pool = new Map<Worker, boolean>();
+    private readonly pool = new Map<Worker, WorkerTask | null>();
 
     public constructor(
         @inject(LOGGER) private readonly logger: Logger,
@@ -84,7 +84,7 @@ export class Parallel extends EventEmitter {
     ) {
         super();
 
-        this.script = path.resolve(this.variable.CONTENT_ROOT, 'aas-scan-worker.js');
+        this.script = path.resolve(this.variable.CONTENT_ROOT, 'aas-scan.js');
         if (!fs.existsSync(this.script)) {
             this.logger.error(`${this.script} does not exist.`);
         }
@@ -98,9 +98,10 @@ export class Parallel extends EventEmitter {
         const task = new WorkerTask(data);
         task.on('message', this.taskOnMessage);
         task.on('end', this.taskOnEnd);
+        task.on('exit', this.taskOnExit);
         task.on('error', this.taskOnError);
 
-        const worker = this.nextWorker();
+        const worker = this.nextWorker(task);
         if (worker) {
             task.execute(worker);
         } else {
@@ -108,17 +109,23 @@ export class Parallel extends EventEmitter {
         }
     }
 
-    private nextWorker(): Worker | undefined {
-        for (const entry of this.pool) {
-            if (entry[1] === true) {
-                this.pool.set(entry[0], false);
-                return entry[0];
+    public async terminate(): Promise<void> {
+        await Promise.allSettled(
+            [...this.pool].filter(([, task]) => task !== null).map(([worker]) => worker.terminate()),
+        );
+    }
+
+    private nextWorker(task: WorkerTask): Worker | undefined {
+        for (const [worker, t] of this.pool) {
+            if (t === null) {
+                this.pool.set(worker, task);
+                return worker;
             }
         }
 
         if (this.pool.size < this.variable.MAX_WORKERS) {
             const worker = new Worker(this.script, { env: SHARE_ENV });
-            this.pool.set(worker, false);
+            this.pool.set(worker, task);
             return worker;
         }
 
@@ -132,45 +139,63 @@ export class Parallel extends EventEmitter {
     private taskOnEnd = (result: ScanResult, task: WorkerTask): void => {
         this.emit('end', result);
 
-        if (task) {
-            const worker = task.worker;
-            task.off('message', this.taskOnMessage);
-            task.off('end', this.taskOnEnd);
-            task.off('error', this.taskOnError);
-            task.destroy();
-            if (worker) {
-                if (this.waiting.length > 0) {
-                    const nextTask = this.waiting.shift();
-                    if (nextTask) {
-                        nextTask.execute(worker);
-                    }
-                } else {
-                    this.pool.set(worker, true);
+        if (!task) {
+            return;
+        }
+
+        const worker = task.worker;
+        task.off('message', this.taskOnMessage);
+        task.off('end', this.taskOnEnd);
+        task.off('exit', this.taskOnExit);
+        task.off('error', this.taskOnError);
+        task.destroy();
+        if (worker) {
+            if (this.waiting.length > 0) {
+                const nextTask = this.waiting.shift();
+                if (nextTask) {
+                    nextTask.execute(worker);
                 }
+            } else {
+                this.pool.set(worker, null);
             }
         }
     };
 
-    private taskOnError = (error: Error, task: WorkerTask): void => {
+    private readonly taskOnExit = (code: number, task: WorkerTask): void => {
+        this.logger.info(`Task ${task.data.taskId} exited with code ${code}.`);
+        if (!task) {
+            return;
+        }
+
+        this.destroyTask(task);
+    };
+
+    private readonly taskOnError = (error: Error, task: WorkerTask): void => {
         this.logger.error(error);
+        if (!task) {
+            return;
+        }
 
+        this.destroyTask(task);
+    };
+
+    private destroyTask(task: WorkerTask): void {
         try {
-            if (task) {
-                task.off('message', this.taskOnMessage);
-                task.off('end', this.taskOnEnd);
-                task.off('error', this.taskOnError);
-                task.destroy();
-                if (task.worker) {
-                    this.pool.delete(task.worker);
-                }
+            task.off('message', this.taskOnMessage);
+            task.off('end', this.taskOnEnd);
+            task.off('exit', this.taskOnExit);
+            task.off('error', this.taskOnError);
+            task.destroy();
+            if (task.worker) {
+                this.pool.delete(task.worker);
+            }
 
-                const index = this.waiting.indexOf(task);
-                if (index >= 0) {
-                    this.waiting.splice(index, 1);
-                }
+            const index = this.waiting.indexOf(task);
+            if (index >= 0) {
+                this.waiting.splice(index, 1);
             }
         } catch {
             noop();
         }
-    };
+    }
 }

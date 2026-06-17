@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,10 +8,11 @@
 
 import { DependencyContainer } from 'tsyringe';
 import path from 'path/posix';
+import { LOGGER, Logger } from 'aas-package';
+
 import { AASIndex } from './aas-index.js';
 import { Variable } from '../variable.js';
 import { MySqlIndex } from './mysql/mysql-index.js';
-import { LOGGER, Logger } from '../logging/logger.js';
 import { urlToString } from '../utilities.js';
 import { KeywordDirectory } from './keyword-directory.js';
 import { SqliteIndex } from './sqlite/sqlite-index.js';

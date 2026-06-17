@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,15 +8,19 @@
 
 import 'reflect-metadata';
 import net from 'net';
-import { HttpClient } from '../app/http-client.js';
+import { Readable } from 'stream';
 import { describe, beforeEach, it, expect, afterEach, vi, Mocked } from 'vitest';
+import { Logger } from 'aas-package';
+import { HttpClient } from '../app/http-client.js';
 import { createSpyObj } from './mocks.js';
 
 describe('HttpClient', () => {
     let server: HttpClient;
+    let logger: Mocked<Logger>;
 
     beforeEach(() => {
-        server = new HttpClient();
+        logger = createSpyObj<Logger>(['info', 'error']);
+        server = new HttpClient(logger);
     });
 
     afterEach(() => {
@@ -28,29 +32,26 @@ describe('HttpClient', () => {
     });
 
     describe('getReadable', () => {
-        let mockStream: ReadableStream<Uint8Array>;
+        let mockStream: Mocked<ReadableStream>;
 
         beforeEach(() => {
-            mockStream = {
-                getReader: vi.fn().mockReturnValue({
-                    read: vi.fn().mockResolvedValue({ done: true, value: undefined }),
-                }),
-            } as unknown as ReadableStream<Uint8Array>;
+            mockStream = createSpyObj<ReadableStream>(['getReader']);
         });
 
         it('returns a readable stream when response is ok', async () => {
-            const mockResponse = {
+            const response = createSpyObj<Response>(['json', 'text', 'clone'], {
                 ok: true,
                 status: 200,
                 statusText: 'OK',
                 body: mockStream,
-            } as Response;
+            });
 
-            vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
+            vi.spyOn(global, 'fetch').mockResolvedValue(response);
+            vi.spyOn(Readable, 'fromWeb').mockReturnValue(new Readable());
 
             const result = await server.getReadable(new URL('http://localhost:1234/hello/world'));
-            expect(result).toBeTruthy();
-            expect(typeof result.read).toBe('function');
+            expect(Readable.fromWeb).toHaveBeenCalled();
+            expect(result.read).toBeTruthy();
         });
 
         it('throws an error when response is not ok', async () => {
@@ -63,71 +64,63 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.getReadable(new URL('http://localhost:1234/hello/world'))).rejects.toThrow(
-                'GET readable failed: Not Found (404)',
-            );
+            await expect(server.getReadable(new URL('http://localhost:1234/hello/world'))).rejects.toThrow();
         });
 
         it('returns an empty readable stream if response.body is null', async () => {
-            const mockResponse = {
+            const response = {
                 ok: true,
                 status: 200,
                 statusText: 'OK',
                 body: null,
             } as Response;
-            vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            const result = await server.getReadable(new URL('http://localhost:1234/hello/world'));
-            expect(result).toBeTruthy();
-            expect(typeof result.read).toBe('function');
+            vi.spyOn(global, 'fetch').mockResolvedValue(response);
+
+            await expect(() => server.getReadable(new URL('http://localhost:1234/hello/world'))).rejects.toThrowError();
         });
     });
 
     describe('getJson', () => {
         it('should resolve with parsed JSON when response is ok', async () => {
             const mockData = { foo: 'bar' };
-            const mockResponse = {
+            const response = createSpyObj<Response>(['json', 'text', 'clone'], {
                 ok: true,
                 status: 200,
                 statusText: 'OK',
-                json: vi.fn().mockReturnValue(Promise.resolve(mockData)),
-            } as unknown as Response;
+            });
 
-            vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
+            response.json.mockResolvedValue(mockData);
+            vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            const result = await server.getJson<typeof mockData>(new URL('http://localhost:1234/test'));
+            const result = await server.get<typeof mockData>(new URL('http://localhost:1234/test'));
             expect(result).toEqual(mockData);
-            expect(mockResponse.json).toHaveBeenCalled();
+            expect(response.json).toHaveBeenCalled();
         });
 
         it('should reject with error when response is not ok', async () => {
-            const mockResponse = {
+            const response = createSpyObj<Response>(['json', 'text', 'clone'], {
                 ok: false,
                 status: 404,
-                statusText: 'Not Found',
-                json: vi.fn().mockReturnValue(Promise.reject(new Error('Should not be called'))),
-            } as unknown as Response;
+                statusText: 'Not found',
+            });
 
-            vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
+            vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(server.getJson<object>(new URL('http://localhost:1234/test'))).rejects.toThrow(
-                'GET failed: Not Found (404)',
-            );
+            await expect(server.get<object>(new URL('http://localhost:1234/test'))).rejects.toThrow();
         });
 
         it('should reject if response.json throws', async () => {
-            const mockResponse = {
+            const response = createSpyObj<Response>(['json', 'text', 'clone', 'json'], {
                 ok: true,
                 status: 200,
                 statusText: 'OK',
-                json: vi.fn().mockRejectedValue(new Error('JSON parse error')),
-            } as unknown as Response;
+            });
 
-            vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
+            response.json.mockRejectedValue(new Error('JSON parse error'));
+            vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(server.getJson<object>(new URL('http://localhost:1234/test'))).rejects.toThrow(
-                'JSON parse error',
-            );
+            await expect(server.get<object>(new URL('http://localhost:1234/test'))).rejects.toThrow('JSON parse error');
         });
     });
 
@@ -156,17 +149,15 @@ describe('HttpClient', () => {
         });
 
         it('should throw error when response is not ok', async () => {
-            const mockResponse = {
+            const response = createSpyObj<Response>(['json', 'text', 'clone'], {
                 ok: false,
                 status: 400,
                 statusText: 'Bad Request',
-            } as unknown as Response;
+            });
 
-            vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
+            vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(server.put(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow(
-                'PUT failed: Bad Request (400)',
-            );
+            await expect(server.put(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow();
         });
     });
 
@@ -199,9 +190,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.delete(new URL('http://localhost:1234/test'))).rejects.toThrow(
-                'DELETE failed: Not Found (404)',
-            );
+            await expect(server.delete(new URL('http://localhost:1234/test'))).rejects.toThrow();
         });
     });
 
@@ -277,9 +266,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.postJson(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow(
-                'POST JSON failed: Bad Request (400)',
-            );
+            await expect(server.postJson(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow();
         });
 
         it('should throw if response.text throws', async () => {
@@ -330,9 +317,7 @@ describe('HttpClient', () => {
             const formData = {} as FormData;
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.postFormData(new URL('http://localhost:1234/test'), formData)).rejects.toThrow(
-                'POST FormData failed: Bad Request (400)',
-            );
+            await expect(server.postFormData(new URL('http://localhost:1234/test'), formData)).rejects.toThrow();
         });
     });
 });

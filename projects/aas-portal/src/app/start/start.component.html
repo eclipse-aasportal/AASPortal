@@ -1,40 +1,66 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
  !---------------------------------------------------------------------------->
 
 <div id="start-page" class="overflow-auto h-100 px-2">
-    @if (isEmpty()){
-    <div id="AID_MD_CONTENT" [innerHTML]="welcome()"></div>
-    } @else {
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
-        @for (item of items(); track item; let i = $index) {
-        <div class="p-2 rounded col" [class.bg-info-subtle]="item.selected()" style="min-width: 380px;">
-            <div class="card" (click)="toggleSelected($event, item)" tabindex="0">
-                <ng-container [ngComponentOutlet]="item.component"
-                    [ngComponentOutletInputs]="item.inputs"></ng-container>
+    @if (isEmpty()) {
+        @let html = welcome();
+        @if (html) {
+            <div id="AID_MD_CONTENT" [innerHTML]="html"></div>
+        } @else {
+            <div class="position-absolute top-50 start-50 translate-middle">
+                <div class="spinner-border text-primary fhg-spinner-lg" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             </div>
-        </div>
         }
-    </div>
+    } @else {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+            @for (item of items(); track item; let i = $index) {
+                <div class="p-2 rounded col" [class.bg-info-subtle]="item.selected()" style="min-width: 380px">
+                    <div class="card" (click)="toggleSelected($event, item)" tabindex="0">
+                        <ng-container
+                            [ngComponentOutlet]="item.component"
+                            [ngComponentOutletInputs]="item.inputs"
+                        ></ng-container>
+                    </div>
+                </div>
+            }
+        </div>
     }
 </div>
 
-<ng-template #startToolbar>
+<ng-template #toolbar>
     <div class="input-group me-2 my-1">
-        <button id="AID_REMOVE" class="btn btn-primary" type="button" (click)="remove().subscribe()"
-            [disabled]="!someSelected()">
+        <button
+            id="AID_REMOVE"
+            class="btn btn-primary"
+            type="button"
+            (click)="remove().subscribe()"
+            [disabled]="!someSelected()"
+        >
             <i class="bi bi-trash"></i>
         </button>
-        <button id="AID_MOVE_LEFT" class="btn btn-primary" type="button" (click)="moveLeft().subscribe()"
-            [disabled]="!canMoveLeft()">
+        <button
+            id="AID_MOVE_LEFT"
+            class="btn btn-primary"
+            type="button"
+            (click)="moveLeft().subscribe()"
+            [disabled]="!canMoveLeft()"
+        >
             <i class="bi bi-arrow-left"></i>
         </button>
-        <button id="AID_MOVE_RIGHT" class="btn btn-primary" type="button" (click)="moveRight().subscribe()"
-            [disabled]="!canMoveRight()">
+        <button
+            id="AID_MOVE_RIGHT"
+            class="btn btn-primary"
+            type="button"
+            (click)="moveRight().subscribe()"
+            [disabled]="!canMoveRight()"
+        >
             <i class="bi bi-arrow-right"></i>
         </button>
     </div>

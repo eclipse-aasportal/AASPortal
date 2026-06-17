@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,11 +9,11 @@
 import { Component, computed } from '@angular/core';
 import { Params } from '@angular/router';
 import { combineLatest, first, from, map, mergeMap, Observable, of, toArray } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { aas, AASDocument, getSemanticId, isEnvironment } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
 import { View } from './view';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({ selector: 'awp-leaf-view', template: '' })
 export abstract class LeafView extends View {

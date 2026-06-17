@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2023 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -22,7 +22,7 @@ await esbuild.build({
 });
 
 await esbuild.build({
-    entryPoints: ['./src/app/aas-scan-worker.ts'],
+    entryPoints: ['./src/app/aas-scan.ts'],
     outdir: './dist',
     bundle: true,
     platform: 'node',

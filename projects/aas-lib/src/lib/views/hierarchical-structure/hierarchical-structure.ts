@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -230,7 +230,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
         const update: HierarchicalNode = {
             ...item,
             symbolType: 'image',
-            symbol: document!.thumbnail,
+            symbol: document?.thumbnail ?? undefined,
             type: 'routerLink',
             name: getDisplayName(shell, document?.content, this.translate.getCurrentLang()),
             suffix: `[${document?.id}]`,

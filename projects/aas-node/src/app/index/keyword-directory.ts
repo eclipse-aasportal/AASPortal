@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,8 +9,9 @@
 import fs from 'fs';
 import path from 'path';
 import { inject, singleton } from 'tsyringe';
+import { LOGGER, Logger } from 'aas-package';
+
 import { Variable } from '../variable.js';
-import { LOGGER, Logger } from '../logging/logger.js';
 
 @singleton()
 export class KeywordDirectory {

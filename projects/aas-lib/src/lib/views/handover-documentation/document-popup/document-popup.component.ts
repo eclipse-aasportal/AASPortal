@@ -1,3 +1,11 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
 import { Component, Input } from '@angular/core';
 import { DocumentationItem } from '../handover-documentation.state';
 import { TranslateDirective, TranslateService } from '@ngx-translate/core';

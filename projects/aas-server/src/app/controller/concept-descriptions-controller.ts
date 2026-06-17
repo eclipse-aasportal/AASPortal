@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -23,8 +23,8 @@ import {
 } from 'tsoa';
 
 import { aas, jsonization, PagedResult } from 'aas-core';
+import { decodeBase64Url } from 'aas-package';
 
-import { decodeBase64Url } from '../utilities.js';
 import { ConceptDescriptionRepository } from '../concept-description-repository.js';
 
 /**
@@ -47,7 +47,7 @@ export class ConceptDescriptionsController extends Controller {
      * @returns List of Concept Descriptions.
      */
     @Get('')
-    @Security('bearerAuth', ['cd.read'])
+    @Security({ api_key: [] })
     @OperationId('GetAllConceptDescriptions')
     public getConceptDescriptions(
         @Query() limit?: number,
@@ -62,7 +62,7 @@ export class ConceptDescriptionsController extends Controller {
      * @returns Requested Concept Description.
      */
     @Get('/{id}')
-    @Security('bearerAuth', ['cd.read'])
+    @Security({ api_key: [] })
     @OperationId('GetConceptDescriptionById')
     public async getConceptDescription(@Path() id: string): Promise<aas.ConceptDescription> {
         return await this.repository.getConceptDescription(decodeBase64Url(id));
@@ -74,7 +74,7 @@ export class ConceptDescriptionsController extends Controller {
      * @returns Created Concept Description.
      */
     @Post('')
-    @Security('bearerAuth', ['cd.create'])
+    @Security({ api_key: [] })
     @OperationId('PostConceptDescription')
     @SuccessResponse('201', 'Created')
     public async addConceptDescription(
@@ -90,7 +90,7 @@ export class ConceptDescriptionsController extends Controller {
      * @param id The Concept Description’s unique id (Base64-URL encoded).
      */
     @Delete('/{id}')
-    @Security('bearerAuth')
+    @Security({ api_key: [] })
     @OperationId('DeleteConceptDescriptionById')
     public async deleteConceptDescription(@Path() id: string): Promise<void> {
         await this.repository.deleteConceptDescription(decodeBase64Url(id));

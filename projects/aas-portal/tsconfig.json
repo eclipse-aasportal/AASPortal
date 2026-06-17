@@ -4,7 +4,7 @@
     "compilerOptions": {
         "outDir": "./build",
         "lib": [
-            "ES2022",
+            "ES2024",
             "dom"
         ],
         "paths": {

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,26 +10,30 @@ import { inject, singleton } from 'tsyringe';
 import path, { join } from 'path';
 import fs from 'fs';
 
-import { aas, PagedResult, noop, ApplicationError, PackageDescription } from 'aas-core';
 import { Stats, WebSocketData } from '../types.js';
 import { Variable } from '../variable.js';
-import { ERROR } from '../error.js';
-import { DatabaseData, DatabaseKey, PackageItem } from './database-types.js';
-import { PackageTable } from './package-table.js';
+import { DatabaseData, Index, Table } from './database-types.js';
 import { SubmodelTable } from './submodel-table.js';
 import { ConceptDescriptionTable } from './concept-description-table.js';
 import { AssetAdministrationShellTable } from './asset-administration-shell-table.js';
 import { WSServer } from '../ws-server.js';
 import { SocketClient } from '../socket-client.js';
 import { DatabaseCommand } from './database-command.js';
+import { DatabaseIndex } from './database-index.js';
+import { DatabaseTable } from './database-table.js';
+import { restoreDir, restoreFile } from '../utilities.js';
 
 type Memento = {
     addedFiles?: string[];
-    deletedFiles?: string[];
+    deletedFiles?: [string, string][];
     updatedFiles?: [string, string][];
+    deletedDirs?: [string, string][];
+    updatedDirs?: [string, string][];
 };
 
 type Connection = { data: DatabaseData };
+
+const CAPACITY = 100;
 
 /**
  * Database class for managing AAS data storage and retrieval.
@@ -54,11 +58,6 @@ export class Database {
     public readonly rootDir: string;
 
     /**
-     * Table for managing packages in the database.
-     */
-    public packages!: PackageTable;
-
-    /**
      * Table for managing Asset Administration Shells in the database.
      */
     public shells!: AssetAdministrationShellTable;
@@ -72,6 +71,16 @@ export class Database {
      * Table for managing concept descriptions in the database.
      */
     public conceptDescriptions!: ConceptDescriptionTable;
+
+    /**
+     * Index for managing assets in the database.
+     */
+    public assetIndex!: DatabaseIndex;
+
+    /**
+     *Index for managing packages in the database.
+     */
+    public packageIndex!: DatabaseIndex;
 
     /**
      * Temporary directory for intermediate file storage.
@@ -143,119 +152,45 @@ export class Database {
      * @param file - The name or path of the file to mark as deleted.
      * @throws {Error} If the `deletedFiles` property in the memento is undefined.
      */
-    public fileDeleted(file: string): void {
+    public fileDeleted(backup: string, file: string): void {
         if (this.memento?.deletedFiles === undefined) {
             throw new Error('Invalid operation.');
         }
 
-        this.memento.deletedFiles.push(file);
+        this.memento.deletedFiles.push([backup, file]);
     }
 
     /**
-     * Retrieves a paginated list of package descriptions, optionally filtered by Asset Administration Shell (AAS) ID.
-     *
-     * @param limit - The maximum number of packages to return. If not provided, a default limit is used.
-     * @param cursor - An optional cursor for pagination, indicating the starting point for the next page of results.
-     * @param aasId - An optional Asset Administration Shell ID to filter packages associated with a specific AAS.
-     * @returns A promise that resolves to a paged result containing package descriptions.
+     * Marks a directory as deleted by adding its path to the `deletedDirs` array in the memento.
+     * @param dir The path of the directory to mark as deleted.
+     * @throws {Error} If the `deletedDirs` property in the memento is undefined.
      */
-    public async getPackages(
-        limit?: number,
-        cursor?: string,
-        aasId?: string,
-    ): Promise<PagedResult<PackageDescription>> {
-        await this.connection;
-        let aasKey: DatabaseKey | undefined;
-        if (aasId) {
-            aasKey = await this.shells.getKey(aasId);
+    public dirDeleted(backup: string, dir: string): void {
+        if (this.memento?.deletedDirs === undefined) {
+            throw new Error('Invalid operation.');
         }
 
-        return await this.packages.getPage(limit ?? this.variable.LIMIT, cursor, (item: PackageItem) => {
-            return aasKey === undefined || item.environment.assetAdministrationShells.indexOf(aasKey) >= 0;
-        });
+        this.memento.deletedDirs.push([backup, dir]);
     }
 
     /**
-     * Retrieves a paginated list of Asset Administration Shells.
+     * Records an updated directory by storing a tuple containing the backup and directory paths
+     * in the `updatedDirs` array of the `memento` object.
      *
-     * @param limit - Optional. The maximum number of shells to return. Defaults to a predefined limit if not specified.
-     * @param cursor - Optional. A pagination cursor indicating the starting point for the next set of results.
-     * @returns A promise that resolves to a paged result containing Asset Administration Shells.
-     */
-    public async getShells(limit?: number, cursor?: string): Promise<PagedResult<aas.AssetAdministrationShell>> {
-        await this.connection;
-        return await this.shells.getPage(limit ?? this.variable.LIMIT, cursor);
-    }
-
-    /**
-     * Retrieves an Asset Administration Shell (AAS) by its unique identifier.
+     * This method is typically used during database operations that modify directory contents,
+     * allowing the system to keep track of which directories were updated, as well as their
+     * corresponding backup paths. This facilitates rollback or commit operations.
      *
-     * @param id - The unique identifier of the Asset Administration Shell to retrieve.
-     * @returns A promise that resolves to the requested Asset Administration Shell object.
-     * @throws Will throw an error if the shell cannot be found or if there is a database access issue.
+     * @param backup - The path to the backup directory.
+     * @param dir - The path to the updated directory.
+     * @throws {Error} If the `updatedDirs` property of the memento is undefined.
      */
-    public async getShell(id: string): Promise<aas.AssetAdministrationShell> {
-        await this.connection;
-        const key = await this.shells.getKey(id);
-        return await this.shells.readJson(key);
-    }
-
-    /**
-     * Retrieves a paginated list of submodels from the database.
-     *
-     * @param limit - Optional. The maximum number of submodels to return. If not provided, a default limit is used.
-     * @param cursor - Optional. A pagination cursor indicating the starting point for the next set of results.
-     * @returns A promise that resolves to a paged result containing submodels.
-     */
-    public async getSubmodels(limit?: number, cursor?: string): Promise<PagedResult<aas.Submodel>> {
-        await this.connection;
-        return await this.submodels.getPage(limit ?? this.variable.LIMIT, cursor);
-    }
-
-    /**
-     * Retrieves a submodel by its unique identifier.
-     *
-     * @param id - The unique identifier of the submodel to retrieve.
-     * @returns A promise that resolves to the requested {@link aas.Submodel}.
-     * @throws {@link ApplicationError} If the submodel does not exist, with error code {@link ERROR.SUBMODEL_DOES_NOT_EXIST} and HTTP status 404.
-     */
-    public async getSubmodel(id: string): Promise<aas.Submodel> {
-        await this.connection;
-        const key = await this.submodels.findKey(id);
-        if (key === undefined) {
-            throw new ApplicationError(ERROR.SUBMODEL_DOES_NOT_EXIST, { id }, 404);
+    public dirUpdated(backup: string, dir: string): void {
+        if (this.memento?.updatedDirs === undefined) {
+            throw new Error('Invalid operation.');
         }
 
-        return await this.submodels.readJson(key);
-    }
-
-    /**
-     * Retrieves a paginated list of ConceptDescription objects from the database.
-     *
-     * @param limit - Optional. The maximum number of ConceptDescription items to return. If not provided, a default limit is used.
-     * @param cursor - Optional. A pagination cursor indicating the starting point for the next page of results.
-     * @returns A promise that resolves to a PagedResult containing ConceptDescription objects.
-     */
-    public async getConceptDescriptions(limit?: number, cursor?: string): Promise<PagedResult<aas.ConceptDescription>> {
-        await this.connection;
-        return await this.conceptDescriptions.getPage(limit ?? this.variable.LIMIT, cursor);
-    }
-
-    /**
-     * Retrieves a concept description by its identifier.
-     *
-     * @param id - The unique identifier of the concept description to retrieve.
-     * @returns A promise that resolves to the corresponding `aas.Submodel` object.
-     * @throws {ApplicationError} If the concept description does not exist, with error code `ERROR.CONCEPT_DESCRIPTION_DOES_NOT_EXIST` and HTTP status 404.
-     */
-    public async getConceptDescription(id: string): Promise<aas.Submodel> {
-        await this.connection;
-        const key = await this.conceptDescriptions.findKey(id);
-        if (key === undefined) {
-            throw new ApplicationError(ERROR.CONCEPT_DESCRIPTION_DOES_NOT_EXIST, { id }, 404);
-        }
-
-        return await this.conceptDescriptions.readJson(key);
+        this.memento.updatedDirs.push([backup, dir]);
     }
 
     /**
@@ -272,12 +207,35 @@ export class Database {
         this.wsServer?.notify({
             type: 'stats',
             data: {
-                packages: this.packages.size,
                 shells: this.shells.size,
                 submodels: this.submodels.size,
                 conceptDescriptions: this.conceptDescriptions.size,
             } satisfies Stats,
         });
+    }
+
+    public getIndex(index: Index): DatabaseIndex {
+        switch (index) {
+            case Index.ASSET_INDEX:
+                return this.assetIndex;
+            case Index.PACKAGE_INDEX:
+                return this.packageIndex;
+            default:
+                throw new Error('Invalid operation');
+        }
+    }
+
+    public getTable(table: Table): DatabaseTable {
+        switch (table) {
+            case Table.AAS_TABLE:
+                return this.shells;
+            case Table.SUBMODEL_TABLE:
+                return this.submodels;
+            case Table.CONCEPT_DESCRIPTION_TABLE:
+                return this.conceptDescriptions;
+            default:
+                throw new Error('Invalid operation');
+        }
     }
 
     private async executeCommand(): Promise<void> {
@@ -308,38 +266,37 @@ export class Database {
             addedFiles: [],
             deletedFiles: [],
             updatedFiles: [],
+            deletedDirs: [],
+            updatedDirs: [],
         };
     }
 
     private async commit(): Promise<void> {
         const data = (await this.connection).data;
-        await this.packages.commit();
         await this.shells.commit();
         await this.submodels.commit();
         await this.conceptDescriptions.commit();
+        await this.assetIndex.commit();
+        await this.packageIndex.commit();
 
         if (this.memento) {
             if (this.memento.deletedFiles) {
-                Promise.all(
-                    this.memento.deletedFiles.map(async deletedFile => {
-                        try {
-                            await fs.promises.unlink(deletedFile);
-                        } catch {
-                            noop();
-                        }
-                    }),
-                );
+                await Promise.allSettled(this.memento.deletedFiles.map(([backup]) => fs.promises.unlink(backup)));
             }
 
             if (this.memento.updatedFiles) {
-                Promise.all(
-                    this.memento.updatedFiles.map(async ([backup]) => {
-                        try {
-                            await fs.promises.unlink(backup);
-                        } catch {
-                            noop();
-                        }
-                    }),
+                await Promise.allSettled(this.memento.updatedFiles.map(([backup]) => fs.promises.unlink(backup)));
+            }
+
+            if (this.memento.deletedDirs) {
+                await Promise.allSettled(
+                    this.memento.deletedDirs.map(([backup]) => fs.promises.rm(backup, { recursive: true })),
+                );
+            }
+
+            if (this.memento.updatedDirs) {
+                await Promise.allSettled(
+                    this.memento.updatedDirs.map(([backup]) => fs.promises.rm(backup, { recursive: true })),
                 );
             }
 
@@ -352,34 +309,27 @@ export class Database {
     private async abort(): Promise<void> {
         const connection = await this.connection;
         connection.data = await this.read();
-        await this.packages.abort();
         await this.shells.abort();
         await this.submodels.abort();
         await this.conceptDescriptions.abort();
+        await this.assetIndex.abort();
+        await this.packageIndex.abort();
+
         if (this.memento) {
             if (this.memento.addedFiles) {
-                Promise.all(
-                    this.memento.addedFiles.map(async addedFile => {
-                        try {
-                            await fs.promises.unlink(addedFile);
-                        } catch {
-                            noop();
-                        }
-                    }),
-                );
+                await Promise.allSettled(this.memento.addedFiles.map(file => fs.promises.unlink(file)));
+            }
 
-                if (this.memento.updatedFiles) {
-                    Promise.all(
-                        this.memento.updatedFiles.map(async ([backup, dest]) => {
-                            try {
-                                await fs.promises.copyFile(backup, dest);
-                                await fs.promises.unlink(backup);
-                            } catch {
-                                noop();
-                            }
-                        }),
-                    );
-                }
+            if (this.memento.deletedFiles) {
+                await Promise.allSettled(this.memento.deletedFiles.map(([backup, file]) => restoreFile(backup, file)));
+            }
+
+            if (this.memento.updatedFiles) {
+                await Promise.allSettled(this.memento.updatedFiles.map(([backup, file]) => restoreFile(backup, file)));
+            }
+
+            if (this.memento.updatedDirs) {
+                await Promise.allSettled(this.memento.updatedDirs.map(([backup, dir]) => restoreDir(backup, dir)));
             }
 
             this.memento = undefined;
@@ -402,42 +352,43 @@ export class Database {
             data = JSON.parse((await fs.promises.readFile(file)).toString());
         } else {
             data = {
+                version: '0.9',
+                format: 'json',
                 pageSize: this.variable.PAGE_SIZE,
-                packages: {
-                    nextKey: 0,
-                    size: 0,
-                    recycled: [],
-                    capacity: 100,
-                },
                 shells: {
                     nextKey: 0,
                     size: 0,
                     recycled: [],
-                    capacity: 100,
+                    capacity: CAPACITY,
                 },
                 submodels: {
                     nextKey: 0,
                     size: 0,
                     recycled: [],
-                    capacity: 100,
+                    capacity: CAPACITY,
                 },
                 conceptDescriptions: {
                     nextKey: 0,
                     size: 0,
                     recycled: [],
-                    capacity: 100,
+                    capacity: CAPACITY,
+                },
+                assetIndex: {
+                    nextKey: 0,
+                    size: 0,
+                    recycled: [],
+                    capacity: CAPACITY,
+                },
+                packageIndex: {
+                    nextKey: 0,
+                    size: 0,
+                    recycled: [],
+                    capacity: CAPACITY,
                 },
             };
 
             await this.write(data);
         }
-
-        const packageDir = path.join(this.variable.DATA, 'packages');
-        if (!fs.existsSync(packageDir)) {
-            await fs.promises.mkdir(packageDir);
-        }
-
-        this.packages = new PackageTable(this, data.packages, data.pageSize, packageDir);
 
         const shellDir = path.join(this.variable.DATA, 'shells');
         if (!fs.existsSync(shellDir)) {
@@ -465,6 +416,34 @@ export class Database {
             conceptDescriptionDir,
         );
 
+        const assetIndexDir = path.join(this.variable.DATA, 'asset-idx');
+        if (!fs.existsSync(assetIndexDir)) {
+            await fs.promises.mkdir(assetIndexDir);
+        }
+
+        this.assetIndex = new DatabaseIndex(
+            Index.ASSET_INDEX,
+            'AssetIndex',
+            this,
+            data.assetIndex,
+            data.pageSize,
+            assetIndexDir,
+        );
+
+        const packageIndexDir = path.join(this.variable.DATA, 'package-idx');
+        if (!fs.existsSync(packageIndexDir)) {
+            await fs.promises.mkdir(packageIndexDir);
+        }
+
+        this.packageIndex = new DatabaseIndex(
+            Index.PACKAGE_INDEX,
+            'PackageIndex',
+            this,
+            data.packageIndex,
+            data.pageSize,
+            packageIndexDir,
+        );
+
         return { data };
     }
 
@@ -483,7 +462,6 @@ export class Database {
             client.notify({
                 type: 'stats',
                 data: {
-                    packages: this.packages.size,
                     shells: this.shells.size,
                     submodels: this.submodels.size,
                     conceptDescriptions: this.conceptDescriptions.size,

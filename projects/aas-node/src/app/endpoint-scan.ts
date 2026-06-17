@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,7 +8,7 @@
 
 import { inject, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
-import { LOGGER, Logger } from './logging/logger.js';
+import { LOGGER, Logger } from 'aas-package';
 import { AASDocument } from 'aas-core';
 import { ScanEndpointData, ScanEndpointResult, ScanResultKind } from './types.js';
 import { toUint8Array } from './utilities.js';
@@ -35,7 +35,13 @@ export class EndpointScan {
             scan.on('remove', this.postRemove);
             scan.on('add', this.postAdd);
             scan.on('error', this.onError);
+            this.logger.info(`Start scanning endpoint ${data.endpoint.name} with task id ${data.taskId}.`);
+            const start = Date.now();
             await scan.scanAsync(this.index, data.endpoint);
+            const duration = (Date.now() - start) / 1000;
+            this.logger.info(
+                `Finished scanning endpoint ${data.endpoint.name} with task id ${data.taskId} in ${duration} s.`,
+            );
         } finally {
             scan.off('compare', this.compare);
             scan.off('remove', this.postRemove);
@@ -44,9 +50,13 @@ export class EndpointScan {
         }
     }
 
-    private compare = (reference: AASDocument, document: AASDocument): void => {
-        if (this.documentChanged(document, reference)) {
-            this.postUpdate(document);
+    private compare = (a: AASDocument, b: AASDocument): void => {
+        if (
+            a.crc32 !== b.crc32 ||
+            a.thumbnail !== b.thumbnail ||
+            (b.timestamp && Date.now() - b.timestamp > this.variable.AAS_EXPIRES_IN)
+        ) {
+            this.postUpdate(b);
         }
     };
 
@@ -92,15 +102,4 @@ export class EndpointScan {
         const array = toUint8Array(value);
         parentPort?.postMessage(array, [array.buffer]);
     };
-
-    private documentChanged(document: AASDocument, reference: AASDocument): boolean {
-        if (
-            document.crc32 === reference.crc32 &&
-            (!reference.timestamp || Date.now() - reference.timestamp <= this.variable.AAS_EXPIRES_IN)
-        ) {
-            return false;
-        }
-
-        return true;
-    }
 }

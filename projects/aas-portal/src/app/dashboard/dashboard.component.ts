@@ -1,14 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import 'chart.js/auto';
-import { WebSocketSubject } from 'rxjs/webSocket';
-import { EMPTY, first, Observable } from 'rxjs';
+import { EMPTY, first, Observable, Subscription } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -29,7 +28,15 @@ import {
 } from '@angular/core';
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
-import { CommandHandler, NotifyService, StartService, ToolbarService, WebSocketFactoryService, WINDOW } from 'aas-lib';
+import {
+    CommandHandler,
+    NotifyService,
+    PromptDialog,
+    StartService,
+    ToolbarService,
+    WebSocketService,
+    WINDOW,
+} from 'aas-lib';
 
 import { MovePreviousCommand } from './commands/move-previous-command';
 import { MoveNextCommand } from './commands/move-next-command';
@@ -49,6 +56,7 @@ import {
     DashboardSource,
     ViewPortSize,
 } from './dashboard-types';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-dashboard',
@@ -62,13 +70,14 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     private readonly service = inject(DashboardService);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly translate = inject(TranslateService);
-    private readonly webServiceFactory = inject(WebSocketFactoryService);
+    private readonly webSocket = inject(WebSocketService);
     private readonly notify = inject(NotifyService);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
+    private readonly modal = inject(NgbModal);
     private readonly commandHandler = inject(CommandHandler);
     private readonly charts = new Map<string, ChartConfigurationTuple>();
-    private webSocketSubject: WebSocketSubject<WebSocketData> | null = null;
+    private webSocketSubscription?: Subscription;
     private live = false;
 
     public constructor() {
@@ -200,9 +209,9 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
         }
     }
 
-    public rename(): void {
+    public async rename(): Promise<void> {
         try {
-            const name = this.window.prompt(this.translate.instant('Dashboard.PROMPT_DASHBOARD_NAME'));
+            const name = await PromptDialog.open(this.modal, this.translate.instant('Dashboard.PROMPT_DASHBOARD_NAME'));
             if (name) {
                 this.commandHandler.execute(new RenamePageCommand(this.service, this.activePage(), name));
             }
@@ -277,7 +286,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                     } satisfies DashboardChart,
                     requests: this.getRequests(item.sources),
                     page: this.service.activePage().name,
-                    href: `/dashboard?page=${this.service.activePage().name}`,
+                    href: `/dashboard;page=${this.service.activePage().name}`,
                 })
             ) {
                 return EMPTY;
@@ -335,9 +344,9 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                 const chartContainers = this.chartContainers();
                 if (chartContainers) {
                     this.createCharts(chartContainers);
-                    if (this.webSocketSubject) {
+                    if (this.webSocketSubscription) {
                         for (const request of this.activePage().requests) {
-                            this.webSocketSubject.next(this.createMessage(request));
+                            this.webSocket.sendMessage(this.createMessage(request));
                         }
                     }
                 }
@@ -350,8 +359,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     private openWebSocket(): void {
         const page = this.activePage();
         if (page && page.requests && page.requests.length > 0) {
-            this.webSocketSubject = this.webServiceFactory.create();
-            this.webSocketSubject.subscribe({
+            this.webSocketSubscription = this.webSocket.getMessages().subscribe({
                 next: this.socketOnMessage,
                 error: this.socketOnError,
             });
@@ -359,9 +367,9 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     }
 
     private closeWebSocket(): void {
-        if (this.webSocketSubject) {
-            this.webSocketSubject.unsubscribe();
-            this.webSocketSubject = null;
+        if (this.webSocketSubscription) {
+            this.webSocketSubscription.unsubscribe();
+            this.webSocketSubscription = undefined;
         }
     }
 

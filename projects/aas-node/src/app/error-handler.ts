@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -13,16 +13,14 @@ import { ApplicationError } from 'aas-core';
 
 export const errorHandler = (err: unknown, _: Request, res: Response, next: NextFunction): void => {
     if (err instanceof ValidateError) {
-        res.status(422).json({
+        res.status(err.status).json({
             type: ValidateError.name,
             message: err.message,
-            name: err.name,
         });
     } else if (err instanceof ApplicationError) {
         res.status(err.statusCode).json({
             type: ApplicationError.name,
             message: err.message,
-            name: err.name,
             args: err.args,
         });
     } else if (err instanceof Error) {

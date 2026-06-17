@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -11,6 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { lastValueFrom, of } from 'rxjs';
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartComponent } from '../../app/start/start.component';
 import { createSpyObj, FakeLoader } from '../mocks';
@@ -168,19 +169,35 @@ describe('StartComponent', () => {
         expect(component.welcome()).toEqual('Welcome');
     });
 
-    // describe('remove', () => {
-    //     it('removes the selected favorite', () => {
-    //         const fixture = TestBed.createComponent(StartComponent);
-    //         favorites[1].selected.set(true);
-    //         fixture.detectChanges();
-    //         const removeButton: HTMLButtonElement = fixture.debugElement.query(By.css('#AID_REMOVE')).nativeElement;
-    //         removeButton.click();
-    //         expect(removeButton.disabled).toBeFalsy();
-    //         expect(start.remove).toHaveBeenCalled();
-    //     });
-    // });
+    describe('remove', () => {
+        it('removes the selected favorite', async () => {
+            start.save.mockReturnValue(of(void 0));
+            favorites[0].selected.set(true);
+            await lastValueFrom(component.remove());
+            expect(start.remove).toHaveBeenCalledWith(favorites[0].tile);
+            expect(start.save).toHaveBeenCalled();
+        });
+    });
 
-    // describe('moveLeft', () => {});
+    describe('moveLeft', () => {
+        it('moves the selected favorite to the left', async () => {
+            start.tiles.set(favorites.map(item => item.tile));
+            start.save.mockReturnValue(of(void 0));
+            favorites[1].selected.set(true);
+            await lastValueFrom(component.moveLeft());
+            expect(start.tiles()).toEqual([favorites[1].tile, favorites[0].tile, favorites[2].tile]);
+            expect(start.save).toHaveBeenCalled();
+        });
+    });
 
-    // describe('moveLeft', () => {});
+    describe('moveRight', () => {
+        it('moves the selected favorite to the right', async () => {
+            start.tiles.set(favorites.map(item => item.tile));
+            start.save.mockReturnValue(of(void 0));
+            favorites[1].selected.set(true);
+            await lastValueFrom(component.moveRight());
+            expect(start.tiles()).toEqual([favorites[0].tile, favorites[2].tile, favorites[1].tile]);
+            expect(start.save).toHaveBeenCalled();
+        });
+    });
 });

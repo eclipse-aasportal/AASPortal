@@ -1,14 +1,14 @@
-import { CommonModule } from '@angular/common';
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
+import { NgClass } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, map, Observable, first, combineLatest } from 'rxjs';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
@@ -48,7 +48,7 @@ import { DashboardService } from '../dashboard/dashboard.service';
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    imports: [TranslateModule, FormsModule, AASTreeComponent, CommonModule, RouterModule, NgbNavModule],
+    imports: [TranslateDirective, TranslatePipe, FormsModule, NgClass, AASTreeComponent, RouterModule, NgbNavModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**
@@ -129,11 +129,7 @@ export class AASComponent implements OnInit, OnDestroy {
     });
 
     public getSubmodels(): aas.Submodel[] | undefined {
-        if (!this.state.document()) return [];
-        if (!this.state.document()?.content) return [];
-        if (!this.state.document()?.content?.submodels) return [];
-
-        return this.state.document()?.content?.submodels;
+        return this.state.document()?.content?.submodels ?? [];
     }
 
     /**
@@ -324,7 +320,7 @@ export class AASComponent implements OnInit, OnDestroy {
             this.start.add('Favorite', `AAS#${document.endpoint}#${document.id}`, {
                 endpoint: document.endpoint,
                 id: document.id,
-                href: `/aas?endpoint=${encodeBase64Url(document.endpoint)}&id=${encodeBase64Url(document.id)}`,
+                href: `/aas;endpoint=${encodeBase64Url(document.endpoint)};id=${encodeBase64Url(document.id)}`,
             })
         ) {
             return this.start.save();
@@ -425,7 +421,6 @@ export class AASComponent implements OnInit, OnDestroy {
         // Data-related
 
         const semId = this.getSubmodelSemanticId(submodel);
-        if (!semId) return 'bi-question-circle';
 
         if (semId.toLowerCase().includes('document') || submodel.idShort.toLowerCase().includes('document'))
             return 'bi-file-earmark-richtext';
@@ -439,6 +434,10 @@ export class AASComponent implements OnInit, OnDestroy {
             return 'bi-graph-up';
         if (semId.toLowerCase().includes('structure') || submodel.idShort.toLowerCase().includes('structure'))
             return 'bi-diagram-3';
+        if (semId.toLowerCase().includes('assetstatus') || submodel.idShort.toLowerCase().includes('assetstatus'))
+            return 'bi-info-circle';
+        if (semId.toLowerCase().includes('servicerequest') || submodel.idShort.toLowerCase().includes('servicerequest'))
+            return 'bi-person-gear';
 
         return 'bi-question-circle';
     }

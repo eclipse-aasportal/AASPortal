@@ -1,12 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Readable } from 'stream';
+import fs from 'fs';
+import path from 'path';
 import {
     aas,
     ApplicationError,
@@ -29,16 +30,10 @@ import {
     types,
 } from 'aas-core';
 
+import { decodeBase64Url, encodeBase64Url } from 'aas-package';
+
 import { Cursor, ExtentModifier, LevelModifier } from './types.js';
 import { ERROR } from './error.js';
-
-export function decodeBase64Url(data: string): string {
-    return Buffer.from(data, 'base64url').toString('ascii');
-}
-
-export function encodeBase64Url(data: string): string {
-    return Buffer.from(data).toString('base64url');
-}
 
 export function generateRandomString(length: number): string {
     let text = '';
@@ -55,70 +50,12 @@ export async function generateCodeChallenge(codeVerifier: string): Promise<strin
     return encodeBase64Url(String.fromCharCode(...new Uint8Array(digest)));
 }
 
-/**
- * Converts a readable stream to a buffer.
- * @param stream The readable stream.
- * @returns The buffer.
- */
-export async function streamToBuffer(readableStream: Readable): Promise<Buffer> {
-    return new Promise<Buffer>((resolve, reject) => {
-        const chunks: Uint8Array[] = [];
-        readableStream.on('data', data => {
-            if (typeof data === 'string') {
-                chunks.push(Buffer.from(data, 'utf-8'));
-            } else if (data instanceof Buffer) {
-                chunks.push(data);
-            } else {
-                const jsonData = JSON.stringify(data);
-                chunks.push(Buffer.from(jsonData, 'utf-8'));
-            }
-        });
-
-        readableStream.on('end', () => {
-            resolve(Buffer.concat(chunks));
-        });
-
-        readableStream.on('error', reject);
-    });
-}
-
 export function toCursor(value: string | undefined): Cursor {
     if (value === undefined) {
         return {};
     }
 
     return JSON.parse(decodeBase64Url(value));
-}
-
-export function referenceToString(value: types.Reference): string {
-    return value.keys.map(key => key.value).join('.');
-}
-
-/**
- * Checks wether the Submodel with the specified identifier is referenced by the current Asset Administration Shell.
- * @param aas The current Asset Administration Shell.
- * @param smId The identifier of the Submodel.
- */
-export function checkSubmodelIsReferenced(aas: aas.AssetAdministrationShell, smId: string): never | void {
-    if (
-        !aas.submodels ||
-        !aas.submodels.flatMap(reference => reference.keys).some(key => key.type === 'Submodel' && key.value === smId)
-    ) {
-        throw new ApplicationError(ERROR.SUBMODEL_NOT_REFERENCED, { id: aas.id, submodelId: smId });
-    }
-}
-
-/**
- * Checks wether the Submodel with the specified identifier is contained in the AAS environment.
- * @param aas The current AAS environment.
- * @param id The identifier of the Submodel.
- */
-export function hasSubmodel(env: types.Environment, id: string): boolean {
-    if (!env.submodels) {
-        return false;
-    }
-
-    return env.submodels.some(submodel => submodel.id === id);
 }
 
 /**
@@ -540,6 +477,132 @@ export function serializeValue(value: unknown, dataType: types.DataTypeDefXsd): 
             throw new Error(`Unknown data type: ${dataType}`);
         }
     }
+}
+
+/**
+ * Returns all immediate child elements of the provided referable object, according to its type.
+ *
+ * - For Submodel instances, returns the list of contained submodel elements.
+ * - For SubmodelElementCollection instances, returns the array of child values.
+ * - For SubmodelElementList instances, returns the array of elements in the list.
+ * - For AnnotatedRelationshipElement instances, returns the set of annotations.
+ * - For Entity instances, returns the list of statements.
+ * - For any other type, or if the corresponding property is undefined, returns an empty array.
+ *
+ * @param referable The referable AAS object from which to obtain children.
+ * @returns An array of immediate child referables, or an empty array if none exist.
+ */
+export function getChildren(referable: types.IReferable): types.IReferable[] {
+    if (referable instanceof types.Submodel) {
+        return referable.submodelElements ?? [];
+    }
+
+    if (referable instanceof types.SubmodelElementCollection) {
+        return referable.value ?? [];
+    }
+
+    if (referable instanceof types.SubmodelElementList) {
+        return referable.value ?? [];
+    }
+
+    if (referable instanceof types.AnnotatedRelationshipElement) {
+        return referable.annotations ?? [];
+    }
+
+    if (referable instanceof types.Entity) {
+        return referable.statements ?? [];
+    }
+
+    return [];
+}
+
+/**
+ * Iterates recursively over all referable elements in a hierarchical AAS structure.
+ *
+ * This generator yields the specified root referable and then traverses its entire
+ * hierarchy in depth-first order, yielding each contained referable element exactly once.
+ *
+ * @param referable The root referable element to start traversal from.
+ * @yields Each referable element in the tree, starting with the input.
+ */
+export function* selectReferables(referable: types.IReferable): Generator<types.IReferable> {
+    const stack: types.IReferable[][] = [];
+    yield referable;
+
+    let children = getChildren(referable);
+    if (children.length > 0) {
+        stack.push(children);
+    }
+
+    while (stack.length) {
+        for (const child of stack.pop()!) {
+            yield child;
+
+            children = getChildren(child);
+            if (children.length > 0) {
+                stack.push(children);
+            }
+        }
+    }
+}
+
+/**
+ * Recursively copies a directory and its contents.
+ * @param src - Source directory path
+ * @param dest - Destination directory path
+ */
+export async function copyDirectory(src: string, dest: string): Promise<void> {
+    const srcStat = await fs.promises.stat(src);
+    if (!srcStat.isDirectory()) {
+        throw new Error(`Source path is not a directory: ${src}`);
+    }
+
+    await fs.promises.mkdir(dest, { recursive: true });
+    const entries = await fs.promises.readdir(src, { withFileTypes: true });
+    for (const entry of entries) {
+        const srcPath = path.join(src, entry.name);
+        const destPath = path.join(dest, entry.name);
+        if (entry.isDirectory()) {
+            await copyDirectory(srcPath, destPath);
+        } else if (entry.isFile()) {
+            await fs.promises.copyFile(srcPath, destPath);
+        } else if (entry.isSymbolicLink()) {
+            const linkTarget = await fs.promises.readlink(srcPath);
+            await fs.promises.symlink(linkTarget, destPath);
+        }
+    }
+}
+
+export async function restoreFile(backup: string, file: string): Promise<void> {
+    if (fs.existsSync(file)) {
+        await fs.promises.unlink(file);
+    }
+
+    await fs.promises.rename(backup, file);
+}
+
+export async function restoreDir(backup: string, dir: string): Promise<void> {
+    if (fs.existsSync(dir)) {
+        await fs.promises.rm(dir, { recursive: true });
+    }
+
+    await fs.promises.rename(backup, dir);
+}
+
+export async function getFiles(dir: string, files: fs.Dirent[] = []): Promise<fs.Dirent[]> {
+    if (!fs.existsSync(dir)) {
+        return [];
+    }
+
+    for (const entry of await fs.promises.readdir(dir, { withFileTypes: true })) {
+        if (entry.isDirectory()) {
+            await getFiles(path.join(entry.parentPath, entry.name), files);
+        } else if (entry.isFile()) {
+            files.push(entry);
+        }
+    }
+
+    return files;
 }
 
 function referenceToValueSerialization(value: aas.Reference): jsonization.JsonObject {

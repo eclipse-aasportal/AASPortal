@@ -1,11 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
+import 'reflect-metadata';
 import { describe, it, expect } from 'vitest';
 import { AASEndpoint } from 'aas-core';
 import { urlToEndpoint } from '../app/configuration.js';

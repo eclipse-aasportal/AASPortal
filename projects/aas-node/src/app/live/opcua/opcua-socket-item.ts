@@ -1,13 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { ClientMonitoredItem, DataValue } from 'node-opcua';
-import { Logger } from '../../logging/logger.js';
+import { Logger } from 'aas-package';
 import { LiveNode } from 'aas-core';
 import { SocketItem } from '../socket-item.js';
 import { SocketClient } from '../socket-client.js';

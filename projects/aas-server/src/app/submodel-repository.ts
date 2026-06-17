@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -17,17 +17,15 @@ import { ERROR } from './error.js';
 import { AddSubmodelCommand } from './db/commands/add-submodel-command.js';
 import { UpdateAttachmentCommand } from './db/commands/update-attachment-command.js';
 import { DeleteAttachmentCommand } from './db/commands/delete-attachment-command.js';
-import { KeyList } from './db/key-list.js';
-import { HttpCache } from './http-cache.js';
 import { processSerializationModifier, selectSubmodelElement, toValueSerialization } from './utilities.js';
-import { AasxPackage } from './aasx-package.js';
 import { PatchSubmodelElementValueCommand } from './db/commands/patch-submodel-element-value-command.js';
+import { Variable } from './variable.js';
 
 @singleton()
 export class SubmodelRepository {
     public constructor(
+        @inject(Variable) private readonly variable: Variable,
         @inject(Database) private readonly db: Database,
-        @inject(HttpCache) private readonly cache: HttpCache,
     ) {}
 
     public async getSubmodels(
@@ -36,49 +34,34 @@ export class SubmodelRepository {
         level: LevelModifier,
         extent: ExtentModifier,
     ): Promise<PagedResult<aas.Submodel>> {
-        const query = `?cursor=${cursor}&limit=${limit}&level=${level}&extent=${extent}`;
-        let result = this.cache.getResult<aas.Submodel>('/submodels', query);
-        if (!result) {
-            result = await this.db.getSubmodels(limit, cursor);
-            for (const submodel of result.result) {
-                processSerializationModifier(submodel, level, extent);
-            }
-
-            this.cache.setResult('/submodels', query, result);
+        const result = await this.db.submodels.getPage(limit ?? this.variable.LIMIT, cursor);
+        for (const submodel of result.result) {
+            processSerializationModifier(submodel, level, extent);
         }
 
         return result;
     }
 
     public async getSubmodel(id: string, level: LevelModifier, extent: ExtentModifier): Promise<aas.Submodel> {
-        const query = `?level=${level}&extent=${extent}`;
-        let submodel = this.cache.getIdentifiable<aas.Submodel>(id, query);
-        if (!submodel) {
-            submodel = await this.db.getSubmodel(id);
-            processSerializationModifier(submodel, level, extent);
-            this.cache.setIdentifiable(query, submodel);
-        }
-
+        const key = await this.db.submodels.getKey(id);
+        const submodel = await this.db.submodels.readObject(key);
+        processSerializationModifier(submodel, level, extent);
         return submodel;
     }
 
     public async getFileByPath(id: string, idShortPath: string): Promise<FileResult> {
         const key = await this.db.submodels.getKey(id);
-        const item = await this.db.submodels.getItem(key);
-        const submodel: aas.Submodel = await this.db.submodels.readJson(key);
+        const submodel: aas.Submodel = await this.db.submodels.readObject(key);
         const element = selectSubmodelElement(submodel, idShortPath);
         if (isFile(element) && element.value) {
-            for (const packageId of new KeyList(item.packageKeys)) {
-                const aasx = await AasxPackage.createFromFile(this.db.packages.getFilePath(packageId));
-                const readable = aasx.read(element.value);
-                if (readable) {
-                    return {
-                        readable,
-                        filename: path.basename(element.value),
-                        value: element.value,
-                        contentType: element.contentType,
-                    };
-                }
+            const readable = this.db.submodels.readAsset(key, element.value);
+            if (readable) {
+                return {
+                    readable,
+                    filename: path.basename(element.value),
+                    value: element.value,
+                    contentType: element.contentType,
+                };
             }
         }
 
@@ -87,29 +70,16 @@ export class SubmodelRepository {
 
     public putFileByPath(id: string, idShortPath: string, path: string, filename: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            const command = new UpdateAttachmentCommand(
-                this.db,
-                resolve,
-                reject,
-                undefined,
-                id,
-                idShortPath,
-                path,
-                filename,
-            );
+            const command = new UpdateAttachmentCommand(this.db, resolve, reject, id, idShortPath, path, filename);
 
             this.db.execute(command);
-            this.cache.remove('/submodels');
-            this.cache.remove(id);
         });
     }
 
     public deleteFileByPath(id: string, idShortPath: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            const command = new DeleteAttachmentCommand(this.db, resolve, reject, undefined, id, idShortPath);
+            const command = new DeleteAttachmentCommand(this.db, resolve, reject, id, idShortPath);
             this.db.execute(command);
-            this.cache.remove('/submodels');
-            this.cache.remove(id);
         });
     }
 
@@ -117,7 +87,6 @@ export class SubmodelRepository {
         return new Promise((resolve, reject) => {
             const command = new AddSubmodelCommand(this.db, resolve, reject, submodel);
             this.db.execute(command);
-            this.cache.remove('/submodels');
         });
     }
 
@@ -127,25 +96,21 @@ export class SubmodelRepository {
         level: LevelModifier,
         extent: ExtentModifier,
     ): Promise<aas.SubmodelElement> {
-        let element = this.cache.getSubmodelElement(id, idShortPath, level, extent);
+        const key = await this.db.submodels.getKey(id);
+        const submodel = await this.db.submodels.readObject(key);
+        const element = selectSubmodelElement(submodel, idShortPath);
         if (!element) {
-            const submodel = await this.db.getSubmodel(id);
-            element = selectSubmodelElement(submodel, idShortPath);
-            if (!element) {
-                throw new ApplicationError(
-                    ERROR.SUBMODEL_ELEMENT_DOES_NOT_EXIST,
-                    {
-                        id,
-                        idShortPath,
-                    },
-                    404,
-                );
-            }
-
-            processSerializationModifier(element, level, extent);
-            this.cache.setSubmodelElement(id, idShortPath, level, extent, element);
+            throw new ApplicationError(
+                ERROR.SUBMODEL_ELEMENT_DOES_NOT_EXIST,
+                {
+                    id,
+                    idShortPath,
+                },
+                404,
+            );
         }
 
+        processSerializationModifier(element, level, extent);
         return element;
     }
 
@@ -187,7 +152,6 @@ export class SubmodelRepository {
         return new Promise((resolve, reject) => {
             const command = new PatchSubmodelElementValueCommand(this.db, resolve, reject, id, idShortPath, value);
             this.db.execute(command);
-            this.cache.remove('/submodels');
         });
     }
 }

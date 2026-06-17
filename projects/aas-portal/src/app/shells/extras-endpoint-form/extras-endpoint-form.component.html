@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -12,15 +12,15 @@
             <i class="bi bi-gear"></i>
             <span class="ms-2" translate>ExtrasEndpointForm.CAPTION</span>
         </h4>
-        <button type="button" class="btn-close" (click)="submit()"> </button>
+        <button type="button" class="btn-close" (click)="submit()"></button>
     </div>
     <div class="modal-body">
         @for (message of messages(); track message) {
-        <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
-            <div class="d-flex">
-                <div class="flex-grow-1">{{ message }}</div>
-            </div>
-        </ngb-toast>
+            <ngb-toast [autohide]="false" class="bg-danger w-100 mb-3">
+                <div class="d-flex">
+                    <div class="flex-grow-1">{{ message }}</div>
+                </div>
+            </ngb-toast>
         }
         <table class="table table-sm">
             <thead>
@@ -33,35 +33,44 @@
             </thead>
             <tbody>
                 @for (item of endpoints(); track item.name; let index = $index) {
-                <tr class="align-middle">
-                    <th scope="row">{{index + 1}}</th>
-                    <td>
-                        <div class="d-flex flex-column flex-grow-1">
-                            <div>{{item.name}}</div>
-                            <div class="fs-7">{{item.url}}</div>
-                        </div>
-                    </td>
-                    <td>{{item.count}}</td>
-                    @if (item.schedule === 'manual') {
-                    <td><button class="btn btn-link p-0" type="button" (click)="scan(item.name)">{{'ExtrasEndpointForm.'+item.schedule |
-                            translate}}</button></td>
-                    } @else {
-                    <td>{{'ExtrasEndpointForm.' + item.schedule | translate}}</td>
-                    }
-                </tr>
+                    <tr class="align-middle">
+                        <th scope="row">{{ index + 1 }}</th>
+                        <td>
+                            <div class="d-flex flex-column flex-grow-1">
+                                <div>{{ item.name }}</div>
+                                <div class="fs-7">{{ item.url }}</div>
+                            </div>
+                        </td>
+                        <td>{{ item.count }}</td>
+                        @if (item.schedule === 'manual') {
+                            <td>
+                                <button class="btn btn-link p-0" type="button" (click)="scan(item.name)">
+                                    {{ 'ExtrasEndpointForm.' + item.schedule | translate }}
+                                </button>
+                            </td>
+                        } @else {
+                            <td>{{ 'ExtrasEndpointForm.' + item.schedule | translate }}</td>
+                        }
+                    </tr>
                 }
             </tbody>
         </table>
-        <button type="button" class="btn btn-secondary" (click)="collapse.toggle()" [attr.aria-expanded]="!isCollapsed()"
-            aria-controls="collapseReset">
+        <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="collapse.toggle()"
+            [attr.aria-expanded]="!isCollapsed()"
+            aria-controls="collapseReset"
+        >
             <span translate>ExtrasEndpointForm.RESET</span><span>...</span>
         </button>
         <div #collapse="ngbCollapse" class="mt-2" [(ngbCollapse)]="isCollapsed">
             <div class="card">
                 <div class="card-body">
-                    <p class="card-text" translate>ExtrasEndpointForm.CONFIRM_RESET_CONFIGURATION</p>
-                    <button type="button" class="btn btn-danger" (click)="reset()"
-                        translate>ExtrasEndpointForm.RESET</button>
+                    <p class="card-text" translate>ExtrasEndpointForm.CONFIRM_RESET_INDEX</p>
+                    <button type="button" class="btn btn-danger" (click)="reset()" translate>
+                        ExtrasEndpointForm.RESET
+                    </button>
                 </div>
             </div>
         </div>

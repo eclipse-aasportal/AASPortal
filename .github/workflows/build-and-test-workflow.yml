@@ -7,25 +7,24 @@ on:
     types:
       - opened
 
-#
 jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
-          node-version: 24.12.0
-      - run: npm ci --unsafe-perm=true --allow-root
+          node-version: 24.15.0
+      - run: npm ci
       - run: npm run build
       - run: npm run lint
       - run: npm run test
       - run: npm run coverage
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: code-coverage-report
           path: |
