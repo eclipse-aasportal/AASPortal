@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,8 +8,9 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ClientMonitoredItem } from 'node-opcua';
+import { Logger } from 'aas-package';
+
 import { OpcuaSocketItem } from '../../../app/live/opcua/opcua-socket-item.js';
-import { Logger } from '../../../app/logging/logger.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { createSpyObj } from '../../mocks.js';
 

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,8 +9,9 @@
 import 'reflect-metadata';
 import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import { AppInfo } from 'aas-core';
+import { Logger } from 'aas-package';
+
 import { ApplicationInfo } from '../app/application-info.js';
-import { Logger } from '../app/logging/logger.js';
 import { Variable } from '../app/variable.js';
 import { createSpyObj } from './mocks.js';
 

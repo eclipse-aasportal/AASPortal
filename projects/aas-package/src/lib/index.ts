@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,8 +9,11 @@
 export * as aasV2 from './aas-v2.js';
 export * from './aas-reader.js';
 export * from './aas-writer.js';
-export * from './aasx-file.js';
 export * from './aasx-file-builder.js';
+export * from './aasx-file.js';
+export * from './logging/console-logger.js';
+export * from './logging/logger.js';
+export * from './mongo-db-connection-provider.js';
 export * from './reader/json-reader-v2.js';
 export * from './reader/json-reader-v3.js';
 export * from './reader/xml-reader-v1.js';

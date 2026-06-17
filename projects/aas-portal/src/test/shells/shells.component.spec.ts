@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,7 +9,9 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -19,16 +21,16 @@ import {
     signal,
 } from '@angular/core';
 
-import { AASDocument, WebSocketData, aas } from 'aas-core';
+import { AASDocument, aas } from 'aas-core';
 import {
     ViewMode,
     AuthService,
     NotifyService,
     AASTable,
     StartService,
-    IndexChangeService,
     EndpointsApi,
     ToolbarService,
+    CookieService,
 } from 'aas-lib';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
@@ -54,9 +56,11 @@ describe('ShellsComponent', () => {
     let localStorage: Mocked<Storage>;
     let api: Mocked<EndpointsApi>;
     let favorites: Mocked<FavoritesService>;
-    let auth: Mocked<AuthService>;
+    let cookies: Mocked<CookieService>;
     let start: Mocked<StartService>;
-    let indexChange: Mocked<IndexChangeService>;
+    let httpClient: Mocked<HttpClient>;
+    let auth: Mocked<AuthService>;
+    let modal: Mocked<NgbModal>;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
@@ -68,17 +72,8 @@ describe('ShellsComponent', () => {
             'getEndpoints',
             'removeEndpoint',
             'getContent',
-            'getDocuments',
             'downloadPackage',
         ]);
-        
-        api.getDocuments.mockReturnValue(
-            of({
-                previous: null,
-                next: null,
-                documents: [],
-            }),
-        );
 
         api.getContent.mockReturnValue(
             of({
@@ -88,30 +83,35 @@ describe('ShellsComponent', () => {
             } as aas.Environment),
         );
 
-        favorites = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove'], {
+        favorites = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save', 'setActive'], {
             active: signal(''),
-            items: signal<FavoritesList[]>([]),
+            items: signal<FavoritesList[]>([{ name: 'List 1', documents: [] }, { name: 'List 2', documents: [] }]),
         });
 
-        auth = createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], {
+        favorites.save.mockReturnValue(of(void 0));
+
+        cookies = createSpyObj<CookieService>(['getCookie', 'setCookie']);
+        cookies.getCookie.mockReturnValue(of(undefined));
+        cookies.setCookie.mockReturnValue(of(undefined));
+
+        httpClient = createSpyObj<HttpClient>(['get', 'post', 'put', 'delete', 'request']);
+        httpClient.get.mockReturnValue(of({}));
+        httpClient.request.mockReturnValue(of({}));
+
+        auth = createSpyObj<AuthService>(['ensureAuthorized'], {
             ready: of(true),
+            isAuthenticated: signal(false),
+            name: signal(''),
         });
 
-        auth.getCookie.mockReturnValue(of(undefined));
-        auth.setCookie.mockReturnValue(of(undefined));
-
-        indexChange = createSpyObj<IndexChangeService>(
-            {},
-            {
-                message: of({
-                    type: 'IndexChange',
-                    data: null,
-                } satisfies WebSocketData),
-            },
-        );
+        modal = createSpyObj<NgbModal>(['open']);
 
         await TestBed.configureTestingModule({
             providers: [
+                { 
+                    provide: HttpClient, 
+                    useValue: httpClient 
+                },
                 {
                     provide: EndpointsApi,
                     useValue: api,
@@ -123,6 +123,10 @@ describe('ShellsComponent', () => {
                 {
                     provide: AuthService,
                     useValue: auth,
+                },
+                {
+                    provide: CookieService,
+                    useValue: cookies,
                 },
                 {
                     provide: NotifyService,
@@ -137,8 +141,8 @@ describe('ShellsComponent', () => {
                     useValue: start,
                 },
                 {
-                    provide: IndexChangeService,
-                    useValue: indexChange,
+                    provide: NgbModal,
+                    useValue: modal,
                 },
                 provideTranslateService({
                     loader: {
@@ -169,7 +173,7 @@ describe('ShellsComponent', () => {
         expect(component).toBeTruthy();
         expect(component.files()).toBeUndefined();
         expect(component.limit()).toBe(10);
-        expect(component.favoritesLists()).toEqual(['']);
+        expect(component.favoritesLists()).toEqual(['', 'List 1', 'List 2']);
         expect(component.activeFavoritesList()).toBe('');
         expect(component.selected()).toEqual([]);
         expect(component.someSelected()).toBe(false);
@@ -179,5 +183,29 @@ describe('ShellsComponent', () => {
         expect(component.documents()).toEqual([]);
         expect(component.isFirstPage()).toBe(true);
         expect(component.isLastPage()).toBe(true);
+    });
+
+    it('should update filter', () => {
+        component.setFilterText('test');
+        expect(component.filterText()).toBe('test');
+    });
+
+    it('should update limit', () => {
+        component.setLimit(20);
+        expect(component.limit()).toBe(20);
+    });
+
+    it('should update selected documents', () => {
+        const doc1: AASDocument = { id: '1', idShort: 'Doc 1' } as AASDocument;
+        const doc2: AASDocument = { id: '2', idShort: 'Doc 2' } as AASDocument;
+        component.setSelected([doc1, doc2]);
+        expect(component.selected()).toEqual([doc1, doc2]);
+        expect(component.someSelected()).toBe(true);
+    });
+
+    it('select favorites list', () => {
+        component.setActiveFavoriteList('List 1');
+        expect(favorites.setActive).toHaveBeenCalledWith('List 1');
+        expect(favorites.save).toHaveBeenCalled();
     });
 });

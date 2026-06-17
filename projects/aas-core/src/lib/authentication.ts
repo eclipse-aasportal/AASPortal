@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -25,8 +25,26 @@ export interface UserProfile {
     id: string;
     /** The name or alias of the user. */
     name: string;
-    /** The password. */
+    /** The current password. */
     password?: string;
+    /** The new password. */
+    newPassword?: string;
+}
+
+/**
+ * Determines whether the specified object is a `UserProfile` object.
+ * @param obj The object to check.
+ * @returns `true` if the specified object is a `UserProfile` object; otherwise, `false`.
+ */
+export function isUserProfile(obj: unknown): obj is UserProfile {
+    return (
+        typeof obj === 'object' &&
+        typeof (obj as UserProfile).id === 'string' &&
+        typeof (obj as UserProfile).name === 'string' &&
+        (typeof (obj as UserProfile).password === 'undefined' || typeof (obj as UserProfile).password === 'string') &&
+        (typeof (obj as UserProfile).newPassword === 'undefined' ||
+            typeof (obj as UserProfile).newPassword === 'string')
+    );
 }
 
 /**  The credentials. */
@@ -37,18 +55,29 @@ export interface Credentials {
     password: string;
 }
 
+/**
+ * Determines whether the specified object is a `Credentials` object.
+ * @param obj The object to check.
+ * @returns `true` if the specified object is a `Credentials` object; otherwise, `false`.
+ */
+export function isCredentials(obj: unknown): obj is Credentials {
+    return (
+        typeof obj === 'object' &&
+        typeof (obj as Credentials).id === 'string' &&
+        typeof (obj as Credentials).password === 'string'
+    );
+}
+
 /** Result of a login or profile update message. */
 export interface AuthResult {
     token: string;
 }
 
 /** JSON web token private claim. */
-export interface JWTPayload {
-    sub?: string;
-    name?: string;
+export interface User {
+    id: string;
+    name: string;
     role: UserRole;
-    exp?: number;
-    iat?: number;
 }
 
 /**

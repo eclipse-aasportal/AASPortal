@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,8 +8,9 @@
 
 import { inject, singleton } from 'tsyringe';
 import { AASEndpoint } from 'aas-core';
+import { LOGGER, Logger } from 'aas-package';
+
 import { EndpointScanner } from './endpoint-scanner.js';
-import { LOGGER, Logger } from '../logging/logger.js';
 import { DirectoryScanner } from './directory-scanner.js';
 import { AASServerScanner } from './aas-server-scanner.js';
 import { OpcuaServerScanner } from './opcua-server-scanner.js';
@@ -18,7 +19,6 @@ import { AasxDirectory } from '../client/fs/aasx-directory.js';
 import { ApiClient } from '../client/api/api-client.js';
 import { ApiClientV3 } from '../client/api/api-client-v3.js';
 import { ApiClientV1 } from '../client/api/api-client-v1.js';
-import { ApiClientV0 } from '../client/api/api-client-v0.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { HttpClient } from '../http-client.js';
 
@@ -35,9 +35,6 @@ export class EndpointScannerFactory {
             case 'AAS_API': {
                 let source: ApiClient;
                 switch (endpoint.version) {
-                    case 'v0':
-                        source = new ApiClientV0(this.logger, this.http, endpoint);
-                        break;
                     case 'v1':
                         source = new ApiClientV1(this.logger, this.http, endpoint);
                         break;

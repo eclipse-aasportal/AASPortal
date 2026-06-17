@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -113,6 +113,7 @@ export type RouteData = Data &
 export type ViewRoute = Route & { path: ViewRouteName; data: RouteData };
 
 export type ViewRouteName =
+    | 'AssetStatus'
     | 'Browser'
     | 'CarbonFootprint'
     | 'ContactInformation'
@@ -123,6 +124,7 @@ export type ViewRouteName =
     | 'Nameplate'
     | 'OperationalData'
     | 'Laser'
+    | 'ServiceRequestNotification'
     | 'TechnicalData';
 
 export type ViewRouteMap = Partial<Record<ViewRouteName, aas.Submodel>>;

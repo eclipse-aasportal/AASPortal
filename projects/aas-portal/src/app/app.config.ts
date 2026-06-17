@@ -1,12 +1,12 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -14,8 +14,10 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import {
     API_URL,
     AuthInterceptor,
+    CacheInterceptor,
     CustomerFeedbackCardComponent,
     FavoriteComponent,
+    NotifyService,
     START_TILE_TYPES,
     START_TILES,
     StartTileType,
@@ -39,6 +41,7 @@ export const appConfig: ApplicationConfig = {
             loader: provideTranslateHttpLoader({ prefix: 'assets/i18n/', suffix: '.json' }),
         }),
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true },
         {
             provide: START_TILE_TYPES,
             useValue: [
@@ -72,6 +75,11 @@ export const appConfig: ApplicationConfig = {
             provide: API_URL,
             useFactory: (window: WindowService) => new ApiUrlService(window),
             deps: [WINDOW],
+        },
+        {
+            provide: ErrorHandler,
+            useFactory: (notify: NotifyService) => notify,
+            deps: [NotifyService],
         },
         provideZonelessChangeDetection(),
     ],

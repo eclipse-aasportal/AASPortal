@@ -1,16 +1,16 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Injectable, WritableSignal, computed, signal, untracked } from '@angular/core';
+import { Injectable, WritableSignal, computed, inject, signal, untracked } from '@angular/core';
 import { nanoid } from 'nanoid';
 import { EMPTY, map, mergeMap, Observable, skipWhile, tap } from 'rxjs';
 import { aas, AASDocument, getUnit, LiveNode } from 'aas-core';
-import { AuthService, encodeBase64Url } from 'aas-lib';
+import { AuthService, CookieService, encodeBase64Url } from 'aas-lib';
 
 import {
     DashboardChartItem,
@@ -26,14 +26,16 @@ const initialState: DashboardState = [{ name: 'Dashboard 1', active: true, items
     providedIn: 'root',
 })
 export class DashboardService {
+    private readonly auth = inject(AuthService);
+    private readonly cookies = inject(CookieService);
     private readonly state = signal<DashboardState>(initialState);
     private readonly modified$ = signal(false);
 
-    public constructor(private readonly auth: AuthService) {
+    public constructor() {
         this.auth.ready
             .pipe(
                 skipWhile(ready => ready === false),
-                mergeMap(() => this.auth.getCookie('.Dashboard.v4')),
+                mergeMap(() => this.cookies.getCookie('.Dashboard.v4')),
                 map(data => {
                     if (data === undefined) {
                         return undefined;
@@ -360,9 +362,9 @@ export class DashboardService {
     private savePages(): Observable<void> {
         const pages = untracked(this.state);
         if (pages.length > 0) {
-            return this.auth.setCookie('.Dashboard.v4', this.toString(pages));
+            return this.cookies.setCookie('.Dashboard.v4', this.toString(pages));
         }
 
-        return this.auth.deleteCookie('.Dashboard.v4');
+        return this.cookies.deleteCookie('.Dashboard.v4');
     }
 }

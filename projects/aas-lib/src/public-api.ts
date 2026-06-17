@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,13 +10,6 @@ export * from './lib/api-url';
 export * from './lib/components/aas-table/aas-table';
 export * from './lib/components/aas-tree/aas-tree-search';
 export * from './lib/components/aas-tree/aas-tree.component';
-export * from './lib/components/auth/auth-api.service';
-export * from './lib/components/auth/auth.component';
-export * from './lib/components/auth/auth.interceptor';
-export * from './lib/components/auth/auth.service';
-export * from './lib/components/auth/login-form/login-form.component';
-export * from './lib/components/auth/profile-form/profile-form.component';
-export * from './lib/components/auth/register-form/register-form.component';
 export * from './lib/components/browser/browser.component';
 export * from './lib/components/browser/browser.state';
 export * from './lib/components/child-component';
@@ -27,27 +20,37 @@ export * from './lib/components/favorite/favorite.component';
 export * from './lib/components/license-info/license-info.component';
 export * from './lib/components/localize/culture-info';
 export * from './lib/components/localize/localize.component';
-export * from './lib/components/notify/notify.component';
-export * from './lib/components/notify/notify.service';
 export * from './lib/components/progress/progress.component';
 export * from './lib/components/progress/progress.service';
 export * from './lib/components/score/score.component';
 export * from './lib/components/theme-toggle/theme-toggle.component';
+export * from './lib/core/auth/auth.component';
+export * from './lib/core/auth/auth.interceptor';
+export * from './lib/core/auth/auth.service';
+export * from './lib/core/auth/login-form/login-form.component';
+export * from './lib/core/auth/profile-form/profile-form.component';
+export * from './lib/core/auth/register-form/register-form.component';
+export * from './lib/core/confirm-dialog/confirm-dialog';
+export * from './lib/core/notify/notify.component';
+export * from './lib/core/notify/notify.service';
+export * from './lib/core/prompt-dialog/prompt-dialog';
 export * from './lib/directives/sortable-header.directive';
 export * from './lib/pipes/max-length.pipe';
-export * from './lib/services/cache.service';
+export * from './lib/services/cache.interceptor';
 export * from './lib/services/command-handler';
 export * from './lib/services/command';
+export * from './lib/services/cookie.service';
 export * from './lib/services/endpoints-api';
-export * from './lib/services/index-change.service';
+export * from './lib/services/index-change';
 export * from './lib/services/start.service';
 export * from './lib/services/template.service';
 export * from './lib/services/theme.service';
 export * from './lib/services/toolbar.service';
-export * from './lib/services/web-socket-factory.service';
+export * from './lib/services/web-socket.service';
 export * from './lib/services/window.service';
 export * from './lib/types';
 export * from './lib/utilities';
+export * from './lib/views/asset-status/asset-status';
 export * from './lib/views/carbon-footprint/carbon-footprint-view';
 export * from './lib/views/carbon-footprint/carbon-footprint';
 export * from './lib/views/composite-view';
@@ -69,6 +72,7 @@ export * from './lib/views/leaf-view';
 export * from './lib/views/nameplate/nameplate-view';
 export * from './lib/views/nameplate/nameplate';
 export * from './lib/views/operational-data/operational-data-view';
+export * from './lib/views/service-request-notification/service-request-notification';
 export * from './lib/views/technical-data/technical-data-view';
 export * from './lib/views/technical-data/technical-data';
 export * from './lib/views/thumbnail-qrcode/thumbnail-qrcode';

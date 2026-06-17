@@ -4,7 +4,6 @@
     "compilerOptions": {
         "outDir": "./out-tsc/spec",
         "isolatedModules": false,
-        "module": "es2022",
         "types": ["express", "multer"]
     },
 }

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -9,7 +9,7 @@
 import { Mocked, vi } from 'vitest';
 import { TranslateLoader, TranslationObject } from '@ngx-translate/core';
 import { noop } from 'aas-core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 
 export class FakeLoader extends TranslateLoader {
     public override getTranslation(lang: string): Observable<TranslationObject> {
@@ -73,3 +73,19 @@ export const createMockFileList = (files: File[]): FileList => {
 
     return fileList;
 };
+
+export class MockWebSocketService {
+    private mockSubject = new Subject<any>();
+
+    public sendMessage(message: any): void {
+        this.mockSubject.next({ data: message });
+    }
+
+    public getMessages(): Observable<any> {
+        return this.mockSubject.asObservable();
+    }
+
+    public closeConnection(): void {
+        this.mockSubject.complete();
+    }
+}

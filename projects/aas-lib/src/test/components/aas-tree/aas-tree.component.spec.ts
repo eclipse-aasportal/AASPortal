@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -16,12 +16,11 @@ import { AASDocument, WebSocketData } from 'aas-core';
 
 import { AASTreeComponent } from '../../../lib/components/aas-tree/aas-tree.component';
 import { sampleDocument } from '../../assets/sample-document';
-import { NotifyService } from '../../../lib/components/notify/notify.service';
-import { WebSocketFactoryService } from '../../../lib/services/web-socket-factory.service';
-import { TestWebSocketFactoryService } from '../../assets/test-web-socket-factory.service';
+import { NotifyService } from '../../../lib/core/notify/notify.service';
+import { WebSocketService } from '../../../lib/services/web-socket.service';
 import { WINDOW } from '../../../lib/services/window.service';
 import { AASTreeApi } from '../../../lib/components/aas-tree/aas-tree-api';
-import { createSpyObj, FakeLoader } from '../../mocks';
+import { createSpyObj, FakeLoader, MockWebSocketService } from '../../mocks';
 import { VIEW_ROUTES } from '../../../lib/views/views-routes';
 
 describe('AASTreeComponent', () => {
@@ -41,15 +40,15 @@ describe('AASTreeComponent', () => {
             providers: [
                 {
                     provide: NotifyService,
-                    useValue: createSpyObj<NotifyService>(['error', 'info', 'log']),
+                    useValue: createSpyObj<NotifyService>(['error', 'info']),
                 },
                 {
                     provide: WINDOW,
                     useValue: createSpyObj<Window>(['addEventListener', 'open', 'removeEventListener']),
                 },
                 {
-                    provide: WebSocketFactoryService,
-                    useValue: new TestWebSocketFactoryService(webSocketSubject),
+                    provide: WebSocketService,
+                    useValue: new MockWebSocketService(),
                 },
                 {
                     provide: AASTreeApi,
@@ -184,7 +183,6 @@ describe('AASTreeComponent', () => {
             fixture.detectChanges();
             expect(component.highlighted()?.name).toEqual('MaxRotationSpeed');
         });
-
     });
 
     describe('search pattern', () => {

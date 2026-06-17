@@ -1,13 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { Routes } from '@angular/router';
-import { viewRoutes } from 'aas-lib';
+import { LoginFormComponent, ProfileFormComponent, RegisterFormComponent, viewRoutes } from 'aas-lib';
 import { AASComponent } from './aas/aas.component';
 import { AboutComponent } from './about/about.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -29,6 +29,9 @@ export const routes: Routes = [
     },
     { path: 'dashboard', component: DashboardComponent },
     { path: 'about', component: AboutComponent },
+    { path: 'login', component: LoginFormComponent },
+    { path: 'register', component: RegisterFormComponent },
+    { path: 'profile', component: ProfileFormComponent },
     { path: '', redirectTo: '/start', pathMatch: 'full' },
     { path: '**', component: ShellsComponent },
 ];

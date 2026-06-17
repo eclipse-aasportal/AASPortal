@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,6 +8,7 @@
 
 import { DOMParser } from '@xmldom/xmldom';
 import { Crc32, aas, flat } from 'aas-core';
+
 import * as aasV2 from './aas-v2.js';
 import { XmlReaderV1 } from './reader/xml-reader-v1.js';
 import { XmlReaderV2 } from './reader/xml-reader-v2.js';

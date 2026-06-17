@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,8 +10,8 @@ import { isAbsolute, resolve } from 'path/posix';
 import { readFile } from 'fs/promises';
 import { inject, singleton } from 'tsyringe';
 import { type AppInfo } from 'aas-core';
+import { LOGGER, Logger } from 'aas-package';
 import { Variable } from './variable.js';
-import { LOGGER, Logger } from './logging/logger.js';
 
 @singleton()
 export class ApplicationInfo {

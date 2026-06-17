@@ -1,16 +1,18 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
+import 'reflect-metadata';
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { Connection } from 'mysql2/promise';
 import { AASEndpoint } from 'aas-core';
+import { Logger } from 'aas-package';
+
 import { MySqlIndex } from '../../../app/index/mysql/mysql-index.js';
-import { Logger } from '../../../app/logging/logger.js';
 import { Variable } from '../../../app/variable.js';
 import { KeywordDirectory } from '../../../app/index/keyword-directory.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from '../../../app/index/mysql/mysql-types.js';
@@ -260,7 +262,7 @@ describe('MySqlIndex', () => {
         it('selects the first page', async () => {
             const results: MySqlDocument[] = [];
             connection.query.mockResolvedValue([results, []]);
-            await expect(index.getPage('Endpoint 1', undefined, 10)).resolves.toEqual({
+            await expect(index.getEndpointDocuments('Endpoint 1', undefined, 10)).resolves.toEqual({
                 paging_metadata: { cursor: undefined },
                 result: [],
             });
