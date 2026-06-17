@@ -102,28 +102,6 @@ export class App {
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
         this.app.use(express.static(this.variable.WEB_ROOT));
-
-        this.app.get(/^\/(?!api|assets|media).*/, (req, res, next) => {
-            const acceptsHtml = (req.headers.accept ?? '').includes('text/html');
-
-            if (!acceptsHtml) {
-                return next();
-            }
-
-            if (req.originalUrl.includes(';')) {
-                this.logger.info(
-                    `[SPA] Matrix params detected for ${req.method} ${req.originalUrl} (path: ${req.path})`,
-                );
-                return this.getIndex(req, res);
-            }
-
-            if (spaRoutes.some(route => req.path.startsWith(route))) {
-                return this.getIndex(req, res);
-            }
-
-            return next();
-        });
-
         this.app.use(errorHandler);
         this.app.use((req: Request, res: Response) => {
             if (req.method === 'GET' && req.accepts('html')) {

@@ -12,7 +12,6 @@ import { inject, singleton } from 'tsyringe';
 import { type AppInfo } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
 import { Variable } from './variable.js';
-import { LOGGER, Logger } from './logging/logger.js';
 
 @singleton()
 export class ApplicationInfo {

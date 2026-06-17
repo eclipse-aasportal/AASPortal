@@ -75,20 +75,3 @@ export async function createThumbnail(readable: NodeJS.ReadableStream | undefine
         return undefined;
     }
 }
-
-export async function createThumbnail(readable: NodeJS.ReadableStream | undefined): Promise<string | undefined> {
-    try {
-        if (!readable) {
-            return undefined;
-        }
-
-        const output = await ImageProcessing.resizeAsync(readable, 40, 40);
-        return await streamToObjectUrl(output);
-    } catch {
-        return undefined;
-    }
-}
-
-export function isScanEndpointData(data: WorkerData): data is ScanEndpointData {
-    return data.type === 'ScanEndpointData';
-}

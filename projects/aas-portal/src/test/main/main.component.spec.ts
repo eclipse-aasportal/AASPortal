@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -64,10 +64,6 @@ describe('MainComponent', () => {
             documentCount: (() => 42) as Signal<number>,
             endpointCount: (() => 1) as Signal<number>,
             changedDocuments: (() => 0) as Signal<number>,
-            message: new BehaviorSubject({
-                type: '',
-                data: undefined,
-            } satisfies WebSocketData),
         });
 
         await TestBed.configureTestingModule({
