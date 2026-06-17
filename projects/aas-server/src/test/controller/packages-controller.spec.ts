@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -16,15 +16,14 @@ import express, { Express, json, urlencoded } from 'express';
 import morgan from 'morgan';
 import request from 'supertest';
 import multer from 'multer';
+import { encodeBase64Url } from 'aas-package';
 
 import { LOGGER, Logger } from '../../app/logging/logger.js';
 import { Variable } from '../../app/variable.js';
 import { RegisterRoutes } from '../../app/routes/routes.js';
 import { Authentication } from '../../app/controller/authentication.js';
 import { errorHandler } from '../../app/error-handler.js';
-import { getToken } from '../json-web-token.js';
 import { PackageRepository } from '../../app/package-repository.js';
-import { encodeBase64Url } from '../../app/utilities.js';
 import { createSpyObj } from '../mocks.js';
 
 describe('PackagesController', () => {
@@ -36,11 +35,11 @@ describe('PackagesController', () => {
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        variable = createSpyObj<Variable>({}, { JWT_SECRET: 'SecretSecretSecretSecretSecretSecret' });
+        variable = createSpyObj<Variable>({}, {});
         repository = createSpyObj<PackageRepository>(['add', 'delete', 'getPackage', 'update', 'getPackages']);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
-        authentication.expressAuthentication.mockResolvedValue({});
+        authentication.expressAuthentication.mockResolvedValue({ label: 'test-user' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
@@ -62,7 +61,7 @@ describe('PackagesController', () => {
         const src = fileURLToPath(new URL('../assets/example-motor.aasx', import.meta.url));
         const response = await request(app)
             .post('/api/v3/packages')
-            .set('Authorization', `Bearer ${getToken()}`)
+            .set('x-api-key', 'this-is-an-api-key')
             .attach('file', src);
 
         expect(response.statusCode).toBe(201);
@@ -74,7 +73,7 @@ describe('PackagesController', () => {
         repository.delete.mockResolvedValue(void 0);
         const response = await request(app)
             .delete(`/api/v3/packages/${encodeBase64Url('1')}`)
-            .set('Authorization', `Bearer ${getToken()}`);
+            .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(204);
         expect(repository.delete).toHaveBeenCalledWith('1');
@@ -91,7 +90,7 @@ describe('PackagesController', () => {
 
         const response = await request(app)
             .get(`/api/v3/packages/${encodeBase64Url('1')}`)
-            .set('Authorization', `Bearer ${getToken()}`);
+            .set('x-api-key', 'this-is-an-api-key');
 
         expect(response.statusCode).toBe(200);
         expect(repository.getPackage).toHaveBeenCalledWith('1');
@@ -102,7 +101,7 @@ describe('PackagesController', () => {
         const src = fileURLToPath(new URL('../assets/example-motor.aasx', import.meta.url));
         const response = await request(app)
             .put('/api/v3/packages/MA')
-            .set('Authorization', `Bearer ${getToken()}`)
+            .set('x-api-key', 'this-is-an-api-key')
             .attach('file', src);
 
         expect(response.statusCode).toBe(204);
@@ -111,7 +110,7 @@ describe('PackagesController', () => {
 
     it('GET: /packages', async () => {
         repository.getPackages.mockResolvedValue({ result: [], paging_metadata: {} });
-        const response = await request(app).get('/api/v3/packages').set('Authorization', `Bearer ${getToken()}`);
+        const response = await request(app).get('/api/v3/packages').set('x-api-key', 'this-is-an-api-key');
         expect(response.statusCode).toBe(200);
         expect(repository.getPackages).toHaveBeenCalled();
     });

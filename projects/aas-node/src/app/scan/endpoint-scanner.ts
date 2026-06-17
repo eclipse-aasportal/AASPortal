@@ -1,16 +1,14 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import EventEmitter from 'events';
-import { AASDocument, AASEndpoint, PagedResult } from 'aas-core';
+import { AASDocument, AASEndpoint, convertToString, PagedResult } from 'aas-core';
 import { AASIndex } from '../index/aas-index.js';
-
-type ScanTuple = { reference?: AASDocument; document?: AASDocument; error?: Error };
 
 /**
  * Defines an automate to scan an AAS endpoint for new, deleted or updated Asset Administration Shells.
@@ -24,88 +22,37 @@ export abstract class EndpointScanner extends EventEmitter {
     public async scanAsync(index: AASIndex, endpoint: AASEndpoint): Promise<void> {
         try {
             await this.open();
-            const map = new Map<string, ScanTuple>();
-            let indexCursor: string | undefined;
             let endpointCursor: string | undefined;
-            let endOfIndex = false;
-            let endOfEndpoint = false;
             do {
-                if (!endOfIndex) {
-                    const result = await index.getPage(endpoint.name, indexCursor);
-                    for (const reference of result.result) {
-                        let value = map.get(reference.id);
-                        if (value === undefined) {
-                            value = { reference };
-                            map.set(reference.id, value);
-                        } else if (value.reference === undefined) {
-                            value.reference = reference;
-                        }
-                    }
-
-                    indexCursor = result.paging_metadata.cursor;
-                    if (indexCursor === undefined) {
-                        endOfIndex = true;
+                const result = await this.getDocuments(endpointCursor);
+                for (const b of result.result) {
+                    const a = await index.find(b.endpoint, 'AssetAdministrationShell', b.id);
+                    if (a === undefined) {
+                        this.emit('add', b);
                     }
                 }
 
-                if (!endOfEndpoint) {
-                    const result = await this.nextEndpointPage(endpointCursor);
-                    for (const address of result.result) {
-                        let value = map.get(address);
-                        if (value === undefined) {
-                            value = {};
-                            map.set(address, value);
-                        }
+                endpointCursor = result.paging_metadata.cursor;
+            } while (endpointCursor);
 
-                        if (value.document === undefined) {
-                            try {
-                                value.document = await this.createDocument(address);
-                            } catch (error) {
-                                value.error = error;
-                            }
-                        }
-                    }
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-                    endpointCursor = result.paging_metadata.cursor;
-                    if (endpointCursor === undefined) {
-                        endOfEndpoint = true;
+            let indexCursor: string | undefined;
+            do {
+                const result = await index.getEndpointDocuments(endpoint.name, indexCursor);
+                for (const a of result.result) {
+                    const b = await this.getDocument(a.address);
+                    if (b === undefined) {
+                        this.emit('remove', a);
+                    } else {
+                        this.emit('compare', a, b);
                     }
                 }
 
-                const keys: string[] = [];
-                for (const value of map.values()) {
-                    if (value.error) {
-                        if (value.reference) {
-                            keys.push(value.reference.address);
-                        }
-                    } else if (value.reference && value.document) {
-                        keys.push(value.reference.address);
-                        this.emit('compare', value.reference, value.document);
-                    } else if (endOfIndex && value.document) {
-                        keys.push(value.document.address);
-                        this.emit('add', value.document);
-                    } else if (endOfEndpoint && value.reference) {
-                        keys.push(value.reference.address);
-                        this.emit('remove', value.reference);
-                    }
-                }
-
-                keys.forEach(key => map.delete(key));
-            } while (!endOfIndex || !endOfEndpoint);
-
-            for (const value of map.values()) {
-                if (value.error) {
-                    continue;
-                }
-
-                if (value.reference && value.document) {
-                    this.emit('compare', value.reference, value.document);
-                } else if (value.document) {
-                    this.emit('add', value.document);
-                } else if (value.reference) {
-                    this.emit('remove', value.reference);
-                }
-            }
+                indexCursor = result.paging_metadata.cursor;
+            } while (indexCursor);
+        } catch (error) {
+            this.emit('error', `Scanning endpoint "${endpoint.name}" failed: ${convertToString(error)}`);
         } finally {
             await this.close();
         }
@@ -121,7 +68,15 @@ export abstract class EndpointScanner extends EventEmitter {
      */
     protected abstract close(): Promise<void>;
 
-    protected abstract createDocument(address: string): Promise<AASDocument>;
+    /**
+     * Gets a next page of document addresses from the endpoint.
+     * @param cursor The cursor for pagination. If undefined, the first page will be returned.
+     */
+    protected abstract getDocuments(cursor: string | undefined): Promise<PagedResult<AASDocument>>;
 
-    protected abstract nextEndpointPage(cursor: string | undefined): Promise<PagedResult<string>>;
+    /**
+     * Gets the document with the specified address from the endpoint.
+     * @param address The address of the document in the endpoint.
+     */
+    protected abstract getDocument(address: string): Promise<AASDocument | undefined>;
 }

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,53 +8,82 @@
 
 export type DatabaseKey = number;
 
+export const Table = {
+    AAS_TABLE: 0,
+    SUBMODEL_TABLE: 1,
+    CONCEPT_DESCRIPTION_TABLE: 2,
+} as const;
+
+export type Table = (typeof Table)[keyof typeof Table];
+
+export const Index = {
+    PACKAGE_INDEX: 0,
+    ASSET_INDEX: 1,
+} as const;
+
+export type Index = (typeof Index)[keyof typeof Index];
+
 export type KeyListItem = DatabaseKey | [DatabaseKey, DatabaseKey];
 
-export type DatabaseTableData = {
+export interface DatabaseTableData {
     nextKey: DatabaseKey;
     size: number;
     recycled: KeyListItem[];
     capacity: number;
-};
+}
 
-export type DatabaseData = {
+export type DatabaseIndexData = DatabaseTableData;
+
+export interface DatabaseData {
+    version: string;
+    format: 'json' | 'binary';
     pageSize: number;
-    packages: DatabaseTableData;
     shells: DatabaseTableData;
     submodels: DatabaseTableData;
     conceptDescriptions: DatabaseTableData;
-};
+    assetIndex: DatabaseIndexData;
+    packageIndex: DatabaseIndexData;
+}
 
-export type TablePage<TItem extends DataTableItem> = {
-    key: DatabaseKey;
-    count: number;
-    items: (TItem | null)[];
-};
-
-export type DatabaseEnvironment = {
-    assetAdministrationShells: DatabaseKey[];
-    submodels: DatabaseKey[];
-    conceptDescriptions: DatabaseKey[];
-};
-
-export interface DataTableItem {
+/** A row or item in the database.  */
+export interface DatabaseItem extends Record<string, unknown> {
     /** The key in the table. */
     key: DatabaseKey;
     /** The identifier of the table item. */
     id: string;
 }
 
-export interface PackageItem extends DataTableItem {
-    id: string;
-    filename: string;
-    environment: DatabaseEnvironment;
+/** A row or item in a database table. */
+export interface DataTableItem extends DatabaseItem {
+    indexRefs: IndexRef[];
 }
+
+export interface DatabasePage<TItem extends DatabaseItem> {
+    page: number;
+    count: number;
+    items: (TItem | null)[];
+}
+
+/** A page of an database table. */
+export type TablePage<TItem extends DataTableItem> = DatabasePage<TItem>;
+
+/** A reference to a table item. */
+export type TableRef = [Table, DatabaseKey];
+
+/** A reference to an index entry. */
+export type IndexRef = [Index, DatabaseKey];
+
+/** An entry in an index. */
+export interface IndexItem extends DatabaseItem {
+    tableRefs: TableRef[];
+}
+
+/** A page of a database index. */
+export type IndexPage = DatabasePage<IndexItem>;
 
 export interface IdentifiableItem extends DataTableItem {
     /** The short name of the identifiable. */
     idShort: string | null;
-    /** The keys of the packages that reference this identifiable. */
-    packageKeys: KeyListItem[];
 }
 
 export type HashTableKeyValue = [string, DatabaseKey];

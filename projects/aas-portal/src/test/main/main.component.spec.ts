@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -20,8 +20,8 @@ import {
     signal,
 } from '@angular/core';
 
-import { AASDocument, WebSocketData } from 'aas-core';
-import { AuthComponent, IndexChangeService, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
+import { AASDocument } from 'aas-core';
+import { AuthComponent, IndexChange, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
 
 import { MainComponent } from '../../app/main/main.component';
 import { createSpyObj, FakeLoader } from '../mocks';
@@ -54,13 +54,13 @@ class TestNotifyComponent {}
 describe('MainComponent', () => {
     let documentSubject: Subject<AASDocument | null>;
     let toolbar: Mocked<ToolbarService>;
-    let indexChange: Mocked<IndexChangeService>;
+    let indexChange: Mocked<IndexChange>;
 
     beforeEach(async () => {
         documentSubject = new Subject<AASDocument | null>();
         documentSubject.next(null);
         toolbar = createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) });
-        indexChange = createSpyObj<IndexChangeService>(['clear'], {
+        indexChange = createSpyObj<IndexChange>(['clear'], {
             documentCount: (() => 42) as Signal<number>,
             endpointCount: (() => 1) as Signal<number>,
             changedDocuments: (() => 0) as Signal<number>,
@@ -77,7 +77,7 @@ describe('MainComponent', () => {
                     useValue: toolbar,
                 },
                 {
-                    provide: IndexChangeService,
+                    provide: IndexChange,
                     useValue: indexChange,
                 },
                 provideTranslateService({
@@ -89,7 +89,7 @@ describe('MainComponent', () => {
                 provideRouter([]),
                 provideZonelessChangeDetection(),
             ],
-            imports: [],
+            imports: [MainComponent],
         }).compileComponents();
 
         TestBed.overrideComponent(MainComponent, {

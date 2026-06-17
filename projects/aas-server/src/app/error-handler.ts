@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,7 +10,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ApplicationError } from 'aas-core';
 import { ValidateError } from 'tsoa';
 
-export const errorHandler = (err: unknown, _: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (err: unknown, _: Request, res: Response, next: NextFunction): void => {
     if (err instanceof ValidateError) {
         res.status(422).json({
             type: 'ValidateError',

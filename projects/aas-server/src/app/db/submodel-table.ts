@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,7 +8,7 @@
 
 import { aas, ApplicationError, jsonization, toJsonObject, types } from 'aas-core';
 import { ERROR } from '../error.js';
-import { DatabaseKey, DatabaseTableData } from './database-types.js';
+import { DatabaseKey, DatabaseTableData, Table } from './database-types.js';
 import { Database } from './database.js';
 import { IdentifiableTable } from './identifiable-table.js';
 
@@ -20,6 +20,8 @@ export class SubmodelTable extends IdentifiableTable<aas.Submodel> {
         super('SubmodelTable', database, data, clusterSize, dir);
     }
 
+    public override readonly index = Table.SUBMODEL_TABLE;
+
     /**
      * Retrieves the database key for a given submodel ID.
      *
@@ -27,7 +29,7 @@ export class SubmodelTable extends IdentifiableTable<aas.Submodel> {
      * @returns A promise that resolves to the corresponding {@link DatabaseKey}.
      * @throws {@link ApplicationError} If the submodel does not exist, with error code {@link ERROR.SUBMODEL_DOES_NOT_EXIST}.
      */
-    public async getKey(id: string): Promise<DatabaseKey> {
+    public override async getKey(id: string): Promise<DatabaseKey> {
         const key = await this.findKey(id);
         if (key === undefined) {
             throw new ApplicationError(ERROR.SUBMODEL_DOES_NOT_EXIST, { id }, 404);
@@ -47,6 +49,6 @@ export class SubmodelTable extends IdentifiableTable<aas.Submodel> {
      * @throws If the submodel cannot be found or conversion fails.
      */
     public async readSubmodel(key: DatabaseKey): Promise<types.Submodel> {
-        return jsonization.submodelFromJsonable(toJsonObject(await this.readJson(key))).mustValue();
+        return jsonization.submodelFromJsonable(toJsonObject(await this.readObject(key))).mustValue();
     }
 }

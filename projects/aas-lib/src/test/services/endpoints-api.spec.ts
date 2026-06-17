@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,11 +10,10 @@ import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { HttpClient, HttpEventType, provideHttpClient } from '@angular/common/http';
-import { EMPTY, first, lastValueFrom, of } from 'rxjs';
-import { AASCursor, AASDocument, AASEndpoint, AASPagedResult } from 'aas-core';
-import { AuthService } from '../../lib/components/auth/auth.service';
+import { lastValueFrom, of } from 'rxjs';
+import { AASDocument, AASEndpoint } from 'aas-core';
+import { AuthService } from '../../lib/core/auth/auth.service';
 import { EndpointsApi } from '../../lib/services/endpoints-api';
-import { CacheService } from '../../lib/services/cache.service';
 import { createSpyObj } from '../mocks';
 
 import sample from '../assets/dpp-sample.json';
@@ -24,19 +23,12 @@ describe('EndpointsApi', () => {
     let httpTestingController: HttpTestingController;
     let httpClient: HttpClient;
     let auth: Mocked<AuthService>;
-    let cache: Mocked<CacheService>;
 
     beforeEach(() => {
         auth = createSpyObj<AuthService>(['login'], { ready: of(true) });
-        cache = createSpyObj<CacheService>(['get', 'set']);
-        cache.get.mockReturnValue(undefined);
 
         TestBed.configureTestingModule({
             providers: [
-                {
-                    provide: CacheService,
-                    useValue: cache,
-                },
                 {
                     provide: AuthService,
                     useValue: auth,
@@ -57,71 +49,6 @@ describe('EndpointsApi', () => {
 
     it('should created', () => {
         expect(service).toBeTruthy();
-    });
-
-    describe('getDocuments', () => {
-        const cursor = { page: 1, size: 10 } as unknown as AASCursor;
-        const pagedResult = { items: [{ id: 'doc1' }], total: 1 } as unknown as AASPagedResult;
-
-        it('should GET /api/v1/documents?cursor=... without filter/language and cache miss', async () => {
-            cache.get.mockReturnValue(undefined);
-            const encodedCursor = 'eyJwYWdlIjoxLCJzaXplIjoxMH0'; // encodeBase64Url(JSON.stringify(cursor))
-            const url = `/api/v1/documents?cursor=${encodedCursor}`;
-
-            const promise = lastValueFrom(service.getDocuments(cursor));
-            const req = httpTestingController.expectOne(url);
-            expect(req.request.method).toBe('GET');
-            req.flush(pagedResult);
-
-            expect(cache.set).toHaveBeenCalledWith(url, pagedResult);
-            expect(await promise).toEqual(pagedResult);
-        });
-
-        it('should GET /api/v1/documents?cursor=...&filter=... with filter and cache miss', async () => {
-            cache.get.mockReturnValue(undefined);
-            const filter = 'type=AAS';
-            const encodedCursor = 'eyJwYWdlIjoxLCJzaXplIjoxMH0';
-            const encodedFilter = 'dHlwZT1BQVM'; // encodeBase64Url('type=AAS')
-            const url = `/api/v1/documents?cursor=${encodedCursor}&filter=${encodedFilter}`;
-
-            const promise = lastValueFrom(service.getDocuments(cursor, filter));
-            const req = httpTestingController.expectOne(url);
-            expect(req.request.method).toBe('GET');
-            req.flush(pagedResult);
-
-            expect(cache.set).toHaveBeenCalledWith(url, pagedResult);
-            expect(await promise).toEqual(pagedResult);
-        });
-
-        it('should GET /api/v1/documents?cursor=...&filter=...&language=de with filter and language and cache miss', async () => {
-            cache.get.mockReturnValue(undefined);
-            const filter = 'type=AAS';
-            const language = 'de';
-            const encodedCursor = 'eyJwYWdlIjoxLCJzaXplIjoxMH0';
-            const encodedFilter = 'dHlwZT1BQVM';
-            const url = `/api/v1/documents?cursor=${encodedCursor}&filter=${encodedFilter}&language=${language}`;
-
-            const promise = lastValueFrom(service.getDocuments(cursor, filter, language));
-            const req = httpTestingController.expectOne(url);
-            expect(req.request.method).toBe('GET');
-            req.flush(pagedResult);
-
-            expect(cache.set).toHaveBeenCalledWith(url, pagedResult);
-            expect(await promise).toEqual(pagedResult);
-        });
-
-        it('should return cached result if present', async () => {
-            const filter = 'type=AAS';
-            const language = 'en';
-            const encodedCursor = 'eyJwYWdlIjoxLCJzaXplIjoxMH0';
-            const encodedFilter = 'dHlwZT1BQVM';
-            const url = `/api/v1/documents?cursor=${encodedCursor}&filter=${encodedFilter}&language=${language}`;
-            cache.get.mockReturnValue(pagedResult);
-
-            const result = await lastValueFrom(service.getDocuments(cursor, filter, language));
-            expect(result).toEqual(pagedResult);
-            expect(cache.set).not.toHaveBeenCalled();
-        });
     });
 
     describe('getDocument', () => {

@@ -1,4 +1,14 @@
 {
+    "Auth": {
+        "AUTHORIZE": "Authorize"
+    },
+    "AuthForm": {
+        "API_KEY_REQUIRED": "API key required",
+        "API_KEY": "API key",
+        "CANCEL": "Cancel",
+        "CAPTION": "Authentication",
+        "OK": "OK"
+    },
     "Error": {
         "AAS_ALREADY_EXISTS": "An AAS with the identifier '{{id}}' already exists.",
         "AAS_NOT_FOUND": "An asset administration shell with the identification '{{id}}' does not exist.",

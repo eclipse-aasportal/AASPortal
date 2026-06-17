@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,7 +8,7 @@
 
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { IndexChangeService } from 'aas-lib';
+import { IndexChange } from 'aas-lib';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -20,7 +20,7 @@ import { environment } from '../../environments/environment';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutCardComponent {
-    private readonly indexChange = inject(IndexChangeService);
+    private readonly indexChange = inject(IndexChange);
 
     public readonly version = signal(environment.version).asReadonly();
 

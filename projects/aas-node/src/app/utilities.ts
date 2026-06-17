@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,7 +10,6 @@ import { ApplicationError } from 'aas-core';
 import { streamToObjectUrl } from 'aas-package';
 import { ERRORS } from './errors.js';
 import { ImageProcessing } from './image-processing.js';
-import { ScanEndpointData, WorkerData } from './types.js';
 
 export function parseUrl(url: string): URL {
     try {
@@ -61,7 +60,20 @@ export function slash(path: string): string {
         return path;
     }
 
-    return path.replace(/\\/g, '/');
+    return path.replaceAll('\\', '/');
+}
+
+export async function createThumbnail(readable: NodeJS.ReadableStream | undefined): Promise<string | undefined> {
+    try {
+        if (!readable) {
+            return undefined;
+        }
+
+        const output = await ImageProcessing.resizeAsync(readable, 40, 40);
+        return await streamToObjectUrl(output);
+    } catch {
+        return undefined;
+    }
 }
 
 export async function createThumbnail(readable: NodeJS.ReadableStream | undefined): Promise<string | undefined> {

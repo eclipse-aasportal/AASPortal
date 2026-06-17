@@ -1,6 +1,6 @@
 <!-----------------------------------------------------------------------------
  !
- ! Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  ! zur Foerderung der angewandten Forschung e.V.
  !
@@ -8,7 +8,7 @@
 
 <div class="fhg-main-page bg-body-secondary">
     <div class="fhg-main-navbar">
-        <nav class="navbar navbar-expand-sm bg-white">
+        <nav class="navbar navbar-expand-sm bg-body">
             <div class="container-fluid">
                 <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
                     <img src="/assets/fhg-logo.svg" width="40" alt="Fraunhofer" />
@@ -26,13 +26,20 @@
                                     routerLink="{{ link.url }}"
                                     routerLinkActive="active"
                                     (click)="isMenuCollapsed.set(true)"
-                                    >{{ link.name }}</a
+                                    >{{ link.name | translate }}</a
                                 >
                             </li>
                         }
                     </ul>
-                    <div class="bg-light">
-                        <img class="img-fluid" src="/assets/aas-portal.svg" width="67" height="40" alt="" />
+                    <div class="d-flex align-items-center me-1">
+                        <fhg-api-auth class="text-primary m-1"></fhg-api-auth>
+                        <img
+                            class="m-1 d-none d-md-block object-fit-contain"
+                            src="/assets/aas-portal.svg"
+                            width="67"
+                            height="40"
+                            alt="AASPortal"
+                        />
                     </div>
                 </div>
             </div>

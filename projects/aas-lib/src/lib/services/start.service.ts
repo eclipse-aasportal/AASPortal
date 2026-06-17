@@ -1,15 +1,16 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Inject, Injectable, InjectionToken, signal, Type } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, EMPTY, map, mergeMap, Observable, of, skipWhile } from 'rxjs';
-import { AuthService } from '../components/auth/auth.service';
+import { inject, Injectable, InjectionToken, linkedSignal, Type } from '@angular/core';
+import { catchError, map, Observable, of } from 'rxjs';
+import { AuthService } from '../core/auth/auth.service';
+import { CookieService } from './cookie.service';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 export type StartTileType = {
     name: string;
@@ -34,31 +35,24 @@ const cookieName = 'v1.StartTiles';
     providedIn: 'root',
 })
 export class StartService {
-    public constructor(
-        private readonly auth: AuthService,
-        @Inject(START_TILE_TYPES) private readonly types: StartTileType[],
-        @Inject(START_TILES) tiles: StartTile[],
-    ) {
-        this.auth.ready
-            .pipe(
-                skipWhile(ready => ready === false),
-                takeUntilDestroyed(),
-                mergeMap(() => this.auth.getCookie(cookieName)),
-            )
-            .subscribe(data => {
-                if (data === undefined) {
-                    this.tiles.set(tiles);
-                } else {
-                    try {
-                        this.tiles.set((JSON.parse(data) as StartTile[]).filter(item => this.getType(item.type)));
-                    } catch {
-                        this.tiles.set(tiles);
-                    }
-                }
-            });
-    }
+    private readonly cookies = inject(CookieService);
+    private readonly auth = inject(AuthService);
+    private readonly types = inject(START_TILE_TYPES);
+    private readonly startTiles = inject(START_TILES);
 
-    public readonly tiles = signal<StartTile[]>([]);
+    private tilesResource = rxResource({
+        params: () => this.auth.user(),
+        stream: () =>
+            this.cookies.getCookie(cookieName).pipe(
+                map(data =>
+                    data ? (JSON.parse(data) as StartTile[]).filter(item => this.getType(item.type)) : this.startTiles,
+                ),
+                catchError(() => of(this.startTiles)),
+            ),
+        defaultValue: this.startTiles,
+    });
+
+    public readonly tiles = linkedSignal(() => this.tilesResource.value());
 
     public getType(name: string): StartTileType | undefined {
         return this.types.find(item => item.name === name);
@@ -82,13 +76,11 @@ export class StartService {
     }
 
     public save(): Observable<void> {
-        return of(this.tiles()).pipe(
-            map(tiles => JSON.stringify(tiles)),
-            catchError(error => {
-                console.error(error);
-                return EMPTY;
-            }),
-            mergeMap(value => this.auth.setCookie(cookieName, value)),
-        );
+        try {
+            return this.cookies.setCookie(cookieName, JSON.stringify(this.tiles()));
+        } catch (error) {
+            console.error('Failed to save start tiles', error);
+            return of(void 0);
+        }
     }
 }

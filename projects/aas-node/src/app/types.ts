@@ -1,13 +1,27 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { Endpoint, AASDocument, TemplateDescriptor, AASEndpoint } from 'aas-core';
+import { Endpoint, AASDocument, TemplateDescriptor, AASEndpoint, UserRole } from 'aas-core';
 import { aasV2 } from 'aas-package';
+
+// Extend Express Request type to include 'user'
+declare module 'express-serve-static-core' {
+    interface Request {
+        user?: { id: string; name: string; role: UserRole };
+    }
+}
+
+declare module 'express-session' {
+    interface SessionData {
+        code_verifier?: string;
+        state?: string;
+    }
+}
 
 export interface AASRegistryModelType {
     name: 'AssetAdministrationShellDescriptor' | 'Asset';
@@ -60,6 +74,10 @@ export interface ScanEndpointResult extends ScanResult {
     document: AASDocument;
 }
 
+export function isScanEndpointResult(result: ScanResult): result is ScanEndpointResult {
+    return result.type === 'ScanEndpointResult';
+}
+
 /** The result of a template scan. */
 export interface ScanTemplatesResult extends ScanResult {
     templates: TemplateDescriptor[];
@@ -73,6 +91,10 @@ export interface WorkerData {
 export interface ScanEndpointData extends WorkerData {
     type: 'ScanEndpointData';
     endpoint: AASEndpoint;
+}
+
+export function isScanEndpointData(data: WorkerData): data is ScanEndpointData {
+    return data.type === 'ScanEndpointData';
 }
 
 export type EventListener = (...args: unknown[]) => void;

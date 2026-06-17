@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -10,14 +10,14 @@ import { inject, singleton } from 'tsyringe';
 import { WebSocket, WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
-import { WebSocketData } from 'aas-core';
 import EventEmitter from 'events';
 import fs from 'fs';
+import { WebSocketData } from 'aas-core';
+import { LOGGER, Logger } from 'aas-package';
 
 import { App } from './app.js';
 import { Variable } from './variable.js';
 import { SocketClient } from './live/socket-client.js';
-import { LOGGER, Logger } from './logging/logger.js';
 
 /* istanbul ignore next */
 @singleton()
@@ -109,7 +109,7 @@ export class WSNode extends EventEmitter {
         this.logger.error(`WebSocket server error: ${error?.message}`);
     };
 
-    private onClientClose = (code: number, reason: string, client: SocketClient): void => {
+    private onClientClose = (_code: number, _reason: string, client: SocketClient): void => {
         this.emit('close', client);
 
         client.off('message', this.onClientMessage);

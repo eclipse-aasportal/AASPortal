@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -13,7 +13,7 @@ import { noop } from 'aas-core';
 import { Command } from '../../lib/services/command';
 import { CommandHandler } from '../../lib/services/command-handler';
 import { createSpyObj } from '../mocks';
-import { NotifyService } from '../../lib/components/notify/notify.service';
+import { NotifyService } from '../../lib/core/notify/notify.service';
 
 class TestCommand extends Command {
     public constructor(

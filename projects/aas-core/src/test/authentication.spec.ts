@@ -1,13 +1,13 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
 import { describe, it, expect } from 'vitest';
-import { getUserNameFromEMail, isUserAuthorized } from '../lib/authentication.js';
+import { getUserNameFromEMail, isCredentials, isUserAuthorized, isUserProfile } from '../lib/authentication.js';
 
 describe('authentication', () => {
     describe('getUserNameFromEMail', () => {
@@ -39,6 +39,90 @@ describe('authentication', () => {
 
         it('false for actual: guest, expected: admin', () => {
             expect(isUserAuthorized('reader', [])).toBeFalsy();
+        });
+    });
+
+    describe('isCredentials', () => {
+        it('true for valid credentials', () => {
+            expect(
+                isCredentials({
+                    id: 'john.doe@email.com',
+                    name: 'John Doe',
+                    password: 'password',
+                }),
+            ).toBeTruthy();
+        });
+
+        it('false for missing id', () => {
+            expect(
+                isCredentials({
+                    name: 'John Doe',
+                    password: 'password',
+                }),
+            ).toBeFalsy();
+        });
+
+        it('false for missing password', () => {
+            expect(
+                isCredentials({
+                    id: 'john.doe@email.com',
+                    name: 'John Doe',
+                }),
+            ).toBeFalsy();
+        });
+
+        it('false for non-string id', () => {
+            expect(
+                isCredentials({
+                    id: 123,
+                    name: 'John Doe',
+                    password: 'password',
+                }),
+            ).toBeFalsy();
+        });
+    });
+
+    describe('isUserProfile', () => {
+        it('true for valid user profile', () => {
+            expect(
+                isUserProfile({
+                    id: 'john.doe@email.com',
+                    name: 'John Doe',
+                    password: 'password',
+                    newPassword: 'newpassword',
+                }),
+            ).toBeTruthy();
+        });
+
+        it('false for missing id', () => {
+            expect(
+                isUserProfile({
+                    name: 'John Doe',
+                    password: 'password',
+                    newPassword: 'newpassword',
+                }),
+            ).toBeFalsy();
+        });
+
+        it('false for missing name', () => {
+            expect(
+                isUserProfile({
+                    id: 'john.doe@email.com',
+                    password: 'password',
+                    newPassword: 'newpassword',
+                }),
+            ).toBeFalsy();
+        });
+
+        it('false for non-string id', () => {
+            expect(
+                isUserProfile({
+                    id: 123,
+                    name: 'John Doe',
+                    password: 'password',
+                    newPassword: 'newpassword',
+                }),
+            ).toBeFalsy();
         });
     });
 });

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -8,6 +8,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Mocked, vi } from 'vitest';
+import { AASDocument } from 'aas-core';
 
 type Func = () => any;
 
@@ -47,4 +48,16 @@ export function createSpyObj<T extends object>(
     }
 
     return obj as Mocked<T>;
+}
+
+export function createDocument(idShort: string): AASDocument {
+    return {
+        id: `http://aas/${idShort}`,
+        idShort,
+        address: 'address',
+        crc32: 0,
+        readonly: false,
+        timestamp: 0,
+        endpoint: 'Endpoint',
+    };
 }

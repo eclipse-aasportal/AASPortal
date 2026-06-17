@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo,
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
  * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
  * zur Foerderung der angewandten Forschung e.V.
  *
@@ -42,13 +42,15 @@ import { AASState } from '../../app/aas/aas.state';
 
 import { rotationSpeed, sampleDocument, torque } from '../assets/sample-document';
 
-class MockURL implements Partial<URL> {
-    public static createObjectURL(): string {
-        return '';
-    }
+const URLMock = vi.fn(
+    class {
+        public static createObjectURL(): string {
+            return '';
+        }
 
-    public static revokeObjectURL(): void {}
-}
+        public static revokeObjectURL(): void {};
+    },
+);
 
 @Component({
     selector: 'fhg-aas-tree',
@@ -91,7 +93,7 @@ describe('AASComponent', () => {
             'download',
             'uploadPackage',
         ]);
-        
+
         dashboard = createSpyObj<DashboardService>(['addChart'], {
             activePage: signal(pages[0]).asReadonly(),
             pages: signal(pages).asReadonly(),
@@ -160,6 +162,10 @@ describe('AASComponent', () => {
         component = fixture.componentInstance;
     });
 
+    afterEach(() => {
+        vi.clearAllMocks();
+    });
+
     it('should create', () => {
         expect(component).toBeTruthy();
     });
@@ -206,16 +212,13 @@ describe('AASComponent', () => {
     describe('download', () => {
         beforeEach(() => {
             vi.useFakeTimers();
-            Object.defineProperty(globalThis as any, 'URL', {
-                configurable: true,
-                writable: true,
-                value: MockURL,
-            });
+            vi.stubGlobal('URL', URLMock);
         });
 
         afterEach(() => {
             vi.useRealTimers();
             vi.clearAllMocks();
+            vi.unstubAllGlobals();
         });
 
         it('does nothing when there is no document content', () => {
@@ -232,8 +235,8 @@ describe('AASComponent', () => {
             const dom = TestBed.inject(DOCUMENT) as Document;
             const fakeAnchor = { setAttribute: vi.fn(), click: vi.fn(), href: '' };
             const createElSpy = vi.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
-            const createObjectSpy = vi.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
-            const revokeSpy = vi.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
+            const createObjectSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob://1');
+            const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
             const state = TestBed.inject(AASState);
             state.update({ document: sampleDocument });
 
@@ -271,8 +274,8 @@ describe('AASComponent', () => {
             const dom = TestBed.inject(DOCUMENT) as Document;
             const fakeAnchor = { setAttribute: vi.fn(), click: vi.fn(), href: '' };
             const createElSpy = vi.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
-            const createObjectSpy = vi.spyOn(MockURL, 'createObjectURL').mockReturnValue('blob://1');
-            const revokeSpy = vi.spyOn(MockURL, 'revokeObjectURL').mockImplementation(() => {});
+            const createObjectSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob://1');
+            const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
             const state = TestBed.inject(AASState);
             state.update({ document: sampleDocument });
 
