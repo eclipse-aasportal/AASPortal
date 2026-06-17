@@ -167,7 +167,6 @@ describe('ShellsComponent', () => {
         fixture = TestBed.createComponent(ShellsComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-        state = TestBed.inject(ShellsState);
     });
 
     it('should create', () => {
