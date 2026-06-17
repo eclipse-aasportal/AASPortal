@@ -1,10 +1,13 @@
 # Creates an aas-server image
-ARG NODE_IMAGE=node:24.12.0-alpine
+ARG NODE_IMAGE=node:24.15.0-alpine
 
 FROM $NODE_IMAGE AS build
+ARG GITHUB_RUN_NUMBER=520
+ARG GITHUB_REF_NAME=development
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
+RUN npm run set-version $GITHUB_RUN_NUMBER $GITHUB_REF_NAME
 RUN npm run build -w=aas-core -w=aas-package -w=aas-lib -w=aas-server -w=aas-browser
 
 FROM $NODE_IMAGE AS aas-server

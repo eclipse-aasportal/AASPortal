@@ -7,11 +7,7 @@
  *****************************************************************************/
 
 import { LiveNode, noop } from 'aas-core';
-import { OpcuaSocketItem } from './opcua-socket-item.js';
-import { OpcuaClient } from '../../client/opcua/opcua-client.js';
-import { Logger } from '../../logging/logger.js';
-import { SocketClient } from '../socket-client.js';
-import { SocketSubscription } from '../socket-subscription.js';
+import { Logger } from 'aas-package';
 import {
     AttributeIds,
     ClientMonitoredItem,
@@ -21,6 +17,11 @@ import {
     ReadValueIdOptions,
     TimestampsToReturn,
 } from 'node-opcua';
+
+import { OpcuaSocketItem } from './opcua-socket-item.js';
+import { OpcuaClient } from '../../client/opcua/opcua-client.js';
+import { SocketClient } from '../socket-client.js';
+import { SocketSubscription } from '../socket-subscription.js';
 
 export class OpcuaSubscription extends SocketSubscription {
     private readonly server: OpcuaClient;

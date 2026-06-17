@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -17,6 +17,7 @@ import {
     CacheInterceptor,
     CustomerFeedbackCardComponent,
     FavoriteComponent,
+    NotifyService,
     START_TILE_TYPES,
     START_TILES,
     StartTileType,
@@ -74,6 +75,11 @@ export const appConfig: ApplicationConfig = {
             provide: API_URL,
             useFactory: (window: WindowService) => new ApiUrlService(window),
             deps: [WINDOW],
+        },
+        {
+            provide: ErrorHandler,
+            useFactory: (notify: NotifyService) => notify,
+            deps: [NotifyService],
         },
         provideZonelessChangeDetection(),
     ],

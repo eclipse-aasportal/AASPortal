@@ -7,7 +7,9 @@
  *****************************************************************************/
 
 import { DatabaseSync, SQLInputValue, SQLOutputValue, StatementSync } from 'node:sqlite';
+import { isMainThread } from 'worker_threads';
 import { nanoid } from 'nanoid';
+import { Logger } from 'aas-package';
 import {
     AASEndpoint,
     AASCursor,
@@ -30,10 +32,8 @@ import {
 
 import { AASIndex } from '../aas-index.js';
 import { KeywordDirectory } from '../keyword-directory.js';
-import { Logger } from '../../logging/logger.js';
 import { ERRORS } from '../../errors.js';
 import { SqliteQuery } from './sqlite-query.js';
-import { isMainThread } from 'worker_threads';
 
 const LIMIT = 100;
 const initDatabase = `

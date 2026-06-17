@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import { aas, AASEndpoint, convertFromString, DefaultType, getSemanticId, LiveRequest, traverse } from 'aas-core';
+import { Logger } from 'aas-package';
 
 import { HttpClient } from '../../http-client.js';
-import { Logger } from '../../logging/logger.js';
 import { HttpSubscription } from '../../live/http/http-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';
-import { AASClient } from '../aas-client.js';
+import { EndpointClient } from '../endpoint-client.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
 import { AasxPackage } from '../fs/aasx-package.js';
 
@@ -21,7 +21,7 @@ interface PropertyValue {
 }
 
 /** Provides access to an AASX-Server. */
-export abstract class ApiClient extends AASClient {
+export abstract class ApiClient extends EndpointClient {
     private reentry = 0;
 
     /**
@@ -94,7 +94,7 @@ export abstract class ApiClient extends AASClient {
      * @returns The current value.
      */
     public async readValue(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
-        const property = await this.http.getJsonLive<PropertyValue>(new URL(url), this.endpoint.headers);
+        const property = await this.http.getLive<PropertyValue>(new URL(url), this.endpoint.headers);
         return convertFromString(property.value, valueType);
     }
 

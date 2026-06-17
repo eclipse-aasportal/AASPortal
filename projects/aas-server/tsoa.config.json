@@ -14,8 +14,8 @@
         "securityDefinitions": {
             "api_key": {
                 "type": "apiKey",
-                "name": "x-api-key",
-                "in": "header"
+                "in": "header",
+                "name": "X-API-Key"
             }
         },
         "yaml": false

@@ -8,6 +8,7 @@
 
 import { nanoid } from 'nanoid';
 import mysql, { Connection, ResultSetHeader } from 'mysql2/promise';
+import { Logger } from 'aas-package';
 import {
     AASEndpoint,
     AASCursor,
@@ -31,7 +32,6 @@ import { Variable } from '../../variable.js';
 import { MySqlQuery } from './mysql-query.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
 import { KeywordDirectory } from '../keyword-directory.js';
-import { Logger } from '../../logging/logger.js';
 import { urlToString } from '../../utilities.js';
 
 const LIMIT = 100;

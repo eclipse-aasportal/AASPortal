@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { effect, inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, linkedSignal, signal } from '@angular/core';
 import { HttpClient, HttpEvent, httpResource } from '@angular/common/http';
 import { catchError, filter, map, mergeMap, Observable, of, tap } from 'rxjs';
 import { aas, PackageDescription, PagedResult } from 'aas-core';
@@ -31,11 +31,6 @@ export interface ShellsPage {
     items: ShellsDataItem[];
 }
 
-const initialState: ShellsData = {
-    items: [],
-    current: { next: undefined, previous: undefined },
-};
-
 /**
  * Provides the state of the ShellsComponent.
  */
@@ -44,15 +39,6 @@ export class ShellsService {
     private readonly apiUrl = inject(API_URL);
     private readonly http = inject(HttpClient);
     private readonly notify = inject(NotifyService);
-    private readonly items$ = signal(initialState.items);
-    private readonly current$ = signal<Cursor | undefined>(initialState.current);
-
-    public constructor() {
-        effect(() => {
-            const page = this.page.value();
-            this.update({ items: page.items, current: page.cursor });
-        });
-    }
 
     /**
      * The maximum number of items per page.
@@ -67,12 +53,12 @@ export class ShellsService {
     /**
      * The items of the current page.
      */
-    public readonly items = this.items$.asReadonly();
+    public readonly items = linkedSignal(() => this.page.value().items);
 
     /**
      * The cursor of the current page.
      */
-    public readonly current = this.current$.asReadonly();
+    public readonly current = linkedSignal(() => this.page.value().cursor);
 
     /**
      * Uploads a package file.
@@ -170,11 +156,11 @@ export class ShellsService {
      */
     public update(newState: Partial<ShellsData>): void {
         if (newState.items) {
-            this.items$.set(newState.items);
+            this.items.set(newState.items);
         }
 
         if (newState.current !== undefined) {
-            this.current$.set(newState.current);
+            this.current.set(newState.current);
         }
     }
 

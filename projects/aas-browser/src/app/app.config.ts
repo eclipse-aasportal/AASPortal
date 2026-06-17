@@ -15,6 +15,7 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { API_URL, CacheInterceptor, WINDOW, WindowService } from 'aas-lib';
 import { routes } from './app.routes';
 import { ApiUrlService } from './api-url.service';
+import { AuthInterceptor } from './auth/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -26,6 +27,11 @@ export const appConfig: ApplicationConfig = {
         {
             provide: HTTP_INTERCEPTORS,
             useClass: CacheInterceptor,
+            multi: true,
+        },
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: AuthInterceptor,
             multi: true,
         },
         provideTranslateService({

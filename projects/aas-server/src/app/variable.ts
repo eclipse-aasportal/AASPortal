@@ -61,5 +61,5 @@ export class Variable {
         (process.env.LOG_LEVEL as 'Error' | 'Warning' | 'Info') ?? 'Info';
 
     /** Enables authentication. */
-    public readonly ENABLE_AUTH = Boolean(process.env.ENABLE_AUTH) || false;
+    public readonly API_KEY_HANDLER?: string = process.env.API_KEY_HANDLER;
 }

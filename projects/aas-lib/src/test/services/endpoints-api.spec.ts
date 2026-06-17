@@ -12,7 +12,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClient, HttpEventType, provideHttpClient } from '@angular/common/http';
 import { lastValueFrom, of } from 'rxjs';
 import { AASDocument, AASEndpoint } from 'aas-core';
-import { AuthService } from '../../lib/components/auth/auth.service';
+import { AuthService } from '../../lib/core/auth/auth.service';
 import { EndpointsApi } from '../../lib/services/endpoints-api';
 import { createSpyObj } from '../mocks';
 

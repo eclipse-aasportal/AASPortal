@@ -10,17 +10,17 @@ import 'reflect-metadata';
 import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import { aas, AASDocument, AASEndpoint } from 'aas-core';
 
-import { Logger } from '../../app/logging/logger.js';
+import { Logger } from 'aas-package';
 import { AASProvider } from '../../app/provider/aas-provider.js';
 import { Parallel } from '../../app/provider/parallel.js';
 import { LocalFileStorage } from '../../app/file-storage/local-file-storage.js';
-import { AASClientFactory } from '../../app/client/aas-client-factory.js';
+import { EndpointClientFactory } from '../../app/client/endpoint-client-factory.js';
 import { createSpyObj } from '../mocks.js';
 import { Variable } from '../../app/variable.js';
 import { FileStorageProvider } from '../../app/file-storage/file-storage-provider.js';
 import { AASIndex } from '../../app/index/aas-index.js';
 import { TaskHandler } from '../../app/provider/task-handler.js';
-import { AASClient } from '../../app/client/aas-client.js';
+import { EndpointClient } from '../../app/client/endpoint-client.js';
 
 describe('AASProvider', function () {
     let aasProvider: AASProvider;
@@ -30,7 +30,7 @@ describe('AASProvider', function () {
     const logger = createSpyObj<Logger>(['error', 'warning', 'info']);
     const parallel = createSpyObj<Parallel>(['execute', 'on']);
     // const wsServer = createSpyObj<WSServer>(['notify', 'close', 'on']);
-    const clientFactory = createSpyObj<AASClientFactory>(['create', 'testAsync']);
+    const clientFactory = createSpyObj<EndpointClientFactory>(['create', 'testAsync']);
 
     beforeEach(function () {
         fileStorageFactory = createSpyObj<FileStorageProvider>(['get']);
@@ -55,7 +55,7 @@ describe('AASProvider', function () {
     describe('getDocument', () => {
         let document: AASDocument;
         let content: aas.Environment;
-        let client: Mocked<AASClient>;
+        let client: Mocked<EndpointClient>;
 
         beforeEach(() => {
             document = {
@@ -85,7 +85,7 @@ describe('AASProvider', function () {
                 submodels: [],
             };
 
-            client = createSpyObj<AASClient>([
+            client = createSpyObj<EndpointClient>([
                 'close',
                 'createDocument',
                 'getEnvironment',
@@ -109,7 +109,11 @@ describe('AASProvider', function () {
 
         it('gets a document by Asset ID', async () => {
             index.find.mockResolvedValue(undefined);
-            client.getAllAssetAdministrationShellIdsByAssetLink.mockResolvedValue(['TestAAS']);
+            client.getAllAssetAdministrationShellIdsByAssetLink.mockResolvedValue({
+                result: ['TestAAS'],
+                paging_metadata: { cursor: '' },
+            });
+
             client.getEnvironment.mockResolvedValue(content);
             client.createDocument.mockResolvedValue(document);
             await expect(aasProvider.getDocument('Samples', 'Asset', 'TestAsset')).resolves.toEqual(document);
@@ -119,8 +123,12 @@ describe('AASProvider', function () {
 
         it('throws an error if endpoint is undefined and document not contained in index', async () => {
             index.find.mockResolvedValue(undefined);
-            client.getAllAssetAdministrationShellIdsByAssetLink.mockResolvedValue([]);
-            await expect(aasProvider.getDocument(undefined, 'Asset', 'TestAsset')).rejects.toThrowError();
+            client.getAllAssetAdministrationShellIdsByAssetLink.mockResolvedValue({
+                result: [],
+                paging_metadata: { cursor: '' },
+            });
+
+            await expect(aasProvider.getDocument(undefined, 'Asset', 'TestAsset')).rejects.toThrow();
         });
     });
 });

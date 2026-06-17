@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { Logger } from 'aas-package';
 import { OpcuaSubscription } from '../../../app/live/opcua/opcua-subscription.js';
 import { createSpyObj } from '../../mocks.js';
-import { Logger } from '../../../app/logging/logger.js';
 import { SocketClient } from '../../../app/live/socket-client.js';
 import { OpcuaClient } from '../../../app/client/opcua/opcua-client.js';
 

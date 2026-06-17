@@ -48,7 +48,7 @@ describe('ShellsController', () => {
         ]);
 
         authentication = createSpyObj<Authentication>(['expressAuthentication']);
-        authentication.expressAuthentication.mockResolvedValue({ owner: 'test-user' });
+        authentication.expressAuthentication.mockResolvedValue({ label: 'test-user' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);

@@ -10,10 +10,9 @@ import fs from 'fs';
 import { basename } from 'path';
 
 import { aas, AASDocument, AASEndpoint, ApplicationError, noop, PagedResult } from 'aas-core';
-import { aasV2, encodeBase64Url, JsonReaderV2, JsonReaderV3, JsonWriterV2 } from 'aas-package';
+import { aasV2, encodeBase64Url, JsonReaderV2, JsonReaderV3, JsonWriterV2, Logger } from 'aas-package';
 
 import { ApiClient } from './api-client.js';
-import { Logger } from '../../logging/logger.js';
 import { ERRORS } from '../../errors.js';
 import { HttpClient } from '../../http-client.js';
 
@@ -58,7 +57,7 @@ export class ApiClientV1 extends ApiClient {
     public readonly onlineReady = true;
 
     public async getDocuments(cursor?: string): Promise<PagedResult<AASDocument>> {
-        const result = await this.http.getJson<aasV2.AssetAdministrationShell[]>(
+        const result = await this.http.get<aasV2.AssetAdministrationShell[]>(
             this.resolve('shells'),
             this.endpoint.headers,
         );
@@ -79,7 +78,7 @@ export class ApiClientV1 extends ApiClient {
     }
 
     public async getEnvironment(id: string): Promise<aas.Environment> {
-        const shell = await this.http.getJson<aasV2.AssetAdministrationShell>(
+        const shell = await this.http.get<aasV2.AssetAdministrationShell>(
             this.resolve(`shells/${encodeBase64Url(id)}`),
             this.endpoint.headers,
         );
@@ -130,7 +129,7 @@ export class ApiClientV1 extends ApiClient {
 
     public override async getPackage(aasIdentifier: string): Promise<NodeJS.ReadableStream> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.http.getJson(
+        const descriptors: PackageDescriptor[] = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
             this.endpoint.headers,
         );
@@ -150,7 +149,7 @@ export class ApiClientV1 extends ApiClient {
 
     public override async deletePackage(aasIdentifier: string): Promise<void> {
         const aasId = encodeBase64Url(aasIdentifier);
-        const descriptors: PackageDescriptor[] = await this.http.getJson(
+        const descriptors: PackageDescriptor[] = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
             this.endpoint.headers,
         );
@@ -159,12 +158,11 @@ export class ApiClientV1 extends ApiClient {
         await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
     }
 
-    public async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
+    public async invoke(operation: aas.Operation): Promise<aas.Operation> {
         if (!operation.path) {
             throw new Error('Invalid argument ""operation.');
         }
 
-        const aasId = encodeBase64Url(env.assetAdministrationShells[0].id);
         const smId = encodeBase64Url(operation.path.id);
         const idShortPath = operation.path.idShortPath;
         const writer = new JsonWriterV2();
@@ -178,7 +176,7 @@ export class ApiClientV1 extends ApiClient {
 
         const result: OperationResult = JSON.parse(
             await this.http.postJson(
-                this.resolve(`shells/${aasId}/aas/submodels/${smId}/submodel/submodel-elements/${idShortPath}/invoke`),
+                this.resolve(`submodels/${smId}/submodel/submodel-elements/${idShortPath}/invoke`),
                 request,
                 this.endpoint.headers,
             ),
@@ -199,13 +197,9 @@ export class ApiClientV1 extends ApiClient {
         } as aasV2.Operation);
     }
 
-    public async getBlobValue(
-        env: aas.Environment,
-        submodelId: string,
-        idShortPath: string,
-    ): Promise<string | undefined> {
+    public async getBlobValue(submodelId: string, idShortPath: string): Promise<string | undefined> {
         const smId = encodeBase64Url(submodelId);
-        const blob = await this.http.getJson<aas.Blob>(
+        const blob = await this.http.get<aas.Blob>(
             this.resolve(`submodels/${smId}/submodel/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
             this.endpoint.headers,
         );
@@ -217,7 +211,7 @@ export class ApiClientV1 extends ApiClient {
         return blob.value;
     }
 
-    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<string[]> {
+    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<PagedResult<string>> {
         return Promise.reject(new Error('Not implemented.'));
     }
 
@@ -228,7 +222,7 @@ export class ApiClientV1 extends ApiClient {
                 const submodelId = encodeBase64Url(reference.keys[0].value);
                 try {
                     submodels.push(
-                        await this.http.getJson<aasV2.Submodel>(
+                        await this.http.get<aasV2.Submodel>(
                             this.resolve(`submodels/${submodelId}/submodel`),
                             this.endpoint.headers,
                         ),
@@ -267,7 +261,7 @@ export class ApiClientV1 extends ApiClient {
                 }
 
                 try {
-                    const conceptDescription = await this.http.getJson<aas.ConceptDescription>(
+                    const conceptDescription = await this.http.get<aas.ConceptDescription>(
                         this.resolve(`concept-descriptions/${encodeBase64Url(semanticId)}`),
                         this.endpoint.headers,
                     );

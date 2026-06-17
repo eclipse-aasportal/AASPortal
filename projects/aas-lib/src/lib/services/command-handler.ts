@@ -8,7 +8,7 @@
 
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Command } from './command';
-import { NotifyService } from '../components/notify/notify.service';
+import { NotifyService } from '../core/notify/notify.service';
 
 @Injectable({
     providedIn: 'root',

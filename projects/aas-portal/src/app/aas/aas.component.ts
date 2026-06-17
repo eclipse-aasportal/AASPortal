@@ -320,7 +320,7 @@ export class AASComponent implements OnInit, OnDestroy {
             this.start.add('Favorite', `AAS#${document.endpoint}#${document.id}`, {
                 endpoint: document.endpoint,
                 id: document.id,
-                href: `/aas?endpoint=${encodeBase64Url(document.endpoint)}&id=${encodeBase64Url(document.id)}`,
+                href: `/aas;endpoint=${encodeBase64Url(document.endpoint)};id=${encodeBase64Url(document.id)}`,
             })
         ) {
             return this.start.save();

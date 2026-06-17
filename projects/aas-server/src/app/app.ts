@@ -28,8 +28,6 @@ const shutdownTime = 15000;
 @singleton()
 export class App {
     private swaggerDoc?: JsonObject;
-    private verifiers = new Map<string, string>();
-
     private get swaggerDocument(): JsonObject {
         if (this.swaggerDoc === undefined) {
             this.swaggerDoc = JSON.parse(

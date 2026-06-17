@@ -11,6 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -29,12 +30,12 @@ import {
     StartService,
     EndpointsApi,
     ToolbarService,
+    CookieService,
 } from 'aas-lib';
 
 import { ShellsComponent } from '../../app/shells/shells.component';
 import { FavoritesList, FavoritesService } from '../../app/shells/favorites.service';
 import { createSpyObj, FakeLoader } from '../mocks';
-import { ShellsState } from '../../app/shells/shells.state';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -55,10 +56,11 @@ describe('ShellsComponent', () => {
     let localStorage: Mocked<Storage>;
     let api: Mocked<EndpointsApi>;
     let favorites: Mocked<FavoritesService>;
-    let auth: Mocked<AuthService>;
+    let cookies: Mocked<CookieService>;
     let start: Mocked<StartService>;
     let httpClient: Mocked<HttpClient>;
-    let state: ShellsState;
+    let auth: Mocked<AuthService>;
+    let modal: Mocked<NgbModal>;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
@@ -88,16 +90,21 @@ describe('ShellsComponent', () => {
 
         favorites.save.mockReturnValue(of(void 0));
 
-        auth = createSpyObj<AuthService>(['ensureAuthorized', 'getCookie', 'setCookie'], {
-            ready: of(true),
-        });
-
-        auth.getCookie.mockReturnValue(of(undefined));
-        auth.setCookie.mockReturnValue(of(undefined));
+        cookies = createSpyObj<CookieService>(['getCookie', 'setCookie']);
+        cookies.getCookie.mockReturnValue(of(undefined));
+        cookies.setCookie.mockReturnValue(of(undefined));
 
         httpClient = createSpyObj<HttpClient>(['get', 'post', 'put', 'delete', 'request']);
         httpClient.get.mockReturnValue(of({}));
         httpClient.request.mockReturnValue(of({}));
+
+        auth = createSpyObj<AuthService>(['ensureAuthorized'], {
+            ready: of(true),
+            isAuthenticated: signal(false),
+            name: signal(''),
+        });
+
+        modal = createSpyObj<NgbModal>(['open']);
 
         await TestBed.configureTestingModule({
             providers: [
@@ -118,6 +125,10 @@ describe('ShellsComponent', () => {
                     useValue: auth,
                 },
                 {
+                    provide: CookieService,
+                    useValue: cookies,
+                },
+                {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
                 },
@@ -128,6 +139,10 @@ describe('ShellsComponent', () => {
                 {
                     provide: StartService,
                     useValue: start,
+                },
+                {
+                    provide: NgbModal,
+                    useValue: modal,
                 },
                 provideTranslateService({
                     loader: {

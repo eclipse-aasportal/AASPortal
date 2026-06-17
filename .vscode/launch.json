@@ -56,7 +56,39 @@
                 "WEB_ROOT": "projects/aas-portal/dist/browser",
                 "ASSETS": "projects/aas-node/src/assets",
                 "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
-                "USER_STORAGE": "mongodb://aas-node:bObXJWW6e8Nh78YF@localhost:27017/aasportal-users"
+                "IDENTITY_PROVIDER": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
+                "COOKIE_STORAGE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
+            }
+        },
+        {
+            "name": "Launch aas-node (keycloak, aas-server)",
+            "type": "node",
+            "args": [
+                "--experimental-sqlite",
+                "--use-system-ca"
+            ],
+            "request": "launch",
+            "preLaunchTask": "build-aas-node",
+            "program": "${workspaceFolder}/projects/aas-node/build/aas-node.js",
+            "cwd": "${workspaceFolder}",
+            "outFiles": [
+                "${workspaceFolder}/projects/aas-node/build/**/*.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "NODE_ENV": "development",
+                "NODE_TLS_REJECT_UNAUTHORIZED": "0",
+                "AAS_NODE_PORT": "1337",
+                "CONTENT_ROOT": "projects/aas-node/build",
+                "WEB_ROOT": "projects/aas-portal/dist/browser",
+                "ASSETS": "projects/aas-node/src/assets",
+                "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
+                "IDENTITY_PROVIDER": "https://localhost:8443/realms/aas-portal",
+                "CLIENT_ID": "aas-node",
+                "CLIENT_SECRET": "7YiU4JXS4yaYHJrytrXNw7y71l3z12QN",
+                "COOKIE_STORAGE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
             }
         },
         {
@@ -78,7 +110,30 @@
                 "AAS_SERVER_PORT": "50010",
                 "CONTENT_ROOT": "projects/aas-server/build",
                 "WEB_ROOT": "projects/aas-browser/dist/browser",
-                "ASSETS": "projects/aas-server/src/assets"
+                "ASSETS": "projects/aas-server/src/assets",
+            }
+        },
+        {
+            "name": "Launch aas-server (Auth)",
+            "type": "node",
+            "args": [],
+            "request": "launch",
+            "preLaunchTask": "build-aas-server",
+            "program": "${workspaceFolder}/projects/aas-server/build/aas-server.js",
+            "cwd": "${workspaceFolder}",
+            "outFiles": [
+                "${workspaceFolder}/projects/aas-server/build/**/*.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "NODE_ENV": "development",
+                "AAS_SERVER_PORT": "50010",
+                "CONTENT_ROOT": "projects/aas-server/build",
+                "WEB_ROOT": "projects/aas-browser/dist/browser",
+                "ASSETS": "projects/aas-server/src/assets",
+                "API_KEY_HANDLER": "mongodb://aas-node:root-password@localhost:27017/aasportal-users"
             }
         },
         {
@@ -112,7 +167,8 @@
                 "test",
                 "aas-portal",
                 "--debug",
-                "--include ${file}"
+                "--include",
+                "${file}"
             ],
         },
         {
@@ -125,7 +181,8 @@
                 "test",
                 "aas-browser",
                 "--debug",
-                "--include ${file}"
+                "--include",
+                "${file}"
             ],
         },
         {

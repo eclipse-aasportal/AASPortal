@@ -10,17 +10,17 @@ import { basename } from 'path';
 import * as posix from 'path/posix';
 import { readFile } from 'fs/promises';
 import { aas, AASDocument, AASEndpoint, ApplicationError, noop, normalize, PagedResult } from 'aas-core';
+import { Logger } from 'aas-package';
 import { ERRORS } from '../../errors.js';
 import { FileStorage } from '../../file-storage/file-storage.js';
-import { Logger } from '../../logging/logger.js';
-import { AASClient } from '../aas-client.js';
+import { EndpointClient } from '../endpoint-client.js';
 import { AasxPackage } from './aasx-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
 
 /**
  * Provides a file system based endpoint.
  */
-export class AasxDirectory extends AASClient {
+export class AasxDirectory extends EndpointClient {
     private readonly root: string;
     private reentry = 0;
 
@@ -169,7 +169,7 @@ export class AasxDirectory extends AASClient {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<string[]> {
+    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<PagedResult<string>> {
         return Promise.reject(new Error('Not implemented.'));
     }
 

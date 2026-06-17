@@ -28,7 +28,15 @@ import {
 } from '@angular/core';
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
-import { CommandHandler, NotifyService, StartService, ToolbarService, WebSocketService, WINDOW } from 'aas-lib';
+import {
+    CommandHandler,
+    NotifyService,
+    PromptDialog,
+    StartService,
+    ToolbarService,
+    WebSocketService,
+    WINDOW,
+} from 'aas-lib';
 
 import { MovePreviousCommand } from './commands/move-previous-command';
 import { MoveNextCommand } from './commands/move-next-command';
@@ -48,6 +56,7 @@ import {
     DashboardSource,
     ViewPortSize,
 } from './dashboard-types';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-dashboard',
@@ -65,6 +74,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     private readonly notify = inject(NotifyService);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
+    private readonly modal = inject(NgbModal);
     private readonly commandHandler = inject(CommandHandler);
     private readonly charts = new Map<string, ChartConfigurationTuple>();
     private webSocketSubscription?: Subscription;
@@ -199,9 +209,9 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
         }
     }
 
-    public rename(): void {
+    public async rename(): Promise<void> {
         try {
-            const name = this.window.prompt(this.translate.instant('Dashboard.PROMPT_DASHBOARD_NAME'));
+            const name = await PromptDialog.open(this.modal, this.translate.instant('Dashboard.PROMPT_DASHBOARD_NAME'));
             if (name) {
                 this.commandHandler.execute(new RenamePageCommand(this.service, this.activePage(), name));
             }
@@ -276,7 +286,7 @@ export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
                     } satisfies DashboardChart,
                     requests: this.getRequests(item.sources),
                     page: this.service.activePage().name,
-                    href: `/dashboard?page=${this.service.activePage().name}`,
+                    href: `/dashboard;page=${this.service.activePage().name}`,
                 })
             ) {
                 return EMPTY;

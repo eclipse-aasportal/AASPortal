@@ -30,11 +30,11 @@ import {
     coerceNodeId,
 } from 'node-opcua';
 
-import { Logger } from '../../logging/logger.js';
+import { Logger } from 'aas-package';
 import { OpcuaSubscription } from '../../live/opcua/opcua-subscription.js';
 import { SocketClient } from '../../live/socket-client.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
-import { AASClient } from '../aas-client.js';
+import { EndpointClient } from '../endpoint-client.js';
 import { OPCUAComponent, OPCUAProperty, readDataTypeAsync } from './opcua.js';
 import { NodeCrawler, NodeCrawlerClientSession } from 'node-opcua-client-crawler';
 import { decodeOpaqueStructure } from './opaque-structure-decoder.js';
@@ -42,7 +42,7 @@ import { OpcuaReader } from './opcua-reader.js';
 import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
 import { ClientFile, OpenFileMode } from './client-file.js';
 
-export class OpcuaClient extends AASClient {
+export class OpcuaClient extends EndpointClient {
     private readonly options: OPCUAClientOptions;
     private dataTypes = new OpcuaDataTypeDictionary();
     private client: OPCUAClient | null = null;
@@ -196,7 +196,7 @@ export class OpcuaClient extends AASClient {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public override async invoke(env: aas.Environment, operation: aas.Operation): Promise<aas.Operation> {
+    public override async invoke(operation: aas.Operation): Promise<aas.Operation> {
         const inputArguments: Array<VariantOptions> = [];
         if (operation.inputVariables) {
             for (const inputVariable of operation.inputVariables) {
@@ -227,7 +227,7 @@ export class OpcuaClient extends AASClient {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<string[]> {
+    public override getAllAssetAdministrationShellIdsByAssetLink(): Promise<PagedResult<string>> {
         return Promise.reject(new Error('Not implemented.'));
     }
 

@@ -18,7 +18,7 @@ export const errorHandler = (err: Error, req: Request, res: Response): void => {
             details: err?.fields,
         });
     } else if (err instanceof ApplicationError) {
-        if (err.name === ERRORS.UnauthorizedAccess) {
+        if (err.name === ERRORS.UNAUTHORIZED) {
             res.status(401).json({
                 message: 'Unauthorized',
             });
