@@ -12,6 +12,8 @@ import http from 'http';
 import https from 'https';
 import EventEmitter from 'events';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { WebSocketData } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
 
@@ -65,7 +67,17 @@ export class WSNode extends EventEmitter {
         });
 
         this.server.listen(this.variable.AAS_NODE_PORT, () => {
-            this.logger.info(`AASNode listening on ${this.variable.AAS_NODE_PORT}`);
+            const file = path.join(path.dirname(fileURLToPath(import.meta.url)), 'package.json');
+            let version = 'N/A';
+            fs.promises
+                .readFile(file, 'utf-8')
+                .then(data => {
+                    const packageJson = JSON.parse(data);
+                    version = packageJson.version ?? version;
+                })
+                .finally(() => {
+                    this.logger.info(`AASNode v${version} listening on ${this.variable.AAS_NODE_PORT}`);
+                });
         });
     }
 

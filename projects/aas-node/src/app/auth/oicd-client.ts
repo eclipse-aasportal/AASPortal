@@ -25,6 +25,8 @@ const AuthorizationServerSchema = z.object({
     token_endpoint: z.url(),
     jwks_uri: z.url(),
     end_session_endpoint: z.url(),
+    userinfo_endpoint: z.url().optional(),
+    check_session_iframe: z.url().optional(),
 });
 
 export type AuthorizationServer = z.infer<typeof AuthorizationServerSchema>;
@@ -108,10 +110,10 @@ export class OicdClient extends IdentityProviderClient {
             const state = req.session.state;
             delete req.session.code_verifier;
             delete req.session.state;
-            if (!code || !code_verifier || !state || req.query.state !== state) {
+            if (!code || !state || req.query.state !== state) {
                 return res.status(400).json({
                     name: 'ApplicationError',
-                    message: ERRORS.BAD_REQUEST,
+                    message: `code: ${code ? 'ok' : 'N/D'}, state: ${state ? 'ok' : 'N/D'}, state match: ${req.query.state === state}`,
                     status: 400,
                 } satisfies ErrorData);
             }
@@ -122,7 +124,10 @@ export class OicdClient extends IdentityProviderClient {
             params.set('client_secret', this.clientSecret);
             params.set('code', code);
             params.set('redirect_uri', redirect_uri);
-            params.set('code_verifier', code_verifier);
+            if (code_verifier) {
+                params.set('code_verifier', code_verifier);
+            }
+
             const response = await fetch(token_endpoint, {
                 method: 'POST',
                 headers: {
@@ -138,6 +143,10 @@ export class OicdClient extends IdentityProviderClient {
                     message,
                     status: response.status,
                 } satisfies ErrorData);
+            }
+
+            if (req.query.session_state) {
+                req.session.session_state = String(req.query.session_state);
             }
 
             const tokenData = (await response.json()) as TokenEndpointResponse;
@@ -287,7 +296,7 @@ export class OicdClient extends IdentityProviderClient {
         return result.data;
     }
 
-    private sendError(res: express.Response, error: unknown): express.Response {
+    private sendError(res: express.Response, error: string | Error): express.Response {
         if (!error) {
             return res.status(500).json({
                 name: 'ApplicationError',
@@ -303,7 +312,7 @@ export class OicdClient extends IdentityProviderClient {
         if (error instanceof Error) {
             return res.status(500).json({
                 name: 'ApplicationError',
-                message: error.message,
+                message: error.stack ?? error.message,
                 status: 500,
             } satisfies ErrorData);
         }

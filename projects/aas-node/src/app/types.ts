@@ -19,6 +19,7 @@ declare module 'express-serve-static-core' {
 declare module 'express-session' {
     interface SessionData {
         code_verifier?: string;
+        session_state?: string;
         state?: string;
     }
 }
