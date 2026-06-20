@@ -294,7 +294,7 @@ export class ApplicationError extends Error {
      * @returns {ErrorData} The serialized error containing name, message, and status code.
      */
     public toJson(): ErrorData {
-        const data: ErrorData = { name: this.name, message: this.message, status: this.statusCode };
+        const data: ErrorData = { name: this.name, message: this.stack ?? this.message, status: this.statusCode };
         if (this.args) {
             data.args = this.args;
         }
