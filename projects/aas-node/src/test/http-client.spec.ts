@@ -10,17 +10,14 @@ import 'reflect-metadata';
 import net from 'net';
 import { Readable } from 'stream';
 import { describe, beforeEach, it, expect, afterEach, vi, Mocked } from 'vitest';
-import { Logger } from 'aas-package';
 import { HttpClient } from '../app/http-client.js';
 import { createSpyObj } from './mocks.js';
 
 describe('HttpClient', () => {
     let server: HttpClient;
-    let logger: Mocked<Logger>;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['info', 'error']);
-        server = new HttpClient(logger);
+        server = new HttpClient();
     });
 
     afterEach(() => {

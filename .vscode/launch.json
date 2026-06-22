@@ -88,6 +88,7 @@
                 "IDENTITY_PROVIDER": "https://localhost:8443/realms/aas-portal",
                 "CLIENT_ID": "aas-node",
                 "CLIENT_SECRET": "7YiU4JXS4yaYHJrytrXNw7y71l3z12QN",
+                "REDIRECT_URI": "http://localhost:4200",
                 "COOKIE_STORAGE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
             }
         },
