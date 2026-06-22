@@ -28,6 +28,18 @@ export abstract class IdentityProviderClient {
     protected constructor(protected readonly logger: Logger) {}
 
     /**
+     * Retrieves the user information associated with the given request.
+     * This method is called to obtain the current user's information based on the request context,
+     * such as cookies or session data. It should return a User object if the user is authenticated,
+     * or null if the user is not authenticated.
+     * @param req The request.
+     * @param res The response.
+     */
+    public async me(req: express.Request, res: express.Response): Promise<express.Response | void> {
+        return res.json(req.user ?? null);
+    }
+
+    /**
      * The login method for the identity provider. This method is called when a user tries to log in.
      * @param req The request.
      * @param res The response.
