@@ -14,19 +14,16 @@ import { ApplicationError } from 'aas-core';
 export const errorHandler = (err: unknown, _: Request, res: Response, next: NextFunction): void => {
     if (err instanceof ValidateError) {
         res.status(err.status).json({
-            type: ValidateError.name,
+            name: ValidateError.name,
             message: err.message,
+            fields: err.fields,
         });
     } else if (err instanceof ApplicationError) {
-        res.status(err.statusCode).json({
-            type: ApplicationError.name,
-            message: err.message,
-            args: err.args,
-        });
+        res.status(err.statusCode).json(err.toJson());
     } else if (err instanceof Error) {
         res.status(500).json({
-            type: err.constructor?.name,
-            message: err.message,
+            name: err.name,
+            message: err.stack ?? err.message,
         });
     } else {
         next(err);

@@ -19,8 +19,8 @@ await main();
 
 async function main(): Promise<void> {
     try {
-        const arg = process.env.GITHUB_RUN_NUMBER || process.argv.at(2);
-        const branch = process.env.GITHUB_REF_NAME || process.argv.at(3);
+        const arg = process.env.GITHUB_RUN_NUMBER ?? process.argv.at(2);
+        const branch = process.env.GITHUB_REF_NAME ?? process.argv.at(3);
 
         if (!arg) {
             console.error('GITHUB_RUN_NUMBER is not set. Version will not be updated.');
@@ -32,6 +32,8 @@ async function main(): Promise<void> {
             console.error(`Invalid GITHUB_RUN_NUMBER: ${arg}`);
             process.exit(-1);
         }
+
+        console.info(`Patch number build from GITHUB_RUN_NUMBER: ${runNumber}, GITHUB_REF_NAME: ${branch}`);
 
         const patch = runNumber - offset;
         await setVersion(join(__dirname, 'package.json'), patch, branch);
@@ -55,5 +57,5 @@ async function setVersion(file: string, patch: number, branch: string | undefine
 
     project.version = version;
     await writeFile(file, JSON.stringify(project, undefined, 4));
-    console.log(`${file}: Version set to ${version}`);
+    console.info(`${file}: Version set to ${version}`);
 }

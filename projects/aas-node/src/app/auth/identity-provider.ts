@@ -81,17 +81,16 @@ export abstract class IdentityProvider extends IdentityProviderClient {
 
     public override async callback(req: express.Request, res: express.Response): Promise<express.Response> {
         const state = req.session.state;
-        delete req.session.state;
-        if (this.variable.CLIENT_ID !== req.query.client_id || !state || state !== req.query.state) {
-            return res
-                .status(400)
-                .json({ name: 'ApplicationError', message: ERRORS.BAD_REQUEST, status: 400 } satisfies ErrorData);
-        }
-
         const code_challenge_method = String(req.query.code_challenge_method);
         const code_challenge = String(req.query.code_challenge);
         const code_verifier = req.session.code_verifier;
-        if (!this.isValidCodeChallenge(code_challenge_method, code_challenge, code_verifier)) {
+        delete req.session.state;
+        if (
+            this.variable.CLIENT_ID !== req.query.client_id ||
+            !state ||
+            state !== req.query.state ||
+            !this.isValidCodeChallenge(code_challenge_method, code_challenge, code_verifier)
+        ) {
             return res
                 .status(400)
                 .json({ name: 'ApplicationError', message: ERRORS.BAD_REQUEST, status: 400 } satisfies ErrorData);
