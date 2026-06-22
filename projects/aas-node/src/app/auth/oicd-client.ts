@@ -108,6 +108,7 @@ export class OicdClient extends IdentityProviderClient {
             const code = req.query.code as string | undefined;
             const code_verifier = req.session.code_verifier;
             const state = req.session.state;
+            const session_state = req.query.session_state as string | undefined;
             delete req.session.code_verifier;
             delete req.session.state;
             if (!code || !state || req.query.state !== state) {
@@ -145,8 +146,8 @@ export class OicdClient extends IdentityProviderClient {
                 } satisfies ErrorData);
             }
 
-            if (req.query.session_state) {
-                req.session.session_state = String(req.query.session_state);
+            if (session_state) {
+                req.session.session_state = session_state;
             }
 
             const tokenData = (await response.json()) as TokenEndpointResponse;
