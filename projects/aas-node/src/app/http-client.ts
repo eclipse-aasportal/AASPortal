@@ -8,8 +8,7 @@
 
 import net from 'net';
 import { Readable } from 'stream';
-import { Logger, LOGGER } from 'aas-package';
-import { inject, singleton } from 'tsyringe';
+import { singleton } from 'tsyringe';
 import { ApplicationError } from 'aas-core';
 import { parseUrl } from './utilities.js';
 
@@ -18,8 +17,6 @@ import { parseUrl } from './utilities.js';
  */
 @singleton()
 export class HttpClient {
-    public constructor(@inject(LOGGER) private readonly logger: Logger) {}
-
     /**
      * Gets a JSON value of type `T` from a server.
      * @template T The type of the object.
@@ -28,9 +25,7 @@ export class HttpClient {
      * @returns The requested object.
      */
     public async get<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
-        const href = url.href;
-        this.logger.info(`GET ${href}`);
-        const response = await fetch(href, { method: 'GET', headers });
+        const response = await fetch(url.href, { method: 'GET', headers });
         if (!response.ok) {
             const message = await response.text().catch(() => 'GET request failed');
             throw new ApplicationError(message, {}, response.status);
@@ -48,7 +43,7 @@ export class HttpClient {
     public async getLive<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
         const response = await fetch(url.href, { method: 'GET', headers });
         if (!response.ok) {
-            const message = await response.text().catch(() => 'GET request failed');
+            const message = await response.text().catch(() => 'GET live request failed');
             throw new ApplicationError(message, {}, response.status);
         }
 
@@ -70,7 +65,8 @@ export class HttpClient {
         }
 
         if (!response.body) {
-            throw new ApplicationError('Response body is null', {}, 400);
+            const message = await response.text().catch(() => 'GET readable failed');
+            throw new ApplicationError(message, {}, 400);
         }
 
         return Readable.fromWeb(response.body);
