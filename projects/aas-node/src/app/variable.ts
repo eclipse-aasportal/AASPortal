@@ -57,7 +57,7 @@ export class Variable {
     /** Specifies the identity provider issuer URL */
     public readonly IDENTITY_PROVIDER: string = process.env.IDENTITY_PROVIDER ?? 'file:///users';
 
-    /** */
+    /** The client name or identifier. */
     public readonly CLIENT_ID: string = process.env.CLIENT_ID ?? 'aas-portal';
 
     /**  */

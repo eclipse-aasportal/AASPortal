@@ -3,6 +3,7 @@
     "compileOnSave": false,
     "compilerOptions": {
         "outDir": "./build",
+        "module": "es2022",
         "moduleResolution": "bundler",
         "emitDecoratorMetadata": true,
         "alwaysStrict": true,

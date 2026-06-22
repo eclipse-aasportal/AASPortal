@@ -54,6 +54,7 @@ swagger.yaml
 /projects/aas-server/src/app/routes
 /projects/aas-server/src/assets/swagger.json
 /data
+app-info.json
 
 # System files
 .DS_Store

@@ -13,7 +13,7 @@ import { inject, singleton } from 'tsyringe';
 import express, { Express, Request, Response, json, urlencoded } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import swaggerUi, { JsonObject } from 'swagger-ui-express';
+import swaggerUi from 'swagger-ui-express';
 import compression from 'compression';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
@@ -28,7 +28,7 @@ import { IDENTITY_PROVIDER, IdentityProviderClient } from './auth/identity-provi
 
 @singleton()
 export class App {
-    private swaggerDoc?: JsonObject;
+    private swaggerHtml?: string;
 
     public constructor(
         @inject(LOGGER) private readonly logger: Logger,
@@ -75,12 +75,16 @@ export class App {
         this.app.use(json());
         this.app.use(urlencoded({ extended: true }));
         this.app.use(morgan('dev'));
-        this.app.use(['/swagger', '/docs'], swaggerUi.serve, async () => {
-            return swaggerUi.setup(await this.getSwaggerDoc());
-        });
+        this.app.use(
+            ['/api/swagger', '/api/docs'],
+            swaggerUi.serve,
+            async (_req: express.Request, res: express.Response) => {
+                res.send(await this.getSwaggerHtml());
+            },
+        );
 
         this.app.get('/api/me', async (req, res) => {
-            res.json(req.user ?? null);
+            await this.identityProvider.me(req, res);
         });
 
         this.app.get('/api/login', async (req, res) => {
@@ -105,20 +109,23 @@ export class App {
         this.app.use(errorHandler);
         this.app.use((req: Request, res: Response) => {
             if (req.method === 'GET' && req.accepts('html')) {
-                res.sendFile(this.variable.WEB_ROOT + '/index.html');
-            } else {
-                res.status(404).send({ message: 'Not Found' });
+                const file = path.join(this.variable.WEB_ROOT, 'index.html');
+                if (fs.existsSync(file)) {
+                    return res.sendFile(file);
+                }
             }
+
+            return res.status(404).send({ name: 'ApplicationError', message: 'Not Found' });
         });
     }
 
-    private async getSwaggerDoc(): Promise<JsonObject> {
-        if (this.swaggerDoc === undefined) {
-            this.swaggerDoc = JSON.parse(
-                (await fs.promises.readFile(path.join(this.variable.ASSETS, 'swagger.json'))).toString(),
-            ) as JsonObject;
+    private async getSwaggerHtml(): Promise<string> {
+        if (this.swaggerHtml === undefined) {
+            this.swaggerHtml = swaggerUi.generateHTML(
+                JSON.parse((await fs.promises.readFile(path.join(this.variable.ASSETS, 'swagger.json'))).toString()),
+            );
         }
 
-        return this.swaggerDoc;
+        return this.swaggerHtml;
     }
 }

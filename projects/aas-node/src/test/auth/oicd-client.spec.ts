@@ -25,15 +25,15 @@ describe('OicdClient', () => {
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>([], {
-            IDENTITY_PROVIDER: 'oidc://example.com',
+            IDENTITY_PROVIDER: 'https://example.com',
             CLIENT_ID: 'client-id',
             CLIENT_SECRET: 'client-secret',
         });
 
         configuration = createSpyObj<AuthorizationServer>([], {
+            issuer: 'https://example.com',
             authorization_endpoint: 'https://example.com/auth',
             token_endpoint: 'https://example.com/token',
-            userinfo_endpoint: 'https://example.com/userinfo',
             end_session_endpoint: 'https://example.com/logout',
             jwks_uri: 'https://example.com/keys',
         });
@@ -51,7 +51,7 @@ describe('OicdClient', () => {
 
     describe('login', () => {
         it('should redirect to identity provider', async () => {
-            const res = createSpyObj<express.Response>(['redirect']);
+            const res = createSpyObj<express.Response>(['redirect', 'status']);
             const session = createSpyObj<Session>([], {});
             const req = createSpyObj<express.Request>([], { protocol: 'https', host: 'localhost', session });
             const response = createSpyObj<Response>(['json'], {
