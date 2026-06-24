@@ -55,7 +55,7 @@ export class App {
         this.app.use(
             cors({
                 origin: this.variable.CORS_ORIGIN,
-                allowedHeaders: ['Origin', 'Content-Type', 'Authorization'],
+                allowedHeaders: ['Origin', 'Content-Type'],
                 credentials: true,
                 maxAge: 86400,
             }),
