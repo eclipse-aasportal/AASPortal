@@ -28,6 +28,8 @@ describe('OicdClient', () => {
             IDENTITY_PROVIDER: 'https://example.com',
             CLIENT_ID: 'client-id',
             CLIENT_SECRET: 'client-secret',
+            REDIRECT_URI: 'https://localhost/callback',
+            HOST_URL: 'https://localhost',
         });
 
         configuration = createSpyObj<AuthorizationServer>([], {
@@ -36,6 +38,8 @@ describe('OicdClient', () => {
             token_endpoint: 'https://example.com/token',
             end_session_endpoint: 'https://example.com/logout',
             jwks_uri: 'https://example.com/keys',
+            check_session_iframe: 'https://example.com/check_session',
+            userinfo_endpoint: 'https://example.com/userinfo',
         });
 
         identityProvider = new OicdClient(logger, variable);
@@ -52,7 +56,11 @@ describe('OicdClient', () => {
     describe('login', () => {
         it('should redirect to identity provider', async () => {
             const res = createSpyObj<express.Response>(['redirect', 'status']);
-            const session = createSpyObj<Session>([], {});
+            const session = createSpyObj<Session>(['save'], {});
+            session.save = vi.fn().mockImplementation(callback => {
+                callback?.();
+            });
+
             const req = createSpyObj<express.Request>([], { protocol: 'https', host: 'localhost', session });
             const response = createSpyObj<Response>(['json'], {
                 ok: true,
@@ -72,9 +80,13 @@ describe('OicdClient', () => {
         it('responds with status code 500 if reading configuration failed', async () => {
             const res = createSpyObj<express.Response>(['json', 'status']);
             res.status.mockReturnThis();
-            const session = createSpyObj<Session>([], {});
+            const session = createSpyObj<Session>(['save'], {});
+            session.save = vi.fn().mockImplementation(callback => {
+                callback?.();
+            });
+
             const req = createSpyObj<express.Request>([], { protocol: 'https', host: 'localhost', session });
-            vi.spyOn(global, 'fetch').mockRejectedValue(new Error());
+            vi.spyOn(global, 'fetch').mockRejectedValue(new Error('Failed to fetch configuration'));
 
             await identityProvider.login(req, res);
             expect(res.status).toHaveBeenCalledWith(500);
@@ -85,9 +97,13 @@ describe('OicdClient', () => {
     describe('callback', () => {
         it('should authorize the current user', async () => {
             const res = createSpyObj<express.Response>(['redirect', 'cookie']);
-            const session = createSpyObj<Session & SessionData>([], {
+            const session = createSpyObj<Session & SessionData>(['save'], {
                 state: 'test-state',
                 code_verifier: 'test-code-verifier',
+            });
+
+            session.save = vi.fn().mockImplementation(callback => {
+                callback?.();
             });
 
             const req = createSpyObj<express.Request>([], {
