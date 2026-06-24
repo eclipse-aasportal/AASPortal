@@ -38,8 +38,6 @@ export interface UserData {
     password: string;
     /** The creation date. */
     created: Date;
-    /** The date and time of the last login. */
-    lastLoggedIn: Date;
 }
 
 export abstract class IdentityProvider extends IdentityProviderClient {
@@ -67,24 +65,26 @@ export abstract class IdentityProvider extends IdentityProviderClient {
         const code_verifier = this.generateCodeVerifier();
         const code_challenge = this.generateCodeChallenge(code_verifier);
         const state = this.generateCodeVerifier(24);
+        const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/api/callback`;
         req.session.state = state;
         req.session.code_verifier = code_verifier;
-        const url = new URL('login', `${req.secure ? 'https://' : 'http://'}${req.host}`);
+        const url = new URL('login', this.variable.HOST_URL ?? `${req.protocol}://${req.host}`);
         url.searchParams.set('client_id', this.variable.CLIENT_ID);
         url.searchParams.set('code_challenge', code_challenge);
         url.searchParams.set('code_challenge_method', 'S256');
-        url.searchParams.set('redirect_uri', '/api/callback');
+        url.searchParams.set('redirect_uri', redirect_uri);
         url.searchParams.set('state', state);
         await this.saveSession(req);
         res.redirect(url.href);
     }
 
-    public override async callback(req: express.Request, res: express.Response): Promise<express.Response> {
+    public override async callback(req: express.Request, res: express.Response): Promise<express.Response | void> {
         const state = req.session.state;
         const code_challenge_method = String(req.query.code_challenge_method);
         const code_challenge = String(req.query.code_challenge);
         const code_verifier = req.session.code_verifier;
         delete req.session.state;
+        delete req.session.code_verifier;
         if (
             this.variable.CLIENT_ID !== req.query.client_id ||
             !state ||
@@ -116,7 +116,8 @@ export abstract class IdentityProvider extends IdentityProviderClient {
 
         const user: User = { id: data.id, name: data.name, role: data.role };
         this.setAuthCookies(res, this.createAccessToken(user), this.createRefreshToken(user));
-        return res.json(user);
+        await this.saveSession(req);
+        res.json(user);
     }
 
     public override async logout(req: express.Request, res: express.Response): Promise<express.Response> {
@@ -168,7 +169,6 @@ export abstract class IdentityProvider extends IdentityProviderClient {
             role: 'editor',
             password: await bcrypt.hash(profile.password, 10),
             created: new Date(),
-            lastLoggedIn: new Date(0),
         };
 
         await this.write(profile.id, data);

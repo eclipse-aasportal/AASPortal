@@ -55,7 +55,6 @@ export class FileSystemIdentityProvider extends IdentityProvider {
     private async readUserData(path: string): Promise<UserData> {
         const data = JSON.parse((await fs.promises.readFile(path)).toString()) as UserData;
         data.created = new Date(data.created);
-        data.lastLoggedIn = new Date(data.lastLoggedIn);
         return data as UserData;
     }
 
