@@ -70,32 +70,36 @@ export class AuthService {
 
     /**
      * Performs user authentication using the provided credentials.
-     * Sends a POST request to the '/api/login' endpoint with the credentials,
-     * receives the authenticated User object, and updates the internal user state.
+     * Sends a POST request to the '/api/login' endpoint with the credentials.
      * @param credentials The credentials object containing the login information.
-     * @returns An observable that completes once the user state is updated.
+     * @returns An observable that completes when the user is authenticated.
      */
     public login(credentials: Credentials): Observable<void> {
         return this.activeRoute.queryParamMap.pipe(
             take(1),
             switchMap(params => {
                 const callback = params.get('redirect_uri');
-                if (!callback) {
-                    return throwError(() => new Error('Missing redirect URI in query parameters'));
+                const client_id = params.get('client_id');
+                const state = params.get('state');
+                const code_challenge_method = params.get('code_challenge_method');
+                const code_challenge = params.get('code_challenge');
+                if (!callback || !client_id || !state || !code_challenge_method || !code_challenge) {
+                    return throwError(() => new Error('Invalid login request: Missing required query parameters.'));
                 }
 
                 const queryParams = new HttpParams({
                     fromObject: {
-                        client_id: params.get('client_id')!,
-                        state: params.get('state')!,
-                        code_challenge_method: params.get('code_challenge_method')!,
-                        code_challenge: params.get('code_challenge')!,
+                        client_id,
+                        state,
+                        code_challenge_method,
+                        code_challenge,
                     },
                 });
 
-                return this.http.post<User>(callback, credentials, { params: queryParams });
+                return this.http
+                    .post<User>(callback, credentials, { params: queryParams })
+                    .pipe(map(user => this.user$.set(user)));
             }),
-            map(user => this.user$.set(user)),
         );
     }
 

@@ -57,7 +57,6 @@ export class OicdClient extends IdentityProviderClient {
     private readonly clientId: string;
     private readonly clientSecret: string;
     private readonly secure = process.env.NODE_ENV === 'production';
-    private readonly redirectUri?: string;
     private jwksClient?: JwksClient;
 
     public constructor(
@@ -70,11 +69,6 @@ export class OicdClient extends IdentityProviderClient {
         this.clientId = this.variable.CLIENT_ID;
         this.clientSecret = this.variable.CLIENT_SECRET;
         this.logger.info(`Using OIDC Client '${this.server}'`);
-
-        if (this.variable.REDIRECT_URI) {
-            this.redirectUri = new URL('/api/callback', this.variable.REDIRECT_URI).href;
-            this.logger.info(`Using redirect URI '${this.redirectUri}'`);
-        }
     }
 
     public override async login(req: express.Request, res: express.Response): Promise<express.Response | void> {
@@ -82,7 +76,7 @@ export class OicdClient extends IdentityProviderClient {
             const authorization_endpoint = (await this.getConfiguration()).authorization_endpoint;
             const code_verifier = this.generateCodeVerifier();
             const code_challenge = this.generateCodeChallenge(code_verifier);
-            const redirect_uri = this.redirectUri ?? `${req.protocol}://${req.host}/api/callback`;
+            const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/api/callback`;
             const state = this.generateCodeVerifier(24);
             req.session.code_verifier = code_verifier;
             req.session.state = state;
@@ -95,6 +89,7 @@ export class OicdClient extends IdentityProviderClient {
             authUrl.searchParams.set('code_challenge', code_challenge);
             authUrl.searchParams.set('code_challenge_method', 'S256');
             authUrl.searchParams.set('state', state);
+            await this.saveSession(req);
             res.redirect(authUrl.href);
         } catch (error) {
             return this.sendError(res, error);
@@ -104,19 +99,24 @@ export class OicdClient extends IdentityProviderClient {
     public override async callback(req: express.Request, res: express.Response): Promise<express.Response | void> {
         try {
             const token_endpoint = (await this.getConfiguration()).token_endpoint;
-            const redirect_uri = this.redirectUri ?? `${req.protocol}://${req.host}/api/callback`;
+            const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/api/callback`;
             const code = req.query.code as string | undefined;
+            const session_state = req.query.session_state as string | undefined;
             const code_verifier = req.session.code_verifier;
             const state = req.session.state;
-            const session_state = req.query.session_state as string | undefined;
             delete req.session.code_verifier;
             delete req.session.state;
+            delete req.session.session_state;
             if (!code || !state || req.query.state !== state) {
                 return res.status(400).json({
                     name: 'ApplicationError',
-                    message: `code: ${code ? 'ok' : 'N/D'}, state: ${state ? 'ok' : 'N/D'}, state match: ${req.query.state === state}`,
+                    message: ERRORS.BAD_REQUEST,
                     status: 400,
                 } satisfies ErrorData);
+            }
+
+            if (session_state) {
+                req.session.session_state = session_state;
             }
 
             const params = new URLSearchParams();
@@ -146,10 +146,6 @@ export class OicdClient extends IdentityProviderClient {
                 } satisfies ErrorData);
             }
 
-            if (session_state) {
-                req.session.session_state = session_state;
-            }
-
             const tokenData = (await response.json()) as TokenEndpointResponse;
             res.cookie('access_token', tokenData.access_token, {
                 httpOnly: true,
@@ -165,7 +161,8 @@ export class OicdClient extends IdentityProviderClient {
                 });
             }
 
-            res.redirect(`${req.protocol}://${req.host}/start`);
+            await this.saveSession(req);
+            res.redirect(new URL('start', this.variable.HOST_URL ?? `${req.protocol}://${req.host}`).href);
         } catch (error) {
             return this.sendError(res, error);
         }

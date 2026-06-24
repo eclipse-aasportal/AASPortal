@@ -29,7 +29,6 @@ vi.mock('fs', () => {
                         name: 'John Doe',
                         role: 'editor',
                         created: new Date(),
-                        lastLoggedIn: new Date(),
                         password: '$2b$10$vInNMtSyK./X7OVfPHP4Fuuv/oA9bJEQQfZq2hQu/YMTxQUs7otGu',
                     } satisfies UserData),
                 ),
@@ -52,6 +51,7 @@ describe('FileSystemIdentityProvider', () => {
             CLIENT_ID: 'test-client-id',
             CLIENT_SECRET: 'test-client-secret',
             REDIRECT_URI: 'http://localhost/callback',
+            HOST_URL: 'http://localhost',
         });
 
         identityProvider = new FileSystemIdentityProvider(createSpyObj<Logger>(['error']), variable);
@@ -88,6 +88,10 @@ describe('FileSystemIdentityProvider', () => {
             const session = createSpyObj<Session & SessionData>(['destroy', 'save'], {
                 state: 'test-state',
                 code_verifier: 'test-code-verifier',
+            });
+
+            session.save = vi.fn().mockImplementation(callback => {
+                callback?.();
             });
 
             const req = createSpyObj<express.Request>([], {
