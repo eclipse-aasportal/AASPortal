@@ -26,7 +26,6 @@ export class MongoDBIdentityProvider extends IdentityProvider {
         role: { type: String, required: true },
         password: { type: String, required: true },
         created: { type: Date, required: true },
-        lastLoggedIn: { type: Date, required: true },
     });
 
     public constructor(

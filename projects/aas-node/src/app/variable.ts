@@ -38,7 +38,7 @@ export class Variable {
     /** The CORS origin settings. */
     public readonly CORS_ORIGIN: string | string[] = process.env.CORS_ORIGIN
         ? JSON.parse(process.env.CORS_ORIGIN)
-        : 'http://localhost:4200';
+        : ['http://localhost:4200', 'http://localhost:1337'];
 
     /** The URLs of the initial AAS container endpoints. */
     public readonly ENDPOINTS: string[] = process.env.ENDPOINTS
@@ -53,6 +53,9 @@ export class Variable {
 
     /** The pfx file if AASNode supports HTTPS. */
     public readonly HTTPS_PFX_FILE?: string = process.env.HTTPS_PFX_FILE;
+
+    /** The URL of the host */
+    public readonly HOST_URL?: string = process.env.HOST_URL;
 
     /** Specifies the identity provider issuer URL */
     public readonly IDENTITY_PROVIDER: string = process.env.IDENTITY_PROVIDER ?? 'file:///users';
