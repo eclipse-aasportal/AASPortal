@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-import fs from 'fs';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -42,8 +41,6 @@ export interface UserData {
 
 export abstract class IdentityProvider extends IdentityProviderClient {
     private readonly algorithm: jwt.Algorithm;
-    private readonly publicKey: string;
-    private readonly privateKey: string;
 
     protected constructor(
         logger: Logger,
@@ -51,14 +48,7 @@ export abstract class IdentityProvider extends IdentityProviderClient {
     ) {
         super(logger);
 
-        if (process.env.JWT_PUBLIC_KEY) {
-            this.publicKey = fs.readFileSync(process.env.JWT_PUBLIC_KEY, 'utf8');
-            this.algorithm = 'RS256';
-            this.privateKey = fs.readFileSync(process.env.JWT_SECRET!, 'utf8');
-        } else {
-            this.publicKey = this.privateKey = process.env.JWT_SECRET || 'The quick brown fox jumps over the lazy dog.';
-            this.algorithm = 'HS256';
-        }
+        this.algorithm = 'HS256';
     }
 
     public override async login(req: express.Request, res: express.Response): Promise<void> {
@@ -99,7 +89,7 @@ export abstract class IdentityProvider extends IdentityProviderClient {
         const credentials = req.body;
         if (!isCredentials(credentials)) {
             return res.status(400).json({
-                message: ERRORS.BAD_REQUEST,
+                message: ERRORS.INVALID_CREDENTIALS,
                 name: 'ApplicationError',
                 status: 400,
             } satisfies ErrorData);
@@ -197,7 +187,7 @@ export abstract class IdentityProvider extends IdentityProviderClient {
     protected abstract delete(userId: string): Promise<boolean>;
 
     protected override getPublicKey(): Promise<string> {
-        return Promise.resolve(this.publicKey);
+        return Promise.resolve(this.variable.CLIENT_SECRET);
     }
 
     protected override async refreshToken(refresh_token: string): Promise<RefreshTokenResponse> {
@@ -229,7 +219,7 @@ export abstract class IdentityProvider extends IdentityProviderClient {
     }
 
     private createAccessToken(user: User): string {
-        return jwt.sign({ email: user.id, name: user.name }, this.privateKey, {
+        return jwt.sign({ email: user.id, name: user.name }, this.variable.CLIENT_SECRET, {
             issuer: this.variable.IDENTITY_PROVIDER,
             audience: this.variable.CLIENT_ID,
             subject: user.id,
@@ -239,7 +229,7 @@ export abstract class IdentityProvider extends IdentityProviderClient {
     }
 
     private createRefreshToken(user: User): string {
-        return jwt.sign({ email: user.id, name: user.name }, this.privateKey, {
+        return jwt.sign({ email: user.id, name: user.name }, this.variable.CLIENT_SECRET, {
             issuer: this.variable.IDENTITY_PROVIDER,
             audience: this.variable.CLIENT_ID,
             subject: user.id,
