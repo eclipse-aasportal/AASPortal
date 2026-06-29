@@ -211,9 +211,6 @@ src/app/
 ```bash
 AAS_NODE_PORT=80                   # Server port
 ENDPOINTS=["file:///samples"]      # Initial AAS endpoints
-USER_STORAGE=mongodb://localhost/  # User database URL
-JWT_SECRET=your-secret-key         # JWT signing key
-CORS_ORIGIN=*                      # CORS configuration
 ```
 
 ### Development Commands
@@ -225,7 +222,7 @@ npm run tsoa -w aas-node           # Generate OpenAPI specs
 ```
 
 ### API Documentation
-Access Swagger UI at: `http://localhost/api-docs`
+Access Swagger UI at: `http://localhost/api/swagger`
 
 ---
 
