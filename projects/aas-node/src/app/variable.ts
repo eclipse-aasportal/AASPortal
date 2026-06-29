@@ -61,12 +61,12 @@ export class Variable {
     public readonly IDENTITY_PROVIDER: string = process.env.IDENTITY_PROVIDER ?? 'file:///users';
 
     /** The client name or identifier. */
-    public readonly CLIENT_ID: string = process.env.CLIENT_ID ?? 'aas-portal';
+    public readonly CLIENT_ID: string = process.env.CLIENT_ID ?? 'aas-node';
 
-    /**  */
-    public readonly CLIENT_SECRET: string = process.env.CLIENT_SECRET ?? 'aas-portal-client-secret';
+    /** The client secret. */
+    public readonly CLIENT_SECRET: string = process.env.CLIENT_SECRET ?? 'aas-node-client-secret-for-development';
 
-    /** */
+    /** The redirect URI after successful login. */
     public readonly REDIRECT_URI?: string = process.env.REDIRECT_URI;
 
     /** The logging level. */

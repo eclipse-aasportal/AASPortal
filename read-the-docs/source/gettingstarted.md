@@ -139,22 +139,7 @@ AASNode is a Node.js server application based on the Express framework. The main
 AASNode provides a user management. Authentication of a user is based on Json Web Token. 
 
 ## Environment Variables
-| Name             |                                                                       | default                                        |
-| ---------------- | --------------------------------------------------------------------- | ---------------------------------------------- |
-| ASSETS           | AASNode root directory local endpoints and templates.               | './assets'                                     |
-| CONTENT_ROOT     | The root directory where AASNode is located.                        | './'                                           |
-| CORS_ORIGIN      |                                                                       | '*'                                            |
-| ENDPOINTS        | The URLs of the initial AAS container endpoints.                      | ['file:///samples']                            |
-| HTTPS_CERT_FILE  | Certification file to enable HTTPS.                                   |                                                |
-| HTTPS_KEY_FILE   | Key file to enable HTTPS.                                             |                                                |
-| JWT_EXPIRES_IN   | The period for the validity of a JWT.                                 | 604800 (1 week)                                |
-| JWT_PUBLIC_KEY   | Public key file for RS256 encryption.                                 |                                                |
-| JWT_SECRET       | Secret for HS256 encryption or private key file for RS256 encryption. | 'The quick brown fox jumps over the lazy dog.' |
-| MAX_WORKERS      | Number of background worker that scan AAS containers.                 | 8                                              |
-| AAS_NODE_PORT | The port number where AASNode is listening.                         | 80                                             |
-| USER_STORAGE     | URL of the user database.                                             | './users'                                      |
-| TIMEOUT          | Timeout until a new scan starts (ms).                                 | 5000                                           |
-| WEB_ROOT         | The root directory for static file resources.                         | './wwwroot'                                    |
+ToDo...
 
 ## Endpoints
 An endpoint is an URL and a unique name to an AAS container. An AAS container can be:

@@ -10,8 +10,8 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { catchError, mergeMap, Observable, of } from 'rxjs';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap/dropdown';
 import { Router } from '@angular/router';
-import { NotifyService } from '../notify/notify.service';
 import { TranslateDirective } from '@ngx-translate/core';
+import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
 
 @Component({
