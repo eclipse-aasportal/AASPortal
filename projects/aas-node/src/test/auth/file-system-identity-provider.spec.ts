@@ -54,7 +54,7 @@ describe('FileSystemIdentityProvider', () => {
             HOST_URL: 'http://localhost',
         });
 
-        identityProvider = new FileSystemIdentityProvider(createSpyObj<Logger>(['error']), variable);
+        identityProvider = new FileSystemIdentityProvider(createSpyObj<Logger>(['error', 'warning', 'info']), variable);
     });
 
     afterEach(() => {
