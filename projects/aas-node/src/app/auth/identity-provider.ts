@@ -81,6 +81,12 @@ export abstract class IdentityProvider extends IdentityProviderClient {
             state !== req.query.state ||
             !this.isValidCodeChallenge(code_challenge_method, code_challenge, code_verifier)
         ) {
+            this.logger.info(`client_id: ${this.variable.CLIENT_ID} : ${req.query.client_id}`);
+            this.logger.info(`state: ${state} : ${req.query.state}`);
+            this.logger.info(
+                `code_challenge_method: ${code_challenge_method}, code_challenge: ${code_challenge}, code_verifier: ${code_verifier}, valid: ${this.isValidCodeChallenge(code_challenge_method, code_challenge, code_verifier)}`,
+            );
+
             return res
                 .status(400)
                 .json({ name: 'ApplicationError', message: ERRORS.BAD_REQUEST, status: 400 } satisfies ErrorData);
