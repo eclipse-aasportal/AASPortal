@@ -6,13 +6,12 @@
  *
  *****************************************************************************/
 
-import { inject, Injectable, computed, signal } from '@angular/core';
+import { inject, Injectable, computed, signal, DOCUMENT } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { map, Observable, of, switchMap, take, throwError } from 'rxjs';
-import { UserProfile, UserRole, User, Credentials } from 'aas-core';
-import { encodeBase64Url } from '../../utilities';
+import { UserProfile, UserRole, User, Credentials, EndpointAuth } from 'aas-core';
 import { HttpCache } from '../../services/http-cache';
 
 @Injectable({
@@ -22,6 +21,7 @@ export class AuthService {
     private readonly http = inject(HttpClient);
     private readonly cache = inject(HttpCache);
     private readonly activeRoute = inject(ActivatedRoute);
+    private readonly document = inject(DOCUMENT);
     private readonly user$ = signal<User | null | undefined>(undefined);
 
     public constructor() {
@@ -74,7 +74,15 @@ export class AuthService {
      * @param credentials The credentials object containing the login information.
      * @returns An observable that completes when the user is authenticated.
      */
-    public login(credentials: Credentials): Observable<void> {
+    public login(credentials?: Credentials): Observable<void> {
+        if (this.isAuthenticated()) {
+            return of(void 0);
+        }
+
+        if (!credentials) {
+            return of(this.document.location.assign('/api/login'));
+        }
+
         return this.activeRoute.queryParamMap.pipe(
             take(1),
             switchMap(params => {
@@ -110,6 +118,10 @@ export class AuthService {
      * @returns An observable that completes once the logout process and user state update are finished.
      */
     public logout(): Observable<void> {
+        if (!this.isAuthenticated()) {
+            return of(void 0);
+        }
+
         return this.http.post('/api/logout', null, { responseType: 'text' }).pipe(map(() => this.user$.set(null)));
     }
 
@@ -133,9 +145,7 @@ export class AuthService {
      * Deletes the account of the current authenticated user.
      */
     public deleteAccount(): Observable<void> {
-        return this.http
-            .delete(`/api/accounts/${encodeBase64Url(this.email() ?? '')}`, { responseType: 'text' })
-            .pipe(map(() => this.user$.set(null)));
+        return this.http.delete('/api/accounts', { responseType: 'text' }).pipe(map(() => this.user$.set(null)));
     }
 
     /**
@@ -153,5 +163,14 @@ export class AuthService {
         }
 
         return expected.indexOf(role) >= 0;
+    }
+
+    /**
+     * Updates the endpoint authentication of the current user.
+     * @param items The endpoint authentication items to update.
+     * @returns An observable that completes when the update operation is successful.
+     */
+    public updateEndpointAuth(items: EndpointAuth[]): Observable<void> {
+        return this.http.patch('/api/v1/endpoints/auth', items, { responseType: 'text' }).pipe(map(() => void 0));
     }
 }

@@ -7,12 +7,16 @@
  *****************************************************************************/
 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { catchError, mergeMap, Observable, of } from 'rxjs';
+import { catchError, from, mergeMap, Observable, of, tap } from 'rxjs';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap/dropdown';
 import { Router } from '@angular/router';
 import { TranslateDirective } from '@ngx-translate/core';
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
+import { EndpointAuthForm } from './endpoint-auth-form/endpoint-auth-form';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { EndpointsApi } from '../../services/endpoints-api';
+import { EndpointAuth } from 'projects/aas-core/dist/types';
 
 @Component({
     selector: 'fhg-auth',
@@ -24,7 +28,9 @@ import { AuthService } from './auth.service';
 export class AuthComponent {
     private readonly auth = inject(AuthService);
     private readonly notify = inject(NotifyService);
+    private readonly api = inject(EndpointsApi);
     private readonly router = inject(Router);
+    private readonly modal = inject(NgbModal);
 
     public readonly isAuthenticated = this.auth.isAuthenticated;
 
@@ -34,6 +40,27 @@ export class AuthComponent {
         return this.auth.logout().pipe(
             catchError(error => of(this.notify.handleError(error))),
             mergeMap(() => this.router.navigateByUrl('/start').then(() => void 0)),
+        );
+    }
+
+    public openEndpointAuth(): Observable<void> {
+        if (!this.auth.isAuthenticated()) {
+            return this.auth.login();
+        }
+
+        return from<Promise<EndpointAuth[]>>(
+            this.modal.open(EndpointAuthForm, { backdrop: 'static', scrollable: true }).result,
+        ).pipe(
+            mergeMap(items =>
+                this.auth.updateEndpointAuth(items).pipe(
+                    tap(() =>
+                        this.notify.info('EndpointAuthForm.UPDATED', {
+                            endpoints: items.map(item => item.name).join(', '),
+                        }),
+                    ),
+                    catchError(error => of(this.notify.error(error))),
+                ),
+            ),
         );
     }
 }

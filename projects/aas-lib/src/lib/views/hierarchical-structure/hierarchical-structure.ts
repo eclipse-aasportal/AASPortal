@@ -30,7 +30,7 @@ import { HIERARCHICAL_STRUCTURES_1_0, HIERARCHICAL_STRUCTURES_1_1 } from '../vie
 import { VIEW_ROUTES } from '../views-routes';
 import { Tree, TreeComponent, TreeNode, TreeResult } from '../../components/tree/tree.component';
 import { RouterLinkWithHref } from '@angular/router';
-import { MaxLengthPipe } from '../../pipes/max-length.pipe';
+import { MaxLengthPipe } from '../../share/pipes/max-length.pipe';
 
 export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
 

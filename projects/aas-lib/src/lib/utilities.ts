@@ -8,6 +8,7 @@
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
+import semver from 'semver';
 import {
     aas,
     ApplicationError,
@@ -29,6 +30,7 @@ import {
     isErrorData,
     isSubmodel,
     isEnvironment,
+    AASEndpointType,
 } from 'aas-core';
 
 import {
@@ -794,4 +796,85 @@ export function hasSpecificView(viewRoutes: ViewRoute[], arg: aas.Submodel | AAS
 
     const { route } = findRouteForShell(viewRoutes, arg, false);
     return route !== undefined;
+}
+
+/**
+ * Validates the specified endpoint URL based on the endpoint type.
+ * @param value The endpoint URL to validate.
+ * @param type The type of the endpoint.
+ * @returns `true` if the endpoint URL is valid for the specified type; otherwise `false`.
+ */
+export function validateEndpointUrl(value: string, type: AASEndpointType): boolean {
+    try {
+        const url = new URL(value);
+        switch (type) {
+            case 'AAS_API':
+                return validateAASApiEndpoint(url);
+            case 'FileSystem':
+                return validateFileSystemEndpoint(url);
+            case 'OPC_UA':
+                return validateOpcuaEndpoint(url);
+            case 'WebDAV':
+                return validateWebDAVEndpoint(url);
+        }
+    } catch {
+        return false;
+    }
+
+    function validateAASApiEndpoint(url: URL): boolean {
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return false;
+        }
+
+        if (!url.hostname) {
+            return false;
+        }
+
+        const version = url.searchParams.get('version');
+        if (version && !semver.valid(semver.coerce(version))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateFileSystemEndpoint(url: URL): boolean {
+        if (url.protocol !== 'file:') {
+            return false;
+        }
+
+        if (url.hostname !== '') {
+            return false;
+        }
+
+        if (url.pathname === '/') {
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateOpcuaEndpoint(url: URL): boolean {
+        if (url.protocol !== 'opc.tcp:') {
+            return false;
+        }
+
+        if (!url.hostname) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateWebDAVEndpoint(url: URL): boolean {
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return false;
+        }
+
+        if (!url.hostname) {
+            return false;
+        }
+
+        return true;
+    }
 }

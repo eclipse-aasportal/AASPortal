@@ -15,22 +15,8 @@
     </a>
     <div ngbDropdownMenu aria-labelledby="navbarLocalize" class="dropdown-menu dropdown-menu-end">
         @if (!isAuthenticated()) {
-            <a
-                type="button"
-                class="dropdown-item"
-                href="/api/login"
-                tabindex="1"
-                translate
-                >Auth.LOGIN</a
-            >
-            <a
-                type="button"
-                class="dropdown-item"
-                href="/register"
-                tabindex="2"
-                translate
-                >Auth.REGISTER_USER</a
-            >
+            <a type="button" class="dropdown-item" href="/api/login" tabindex="1" translate>Auth.LOGIN</a>
+            <a type="button" class="dropdown-item" href="/register" tabindex="2" translate>Auth.REGISTER_USER</a>
         } @else {
             <a
                 type="button"
@@ -41,14 +27,8 @@
                 translate
                 >Auth.LOGOUT</a
             >
-            <a
-                type="button"
-                class="dropdown-item"
-                href="/profile"
-                tabindex="4"
-                translate
-                >Auth.UPDATE_PROFILE</a
-            >
+            <a type="button" class="dropdown-item" href="/profile" tabindex="4" translate>Auth.UPDATE_PROFILE</a>
+            <a type="button" class="dropdown-item" (click)="openEndpointAuth().subscribe()" tabindex="4" translate>Auth.ENDPOINTS</a>
         }
     </div>
 </div>

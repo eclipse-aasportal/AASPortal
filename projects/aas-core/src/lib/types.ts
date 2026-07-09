@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import * as z from 'zod';
 import * as aas from './aas.js';
 
 /** Defines the supported endpoint types. */
@@ -45,9 +46,14 @@ export type AASAbbreviation =
     | 'SME'
     | 'SML';
 
-export type AASEndpointScheduleType = 'disabled' | 'manual' | 'once' | 'every' | 'daily' | 'weekly';
+export type AASEndpointScheduleType = 'disabled' | 'manual' | 'once' | 'every';
 
 /** The schedule type. */
+export const AASEndpointScheduleSchema = z.object({
+    type: z.literal(['disabled', 'manual', 'once', 'every']),
+    values: z.array(z.string().or(z.number())).optional(),
+});
+
 export interface AASEndpointSchedule {
     type: AASEndpointScheduleType;
     values?: (string | number)[];
@@ -56,14 +62,29 @@ export interface AASEndpointSchedule {
 /** The kind of AAS container or server. */
 export type AASEndpointType = 'FileSystem' | 'AAS_API' | 'OPC_UA' | 'WebDAV';
 
-/** The endpoint to an AAS container */
+/** Represents an AAS endpoint. */
+export const AASEndpointSchema = z.object({
+    headers: z.record(z.string(), z.string()).optional(),
+    name: z.string().min(1),
+    schedule: AASEndpointScheduleSchema.optional(),
+    type: z.literal(['FileSystem', 'AAS_API', 'OPC_UA', 'WebDAV']),
+    url: z.url(),
+    version: z.string().optional(),
+});
+
 export interface AASEndpoint {
     name: string;
-    url: string;
-    type: AASEndpointType;
-    schedule?: AASEndpointSchedule;
-    version?: string;
     headers?: Record<string, string>;
+    schedule?: AASEndpointSchedule;
+    type: AASEndpointType;
+    url: string;
+    version?: string;
+}
+
+/** Authentication of a user for an AAS endpoint. */
+export interface EndpointAuth {
+    name: string;
+    headers: Record<string, string>;
 }
 
 /** The unique identifier of an AAS. */
@@ -190,10 +211,15 @@ export interface Message {
 }
 
 /** Represents a cookie. */
-export interface Cookie {
+export const CookieSchema = z.object({
+    name: z.string().min(1),
+    data: z.string(),
+});
+
+export type Cookie = {
     name: string;
     data: string;
-}
+};
 
 /** The Websocket data. */
 export interface WebSocketData {

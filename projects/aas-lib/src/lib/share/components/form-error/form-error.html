@@ -1,0 +1,15 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+@if (field().touched() && field().invalid()) {
+    <ul class="text-danger fs-7">
+        @for (error of field().errors(); track error) {
+            <li>{{ error.message | translate }}</li>
+        }
+    </ul>
+}

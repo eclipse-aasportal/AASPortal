@@ -16,33 +16,41 @@
         "ABOUT": "About..."
     },
     "AddEndpointForm": {
-        "CAPTION": "Add AAS Endpoint",
-        "FileSystem": "File system",
         "AAS_API": "AAS API",
-        "WebDAV": "WebDAV",
-        "OPC_UA": "OPC UA",
+        "API_KEY": "API Key",
+        "AUTHORIZATION": "Authorization",
+        "BEARER_TOKEN": "Bearer Token",
+        "CANCEL": "Cancel",
+        "CAPTION": "Add AAS Endpoint",
+        "DISABLED": "disabled",
+        "ENDPOINT": "Endpoint",
+        "EVERY": "cyclic",
+        "FileSystem": "File system",
+        "HOURS": "Hours",
+        "KEY": "Key",
         "LABEL_NAME": "Name",
         "LABEL_URL": "URL",
+        "MANUAL": "manual",
+        "MINUTES": "Minutes",
+        "NO_AUTH": "No authorization",
+        "OK": "OK",
+        "ONCE": "once",
+        "OPC_UA": "OPC UA",
         "PLACEHOLDER_NAME": "enter a unique name",
         "PLACEHOLDER_URL_FILE": "file:///",
         "PLACEHOLDER_URL_HTTP": "http(s)://",
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
-        "HINT_CONTAINER_NETWORKING": "💡 If AASPortal runs in a container and your endpoint is on the host, use 'host.containers.internal' (Podman) or 'host.docker.internal' (Docker) instead of 'localhost'.",
-        "ADVANCED_SETTINGS": "Advanced settings",
         "SCHEDULE": "Update endpoint index",
-        "DISABLED": "disabled",
-        "MANUAL": "manual",
-        "OK": "OK",
-        "ONCE": "once",
-        "EVERY": "cyclic",
-        "MINUTES": "Minutes",
-        "HOURS": "Hours",
-        "HEADERS": "HTTP headers",
-        "HEADER": "Header",
-        "VALUE": "Value"
+        "TOKEN": "Token",
+        "VALUE": "Value",
+        "WebDAV": "WebDAV"
+    },
+    "AssetStatus": {
+        "TITLE": "Asset-Status"
     },
     "Auth": {
+        "ENDPOINTS": "Endpoints",
         "LOGIN": "Login",
         "LOGOUT": "Logout",
         "REGISTER_USER": "Register",
@@ -52,17 +60,6 @@
         "EMPTY": "No Asset Administration Shell available.",
         "TITLE": "AAS browser"
     },
-    "CAPTION_CREATE_WORKSPACE": "Group",
-    "CAPTION_EDIT_ELEMENT": "Edit",
-    "CAPTION_EDIT_WORKSPACE": "Edit Group",
-    "CAPTION_INOUTPUT_ARGUMENTS": "In/Output arguments",
-    "CAPTION_INPUT_ARGUMENTS": "Input arguments",
-    "CAPTION_NEW_ELEMENT": "Insert New",
-    "CAPTION_OUTPUT_ARGUMENTS": "Output arguments",
-    "CAPTION_PASSWORD_FORGOTTEN": "Password forgotten?",
-    "CAPTION_PROFILE": "Profile",
-    "CAPTION_REMOVE_WORKSPACE": "Remove Group",
-    "CAPTION_UPLOAD_FILE": "Upload AASX File",
     "CarbonFootprint": {
         "TITLE": "Carbon Footprint",
         "CARBON_FOOTPRINT_DATA": "Carbon footprint",
@@ -77,42 +74,6 @@
     "Chart": {
         "SHOW": "Show..."
     },
-    "CMD_CALL": "Call",
-    "CMD_CHANGE_PASSWORD": "Change password",
-    "CMD_CLOSE": "Close",
-    "CMD_CREATE_WORKSPACE": "Group...",
-    "CMD_DESELECT_ALL": "Deselect ALL",
-    "CMD_DELETE": "Delete",
-    "CMD_DELETE_USER": "Delete user account...",
-    "CMD_DOWNLOAD": "Download",
-    "CMD_EDIT_WORKSPACE": "Edit group...",
-    "CMD_HIDE_LICENSE_TEXT": "Hide license text",
-    "CMD_OPEN_AAS": "Open AAS",
-    "CMD_OPERATION_CALL": "Call",
-    "CMD_REMOVE": "Remove",
-    "CMD_REMOVE_WORKSPACE": "Ungroup...",
-    "CMD_RESET_PASSWORD": "Password forgotten?",
-    "CMD_SELECT_ALL": "Select All",
-    "CMD_SHOW_LICENSE_TEXT": "Show license text",
-    "CMD_TOGGLE_MESSAGES": "Messages",
-    "CMD_TOGGLE_PACKAGES": "Packages",
-    "CMD_UPLOAD": "Upload",
-    "COLUMN_DATA_TYPE": "DataType",
-    "COLUMN_DESCRIPTION": "Description",
-    "COLUMN_LICENSE": "License",
-    "COLUMN_MESSAGE_TEXT": "Message",
-    "COLUMN_MESSAGE_TYPE": "Type",
-    "COLUMN_MODEL_TYPE": "Model type",
-    "COLUMN_MODIFIED": "Date of modification",
-    "COLUMN_PACKAGE": "Package",
-    "COLUMN_SIZE": "Size",
-    "COLUMN_TIMESTAMP": "Time",
-    "COLUMN_URL": "URL",
-    "COLUMN_VALUE": "Value",
-    "COLUMN_VERSION": "Version",
-    "CONFIRM_DELETE_FILE": "Permanently delete {0}?",
-    "CONFIRM_DELETE_FILES": "Permanently delete {0} files?",
-    "CONFIRM_DELETE_USER": "Do you want to delete the account '{0}'?",
     "ConfirmDialog": {
         "CANCEL": "Cancel",
         "CAPTION": "Confirm",
@@ -159,6 +120,19 @@
         "NAMEPLATE_DATA": "Nameplate",
         "SERIAL_NUMBER": "Serial No.",
         "TYPE": "Type"
+    },
+    "EndpointAuthForm": {
+        "API_KEY": "API Key",
+        "AUTHORIZATION": "Authorization",
+        "BEARER_TOKEN": "Bearer Token",
+        "CANCEL": "Cancel",
+        "CAPTION": "Endpoint Authorization",
+        "ENDPOINT": "Endpoint",
+        "KEY": "Key",
+        "NO_AUTH": "No authorization",
+        "OK": "OK",
+        "TOKEN": "Token",
+        "VALUE": "Value"
     },
     "Error": {
         "AAS_ALREADY_EXISTS": "An AAS with the identifier '{{id}}' already exists.",
@@ -208,6 +182,7 @@
         "SHOW": "Show..."
     },
     "FavoritesForm": {
+        "CANCEL": "Cancel",
         "CAPTION": "Favorites",
         "ADD_NEW": "New favorites list",
         "COUNT": "{0} favorite(s)",
@@ -215,8 +190,6 @@
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name.",
         "OK": "OK"
     },
-    "FILE_PATH": "File URL",
-    "GUEST_USER": "Guest",
     "HandoverDocumentation": {
         "TITLE": "Handover Documentation",
         "EMPTY": "No handover documents available."
@@ -237,39 +210,10 @@
         "NEW_PASSWORD_SENT": "A new password has been sent.",
         "NO_SHELL_AVAILABLE": "No Asset Administration Shell selected."
     },
-    "LABEL_AAS_ID": "ID:",
-    "LABEL_AAS_ID_SHORT": "ID short:",
-    "LABEL_AAS_URL": "AAS endpoint",
-    "LABEL_ADDRESS": "Address:",
-    "LABEL_ASSET_ID": "Asset ID:",
-    "LABEL_ASSET_ID_SHORT": "Asset ID short:",
-    "LABEL_CATEGORY": "Category",
-    "LABEL_DEFINITION": "Definition:",
-    "LABEL_DESCRIPTION": "Description:",
-    "LABEL_ENDPOINT_NAME": "Name",
-    "LABEL_ENDPOINT_URL": "URL",
-    "LABEL_ERROR": "Errors",
-    "LABEL_FILE": "File:",
-    "LABEL_INFO": "Info",
-    "LABEL_INSERT_POSITION": "Position:",
-    "LABEL_MIME_TYPE": "MIME type",
-    "LABEL_MODEL_TYPE": "Model type:",
-    "LABEL_MODEL_TYPE_TEMPLATE": "Template:",
-    "LABEL_NAME": "Name",
-    "LABEL_OVERWRITE_FILE": "Overwrite",
-    "LABEL_SEMANTIC_ID": "Semantic ID",
-    "LABEL_SELECT_REGISTRY": "AAS registry",
-    "LABEL_SELECT_WORKSPACE": "Group",
-    "LABEL_SERVER_URL": "Server endpoint",
-    "LABEL_SHOW_ALL": "Show all",
-    "LABEL_STAY_LOGGED_IN": "Stay logged in",
-    "LABEL_UPLOAD_CONTAINER": "Destination",
-    "LABEL_VALUE": "Value",
-    "LABEL_VALUE_TYPE": "Value type",
-    "LABEL_VERSION": "Version:",
-    "LABEL_VIEWS": "Views",
-    "LABEL_VIEW_MODE": "View:",
-    "LABEL_WARNING": "Warnings",
+    "LicenseInfo": {
+        "SHOW_LICENSE_TEXT": "Show licenses",
+        "HIDE_LICENSE_TEXT": "Hide licenses"
+    },
     "LoginForm": {
         "CAPTION": "Login",
         "CREATE_ACCOUNT": "Create an account.",
@@ -278,7 +222,7 @@
         "EMAIL_INVALID": "Not a valid e-mail.",
         "LOGIN": "Login",
         "NOT_REGISTERED": "Not registered?",
-        "PASSWORD_REQUIRED": "Password required.",
+        "PASSWORD_REQUIRED": "Password is required.",
         "PASSWORD": "Password"
     },
     "Main": {
@@ -315,26 +259,26 @@
     "OperationalData": {
         "TITLE": "Operational Data"
     },
-    "PLACEHOLDER_NEW_FAVORITES": "new favorites",
-    "PLACEHOLDER_WORKSPACE": "group name",
-    "PLEASE_WAIT": "Please wait...",
     "ProfileForm": {
         "CAPTION": "Profile",
         "CHANGE_PASSWORD": "Change password",
         "CONFIRM_NEW_PASSWORD_REQUIRED": "New password confirmation required.",
         "CONFIRM_NEW_PASSWORD": "Confirm new password",
-        "DELETE_ACCOUNT_HINT": "Are you sure you want to delete the account? This action cannot be undone.",
-        "DELETE_ACCOUNT": "Delete account",
+        "DELETE_ACCOUNT_PROMPT": "To delete, enter '{{email}}'",
+        "DELETE_ACCOUNT_SUCCESS": "Account successfully deleted.",
+        "DELETE_ACCOUNT": "Delete account...",
+        "EMAIL_MISMATCH": "No match.",
         "EMAIL_REQUIRED": "E-mail is required.",
         "EMAIL": "E-Mail",
         "INVALID_EMAIL": "Not a valid e-mail.",
         "NAME": "Name",
         "NEW_PASSWORD": "New password",
-        "OK": "OK",
+        "SUBMIT": "Save",
         "OLD_PASSWORD": "Old password",
         "PASSWORD_MIN_LENGTH": "The password must be at least 8 characters long.",
         "PASSWORD_REQUIRED": "Password required.",
-        "PASSWORDS_DO_NOT_MATCH": "The passwords do not match."
+        "PASSWORDS_DO_NOT_MATCH": "The passwords do not match.",
+        "UPDATE_ACCOUNT_SUCCESS": "Account successfully updated."
     },
     "PromptDialog": {
         "CANCEL": "Cancel",
@@ -368,15 +312,19 @@
         "PASSWORD": "Password",
         "PASSWORDS_DO_NOT_MATCH": "The passwords do not match."
     },
-    "RemoveEndpointForm": {
-        "CANCEL": "Cancel",
-        "CAPTION": "Remove AAS Endpoint",
-        "OK": "OK"
+    "ServiceRequestNotification": {
+        "TITLE": "Service Request Notification"
     },
-    "ROUTE_FILE_SYSTEM": "File system",
-    "ROUTE_OPC_UA": "OPC UA",
+    "Settings": {
+        "ADD_ENDPOINT": "Add Endpoint",
+        "EXTRAS": "Extras...",
+        "REMOVE_ENDPOINT": "Remove Endpoint",
+        "UPDATE_ENDPOINT": "Edit Endpoint",
+        "AAS_ENDPOINT_ADDED": "Endpoint '{{endpoint}}' successfully added.",
+        "AAS_ENDPOINT_UPDATED": "Endpoint '{{endpoint}}' successfully updated.",
+        "AAS_ENDPOINT_DELETED": "Endpoint '{{endpoint}}' successfully removed."
+    },
     "Shells": {
-        "ADD_ENDPOINT": "Add...",
         "AssetStatus": "Asset status",
         "Browser": "Browser",
         "CarbonFootprint": "Carbon footprint",
@@ -384,28 +332,31 @@
         "ContactInformation": "Contact information",
         "CustomerFeedback": "User feedback",
         "DigitalProductPassport": "Product passport",
-        "ENDPOINT": "Endpoint",
-        "EXTRAS": "Extras...",
         "FAVORITES": "All shells",
         "HandoverDocumentation": "Handover documentation",
         "HierarchicalStructure": "Hierarchical Structures",
         "Nameplate": "Nameplate",
         "OperationalData": "Operational data",
         "PLACEHOLDER_FILTER": "Filter",
-        "REMOVE_ENDPOINT": "Remove...",
         "ServiceRequestNotification": "Service request notification",
         "TechnicalData": "Technical data",
-        "UPDATE_ENDPOINT": "Edit..."
+        "VIEWS": "Views"
     },
     "Start": {
         "EMPTY": "The START page is empty."
     },
-    "TEXT_ADD_FAVORITE": "Add 1 favorite ({0}).",
-    "TEXT_ADD_FAVORITES": "Add {0} favorites ({1}).",
+    "TechnicalData": {
+        "TITLE": "Technical Data"
+    },
     "UpdateEndpointForm": {
         "AAS_API": "AAS API",
+        "API_KEY": "API Key",
+        "AUTHORIZATION": "Authorization",
+        "BEARER_TOKEN": "Bearer Token",
         "CANCEL": "Cancel",
         "CAPTION": "Update AAS Endpoint",
+        "DELETE": "Delete",
+        "DELETE_ENDPOINT_PROMPT": "To delete, enter '{{name}}'",
         "DISABLED": "disabled",
         "ENDPOINTS": "Endpoints",
         "EVERY": "cyclic",
@@ -415,6 +366,7 @@
         "HOURS": "Hours",
         "MANUAL": "manual",
         "MINUTES": "Minutes",
+        "NO_AUTH": "No authorization",
         "OK": "OK",
         "ONCE": "once",
         "OPC_UA": "OPC UA",
@@ -426,14 +378,5 @@
         "URL": "URL",
         "VALUE": "Value",
         "WebDAV": "WebDAV"
-    },
-    "TechnicalData": {
-        "TITLE": "Technical Data"
-    },
-    "ServiceRequestNotification": {
-        "TITLE": "Service Request Notification"
-    },
-    "AssetStatus": {
-        "TITLE": "Asset-Status"
     }
 }

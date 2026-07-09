@@ -9,7 +9,6 @@
 import { inject, singleton } from 'tsyringe';
 import mongoose from 'mongoose';
 import { Cookie } from 'aas-core';
-
 import { Logger, LOGGER, MongoDBConnectionProvider } from 'aas-package';
 import { Variable } from '../variable.js';
 import { CookieStorage } from './cookie-storage.js';
@@ -25,10 +24,10 @@ interface UserCookiesDocument extends UserCookies, mongoose.Document {}
  * A cookie storage implementation that uses MongoDB to store cookies.
  */
 @singleton()
-export class MongoDBCookieStorage implements CookieStorage {
+export class MongoDBCookieStorage extends CookieStorage {
     private readonly connection: mongoose.Connection;
     private readonly model: mongoose.Model<UserCookiesDocument>;
-    private readonly userCookiesSchema = new mongoose.Schema<UserCookiesDocument>({
+    private readonly schema = new mongoose.Schema<UserCookiesDocument>({
         id: String,
         cookies: [
             {
@@ -43,38 +42,15 @@ export class MongoDBCookieStorage implements CookieStorage {
         @inject(MongoDBConnectionProvider) connectionProvider: MongoDBConnectionProvider,
         @inject(Variable) variable: Variable,
     ) {
+        super();
+
         if (!variable.COOKIE_STORAGE) {
             throw new Error('COOKIE_STORAGE variable is not set');
         }
 
         this.connection = connectionProvider.getConnection(variable.COOKIE_STORAGE);
-        this.model = this.connection.model<UserCookiesDocument>('UserCookies', this.userCookiesSchema);
+        this.model = this.connection.model<UserCookiesDocument>('UserCookies', this.schema);
         this.logger.info('Using MongoDB cookie storage');
-    }
-
-    public async getCookie(userId: string, name: string): Promise<Cookie | undefined> {
-        const user = await this.model.findOne({ id: userId }).exec();
-        if (user != null) {
-            return user.cookies.find(cookie => cookie.name === name);
-        }
-
-        return undefined;
-    }
-
-    public async setCookie(userId: string, name: string, data: string): Promise<void> {
-        let user = await this.model.findOne({ id: userId }).exec();
-        if (user) {
-            const index = user.cookies.findIndex(cookie => cookie.name === name);
-            if (index < 0) {
-                user.cookies.push({ name, data });
-            } else {
-                user.cookies[index].data = data;
-            }
-        } else {
-            user = new this.model({ id: userId, cookies: [{ name, data }] });
-        }
-
-        await user.save();
     }
 
     public async deleteCookie(userId: string, name: string): Promise<void> {
@@ -90,5 +66,30 @@ export class MongoDBCookieStorage implements CookieStorage {
                 }
             }
         }
+    }
+
+    protected override async getCookieData(userId: string, name: string): Promise<string | undefined> {
+        const user = await this.model.findOne({ id: userId }).exec();
+        if (user != null) {
+            return user.cookies.find(cookie => cookie.name === name)?.data;
+        }
+
+        return undefined;
+    }
+
+    protected override async setCookieData(userId: string, name: string, data: string): Promise<void> {
+        let user = await this.model.findOne({ id: userId }).exec();
+        if (user) {
+            const index = user.cookies.findIndex(cookie => cookie.name === name);
+            if (index < 0) {
+                user.cookies.push({ name, data });
+            } else {
+                user.cookies[index].data = data;
+            }
+        } else {
+            user = new this.model({ id: userId, cookies: [{ name, data }] });
+        }
+
+        await user.save();
     }
 }

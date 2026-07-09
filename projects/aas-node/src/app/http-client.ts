@@ -8,15 +8,18 @@
 
 import net from 'net';
 import { Readable } from 'stream';
-import { singleton } from 'tsyringe';
+import { inject, singleton } from 'tsyringe';
 import { ApplicationError } from 'aas-core';
 import { parseUrl } from './utilities.js';
+import { HttpCache } from './http-cache.js';
 
 /**
  * A simple HTTP client for making requests to servers.
  */
 @singleton()
 export class HttpClient {
+    public constructor(@inject(HttpCache) private readonly cache: HttpCache) {}
+
     /**
      * Gets a JSON value of type `T` from a server.
      * @template T The type of the object.
@@ -24,14 +27,22 @@ export class HttpClient {
      * @param headers Additional outgoing http headers.
      * @returns The requested object.
      */
-    public async get<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
-        const response = await fetch(url.href, { method: 'GET', headers });
+    public async get<T = unknown>(url: URL, headers?: Record<string, string>): Promise<T> {
+        const href = url.href;
+        let value = this.cache.get(href);
+        if (value !== undefined) {
+            return value as T;
+        }
+
+        const response = await fetch(href, { method: 'GET', headers });
         if (!response.ok) {
             const message = await response.text().catch(() => 'GET request failed');
             throw new ApplicationError(message, {}, response.status);
         }
 
-        return (await response.json()) as T;
+        value = await response.json();
+        this.cache.set(href, value);
+        return value as T;
     }
 
     /**
@@ -40,7 +51,7 @@ export class HttpClient {
      * @param headers The additional outgoing http headers.
      * @returns The requested value.
      */
-    public async getLive<T extends object>(url: URL, headers?: Record<string, string>): Promise<T> {
+    public async getLiveData<T = unknown>(url: URL, headers?: Record<string, string>): Promise<T> {
         const response = await fetch(url.href, { method: 'GET', headers });
         if (!response.ok) {
             const message = await response.text().catch(() => 'GET live request failed');
@@ -81,7 +92,7 @@ export class HttpClient {
      * @returns A promise that resolves to the response body as a string.
      * @throws {Error} If the HTTP response status is not OK (status code outside the range 200-299).
      */
-    public async put(url: URL, obj: object, headers: Record<string, string> = {}): Promise<void> {
+    public async put(url: URL, obj: object, headers?: Record<string, string>): Promise<void> {
         const response = await fetch(url.href, {
             method: 'PUT',
             headers: {
@@ -122,7 +133,7 @@ export class HttpClient {
      * @returns A promise that resolves to the response body as a string.
      * @throws {Error} If the HTTP response status is not OK (status code outside the range 200-299).
      */
-    public async postJson(url: URL, obj: object, headers: Record<string, string> = {}): Promise<string> {
+    public async post(url: URL, obj: object, headers?: Record<string, string>): Promise<string> {
         const response = await fetch(url.href, {
             method: 'POST',
             headers: {
@@ -148,7 +159,7 @@ export class HttpClient {
      * @returns A promise that resolves when the request completes successfully.
      * @throws {Error} If the response status is not OK (i.e., not in the 2xx range).
      */
-    public async postFormData(url: URL, formData: FormData, headers: Record<string, string> = {}): Promise<void> {
+    public async postFormData(url: URL, formData: FormData, headers?: Record<string, string>): Promise<void> {
         const response = await fetch(url.href, {
             method: 'POST',
             headers,

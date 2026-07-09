@@ -2,24 +2,28 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "compileOnSave": false,
     "compilerOptions": {
-      "baseUrl": "./",
-      "esModuleInterop": true,
-      "experimentalDecorators": true,
-      "importHelpers": true,
-      "isolatedModules": true,
-      "module": "ES2022",
-      "moduleResolution": "bundler",
-      "noFallthroughCasesInSwitch": true,
-      "noImplicitOverride": true,
-      "noImplicitReturns": true,
-      "noPropertyAccessFromIndexSignature": false,
-      "resolveJsonModule": true,
-      "skipLibCheck": true,
-      "sourceMap": true,
-      "strict": true,
-      "target": "es2024",
-      "useUnknownInCatchVariables": false
+        "baseUrl": "./",
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "isolatedModules": true,
+        "module": "es2022",
+        "moduleResolution": "bundler",
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": false,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "strict": true,
+        "target": "es2024",
+        "useUnknownInCatchVariables": false
     },
+    "lib": [
+        "ES2024",
+        "dom"
+    ],
     "ts-node": {
         "esm": true
     }

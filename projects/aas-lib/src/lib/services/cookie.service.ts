@@ -7,9 +7,8 @@
  *****************************************************************************/
 
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, of } from 'rxjs';
-import { Cookie } from 'aas-core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, mergeMap, Observable, of } from 'rxjs';
 
 import { WINDOW } from './window.service';
 import { AuthService } from '../core/auth/auth.service';
@@ -28,14 +27,15 @@ export class CookieService {
      * @returns The cookie value.
      */
     public getCookie(name: string): Observable<string | undefined> {
-        if (this.auth.isAuthenticated()) {
-            return this.http.get<Cookie>(`/api/v1/cookies/${name}`).pipe(
-                map(cookie => cookie?.data),
-                catchError(() => of(undefined)),
-            );
-        } else {
-            return of(this.window.localStorage.getItem(name) ?? undefined);
-        }
+        return this.auth.isAuthenticated()
+            ? this.http.get<string>(`/api/v1/cookies/${name}`).pipe(
+                  mergeMap(value => of(value ?? undefined)),
+                  catchError(error => {
+                      console.error(`Failed to get cookie "${name}": ${error.message}`);
+                      return of(undefined);
+                  }),
+              )
+            : of(this.window.localStorage.getItem(name) ?? undefined);
     }
 
     /**
@@ -44,12 +44,20 @@ export class CookieService {
      * @param data The cookie value.
      */
     public setCookie(name: string, data: string): Observable<void> {
-        if (this.auth.isAuthenticated()) {
-            return this.http.post<void>(`/api/v1/cookies/${name}`, { name, data });
-        } else {
-            this.window.localStorage.setItem(name, data);
-            return of(void 0);
-        }
+        return this.auth.isAuthenticated()
+            ? this.http
+                  .post(`/api/v1/cookies/${name}`, data, {
+                      headers: new HttpHeaders({ 'Content-Type': 'text/plain' }),
+                      responseType: 'text',
+                  })
+                  .pipe(
+                      mergeMap(() => of(void 0)),
+                      catchError(error => {
+                          console.error(`Failed to set cookie "${name}": ${error.message}`);
+                          return of(void 0);
+                      }),
+                  )
+            : of(this.window.localStorage.setItem(name, data));
     }
 
     /**
@@ -57,11 +65,14 @@ export class CookieService {
      * @param name The cookie name.
      */
     public deleteCookie(name: string): Observable<void> {
-        if (this.auth.isAuthenticated()) {
-            return this.http.delete<void>(`/api/v1/cookies/${name}`);
-        } else {
-            this.window.localStorage.removeItem(name);
-            return of(void 0);
-        }
+        return this.auth.isAuthenticated()
+            ? this.http.delete(`/api/v1/cookies/${name}`).pipe(
+                  mergeMap(() => of(void 0)),
+                  catchError(error => {
+                      console.error(`Failed to delete cookie "${name}": ${error.message}`);
+                      return of(void 0);
+                  }),
+              )
+            : of(this.window.localStorage.removeItem(name));
     }
 }

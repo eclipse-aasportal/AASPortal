@@ -1,0 +1,178 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<form (submit)="submit($event)">
+    <div class="modal-header text-info">
+        <h4 class="modal-title">
+            <i class="bi bi-plus-circle"></i>
+            <span class="ms-2" translate>UpdateEndpointForm.CAPTION</span>
+        </h4>
+        <button type="button" class="btn-close" (click)="cancel()"></button>
+    </div>
+    <div class="modal-body">
+        <label class="form-lable" for="AID_SELECT_ENDPOINT" translate>UpdateEndpointForm.ENDPOINTS</label>
+        <select id="AID_SELECT_ENDPOINT" class="form-select" [formField]="form.endpoint">
+            @for (item of items(); track item.name) {
+                <option [value]="item.name">{{ item.name }}</option>
+            }
+        </select>
+
+        @let idx = index();
+        @if (idx >= 0) {
+            <label class="form-lable mt-3" for="div-endpoint-url" translate>UpdateEndpointForm.URL</label>
+            <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
+                <button type="button" class="btn btn-secondary" ngbDropdownToggle>
+                    {{ 'UpdateEndpointForm.' + template().type | translate }}
+                </button>
+                <div class="dropdown-menu" ngbDropdownMenu>
+                    @for (item of templates(); track item) {
+                        <button type="button" id="{{ 'AID_TYPE_' + item.type }}" (click)="selectTemplate(item)" ngbDropdownItem>
+                            {{ 'UpdateEndpointForm.' + item.type | translate }}
+                        </button>
+                    }
+                </div>
+                <input
+                    id="AID_ENDPOINT_URL"
+                    type="text"
+                    class="form-control"
+                    placeholder="{{ template().placeholder | translate }}"
+                    [formField]="form.items[idx].url"
+                />
+            </div>
+            <fhg-form-error [field]="form.items[idx].url()"></fhg-form-error>
+            <label class="form-lable mt-3" for="schedule-options" translate>UpdateEndpointForm.SCHEDULE</label>
+            <div class="border border-light-subtle rounded p-2 mb-2" id="schedule-options">
+                <div class="form-check form-check-inline">
+                    <input
+                        class="form-check-input"
+                        type="radio"
+                        id="AID_SCHEDULE_DISABLED"
+                        value="disabled"
+                        [formField]="form.items[idx].schedule"
+                    />
+                    <label class="form-check-label" for="AID_SCHEDULE_DISABLED" translate
+                        >UpdateEndpointForm.DISABLED</label
+                    >
+                </div>
+                <div class="form-check form-check-inline">
+                    <input
+                        class="form-check-input"
+                        type="radio"
+                        id="AID_SCHEDULE_MANUAL"
+                        value="manual"
+                        [formField]="form.items[idx].schedule"
+                    />
+                    <label class="form-check-label" for="AID_SCHEDULE_MANUAL" translate
+                        >UpdateEndpointForm.MANUAL</label
+                    >
+                </div>
+                <div class="form-check form-check-inline">
+                    <input
+                        class="form-check-input"
+                        type="radio"
+                        id="AID_SCHEDULE_ONCE"
+                        value="once"
+                        [formField]="form.items[idx].schedule"
+                    />
+                    <label class="form-check-label" for="AID_SCHEDULE_ONCE" translate>UpdateEndpointForm.ONCE</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input
+                        class="form-check-input"
+                        type="radio"
+                        id="AID_SCHEDULE_EVERY"
+                        value="every"
+                        [formField]="form.items[idx].schedule"
+                    />
+                    <label class="form-check-label" for="AID_SCHEDULE_EVERY" translate>UpdateEndpointForm.EVERY</label>
+                </div>
+                @if (form.items[idx].schedule().value() === 'every') {
+                    <div class="input-group mt-3">
+                        <input
+                            type="number"
+                            class="form-control awp-number-input"
+                            id="AID_SCHEDULE_HOURS"
+                            aria-label="Hours"
+                            [formField]="form.items[idx].hours"
+                        />
+                        <span class="input-group-text" translate>UpdateEndpointForm.HOURS</span>
+                        <input
+                            type="number"
+                            class="form-control awp-number-input"
+                            id="AID_SCHEDULE_MINUTES"
+                            aria-label="Minutes"
+                            [formField]="form.items[idx].minutes"
+                        />
+                        <span class="input-group-text" translate>UpdateEndpointForm.MINUTES</span>
+                    </div>
+                    <fhg-form-error [field]="form.items[idx].hours()"></fhg-form-error>
+                    <fhg-form-error [field]="form.items[idx].minutes()"></fhg-form-error>
+                }
+            </div>
+            @if (template().type === 'AAS_API') {
+                <label class="form-lable mt-2" for="AID_SELECT_AUTHORIZATION" translate
+                    >UpdateEndpointForm.AUTHORIZATION</label
+                >
+                <select id="AID_SELECT_AUTHORIZATION" class="form-select" [formField]="form.items[idx].authorization">
+                    @for (item of authorizations(); track item) {
+                        <option [value]="item">{{ item | translate }}</option>
+                    }
+                </select>
+                <div class="row gx-3 mt-2">
+                    @switch (form.items[idx].authorization().value()) {
+                        @case ('UpdateEndpointForm.API_KEY') {
+                            <div class="col-4">
+                                <label class="form-lable" for="AID_HEADER_NAME" translate>UpdateEndpointForm.KEY</label>
+                                <input
+                                    type="text"
+                                    id="AID_HEADER_NAME"
+                                    class="form-control"
+                                    [formField]="form.items[idx].key"
+                                />
+                                <fhg-form-error [field]="form.items[idx].key()"></fhg-form-error>
+                            </div>
+                            <div class="col-8">
+                                <label class="form-lable" for="AID_ACCESS_KEY" translate
+                                    >UpdateEndpointForm.VALUE</label
+                                >
+                                <input
+                                    type="password"
+                                    id="AID_ACCESS_KEY"
+                                    class="form-control"
+                                    [formField]="form.items[idx].value"
+                                />
+                                <fhg-form-error [field]="form.items[idx].value()"></fhg-form-error>
+                            </div>
+                        }
+                        @case ('UpdateEndpointForm.BEARER_TOKEN') {
+                            <div class="col-12">
+                                <label class="form-lable" for="AID_BEARER_TOKEN" translate
+                                    >UpdateEndpointForm.TOKEN</label
+                                >
+                                <input
+                                    type="password"
+                                    id="AID_BEARER_TOKEN"
+                                    class="form-control"
+                                    [formField]="form.items[idx].token"
+                                />
+                                <fhg-form-error [field]="form.items[idx].token()"></fhg-form-error>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        }
+    </div>
+    <div class="modal-footer">
+        <button type="button" id="AID_DELETE_ENDPOINT" class="btn btn-danger me-auto" (click)="deleteEndpoint()" translate>
+            UpdateEndpointForm.DELETE
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="!canClose()" translate>UpdateEndpointForm.OK</button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>UpdateEndpointForm.CANCEL</button>
+    </div>
+</form>

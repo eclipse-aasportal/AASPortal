@@ -24,7 +24,7 @@ import {
 
 import { AASDocument } from 'aas-core';
 
-import { MaxLengthPipe } from '../../pipes/max-length.pipe';
+import { MaxLengthPipe } from '../../share/pipes/max-length.pipe';
 import { AASTableFilter } from './aas-table.filter';
 import { encodeBase64Url } from '../../utilities';
 

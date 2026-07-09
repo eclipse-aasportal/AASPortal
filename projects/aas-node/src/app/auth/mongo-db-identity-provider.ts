@@ -12,6 +12,7 @@ import { Logger, LOGGER, MongoDBConnectionProvider } from 'aas-package';
 
 import { Variable } from '../variable.js';
 import { IdentityProvider, UserData } from './identity-provider.js';
+import { COOKIE_STORAGE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
 
 interface UserDocument extends UserData, mongoose.Document {}
 
@@ -20,7 +21,7 @@ export class MongoDBIdentityProvider extends IdentityProvider {
     private readonly connection: mongoose.Connection;
     private readonly userModel: mongoose.Model<UserDocument>;
 
-    private readonly userDataSchema = new mongoose.Schema<UserDocument>({
+    private readonly schema = new mongoose.Schema<UserDocument>({
         id: { type: String, required: true },
         name: { type: String, required: true },
         role: { type: String, required: true },
@@ -30,13 +31,14 @@ export class MongoDBIdentityProvider extends IdentityProvider {
 
     public constructor(
         @inject(LOGGER) logger: Logger,
+        @inject(COOKIE_STORAGE) cookies: CookieStorage,
         @inject(Variable) variable: Variable,
         @inject(MongoDBConnectionProvider) connectionProvider: MongoDBConnectionProvider,
     ) {
-        super(logger, variable);
+        super(logger, cookies, variable);
 
         this.connection = connectionProvider.getConnection(variable.IDENTITY_PROVIDER!);
-        this.userModel = this.connection.model<UserDocument>('User', this.userDataSchema);
+        this.userModel = this.connection.model<UserDocument>('User', this.schema);
         this.logger.info('Using MongoDB identity provider');
     }
 

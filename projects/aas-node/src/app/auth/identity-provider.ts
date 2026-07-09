@@ -24,6 +24,7 @@ import {
 import { IdentityProviderClient, RefreshTokenResponse } from './identity-provider-client.js';
 import { ERRORS } from '../errors.js';
 import { Variable } from '../variable.js';
+import { CookieStorage } from '../cookie-storage/cookie-storage.js';
 
 /** The user data. */
 export interface UserData {
@@ -44,9 +45,10 @@ export abstract class IdentityProvider extends IdentityProviderClient {
 
     protected constructor(
         logger: Logger,
+        cookies: CookieStorage,
         protected readonly variable: Variable,
     ) {
-        super(logger);
+        super(logger, cookies);
 
         this.algorithm = 'HS256';
     }
@@ -64,7 +66,6 @@ export abstract class IdentityProvider extends IdentityProviderClient {
         url.searchParams.set('code_challenge_method', 'S256');
         url.searchParams.set('redirect_uri', redirect_uri);
         url.searchParams.set('state', state);
-        await this.saveSession(req);
         res.redirect(url.href);
     }
 
@@ -105,15 +106,13 @@ export abstract class IdentityProvider extends IdentityProviderClient {
         }
 
         const user: User = { id: data.id, name: data.name, role: data.role };
-        this.setAuthCookies(res, this.createAccessToken(user), this.createRefreshToken(user));
-        await this.saveSession(req);
+        req.session.access_token = this.createAccessToken(user);
+        req.session.refresh_token = this.createRefreshToken(user);
         res.json(user);
     }
 
     public override async logout(req: express.Request, res: express.Response): Promise<express.Response> {
         delete req.user;
-        res.clearCookie('access_token');
-        res.clearCookie('refresh_token');
         await this.destroySession(req.session);
         return res.sendStatus(200);
     }
@@ -163,6 +162,84 @@ export abstract class IdentityProvider extends IdentityProviderClient {
 
         await this.write(profile.id, data);
         return res.sendStatus(201);
+    }
+
+    public override async updateAccount(req: express.Request, res: express.Response): Promise<express.Response> {
+        const user = req.user;
+        if (!user) {
+            return res.status(401).json({
+                message: ERRORS.UNAUTHORIZED,
+                name: 'ApplicationError',
+                status: 401,
+            } satisfies ErrorData);
+        }
+
+        const profile = req.body;
+        if (!isUserProfile(profile)) {
+            return res.status(400).json({
+                message: ERRORS.BAD_REQUEST,
+                name: 'ApplicationError',
+                status: 400,
+            } satisfies ErrorData);
+        }
+
+        const data = await this.read(profile.id);
+        if (!data) {
+            return res.status(404).json({
+                message: ERRORS.USER_DOES_NOT_EXIST,
+                name: 'ApplicationError',
+                status: 404,
+            } satisfies ErrorData);
+        }
+
+        if (profile.name) {
+            data.name = profile.name;
+        }
+
+        if (profile.password && profile.newPassword) {
+            if ((await bcrypt.compare(profile.password, data.password)) === false) {
+                return res.status(401).json({
+                    message: ERRORS.INVALID_CREDENTIALS,
+                    name: 'ApplicationError',
+                    status: 401,
+                } satisfies ErrorData);
+            }
+
+            if (!isValidPassword(profile.newPassword)) {
+                return res.status(400).json({
+                    message: ERRORS.INVALID_PASSWORD,
+                    name: 'ApplicationError',
+                    status: 400,
+                } satisfies ErrorData);
+            }
+
+            data.password = await bcrypt.hash(profile.newPassword, 10);
+        }
+
+        await this.write(profile.id, data);
+        return res.status(201).json({ id: data.id, name: data.name, role: data.role } satisfies User);
+    }
+
+    public override async deleteAccount(req: express.Request, res: express.Response): Promise<express.Response | void> {
+        const user = req.user;
+        if (!user) {
+            return res.status(401).json({
+                message: ERRORS.UNAUTHORIZED,
+                name: 'ApplicationError',
+                status: 401,
+            } satisfies ErrorData);
+        }
+
+        const deleted = await this.delete(user.id);
+        if (!deleted) {
+            return res.status(404).json({
+                message: ERRORS.USER_DOES_NOT_EXIST,
+                name: 'ApplicationError',
+                status: 404,
+            } satisfies ErrorData);
+        }
+
+        return this.logout(req, res);
     }
 
     /**

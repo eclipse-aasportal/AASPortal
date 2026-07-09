@@ -41,14 +41,10 @@ import {
     viewRoutes,
 } from 'aas-lib';
 
-import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
-import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
 import { ShellsState } from './shells.state';
-import { UpdateEndpointFormComponent } from './update-endpoint-form/update-endpoint-form.component';
-import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpoint-form.component';
 import { INFO } from '../messages';
 
 @Component({
@@ -232,108 +228,6 @@ export class ShellsComponent implements OnDestroy {
     }
 
     /**
-     * Adds a new AAS endpoint.
-     * This operation requires specific permissions.
-     *
-     * @returns An Observable that completes when the endpoint is successfully added,
-     *          or emits an error if the operation fails. Returns EMPTY if user cancels the operation.
-     * @throws Will be caught and handled by the notification service
-     */
-    public addEndpoint(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            map(endpoints => {
-                const modalRef = this.modal.open(AddEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.initialize(endpoints);
-                return modalRef;
-            }),
-            mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
-            mergeMap(result => {
-                if (result === undefined) {
-                    return EMPTY;
-                }
-
-                return this.api.addEndpoint(result);
-            }),
-            catchError(error => of(this.notify.error(error))),
-        );
-    }
-
-    /**
-     * Updates the configuration of an AAS endpoint.
-     * This operation requires specific permissions.
-     *
-     * @returns An Observable that completes when the endpoint is updated, or emits an error if the operation fails
-     * @throws Error if unauthorized, endpoint retrieval fails, or update operation fails
-     */
-    public updateEndpoint(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            map(endpoints => {
-                const modalRef = this.modal.open(UpdateEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.initialize(endpoints);
-                return modalRef;
-            }),
-            mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
-            mergeMap(result => {
-                if (result === undefined) {
-                    return EMPTY;
-                }
-
-                return this.api.updateEndpoint(result);
-            }),
-            catchError(error => of(this.notify.error(error))),
-        );
-    }
-
-    /**
-     * Removes one or multiple endpoints from the AASNode configuration.
-     * This operation requires specific permissions.
-     *
-     * @returns An Observable that completes when the endpoint removal process is finished
-     * @throws Handled by the notification service if any error occurs during the process
-     */
-    public removeEndpoint(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            mergeMap(endpoints => {
-                const modalRef = this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.endpoints.set(
-                    endpoints
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .map(
-                            item =>
-                                ({
-                                    name: item.name,
-                                    url: item.url,
-                                    selected: false,
-                                }) as EndpointSelect,
-                        ),
-                );
-                return from<Promise<string[] | undefined>>(modalRef.result);
-            }),
-            mergeMap(endpoints => from(endpoints ?? [])),
-            mergeMap(endpoint => this.api.removeEndpoint(endpoint)),
-            catchError(error => of(this.notify.error(error))),
-        );
-    }
-
-    /**
-     * Opens the extras dialog.
-     * This operation requires specific permissions.
-     *
-     * @returns An Observable that completes when the dialog has been closed.
-     */
-    public extras(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => {
-                const modalRef = this.modal.open(ExtrasEndpointFormComponent, { backdrop: 'static', scrollable: true });
-                return from(modalRef.result);
-            }),
-        );
-    }
-
-    /**
      * Initiates download(s) of the AASX package files for the currently selected document(s).
      *
      * @returns An Observable that completes when the download request(s) complete.
@@ -381,7 +275,7 @@ export class ShellsComponent implements OnDestroy {
                             ),
                         ),
                         mergeMap(result => from(result ? this.state.selected() : [])),
-                        mergeMap(document => this.api.deleteDocument(document.id, document.endpoint)),
+                        mergeMap(document => this.api.deletePackage(document.id, document.endpoint)),
                         catchError(error => {
                             this.notify.error(error);
                             return of(void 0);

@@ -30,7 +30,6 @@
         "jszip": "^3.10.1",
         "jwks-rsa": "^3.2.0",
         "lodash-es": "^4.17.23",
-        "morgan": "^1.10.1",
         "multer": "^2.1.1",
         "nanoid": "^5.1.7",
         "reflect-metadata": "^0.2.2",

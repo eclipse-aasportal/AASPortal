@@ -18,26 +18,30 @@ import { KeywordDirectory } from './keyword-directory.js';
 import { SqliteIndex } from './sqlite/sqlite-index.js';
 
 export class AASIndexFactory {
-    public constructor(private readonly container: DependencyContainer) {}
+    private static instance?: AASIndex;
 
-    public create(): AASIndex {
-        const variable = this.container.resolve(Variable);
-        const logger = this.container.resolve<Logger>(LOGGER);
-        const keywordDirectory = this.container.resolve(KeywordDirectory);
-        if (variable.AAS_INDEX) {
-            try {
-                const url = new URL(variable.AAS_INDEX);
-                if (url.protocol === 'mysql:') {
-                    return new MySqlIndex(logger, variable, keywordDirectory);
+    public static getInstance(container: DependencyContainer): AASIndex {
+        if (!AASIndexFactory.instance) {
+            const variable = container.resolve(Variable);
+            const logger = container.resolve<Logger>(LOGGER);
+            const keywordDirectory = container.resolve(KeywordDirectory);
+            if (variable.AAS_INDEX) {
+                try {
+                    const url = new URL(variable.AAS_INDEX);
+                    if (url.protocol === 'mysql:') {
+                        return new MySqlIndex(logger, variable, keywordDirectory);
+                    }
+
+                    throw new Error(`${urlToString(url)} is a not supported AAS index.`);
+                } catch (error) {
+                    logger.error(error);
                 }
-
-                throw new Error(`${urlToString(url)} is a not supported AAS index.`);
-            } catch (error) {
-                logger.error(error);
             }
+
+            const dbFile = path.join(variable.CONTENT_ROOT, 'aas-index.db');
+            AASIndexFactory.instance = new SqliteIndex(logger, keywordDirectory, dbFile);
         }
 
-        const dbFile = path.join(variable.CONTENT_ROOT, 'aas-index.db');
-        return new SqliteIndex(logger, keywordDirectory, dbFile);
+        return AASIndexFactory.instance;
     }
 }

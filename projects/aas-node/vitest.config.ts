@@ -9,7 +9,7 @@ export default defineConfig({
             reporter: ['text', 'json', 'html', 'clover', 'json-summary'],
         },
         environment: 'node',
-        include: ['src/test/**/*.{test,spec}.ts'],
+        include: ['src/**/*.{test,spec}.ts'],
         outputFile: '../../coverage/aas-node.xml',
         reporters: ['default', 'junit'],
     },

@@ -59,13 +59,20 @@ export interface OperationResult {
 export class ApiClientV3 extends ApiClient {
     private readonly cdCache = new ConceptDescriptionCache();
 
-    public constructor(logger: Logger, http: HttpClient, endpoint: AASEndpoint) {
-        super(logger, http, endpoint);
+    public constructor(
+        logger: Logger,
+        endpoint: AASEndpoint,
+        auth: Record<string, string> | undefined,
+        http: HttpClient,
+    ) {
+        super(logger, endpoint, auth, http);
     }
+
+    public static readonly version = '^3.0.0';
 
     public readonly readOnly = false;
 
-    public readonly onlineReady = true;
+    public readonly providesLiveData = true;
 
     /**
      * Tests the connection to the endpoint by requesting a page of Asset Administration Shells.
@@ -73,7 +80,7 @@ export class ApiClientV3 extends ApiClient {
     public override async test(): Promise<void> {
         await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
             this.resolve('shells', { limit: 10 }),
-            this.endpoint.headers,
+            this.auth,
         );
     }
 
@@ -93,7 +100,7 @@ export class ApiClientV3 extends ApiClient {
 
         const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
             this.resolve('shells', searchParams),
-            this.endpoint.headers,
+            this.auth,
         );
 
         return {
@@ -110,7 +117,7 @@ export class ApiClientV3 extends ApiClient {
     public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
         return this.http.getReadable(
             this.resolve(`shells/${encodeBase64Url(id)}/asset-information/thumbnail`),
-            this.endpoint.headers,
+            this.auth,
         );
     }
 
@@ -122,7 +129,7 @@ export class ApiClientV3 extends ApiClient {
     public override async getEnvironment(id: string): Promise<aas.Environment> {
         const shell = await this.http.get<aas.AssetAdministrationShell>(
             this.resolve(`shells/${encodeBase64Url(id)}`),
-            this.endpoint.headers,
+            this.auth,
         );
 
         const submodels = await this.readSubmodels(shell.submodels);
@@ -174,7 +181,7 @@ export class ApiClientV3 extends ApiClient {
         const id = encodeBase64Url(file.path.id);
         const idShortPath = file.path.idShortPath;
         const url = this.resolve(`submodels/${id}/submodel-elements/${idShortPath}/attachment`);
-        return await this.http.getReadable(url, this.endpoint.headers);
+        return await this.http.getReadable(url, this.auth);
     }
 
     public override resolveNodeId(_: aas.AssetAdministrationShell, nodeId: string): string {
@@ -187,11 +194,11 @@ export class ApiClientV3 extends ApiClient {
     public override async getPackage(aasId: string): Promise<NodeJS.ReadableStream> {
         const result: PagedResult<PackageDescriptor> = await this.http.get(
             this.resolve(`packages?aasId=${encodeBase64Url(aasId)}`),
-            this.endpoint.headers,
+            this.auth,
         );
 
         const packageId = encodeBase64Url(result.result[0].packageId);
-        return await this.http.getReadable(this.resolve(`packages/${packageId}`), this.endpoint.headers);
+        return await this.http.getReadable(this.resolve(`packages/${packageId}`), this.auth);
     }
 
     public override async insertPackage(file: string): Promise<void> {
@@ -200,17 +207,17 @@ export class ApiClientV3 extends ApiClient {
         const fileName = basename(file);
         formData.append('file', new File([buffer], fileName));
         formData.append('fileName', fileName);
-        await this.http.postFormData(this.resolve(`packages`), formData, this.endpoint.headers);
+        await this.http.postFormData(this.resolve(`packages`), formData, this.auth);
     }
 
     public override async deletePackage(aasId: string): Promise<void> {
         const result: PagedResult<PackageDescriptor> = await this.http.get(
             this.resolve(`packages?aasId=${encodeBase64Url(aasId)}`),
-            this.endpoint.headers,
+            this.auth,
         );
 
         const packageId = encodeBase64Url(result.result[0].packageId);
-        await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
+        await this.http.delete(this.resolve(`packages/${packageId}`), this.auth);
     }
 
     public override async invoke(operation: aas.Operation): Promise<aas.Operation> {
@@ -231,15 +238,15 @@ export class ApiClientV3 extends ApiClient {
         }
 
         const result: OperationResult = JSON.parse(
-            await this.http.postJson(
+            await this.http.post(
                 this.resolve(`submodels/${smId}/submodel-elements/${idShortPath}/invoke`),
                 request,
-                this.endpoint.headers,
+                this.auth,
             ),
         );
 
         if (!result.success) {
-            throw new ApplicationError(ERRORS.InvokeOperationFailed, {
+            throw new ApplicationError(ERRORS.INVOKE_OPERATION_FAILED, {
                 idShort: operation.idShort,
                 message: result.messages?.map(message => message.text).join(' '),
             });
@@ -251,7 +258,7 @@ export class ApiClientV3 extends ApiClient {
     public override async getBlobValue(submodelId: string, idShortPath: string): Promise<string | undefined> {
         const blob = await this.http.get<aas.Blob>(
             this.resolve(`submodels/${submodelId}/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
-            this.endpoint.headers,
+            this.auth,
         );
 
         if (!blob) {
@@ -262,7 +269,7 @@ export class ApiClientV3 extends ApiClient {
     }
 
     public override getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<PagedResult<string>> {
-        return this.http.get(this.resolve(`lookup/shells?assetIds=${encodeBase64Url(assetId)}`), this.endpoint.headers);
+        return this.http.get(this.resolve(`lookup/shells?assetIds=${encodeBase64Url(assetId)}`), this.auth);
     }
 
     private toDocument(shell: aas.AssetAdministrationShell): AASDocument {
@@ -290,7 +297,7 @@ export class ApiClientV3 extends ApiClient {
             submodelRefs.map(async reference => {
                 return this.http.get<aas.Submodel>(
                     this.resolve(`submodels/${encodeBase64Url(reference.keys[0].value)}`),
-                    this.endpoint.headers,
+                    this.auth,
                 );
             }),
         );
@@ -325,7 +332,7 @@ export class ApiClientV3 extends ApiClient {
                 try {
                     conceptDescription = await this.http.get<aas.ConceptDescription>(
                         this.resolve(`concept-descriptions/${encodeBase64Url(semanticId)}`),
-                        this.endpoint.headers,
+                        this.auth,
                     );
 
                     this.cdCache.set(semanticId, conceptDescription);
@@ -344,7 +351,7 @@ export class ApiClientV3 extends ApiClient {
             return (
                 (await this.http.get<aas.AssetAdministrationShell>(
                     this.resolve(`shells/${encodeBase64Url(shell.id)}`),
-                    this.endpoint.headers,
+                    this.auth,
                 )) !== undefined
             );
         } catch {
@@ -354,24 +361,18 @@ export class ApiClientV3 extends ApiClient {
 
     private async putShell(shell: aas.AssetAdministrationShell): Promise<void> {
         const aasId = encodeBase64Url(shell.id);
-        await this.http.put(this.resolve(`shells/${aasId}`), new JsonWriterV3().convert(shell), this.endpoint.headers);
+        await this.http.put(this.resolve(`shells/${aasId}`), new JsonWriterV3().convert(shell), this.auth);
     }
 
     private async postShell(shell: aas.AssetAdministrationShell): Promise<string> {
-        return await this.http.postJson(
-            this.resolve(`shells`),
-            new JsonWriterV3().convert(shell),
-            this.endpoint.headers,
-        );
+        return await this.http.post(this.resolve(`shells`), new JsonWriterV3().convert(shell), this.auth);
     }
 
     private async hasSubmodel(submodel: aas.Submodel): Promise<boolean> {
         try {
             return (
-                (await this.http.get(
-                    this.resolve(`submodels/${encodeBase64Url(submodel.id)}`),
-                    this.endpoint.headers,
-                )) !== undefined
+                (await this.http.get(this.resolve(`submodels/${encodeBase64Url(submodel.id)}`), this.auth)) !==
+                undefined
             );
         } catch {
             return false;
@@ -382,16 +383,12 @@ export class ApiClientV3 extends ApiClient {
         await this.http.put(
             this.resolve(`submodels/${encodeBase64Url(submodel.id)}`),
             new JsonWriterV3().convert(submodel),
-            this.endpoint.headers,
+            this.auth,
         );
     }
 
     private async postSubmodel(submodel: aas.Submodel): Promise<void> {
-        await this.http.postJson(
-            this.resolve(`submodels/`),
-            new JsonWriterV3().convert(submodel),
-            this.endpoint.headers,
-        );
+        await this.http.post(this.resolve(`submodels/`), new JsonWriterV3().convert(submodel), this.auth);
     }
 
     private async hasConceptDescription(conceptDescription: aas.ConceptDescription): Promise<boolean> {
@@ -399,7 +396,7 @@ export class ApiClientV3 extends ApiClient {
             return (
                 (await this.http.get(
                     this.resolve(`concept-descriptions/${encodeBase64Url(conceptDescription.id)}`),
-                    this.endpoint.headers,
+                    this.auth,
                 )) !== undefined
             );
         } catch {
@@ -411,15 +408,15 @@ export class ApiClientV3 extends ApiClient {
         await this.http.put(
             this.resolve(`concept-descriptions/${encodeBase64Url(conceptDescription.id)}`),
             new JsonWriterV3().convert(conceptDescription),
-            this.endpoint.headers,
+            this.auth,
         );
     }
 
     private async postConceptDescription(conceptDescription: aas.ConceptDescription): Promise<void> {
-        await this.http.postJson(
+        await this.http.post(
             this.resolve(`concept-descriptions`),
             new JsonWriterV3().convert(conceptDescription),
-            this.endpoint.headers,
+            this.auth,
         );
     }
 }

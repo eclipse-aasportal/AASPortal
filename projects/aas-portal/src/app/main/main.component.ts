@@ -20,6 +20,7 @@ import {
     ProgressComponent,
     ThemeToggleComponent,
     ToolbarService,
+    SettingsComponent,
 } from 'aas-lib';
 
 import { environment } from '../../environments/environment';
@@ -59,6 +60,7 @@ export interface LinkDescriptor {
         AuthComponent,
         ProgressComponent,
         ThemeToggleComponent,
+        SettingsComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

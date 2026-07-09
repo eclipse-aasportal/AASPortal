@@ -158,7 +158,7 @@ export abstract class AASIndex {
     ): Promise<AASDocument> {
         const document = await this.find(endpoint, modelType, id);
         if (!document) {
-            throw new ApplicationError(ERRORS.AASNotFound, { modelType, id }, 404);
+            throw new ApplicationError(ERRORS.AAS_NOT_FOUND, { modelType, id }, 404);
         }
 
         return document;

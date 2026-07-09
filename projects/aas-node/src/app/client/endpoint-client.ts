@@ -17,6 +17,7 @@ export abstract class EndpointClient {
     protected constructor(
         protected readonly logger: Logger,
         public readonly endpoint: AASEndpoint,
+        protected readonly auth?: Record<string, string>,
     ) {}
 
     /**
@@ -30,9 +31,9 @@ export abstract class EndpointClient {
     public abstract readonly readOnly: boolean;
 
     /**
-     * Indicates whether the AAS source provides live data.
+     * Indicates whether the AAS source provides real-time data.
      */
-    public abstract readonly onlineReady: boolean;
+    public abstract readonly providesLiveData: boolean;
 
     /**
      * Gets the documents of the current endpoint.

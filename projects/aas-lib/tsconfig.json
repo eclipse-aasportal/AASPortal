@@ -4,14 +4,9 @@
     "compilerOptions": {
         "outDir": "./dist/out-tsc",
         "declaration": false,
-        "lib": [
-            "ES2024",
-            "dom"
-        ],
         "types": [
             "@angular/localize"
-        ],
-        "paths": {}
+        ]
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,

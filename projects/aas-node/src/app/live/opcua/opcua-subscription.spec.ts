@@ -1,0 +1,37 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { Logger } from 'aas-package';
+import { OpcuaSubscription } from './opcua-subscription.js';
+import { createSpyObj } from '../../../test/mocks.js';
+import { SocketClient } from '../socket-client.js';
+import { OpcuaClient } from '../../client/opcua/opcua-client.js';
+
+describe('OpcuaSubscription', function () {
+    let subscription: OpcuaSubscription;
+    let logger: Mocked<Logger>;
+    let client: Mocked<SocketClient>;
+    let server: Mocked<OpcuaClient>;
+
+    beforeEach(function () {
+        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
+        client = createSpyObj<SocketClient>(['has', 'subscribe', 'notify']);
+        server = createSpyObj<OpcuaClient>(['getSession']);
+        subscription = new OpcuaSubscription(logger, client, server, [
+            {
+                nodeId: 'ns=1;i=42',
+                valueType: 'xs:integer',
+            },
+        ]);
+    });
+
+    it('should be created', function () {
+        expect(subscription).toBeTruthy();
+    });
+});

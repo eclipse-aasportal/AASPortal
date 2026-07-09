@@ -58,7 +58,7 @@ import { basename, encodeBase64Url, findRouteForShell, findRouteForSubmodel } fr
 import { VIEW_ROUTES } from '../../views/views-routes';
 import { WebSocketService } from '../../services/web-socket.service';
 import { NotifyService } from '../../core/notify/notify.service';
-import { MaxLengthPipe } from '../../pipes/max-length.pipe';
+import { MaxLengthPipe } from '../../share/pipes/max-length.pipe';
 import {
     Tree,
     TreeComponent,

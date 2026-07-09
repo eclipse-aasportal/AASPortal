@@ -70,7 +70,7 @@ export class OpcuaClient extends EndpointClient {
 
     public readonly readOnly = true;
 
-    public readonly onlineReady = true;
+    public readonly providesLiveData = true;
 
     public get isOpen(): boolean {
         return this.reentry > 0;

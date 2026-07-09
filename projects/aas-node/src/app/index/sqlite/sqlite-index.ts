@@ -203,7 +203,7 @@ export class SqliteIndex extends AASIndex {
                 if (value) {
                     resolve(this.toEndpoint(value));
                 } else {
-                    reject(new ApplicationError(ERRORS.EndpointDoesNotExist, { endpoint: name }));
+                    reject(new ApplicationError(ERRORS.ENDPOINT_DOES_NOT_EXIST, { endpoint: name }));
                 }
             } catch (error) {
                 reject(error);
@@ -251,7 +251,7 @@ export class SqliteIndex extends AASIndex {
                 this.db.exec('BEGIN');
                 const value = this.getEndpointSql.get(endpoint.name);
                 if (value === undefined) {
-                    reject(new ApplicationError(ERRORS.EndpointDoesNotExist, { endpoint: endpoint.name }));
+                    reject(new ApplicationError(ERRORS.ENDPOINT_DOES_NOT_EXIST, { endpoint: endpoint.name }));
                     return;
                 }
 
