@@ -18,6 +18,7 @@ import { Logger, LOGGER } from 'aas-package';
 import { IdentityProviderClient, RefreshTokenResponse } from './identity-provider-client.js';
 import { Variable } from '../variable.js';
 import { ERRORS } from '../errors.js';
+import { COOKIE_STORAGE, CookieStorage } from '../cookie-storage/cookie-storage.js';
 
 const AuthorizationServerSchema = z.object({
     issuer: z.url(),
@@ -61,9 +62,10 @@ export class OicdClient extends IdentityProviderClient {
 
     public constructor(
         @inject(LOGGER) logger: Logger,
+        @inject(COOKIE_STORAGE) cookies: CookieStorage,
         @inject(Variable) private readonly variable: Variable,
     ) {
-        super(logger);
+        super(logger, cookies);
 
         this.server = this.variable.IDENTITY_PROVIDER;
         this.clientId = this.variable.CLIENT_ID;
@@ -89,7 +91,6 @@ export class OicdClient extends IdentityProviderClient {
             authUrl.searchParams.set('code_challenge', code_challenge);
             authUrl.searchParams.set('code_challenge_method', 'S256');
             authUrl.searchParams.set('state', state);
-            await this.saveSession(req);
             res.redirect(authUrl.href);
         } catch (error) {
             return this.sendError(res, error);
@@ -110,7 +111,7 @@ export class OicdClient extends IdentityProviderClient {
             if (!code || !state || req.query.state !== state) {
                 return res.status(400).json({
                     name: 'ApplicationError',
-                    message: ERRORS.BAD_REQUEST,
+                    message: `code: ${code ? 'ok' : 'N/D'}, state: ${state ? 'ok' : 'N/D'}, state match: ${req.query.state === state}`,
                     status: 400,
                 } satisfies ErrorData);
             }
@@ -146,22 +147,13 @@ export class OicdClient extends IdentityProviderClient {
                 } satisfies ErrorData);
             }
 
-            const tokenData = (await response.json()) as TokenEndpointResponse;
-            res.cookie('access_token', tokenData.access_token, {
-                httpOnly: true,
-                secure: this.secure,
-                sameSite: 'strict',
-            });
-
-            if (tokenData.refresh_token) {
-                res.cookie('refresh_token', tokenData.refresh_token, {
-                    httpOnly: true,
-                    secure: this.secure,
-                    sameSite: 'strict',
-                });
+            if (session_state) {
+                req.session.session_state = session_state;
             }
 
-            await this.saveSession(req);
+            const tokenData = (await response.json()) as TokenEndpointResponse;
+            req.session.access_token = tokenData.access_token;
+            req.session.refresh_token = tokenData.refresh_token;
             res.redirect(new URL('start', this.variable.HOST_URL ?? `${req.protocol}://${req.host}`).href);
         } catch (error) {
             return this.sendError(res, error);
@@ -200,8 +192,6 @@ export class OicdClient extends IdentityProviderClient {
                 } satisfies ErrorData);
             }
 
-            res.clearCookie('access_token');
-            res.clearCookie('refresh_token');
             await this.destroySession(req.session);
             return res.sendStatus(200);
         } catch (error) {

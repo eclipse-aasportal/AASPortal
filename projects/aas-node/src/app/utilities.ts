@@ -15,7 +15,7 @@ export function parseUrl(url: string): URL {
     try {
         return new URL(url);
     } catch (error) {
-        throw new ApplicationError(ERRORS.InvalidURL, {
+        throw new ApplicationError(ERRORS.INVALID_URL, {
             url,
             message: error?.message,
         });

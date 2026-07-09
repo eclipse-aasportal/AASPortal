@@ -11,8 +11,10 @@ import crypto from 'crypto';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { Session } from 'express-session';
-import { User, UserRole, noop } from 'aas-core';
+import { User, noop } from 'aas-core';
 import { Logger } from 'aas-package';
+import { CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { ERRORS } from '../errors.js';
 
 /** Injection token. */
 export const IDENTITY_PROVIDER: InjectionToken<IdentityProviderClient> = 'IDENTITY_PROVIDER';
@@ -23,9 +25,12 @@ export interface RefreshTokenResponse {
     readonly user: User;
 }
 
-/** Defines user storage. */
+/** Defines an identifier provider client. */
 export abstract class IdentityProviderClient {
-    protected constructor(protected readonly logger: Logger) {}
+    protected constructor(
+        protected readonly logger: Logger,
+        protected readonly cookies: CookieStorage,
+    ) {}
 
     /**
      * Retrieves the user information associated with the given request.
@@ -69,6 +74,24 @@ export abstract class IdentityProviderClient {
     public abstract createAccount(req: express.Request, res: express.Response): Promise<express.Response>;
 
     /**
+     * Updates the user account. This method is called when a user tries to update their account information.
+     * @param req The request.
+     * @param res The response.
+     */
+    public async updateAccount(req: express.Request, res: express.Response): Promise<express.Response> {
+        return res.status(501).send({ name: 'ApplicationError', message: ERRORS.UPDATE_ACCOUNT_NOT_SUPPORTED });
+    }
+
+    /**
+     * Deletes the user account. This method is called when a user tries to delete their account.
+     * @param req The request.
+     * @param res The response.
+     */
+    public async deleteAccount(req: express.Request, res: express.Response): Promise<express.Response | void> {
+        return res.status(501).send({ name: 'ApplicationError', message: ERRORS.DELETE_ACCOUNT_NOT_SUPPORTED });
+    }
+
+    /**
      * Provides an Express middleware that handles authentication for incoming requests.
      * This middleware should be used in the Express app to protect routes that require authentication.
      *
@@ -79,42 +102,49 @@ export abstract class IdentityProviderClient {
         return async (req, res, next) => {
             delete req.user;
             res.setHeader('Access-Control-Allow-Credentials', 'true');
-            const { access_token, refresh_token } = req.cookies ?? {};
+            const { access_token, refresh_token } = req.session;
             if (access_token) {
                 try {
                     const payload = await this.verifyAccessToken(access_token);
+                    const userId = String(payload.email);
+                    let endpoints = req.session.endpoints;
+                    if (!endpoints) {
+                        endpoints = await this.cookies.getEndpoints(userId);
+                        req.session.endpoints = endpoints;
+                    }
+
                     req.user = {
-                        id: String(payload.email),
+                        id: userId,
                         name: String(payload.name),
-                        role: 'editor' as UserRole,
+                        role: 'editor',
+                        endpoints,
                     };
                 } catch (error) {
                     if (error.name !== 'TokenExpiredError' || !refresh_token) {
-                        res.clearCookie('access_token');
-                        res.clearCookie('refresh_token');
+                        this.destroySession(req.session);
                         return res.redirect('/api/login');
                     }
 
                     try {
                         const tokenData = await this.refreshToken(refresh_token);
-                        this.setAuthCookies(res, tokenData.access_token, tokenData.refresh_token);
+                        req.session.access_token = tokenData.access_token;
+                        req.session.refresh_token = tokenData.refresh_token;
                         req.user = tokenData.user;
                     } catch (error) {
                         noop(error);
-                        res.clearCookie('access_token');
-                        res.clearCookie('refresh_token');
+                        this.destroySession(req.session);
                         return res.redirect('/api/login');
                     }
                 }
             } else if (refresh_token) {
                 try {
                     const tokenData = await this.refreshToken(refresh_token);
-                    this.setAuthCookies(res, tokenData.access_token, tokenData.refresh_token);
+                    req.session.access_token = tokenData.access_token;
+                    req.session.refresh_token = tokenData.refresh_token;
                     req.user = tokenData.user;
                 } catch (error) {
                     noop(error);
-                    res.clearCookie('access_token');
-                    res.clearCookie('refresh_token');
+                    this.destroySession(req.session);
                     return res.redirect('/api/login');
                 }
             }
@@ -183,21 +213,6 @@ export abstract class IdentityProviderClient {
 
                 resolve();
             });
-        });
-    }
-
-    protected setAuthCookies(res: express.Response, access: string, refresh: string): void {
-        const secure = process.env.NODE_ENV === 'production';
-        res.cookie('access_token', access, {
-            httpOnly: true,
-            secure,
-            sameSite: 'strict',
-        });
-
-        res.cookie('refresh_token', refresh, {
-            httpOnly: true,
-            secure,
-            sameSite: 'strict',
         });
     }
 

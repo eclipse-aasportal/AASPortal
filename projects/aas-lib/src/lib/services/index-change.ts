@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { computed, EventEmitter, inject, Injectable, OnDestroy, signal } from '@angular/core';
-import { AASNodeMessage, AASNodeMessageType, WebSocketData } from 'aas-core';
+import { computed, inject, Injectable, OnDestroy, signal } from '@angular/core';
+import { AASNodeMessage, WebSocketData } from 'aas-core';
 import { HttpClient } from '@angular/common/http';
 import { first, map, mergeMap, Observable, Subscription, zip } from 'rxjs';
 import { WebSocketService } from './web-socket.service';
@@ -18,6 +18,7 @@ type State = {
     documentCount: number;
     endpointCount: number;
     changedDocuments: number;
+    endpoints: string[];
 };
 
 /**
@@ -37,6 +38,7 @@ export class IndexChange implements OnDestroy {
         documentCount: 0,
         endpointCount: 0,
         changedDocuments: 0,
+        endpoints: [],
     });
 
     public constructor() {
@@ -65,12 +67,6 @@ export class IndexChange implements OnDestroy {
     }
 
     /**
-     * Event emitted when a reset message is received, indicating that the index has been reset and
-     * the state should be cleared.
-     */
-    public readonly reset = new EventEmitter();
-
-    /**
      * Observable that emits the current count of documents in the index.
      */
     public readonly documentCount = computed(() => this.state().documentCount);
@@ -92,11 +88,11 @@ export class IndexChange implements OnDestroy {
     public clear(): Observable<void> {
         return zip(
             this.http.get<{ count: number }>('/api/v1/endpoints/count'),
-            this.http.get<{ count: number }>('/api/v1/documents/count'),
+            this.http.get<{ count: number }>('/api/v1/endpoints/documents-count'),
         ).pipe(
             map(([endpointCount, documentCount]) => [endpointCount.count, documentCount.count]),
             map(([endpointCount, documentCount]) =>
-                this.state.set({ endpointCount, documentCount, changedDocuments: 0 }),
+                this.state.set({ endpointCount, documentCount, changedDocuments: 0, endpoints: [] }),
             ),
         );
     }
@@ -106,41 +102,38 @@ export class IndexChange implements OnDestroy {
     }
 
     private update(messages: AASNodeMessage[]): void {
-        const groupBy = messages.reduce<Record<string, number>>((group, message) => {
-            const type = message.type;
-            if (group[type] === undefined) {
-                group[type] = 0;
-            }
-
-            group[type]++;
-            return group;
-        }, {});
-
-        for (const type in groupBy) {
-            const count = groupBy[type];
-            switch (type as AASNodeMessageType) {
+        for (const message of messages) {
+            switch (message.type) {
                 case 'Added':
-                    this.state.update(state => ({ ...state, documentCount: state.documentCount + count }));
+                    this.state.update(state => ({ ...state, documentCount: ++state.documentCount }));
                     break;
                 case 'Removed':
-                    this.state.update(state => ({ ...state, documentCount: state.documentCount - count }));
+                    this.state.update(state => ({ ...state, documentCount: --state.documentCount }));
                     this.cache.clear();
                     break;
                 case 'Update':
-                    this.state.update(state => ({ ...state, changedDocuments: state.changedDocuments + count }));
+                    this.state.update(state => ({ ...state, changedDocuments: ++state.changedDocuments }));
                     this.cache.clear();
                     break;
                 case 'EndpointAdded':
-                    this.state.update(state => ({ ...state, endpointCount: state.endpointCount + count }));
+                    this.state.update(state => ({ ...state, endpointCount: ++state.endpointCount }));
                     break;
                 case 'EndpointRemoved':
-                    this.state.update(state => ({ ...state, endpointCount: state.endpointCount - count }));
+                    this.state.update(state => ({ ...state, endpointCount: --state.endpointCount }));
                     this.cache.clear();
                     break;
                 case 'Reset':
                     this.state.update(state => ({ ...state, documentCount: 0, changedDocuments: 0 }));
-                    this.reset.emit();
                     this.cache.clear();
+                    break;
+                case 'End':
+                    this.state.update(state => ({
+                        ...state,
+                        endpoints: [
+                            ...state.endpoints,
+                            ...messages.filter(m => m.type === 'End').map(m => m.endpoint.name),
+                        ],
+                    }));
                     break;
             }
         }

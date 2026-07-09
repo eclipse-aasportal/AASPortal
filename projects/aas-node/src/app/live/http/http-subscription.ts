@@ -49,8 +49,8 @@ export class HttpSubscription extends SocketSubscription {
         const nodes: Array<LiveNode> = [];
         for (const item of this.items) {
             try {
-                const raw = await this.api.readValue(item.url, item.node.valueType);
-                item.node.value = changeType(raw, item.node.valueType);
+                const value = await this.api.readValue(item.url, item.node.valueType);
+                item.node.value = changeType(value, item.node.valueType);
                 item.node.timeStamp = Date.now();
                 nodes.push(item.node);
             } catch (error) {

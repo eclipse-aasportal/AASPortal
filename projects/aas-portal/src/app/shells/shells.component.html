@@ -66,19 +66,6 @@
         </div>
     }
     <div class="btn-group me-2 my-1">
-        <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints" translate>
-                Shells.ENDPOINT
-            </button>
-            <div ngbDropdownMenu class="dropdown-menu" id="menuEndpoints">
-                <button ngbDropdownItem (click)="addEndpoint().subscribe()" translate>Shells.ADD_ENDPOINT</button>
-                <button ngbDropdownItem (click)="updateEndpoint().subscribe()" translate>Shells.UPDATE_ENDPOINT</button>
-                <button ngbDropdownItem (click)="removeEndpoint().subscribe()" translate>Shells.REMOVE_ENDPOINT</button>
-                <button ngbDropdownItem (click)="extras().subscribe()" translate>Shells.EXTRAS</button>
-            </div>
-        </div>
-    </div>
-    <div class="btn-group me-2 my-1">
         <button class="btn btn-primary ms-2" type="button" id="AID_OPEN_FILE" (click)="inputFiles.click()">
             <i class="bi bi-upload"></i>
         </button>
@@ -112,7 +99,7 @@
     <div class="btn-group me-2 my-1">
         <div ngbDropdown class="btn-group" role="group">
             <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints" translate>
-                LABEL_VIEWS
+                Shells.VIEWS
             </button>
             <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
                 @for (view of views(); track view.path) {

@@ -14,13 +14,18 @@ import fs from 'fs';
 import { LOGGER, Logger } from 'aas-package';
 import { IdentityProvider, UserData } from './identity-provider.js';
 import { Variable } from '../variable.js';
+import { COOKIE_STORAGE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
 
 @injectable()
 export class FileSystemIdentityProvider extends IdentityProvider {
     private readonly usersDirectory: string;
 
-    public constructor(@inject(LOGGER) logger: Logger, @inject(Variable) variable: Variable) {
-        super(logger, variable);
+    public constructor(
+        @inject(LOGGER) logger: Logger,
+        @inject(COOKIE_STORAGE) cookies: CookieStorage,
+        @inject(Variable) variable: Variable,
+    ) {
+        super(logger, cookies, variable);
 
         this.usersDirectory = resolve(normalize(`.${new URL(variable.IDENTITY_PROVIDER).pathname}`));
         if (!fs.existsSync(this.usersDirectory)) {

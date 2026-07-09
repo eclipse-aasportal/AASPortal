@@ -20,11 +20,10 @@ import {
     fromConceptDescription,
 } from 'aas-core';
 
-import { FileResult } from 'aas-package';
+import { FileResult, Logger, LOGGER } from 'aas-package';
 
 import { Database } from './db/database.js';
 import { Variable } from './variable.js';
-import { LOGGER, Logger } from './logging/logger.js';
 import { AddPackageCommand } from './db/commands/add-package-command.js';
 import { UpdatePackageCommand } from './db/commands/update-package-command.js';
 import { DeletePackageCommand } from './db/commands/delete-package-command.js';

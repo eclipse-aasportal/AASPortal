@@ -26,16 +26,18 @@ export abstract class ApiClient extends EndpointClient {
 
     /**
      * @param logger The logger.
+     * @param endpoint The AAS endpoint
+     * @param auth The authentication/authorization parameter.
      * @param http The HTTP client.
-     * @param endpoint AAS endpoint.
      */
-    public constructor(logger: Logger, http: HttpClient, endpoint: AASEndpoint) {
-        super(logger, endpoint);
-
-        this.http = http;
+    public constructor(
+        logger: Logger,
+        endpoint: AASEndpoint,
+        auth: Record<string, string> | undefined,
+        protected readonly http: HttpClient,
+    ) {
+        super(logger, endpoint, auth);
     }
-
-    protected readonly http: HttpClient;
 
     /** Indicates whether a connection to an AAS endpoint exits. */
     public override get isOpen(): boolean {
@@ -94,7 +96,7 @@ export abstract class ApiClient extends EndpointClient {
      * @returns The current value.
      */
     public async readValue(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
-        const property = await this.http.getLive<PropertyValue>(new URL(url), this.endpoint.headers);
+        const property = await this.http.getLiveData<PropertyValue>(new URL(url), this.auth);
         return convertFromString(property.value, valueType);
     }
 

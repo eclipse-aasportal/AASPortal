@@ -12,11 +12,11 @@ import http from 'http';
 import https from 'https';
 import EventEmitter from 'events';
 import fs from 'fs';
+import { Logger, LOGGER } from 'aas-package';
 
 import { App } from './app.js';
 import { ListenerFn, WebSocketData } from './types.js';
 import { Variable } from './variable.js';
-import { LOGGER, Logger } from './logging/logger.js';
 import { SocketClient } from './socket-client.js';
 
 @singleton()

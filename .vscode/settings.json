@@ -82,5 +82,6 @@
     "plantuml.exportOutDir": "read-the-docs/source/images",
     "plantuml.diagramsRoot": "read-the-docs/source",
     "plantuml.exportIncludeFolderHeirarchy": false,
-    "plantuml.exportSubFolder": false
+    "plantuml.exportSubFolder": false,
+    "editor.formatOnType": false
 }

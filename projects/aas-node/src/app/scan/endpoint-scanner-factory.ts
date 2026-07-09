@@ -7,8 +7,9 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { AASEndpoint } from 'aas-core';
+import { AASEndpoint, ApplicationError } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
+import semver from 'semver';
 
 import { EndpointScanner } from './endpoint-scanner.js';
 import { DirectoryScanner } from './directory-scanner.js';
@@ -33,26 +34,24 @@ export class EndpointScannerFactory {
     public create(endpoint: AASEndpoint): EndpointScanner {
         switch (endpoint.type) {
             case 'AAS_API': {
-                let source: ApiClient;
-                switch (endpoint.version) {
-                    case 'v1':
-                        source = new ApiClientV1(this.logger, this.http, endpoint);
-                        break;
-                    case 'v3':
-                        source = new ApiClientV3(this.logger, this.http, endpoint);
-                        break;
-                    default:
-                        throw new Error('Not implemented.');
+                let client: ApiClient;
+                const version = semver.coerce(endpoint.version) ?? '3.0.0';
+                if (semver.satisfies(version, ApiClientV3.version)) {
+                    client = new ApiClientV3(this.logger, endpoint, endpoint.headers, this.http);
+                } else if (semver.satisfies(version, ApiClientV1.version)) {
+                    client = new ApiClientV1(this.logger, endpoint, endpoint.headers, this.http);
+                } else {
+                    throw new ApplicationError(`AAS server version ${version} is not supported.`, {}, 500);
                 }
 
-                return new AASServerScanner(source);
+                return new AASServerScanner(client);
             }
             case 'OPC_UA':
                 return new OpcuaServerScanner(new OpcuaClient(this.logger, endpoint));
             case 'WebDAV':
             case 'FileSystem':
                 return new DirectoryScanner(
-                    new AasxDirectory(this.logger, this.fileStorageProvider.get(endpoint.url), endpoint),
+                    new AasxDirectory(this.logger, endpoint, this.fileStorageProvider.get(endpoint.url)),
                 );
             default:
                 throw new Error('Not implemented.');

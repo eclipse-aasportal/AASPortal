@@ -26,8 +26,8 @@ export class AasxDirectory extends EndpointClient {
 
     public constructor(
         logger: Logger,
-        private readonly fileStorage: FileStorage,
         endpoint: AASEndpoint,
+        private readonly fileStorage: FileStorage,
     ) {
         const url = new URL(endpoint.url);
         super(logger, endpoint);
@@ -41,7 +41,7 @@ export class AasxDirectory extends EndpointClient {
 
     public readonly readOnly = false;
 
-    public readonly onlineReady = false;
+    public readonly providesLiveData = false;
 
     public async test(): Promise<void> {
         if (this.reentry === 0) {
@@ -141,7 +141,7 @@ export class AasxDirectory extends EndpointClient {
         const path = posix.join(this.root, filename);
         const exists = await this.fileStorage.exists(path);
         if (exists) {
-            throw new ApplicationError(ERRORS.FileAlreadyExists, { file: filename }, 409);
+            throw new ApplicationError(ERRORS.FILE_ALREADY_EXISTS, { file: filename }, 409);
         }
 
         try {

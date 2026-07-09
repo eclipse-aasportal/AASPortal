@@ -23,7 +23,7 @@
                                 <a
                                     ngbNavLink
                                     class="nav-item"
-                                    routerLink="{{ link.url }}"
+                                    [routerLink]="link.url"
                                     routerLinkActive="active"
                                     (click)="isMenuCollapsed.set(true)"
                                     >{{ link.name | translate }}</a
@@ -33,6 +33,7 @@
                     </ul>
                     <div class="d-flex align-items-center me-1">
                         <fhg-theme-toggle class="text-primary m-1"></fhg-theme-toggle>
+                        <fhg-settings class="text-primary m-1"></fhg-settings>
                         <fhg-localize class="text-primary m-1" [languages]="languages()"></fhg-localize>
                         <fhg-auth class="text-primary m-1"></fhg-auth>
                         <img

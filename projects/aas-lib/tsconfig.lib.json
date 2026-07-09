@@ -9,6 +9,7 @@
   },
   "exclude": [
     "src/test/**",
-    "dist/**"
+    "dist/**",
+    "src/lib/**/*.spec.ts"
   ]
 }

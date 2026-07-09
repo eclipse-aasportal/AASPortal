@@ -26,7 +26,7 @@ import {
 import { noop } from 'aas-core';
 import { WINDOW } from '../../services/window.service';
 import { ChildComponent } from '../child-component';
-import { MaxLengthPipe } from '../../pipes/max-length.pipe';
+import { MaxLengthPipe } from '../../share/pipes/max-length.pipe';
 
 export type TreeId = string | number | object;
 

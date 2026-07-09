@@ -48,21 +48,24 @@ interface OperationResult {
 }
 
 export class ApiClientV1 extends ApiClient {
-    public constructor(logger: Logger, http: HttpClient, endpoint: AASEndpoint) {
-        super(logger, http, endpoint);
+    public constructor(
+        logger: Logger,
+        endpoint: AASEndpoint,
+        auth: Record<string, string> | undefined,
+        http: HttpClient,
+    ) {
+        super(logger, endpoint, auth, http);
     }
 
-    public readonly readOnly = false;
+    public static readonly version = '^1.0.0';
 
-    public readonly onlineReady = true;
+    public override readonly readOnly = false;
+
+    public override readonly providesLiveData = true;
 
     public async getDocuments(cursor?: string): Promise<PagedResult<AASDocument>> {
-        const result = await this.http.get<aasV2.AssetAdministrationShell[]>(
-            this.resolve('shells'),
-            this.endpoint.headers,
-        );
-
         noop(cursor);
+        const result = await this.http.get<aasV2.AssetAdministrationShell[]>(this.resolve('shells'), this.auth);
 
         return {
             result: result.map(shell => this.toDocument(shell)),
@@ -73,14 +76,14 @@ export class ApiClientV1 extends ApiClient {
     public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
         return this.http.getReadable(
             this.resolve(`shells/${encodeBase64Url(id)}/asset-information/thumbnail`),
-            this.endpoint.headers,
+            this.auth,
         );
     }
 
-    public async getEnvironment(id: string): Promise<aas.Environment> {
+    public override async getEnvironment(id: string): Promise<aas.Environment> {
         const shell = await this.http.get<aasV2.AssetAdministrationShell>(
             this.resolve(`shells/${encodeBase64Url(id)}`),
-            this.endpoint.headers,
+            this.auth,
         );
 
         const submodels = await this.readSubmodels(shell);
@@ -103,12 +106,12 @@ export class ApiClientV1 extends ApiClient {
         return new JsonReaderV2(sourceEnv, true).readEnvironment();
     }
 
-    public setEnvironment(id: string, env: aas.Environment): Promise<void> {
+    public override setEnvironment(id: string, env: aas.Environment): Promise<void> {
         noop(id, env);
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    public async getFile(_: string, file: aas.File): Promise<NodeJS.ReadableStream> {
+    public override async getFile(_: string, file: aas.File): Promise<NodeJS.ReadableStream> {
         if (!file.path) {
             throw new Error('Invalid argument "file".');
         }
@@ -116,10 +119,10 @@ export class ApiClientV1 extends ApiClient {
         const smId = encodeBase64Url(file.path.id);
         const path = file.path.idShortPath;
         const url = this.resolve(`submodels/${smId}/submodel/submodel-elements/${path}/attachment`);
-        return await this.http.getReadable(url, this.endpoint.headers);
+        return await this.http.getReadable(url, this.auth);
     }
 
-    public resolveNodeId(shell: aas.AssetAdministrationShell, nodeId: string): string {
+    public override resolveNodeId(shell: aas.AssetAdministrationShell, nodeId: string): string {
         const aasId = encodeBase64Url(shell.id);
         const index = nodeId.indexOf('#');
         const smId = nodeId.substring(0, index);
@@ -131,11 +134,11 @@ export class ApiClientV1 extends ApiClient {
         const aasId = encodeBase64Url(aasIdentifier);
         const descriptors: PackageDescriptor[] = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
-            this.endpoint.headers,
+            this.auth,
         );
 
         const packageId = encodeBase64Url(descriptors[0].packageId);
-        return await this.http.getReadable(this.resolve(`packages/${packageId}`), this.endpoint.headers);
+        return await this.http.getReadable(this.resolve(`packages/${packageId}`), this.auth);
     }
 
     public override async insertPackage(file: string): Promise<void> {
@@ -144,21 +147,21 @@ export class ApiClientV1 extends ApiClient {
         const fileName = basename(file);
         formData.append('file', new File([buffer], fileName));
         formData.append('fileName', fileName);
-        await this.http.postFormData(this.resolve(`packages`), formData, this.endpoint.headers);
+        await this.http.postFormData(this.resolve(`packages`), formData, this.auth);
     }
 
     public override async deletePackage(aasIdentifier: string): Promise<void> {
         const aasId = encodeBase64Url(aasIdentifier);
         const descriptors: PackageDescriptor[] = await this.http.get(
             this.resolve(`packages?aasId=${aasId}`),
-            this.endpoint.headers,
+            this.auth,
         );
 
         const packageId = encodeBase64Url(descriptors[0].packageId);
-        await this.http.delete(this.resolve(`packages/${packageId}`), this.endpoint.headers);
+        await this.http.delete(this.resolve(`packages/${packageId}`), this.auth);
     }
 
-    public async invoke(operation: aas.Operation): Promise<aas.Operation> {
+    public override async invoke(operation: aas.Operation): Promise<aas.Operation> {
         if (!operation.path) {
             throw new Error('Invalid argument ""operation.');
         }
@@ -175,15 +178,15 @@ export class ApiClientV1 extends ApiClient {
         };
 
         const result: OperationResult = JSON.parse(
-            await this.http.postJson(
+            await this.http.post(
                 this.resolve(`submodels/${smId}/submodel/submodel-elements/${idShortPath}/invoke`),
                 request,
-                this.endpoint.headers,
+                this.auth,
             ),
         );
 
         if (!result.executionResult.success) {
-            throw new ApplicationError(ERRORS.InvokeOperationFailed, {
+            throw new ApplicationError(ERRORS.INVOKE_OPERATION_FAILED, {
                 idShort: opr.idShort,
                 message: result.executionResult.messages?.map(message => message.text).join(' '),
             });
@@ -197,11 +200,11 @@ export class ApiClientV1 extends ApiClient {
         } as aasV2.Operation);
     }
 
-    public async getBlobValue(submodelId: string, idShortPath: string): Promise<string | undefined> {
+    public override async getBlobValue(submodelId: string, idShortPath: string): Promise<string | undefined> {
         const smId = encodeBase64Url(submodelId);
         const blob = await this.http.get<aas.Blob>(
             this.resolve(`submodels/${smId}/submodel/submodel-elements/${idShortPath}/?extent=WithBlobValue`),
-            this.endpoint.headers,
+            this.auth,
         );
 
         if (!blob) {
@@ -224,7 +227,7 @@ export class ApiClientV1 extends ApiClient {
                     submodels.push(
                         await this.http.get<aasV2.Submodel>(
                             this.resolve(`submodels/${submodelId}/submodel`),
-                            this.endpoint.headers,
+                            this.auth,
                         ),
                     );
                 } catch (error) {
@@ -263,7 +266,7 @@ export class ApiClientV1 extends ApiClient {
                 try {
                     const conceptDescription = await this.http.get<aas.ConceptDescription>(
                         this.resolve(`concept-descriptions/${encodeBase64Url(semanticId)}`),
-                        this.endpoint.headers,
+                        this.auth,
                     );
 
                     if (this.isConceptDescription(conceptDescription)) {

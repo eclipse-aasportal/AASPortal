@@ -6,19 +6,27 @@
  *
  *****************************************************************************/
 
-import { Endpoint, AASDocument, TemplateDescriptor, AASEndpoint, UserRole } from 'aas-core';
+import { Endpoint, AASDocument, TemplateDescriptor, AASEndpoint, UserRole, EndpointAuth } from 'aas-core';
 import { aasV2 } from 'aas-package';
 
-// Extend Express Request type to include 'user'
+/** Extend Express Request type to include 'user' */
 declare module 'express-serve-static-core' {
     interface Request {
-        user?: { id: string; name: string; role: UserRole };
+        user?: {
+            id: string;
+            name: string;
+            role: UserRole;
+            endpoints?: EndpointAuth[];
+        };
     }
 }
 
 declare module 'express-session' {
     interface SessionData {
+        access_token?: string;
+        refresh_token?: string;
         code_verifier?: string;
+        endpoints?: EndpointAuth[];
         session_state?: string;
         state?: string;
     }

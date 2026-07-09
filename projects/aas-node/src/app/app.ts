@@ -10,21 +10,21 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import { inject, singleton } from 'tsyringe';
-import express, { Express, Request, Response, json, urlencoded } from 'express';
+import express, { Express, Request, Response, json, text, urlencoded } from 'express';
 import cors from 'cors';
-import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
 import compression from 'compression';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 
-import { LOGGER, Logger } from 'aas-package';
+import { LOGGER, Logger, requestLogger } from 'aas-package';
 
 import { RegisterRoutes } from './routes/routes.js';
 import { Variable } from './variable.js';
 import { errorHandler } from './error-handler.js';
 import { IDENTITY_PROVIDER, IdentityProviderClient } from './auth/identity-provider-client.js';
+import { SESSION_STORE } from './session/session-store.js';
 
 @singleton()
 export class App {
@@ -34,6 +34,7 @@ export class App {
         @inject(LOGGER) private readonly logger: Logger,
         @inject(Variable) private readonly variable: Variable,
         @inject(IDENTITY_PROVIDER) private readonly identityProvider: IdentityProviderClient,
+        @inject(SESSION_STORE) private readonly sessionStore: session.Store,
     ) {
         this.app = express();
         this.setup();
@@ -51,7 +52,6 @@ export class App {
         });
 
         this.app.set('trust proxy', true);
-
         this.app.use(
             cors({
                 origin: this.variable.CORS_ORIGIN,
@@ -66,15 +66,23 @@ export class App {
             session({
                 saveUninitialized: false,
                 secret: this.variable.SESSION_SECRET,
-                resave: true,
+                resave: false,
+                store: this.sessionStore,
+                cookie: {
+                    secure: false,
+                    httpOnly: true,
+                    sameSite: 'strict',
+                    maxAge: 86400000,
+                },
             }),
         );
 
         this.app.use(this.identityProvider.middleware());
         this.app.use(compression());
         this.app.use(json());
+        this.app.use(text());
         this.app.use(urlencoded({ extended: true }));
-        this.app.use(morgan('dev'));
+        this.app.use(requestLogger(this.logger));
         this.app.use(
             ['/api/swagger', '/api/docs'],
             swaggerUi.serve,
@@ -101,6 +109,14 @@ export class App {
 
         this.app.post('/api/accounts', async (req, res) => {
             await this.identityProvider.createAccount(req, res);
+        });
+
+        this.app.patch('/api/accounts', async (req, res) => {
+            await this.identityProvider.updateAccount(req, res);
+        });
+
+        this.app.delete('/api/accounts', async (req, res) => {
+            await this.identityProvider.deleteAccount(req, res);
         });
 
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });

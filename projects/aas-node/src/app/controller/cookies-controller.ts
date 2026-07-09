@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import { inject, injectable } from 'tsyringe';
-import { Body, Controller, Delete, Get, OperationId, Path, Post, Route, Request, Security, Tags } from 'tsoa';
+import { Body, Controller, Delete, Get, OperationId, Path, Post, Route, Request, Tags } from 'tsoa';
 import express from 'express';
-import { ApplicationError, type Cookie } from 'aas-core';
+import { ApplicationError } from 'aas-core';
 
 import { COOKIE_STORAGE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
 import { ERRORS } from '../errors.js';
@@ -28,12 +28,11 @@ export class CookiesController extends Controller {
      * @returns The cookie with the specified name or `undefined`.
      */
     @Get('{name}')
-    @Security('oauth2', ['reader', 'editor', 'admin'])
     @OperationId('getCookie')
-    public async getCookie(@Request() request: express.Request, @Path() name: string): Promise<Cookie | undefined> {
-        const user = request.user;
+    public async getCookie(@Path() name: string, @Request() req: express.Request): Promise<string | undefined> {
+        const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.BAD_REQUEST, {}, 400);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
         }
 
         return await this.storage.getCookie(user.id, name);
@@ -42,22 +41,17 @@ export class CookiesController extends Controller {
     /**
      * @summary Sets a cookie for the current authenticated user.
      * @param name The cookie name.
-     * @param cookie The current cookie.
+     * @param data The cookie data.
      */
     @Post('{name}')
-    @Security('oauth2', ['reader', 'editor', 'admin'])
     @OperationId('setCookie')
-    public async setCookie(
-        @Request() request: express.Request,
-        @Path() name: string,
-        @Body() cookie: Cookie,
-    ): Promise<void> {
-        const user = request.user;
+    public async setCookie(@Request() req: express.Request, @Path() name: string, @Body() data: string): Promise<void> {
+        const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.BAD_REQUEST, {}, 400);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
         }
 
-        await this.storage.setCookie(user.id, name, cookie.data);
+        await this.storage.setCookie(user.id, name, data);
     }
 
     /**
@@ -65,12 +59,11 @@ export class CookiesController extends Controller {
      * @param name The cookie name.
      */
     @Delete('{name}')
-    @Security('oauth2', ['reader', 'editor', 'admin'])
     @OperationId('deleteCookie')
-    public async deleteCookie(@Request() request: express.Request, @Path() name: string): Promise<void> {
+    public async deleteCookie(@Path() name: string, @Request() request: express.Request): Promise<void> {
         const user = request.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.BAD_REQUEST, {}, 400);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
         }
 
         await this.storage.deleteCookie(user.id, name);

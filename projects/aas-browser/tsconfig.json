@@ -3,10 +3,6 @@
     "compileOnSave": false,
     "compilerOptions": {
         "outDir": "./build",
-        "lib": [
-            "ES2024",
-            "dom"
-        ],
         "types": [
             "@angular/localize"
         ],

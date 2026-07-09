@@ -11,12 +11,12 @@
     <div class="d-flex flex-column">
         <div class="d-flex flex-row mb-2">
             <img [height]="128" [src]="thumbnail()" alt="assets/resources/aas-portal.svg" />
-            <div class="d-flex flex-column ms-2">
+            <div class="d-flex flex-column overflow-hidden ms-2">
                 @for (detail of detailItems(); track detail) {
-                    <div class="fs-8 text-body-secondary text-nowrap text-truncate overflow-hidden">
+                    <div class="fs-8 text-body-secondary text-nowrap text-truncate">
                         {{ detail.name | translate }}
                     </div>
-                    <div class="mb-1 mt-n1 text-truncate text-nowrap overflow-hidden">{{ detail.value }}</div>
+                    <div class="mb-1 mt-n1 text-truncate text-nowrap">{{ detail.value }}</div>
                 }
             </div>
         </div>

@@ -1,0 +1,30 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import 'reflect-metadata';
+import { describe, beforeEach, it, expect, Mocked } from 'vitest';
+import { createSpyObj } from '../../../test/mocks.js';
+import { OpcuaReader } from './opcua-reader.js';
+import { OPCUAComponent } from './opcua.js';
+import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
+
+describe('OpcuaReader', () => {
+    let reader: OpcuaReader;
+    let origin: Mocked<OPCUAComponent>;
+    let dataTypes: Mocked<OpcuaDataTypeDictionary>;
+
+    beforeEach(() => {
+        origin = createSpyObj<OPCUAComponent>({}, ['displayName', 'hasProperty', 'nodeClass']);
+        dataTypes = createSpyObj<OpcuaDataTypeDictionary>(['get']);
+        reader = new OpcuaReader(origin, dataTypes);
+    });
+
+    it('should be created', () => {
+        expect(reader).toBeTruthy();
+    });
+});

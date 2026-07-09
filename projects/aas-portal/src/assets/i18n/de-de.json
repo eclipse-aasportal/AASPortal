@@ -16,34 +16,41 @@
         "ABOUT": "Info über..."
     },
     "AddEndpointForm": {
+        "AAS_API": "AAS API",
+        "API_KEY": "API Key",
+        "AUTHORIZATION": "Autorisierung",
+        "BEARER_TOKEN": "Bearer Token",
         "CANCEL": "Abbrechen",
         "CAPTION": "AAS-Endpunkt hinzufügen",
+        "DISABLED": "deaktiviert",
+        "ENDPOINT": "Endpunkt",
+        "EVERY": "zyklisch",
         "FileSystem": "Dateisystem",
-        "AAS_API": "AAS API",
-        "WebDAV": "WebDAV",
-        "OPC_UA": "OPC UA",
+        "HOURS": "Stunden",
+        "KEY": "Schlüssel",
         "LABEL_NAME": "Name",
         "LABEL_URL": "URL",
+        "MANUAL": "manuell",
+        "MINUTES": "Minuten",
+        "NO_AUTH": "Keine Autorisierung",
+        "OK": "OK",
+        "ONCE": "einmalig",
+        "OPC_UA": "OPC UA",
         "PLACEHOLDER_NAME": "eindeutigen Namen eingeben",
         "PLACEHOLDER_URL_FILE": "file:///",
         "PLACEHOLDER_URL_HTTP": "http(s)://",
         "PLACEHOLDER_URL_OPCUA": "opc.tcp://",
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
-        "HINT_CONTAINER_NETWORKING": "💡 Wenn AASPortal in einem Container ausgeführt wird und sich Ihr Endpunkt auf dem Host befindet, verwenden Sie 'host.containers.internal' (Podman) oder 'host.docker.internal' (Docker) anstelle von 'localhost'.",
-        "ADVANCED_SETTINGS": "Erweiterte Einstellungen",
         "SCHEDULE": "Endpunkt-Index aktualisieren",
-        "DISABLED": "deaktiviert",
-        "MANUAL": "manuell",
-        "ONCE": "einmalig",
-        "OK": "OK",
-        "EVERY": "zyklisch",
-        "MINUTES": "Minuten",
-        "HOURS": "Stunden",
-        "HEADERS": "HTTP-Header-Felder",
-        "HEADER": "Feld",
-        "VALUE": "Wert"
+        "TOKEN": "Token",
+        "VALUE": "Value",
+        "WebDAV": "WebDAV"
+    },
+    "AssetStatus": {
+        "TITLE": "Asset-Status"
     },
     "Auth": {
+        "ENDPOINT": "Endpunkte",
         "LOGIN": "Anmelden",
         "LOGOUT": "Abmelden",
         "REGISTER_USER": "Registrieren",
@@ -53,37 +60,6 @@
         "TITLE": "AAS-Browser",
         "EMPTY": "Keine Verwalungsschale verfügbar."
     },
-    "CAPTION_CREATE_WORKSPACE": "Gruppieren",
-    "CAPTION_EDIT_ELEMENT": "Bearbeiten",
-    "CAPTION_EDIT_WORKSPACE": "Gruppe bearbeiten",
-    "CAPTION_INOUTPUT_ARGUMENTS": "Ein/Ausgangsargumente",
-    "CAPTION_INPUT_ARGUMENTS": "Eingangsargumente",
-    "CAPTION_NEW_ELEMENT": "Neu hinzufügen",
-    "CAPTION_OUTPUT_ARGUMENTS": "Ausgangsargumente",
-    "CAPTION_PASSWORD_FORGOTTEN": "Passwort vergessen?",
-    "CAPTION_PROFILE": "Profil",
-    "CAPTION_REMOVE_WORKSPACE": "Gruppe löschen",
-    "CAPTION_UPLOAD_FILE": "AASX-Datei hochladen",
-    "CMD_CALL": "Anruf",
-    "CMD_CHANGE_PASSWORD": "Passwort ändern",
-    "CMD_CLOSE": "Schließen",
-    "CMD_CREATE_WORKSPACE": "Gruppieren...",
-    "CMD_DELETE": "Löschen",
-    "CMD_DELETE_USER": "Benutzerkonto löschen...",
-    "CMD_DESELECT_ALL": "Alle deselektieren",
-    "CMD_DOWNLOAD": "Herunterladen",
-    "CMD_EDIT_WORKSPACE": "Gruppe bearbeiten...",
-    "CMD_HIDE_LICENSE_TEXT": "Lizenztext verbergen",
-    "CMD_OPEN_AAS": "VWS öffnen",
-    "CMD_OPERATION_CALL": "Aufrufen",
-    "CMD_REMOVE": "Entfernen",
-    "CMD_REMOVE_WORKSPACE": "Gruppierung aufheben...",
-    "CMD_RESET_PASSWORD": "Passwort vergessen?",
-    "CMD_SELECT_ALL": "Alle selektieren",
-    "CMD_SHOW_LICENSE_TEXT": "Lizenztext anzeigen",
-    "CMD_TOGGLE_MESSAGES": "Meldungen",
-    "CMD_TOGGLE_PACKAGES": "Packages",
-    "CMD_UPLOAD": "Hochladen",
     "CarbonFootprint": {
         "TITLE": "CO2-Fußabdruck",
         "CARBON_FOOTPRINT": "CO2-Fußabdruck",
@@ -98,29 +74,12 @@
     "Chart": {
         "SHOW": "Anzeigen..."
     },
-    "COLUMN_DATA_TYPE": "Datentyp",
-    "COLUMN_DESCRIPTION": "Beschreibung",
-    "COLUMN_LICENSE": "Lizenz",
-    "COLUMN_MESSAGE_TEXT": "Meldung",
-    "COLUMN_MESSAGE_TYPE": "Typ",
-    "COLUMN_MODEL_TYPE": "Modeltyp",
-    "COLUMN_MODIFIED": "Änderungsdatum",
-    "COLUMN_PACKAGE": "Package",
-    "COLUMN_SIZE": "Größe",
-    "COLUMN_TIMESTAMP": "Zeit",
-    "COLUMN_URL": "URL",
-    "COLUMN_VALUE": "Wert",
-    "COLUMN_VARIANT": "Variante",
-    "COLUMN_VERSION": "Version",
     "ConfirmDialog": {
         "CANCEL": "Abbrechen",
         "CAPTION": "Bestätigung",
         "NO": "Nein",
         "YES": "Ja"
     },
-    "CONFIRM_DELETE_FILE": "{0} unwiderruflich löschen?",
-    "CONFIRM_DELETE_FILES": "{0} Dateien unwiderruflich löschen?",
-    "CONFIRM_DELETE_USER": "Möchten Sie das Konto '{0}' löschen?",
     "ContactInformations": {
         "TITLE": "Kontaktdaten"
     },
@@ -161,6 +120,19 @@
         "NAMEPLATE_DATA": "Typenschild",
         "SERIAL_NUMBER": "Seriennummer",
         "TYPE": "Type"
+    },
+    "EndpointAuthForm": {
+        "API_KEY": "API Key",
+        "AUTHORIZATION": "Autorisierung",
+        "BEARER_TOKEN": "Bearer Token",
+        "CANCEL": "Abbrechen",
+        "CAPTION": "Endpunkt Autorisierung",
+        "ENDPOINT": "Endpunkt",
+        "KEY": "Schlüssel",
+        "NO_AUTH": "Keine Autorisierung",
+        "OK": "OK",
+        "TOKEN": "Token",
+        "VALUE": "Value"
     },
     "Error": {
         "AAS_ALREADY_EXISTS": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert bereits.",
@@ -218,7 +190,6 @@
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Ungültiger leerer Name.",
         "OK": "OK"
     },
-    "GUEST_USER": "Gast",
     "HandoverDocumentation": {
         "TITLE": "Übergabedocumentation",
         "EMPTY": "Keine Übergabedokumente verfügbar."
@@ -239,40 +210,11 @@
         "NEW_PASSWORD_SENT": "Ein neues Password wurde versendet.",
         "NO_SHELL_AVAILABLE": "Keine Verwaltungsschale ausgewählt."
     },
-    "LABEL_AAS_ID": "Id:",
-    "LABEL_AAS_ID_SHORT": "ID-Short:",
-    "LABEL_AAS_URL": "AAS Endpunkt",
-    "LABEL_ADDRESS": "Adresse:",
-    "LABEL_ASSET_ID": "Asset ID:",
-    "LABEL_ASSET_ID_SHORT": "Asset ID-Short:",
-    "LABEL_CATEGORY": "Kategorie",
-    "LABEL_CONFIRM_PASSWORD": "Passwort bestätigen",
-    "LABEL_DEFINITION": "Definition:",
-    "LABEL_DESCRIPTION": "Beschreibung:",
-    "LABEL_EMAIL": "E-Mail",
-    "LABEL_ERROR": "Fehler",
-    "LABEL_FILE": "Datei:",
-    "LABEL_INFO": "Info",
-    "LABEL_INSERT_POSITION": "Position:",
-    "LABEL_MIME_TYPE": "MIME-Typ",
-    "LABEL_MODEL_TYPE": "Modelltyp:",
-    "LABEL_MODEL_TYPE_TEMPLATE": "Vorlage:",
-    "LABEL_NAME": "Name",
-    "LABEL_OVERWRITE_FILE": "Überschreiben",
-    "LABEL_SEMANTIC_ID": "Semantik ID",
-    "LABEL_SELECT_REGISTRY": "AAS-Registry",
-    "LABEL_SELECT_WORKSPACE": "Gruppe",
-    "LABEL_SERVER_URL": "Server Endpunkt",
-    "LABEL_SHOW_ALL": "Alle anzeigen",
-    "LABEL_STAY_LOGGED_IN": "Angemeldet bleiben",
-    "LABEL_UPLOAD_CONTAINER": "Ziel",
-    "LABEL_VALUE": "Wert:",
-    "LABEL_VALUE_TYPE": "Wertetyp",
-    "LABEL_VERSION": "Version:",
-    "LABEL_VIEW_MODE": "Anzeige:",
-    "LABEL_VIEWS": "Sichten",
-    "LABEL_WARNING": "Warnungen",
-    "LoginForm": {
+     "LicenseInfo": {
+        "SHOW_LICENSE_TEXT": "Lizenzen anzeigen",
+        "HIDE_LICENSE_TEXT": "Lizenzen verbergen"
+    },
+   "LoginForm": {
         "CAPTION": "Login",
         "CREATE_ACCOUNT": "Ein Konto erstellen.",
         "EMAIL_REQUIRED": "E-Mail erforderlich.",
@@ -317,26 +259,26 @@
     "OperationalData": {
         "TITLE": "Betriebsdaten"
     },
-    "PLACEHOLDER_NEW_FAVORITES": "neue Favoriten",
-    "PLACEHOLDER_WORKSPACE": "Gruppenname",
-    "PLEASE_WAIT": "Bitte warten...",
     "ProfileForm": {
         "CAPTION": "Profil",
         "CHANGE_PASSWORD": "Passwort ändern",
         "CONFIRM_NEW_PASSWORD_REQUIRED": "Passwortbestätigung erforderlich.",
         "CONFIRM_NEW_PASSWORD": "Passwort betätigen",
-        "DELETE_ACCOUNT_HINT": "Möchten Sie wirklich das Konto löschen? Der Vorgang kann nicht rückgängig gemacht werden.",
-        "DELETE_ACCOUNT": "Konto löschen",
+        "DELETE_ACCOUNT_PROMPT": "Zum Löschen, '{{email}}' eingeben.",
+        "DELETE_ACCOUNT_SUCCESS": "Konto erfolgreich gelöscht.",
+        "DELETE_ACCOUNT": "Konto löschen...",
+        "EMAIL_MISMATCH": "Keine Übereinstimmung.",
         "EMAIL_REQUIRED": "E-mail erforderlich.",
         "EMAIL": "E-Mail",
         "INVALID_EMAIL": "Keine gültige E-Mail.",
         "NAME": "Name",
         "NEW_PASSWORD": "Neues Passwort",
-        "OK": "OK",
+        "SUBMIT": "Speichern",
         "OLD_PASSWORD": "Altes Passwort",
         "PASSWORD_MIN_LENGTH": "Das Passwort muss mindestens 8 Zeichen lang sein.",
         "PASSWORD_REQUIRED": "Passwort erforderlich.",
-        "PASSWORDS_DO_NOT_MATCH": "Die Passwörter stimmen nicht überein."
+        "PASSWORDS_DO_NOT_MATCH": "Die Passwörter stimmen nicht überein.",
+        "UPDATE_ACCOUNT_SUCCESS": "Konto erfolgreich aktulasiert."
     },
     "PromptDialog": {
         "CANCEL": "Abbrechen",
@@ -357,8 +299,6 @@
         "TERM_EXPECTED": "Term erwartet an Position {0}.",
         "UNEXPECTED_CLOSING_BRACKET": "Unerwartete schließende Klammer an Position ${0}."
     },
-    "ROUTE_FILE_SYSTEM": "Dateisystem",
-    "ROUTE_OPC_UA": "OPC UA",
     "RegisterForm": {
         "CAPTION": "Registration",
         "CONFIRM_PASSWORD_REQUIRED": "Passwortbestätigung erforderlich.",
@@ -372,13 +312,19 @@
         "PASSWORD": "Passwort",
         "PASSWORDS_DO_NOT_MATCH": "Die Passworte stimmen nicht überein."
     },
-    "RemoveEndpointForm": {
-        "CANCEL": "Abbrechen",
-        "CAPTION": "AAS-Endpunkt entfernen",
-        "OK": "OK"
+    "ServiceRequestNotification": {
+        "TITLE": "Serviceanfrage"
+    },
+    "Settings": {
+        "ADD_ENDPOINT": "Endpunkt hinzufügen",
+        "EXTRAS": "Endpunkt ???",
+        "REMOVE_ENDPOINT": "Endpunkt entfernen",
+        "UPDATE_ENDPOINT": "Endpunkt bearbeiten",
+        "AAS_ENDPOINT_ADDED": "Endpunkt '{{endpoint}}' erfolgreich hinzugefügt.",
+        "AAS_ENDPOINT_UPDATED": "Endpunkt '{{endpoint}}' erfolgreich aktualisiert.",
+        "AAS_ENDPOINT_DELETED": "Endpunkt '{{endpoint}}' erfolgreich entfernt."
     },
     "Shells": {
-        "ADD_ENDPOINT": "Hinzufügen...",
         "AssetStatus": "Asset-Status",
         "Browser": "Browser",
         "CarbonFootprint": "CO2-Fußabdruck",
@@ -386,33 +332,32 @@
         "ContactInformation": "Kontaktinformationen",
         "CustomerFeedback": "Nutzer-Feedback",
         "DigitalProductPassport": "Produktpass",
-        "ENDPOINT": "Endpunkt",
-        "EXTRAS": "Extras...",
         "FAVORITES": "Alle Verwaltungsschalen",
         "HandoverDocumentation": "Übergabedokumentation",
         "HierarchicalStructure": "Hierarchische Strukturen",
         "Nameplate": "Typenschild",
         "OperationalData": "Operative Daten",
         "PLACEHOLDER_FILTER": "Filter",
-        "REMOVE_ENDPOINT": "Entfernen...",
         "ServiceRequestNotification": "Serviceanfrage",
         "TechnicalData": "Technische Daten",
-        "UPDATE_ENDPOINT": "Bearbeiten..."
+        "VIEWS": "Sichten"
     },
     "Start": {
         "EMPTY": "Die START-Seite ist leer."
     },
-    "TEXT_ADD_FAVORITE": "1 Favorit hinzufügen ({0}).",
-    "TEXT_ADD_FAVORITES": "{0} Favoriten hinzufügen ({1}).",
-    "TIP_PASSWORD_SEND_VIA_EMAIL": "An '{{email}}' wird ein neues Password gesendet.",
     "TechnicalData": {
         "TITLE": "Technische Daten"
     },
     "UpdateEndpointForm": {
         "AAS_API": "AAS API",
+        "APPLY": "Übernehmen",
+        "AUTHORIZATION": "Autorisierung",
+        "BEARER_TOKEN": "Bearer Token",
         "CANCEL": "Abbrechen",
         "CAPTION": "AAS-Endpunkt bearbeiten",
+        "DELETE": "Entfernen",
         "DISABLED": "deaktiviert",
+        "DELETE_ENDPOINT_PROMPT": "Zum Löschen '{{name}}' eingeben",
         "ENDPOINTS": "Endpunkte",
         "EVERY": "zyklisch",
         "FileSystem": "Dateisystem",
@@ -421,6 +366,7 @@
         "HOURS": "Stunden",
         "MANUAL": "manuell",
         "MINUTES": "Minuten",
+        "NO_AUTH": "Keine Autorisierung",
         "OK": "OK",
         "ONCE": "einmalig",
         "OPC_UA": "OPC UA",
@@ -432,11 +378,5 @@
         "URL": "URL",
         "VALUE": "Wert",
         "WebDAV": "WebDAV"
-    },
-    "ServiceRequestNotification": {
-        "TITLE": "Serviceanfrage"
-    },
-    "AssetStatus": {
-        "TITLE": "Asset-Status"
     }
 }

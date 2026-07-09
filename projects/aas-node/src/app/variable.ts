@@ -84,6 +84,9 @@ export class Variable {
     /** The session secret. */
     public readonly SESSION_SECRET: string = process.env.SESSION_SECRET ?? 'aas-portal-session-secret';
 
+    /** The session store. */
+    public readonly SESSION_STORE?: string = process.env.SESSION_STORE;
+
     /** The root directory for static files. */
     public readonly WEB_ROOT: string = path.resolve(process.env.WEB_ROOT ?? './wwwroot');
 }

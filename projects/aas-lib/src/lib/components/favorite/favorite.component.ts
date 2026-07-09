@@ -92,7 +92,7 @@ export class FavoriteComponent {
             return aas.idShort;
         }
 
-        return getLocaleValue(displayName, this.translate.currentLang);
+        return getLocaleValue(displayName, this.translate.getCurrentLang()) ?? aas.idShort;
     });
 
     public readonly thumbnail = computed(() => {

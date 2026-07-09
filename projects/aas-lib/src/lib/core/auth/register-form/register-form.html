@@ -1,0 +1,49 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<main class="form-register position-absolute top-50 start-50 translate-middle">
+    <form novalidate (submit)="submit($event)">
+        <h5 class="text-info text-center">
+            <i class="bi bi-person-circle"></i>
+            <span class="ms-2" translate>RegisterForm.CAPTION</span>
+        </h5>
+        <div class="form-floating mb-3">
+            <input #inputEMail type="email" class="form-control" id="intputRegisterEMail" [formField]="email" />
+            <label for="intputRegisterEMail" translate>RegisterForm.EMAIL</label>
+            <fhg-form-error [field]="email()"></fhg-form-error>
+        </div>
+        <div class="form-floating mb-3">
+            <input
+                type="text"
+                class="form-control"
+                id="AID_USER_NAME"
+                [formField]="name"
+            />
+            <label for="AID_USER_NAME" translate>RegisterForm.NAME</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="AID_PASSWORD_1" [formField]="password1" />
+            <label for="AID_PASSWORD_1" translate>RegisterForm.PASSWORD</label>
+            <fhg-form-error [field]="password1()"></fhg-form-error>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="AID_PASSWORD_2" [formField]="password2" />
+            <label for="AID_PASSWORD_2" translate>RegisterForm.CONFIRM_PASSWORD</label>
+            <fhg-form-error [field]="password2()"></fhg-form-error>
+        </div>
+        <button
+            type="submit"
+            class="btn btn-primary w-100"
+            id="AID_REGISTER_OK"
+            [disabled]="form().invalid()"
+            translate
+        >
+            RegisterForm.OK
+        </button>
+    </form>
+</main>

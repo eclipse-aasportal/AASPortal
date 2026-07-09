@@ -9,5 +9,8 @@
     },
     "include": [
         "./src/lib/**/*.ts"
+    ],
+    "exclude": [
+        "./src/lib/**/*.spec.ts"
     ]
 }

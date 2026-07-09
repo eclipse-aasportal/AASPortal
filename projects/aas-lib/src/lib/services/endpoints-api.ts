@@ -75,10 +75,10 @@ export class EndpointsApi {
                 const url = endpoint
                     ? modelType === 'AssetAdministrationShell'
                         ? `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}`
-                        : `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/asset/${encodeBase64Url(id)}`
+                        : `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/assets/${encodeBase64Url(id)}`
                     : modelType === 'AssetAdministrationShell'
                       ? `/api/v1/documents/${encodeBase64Url(id)}`
-                      : `/api/v1/documents/asset/${encodeBase64Url(id)}`;
+                      : `/api/v1/documents/assets/${encodeBase64Url(id)}`;
 
                 return this.http.get<AASDocument>(url);
             }),
@@ -135,13 +135,13 @@ export class EndpointsApi {
     }
 
     /**
-     * Delete the specified AAS document from the corresponding AAS container.
+     * Delete the specified AASX package from the specified endpoint.
      * @param id The identification of the AAS document to delete.
-     * @param url The URL of the AAS container.
+     * @param endpoint The name of the AAS endpoint.
      * @returns An observable.
      */
-    public deleteDocument(id: string, url: string): Observable<void> {
-        return this.http.delete<void>(`/api/v1/endpoints/${encodeBase64Url(url)}/packages/${encodeBase64Url(id)}`);
+    public deletePackage(id: string, endpoint: string): Observable<void> {
+        return this.http.delete<void>(`/api/v1/endpoints/${encodeBase64Url(endpoint)}/packages/${encodeBase64Url(id)}`);
     }
 
     /**
@@ -175,7 +175,7 @@ export class EndpointsApi {
      */
     public downloadPackage(endpoint: string, id: string, filename: string): Observable<void> {
         return this.http
-            .get(`/api/v1/endpoints/${encodeBase64Url(endpoint)}/packages/${encodeBase64Url(id)}`, {
+            .get(`/api/v1/packages/${encodeBase64Url(id)}?endpoint=${encodeURIComponent(endpoint)}`, {
                 responseType: 'blob',
             })
             .pipe(
