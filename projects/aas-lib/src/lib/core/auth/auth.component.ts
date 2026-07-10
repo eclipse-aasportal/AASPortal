@@ -16,7 +16,6 @@ import { EndpointAuth } from 'aas-core';
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
 import { EndpointAuthForm } from './endpoint-auth-form/endpoint-auth-form';
-import { EndpointsApi } from '../../services/endpoints-api';
 
 @Component({
     selector: 'fhg-auth',

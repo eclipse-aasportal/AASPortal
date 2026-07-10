@@ -6,15 +6,13 @@
  *
  *****************************************************************************/
 
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { DecimalPipe } from '@angular/common';
 import { EMPTY, Observable, Subscription } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
 import {
     ChangeDetectionStrategy,
     Component,
     OnDestroy,
-    Signal,
     TemplateRef,
     computed,
     effect,

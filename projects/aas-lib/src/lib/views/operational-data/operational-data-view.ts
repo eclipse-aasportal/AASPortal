@@ -7,8 +7,7 @@
  *****************************************************************************/
 
 import { RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { EMPTY, Observable, Subscription } from 'rxjs';
 import {
@@ -18,7 +17,6 @@ import {
     effect,
     inject,
     OnDestroy,
-    Signal,
     signal,
     TemplateRef,
     viewChild,
@@ -46,7 +44,6 @@ import { ToolbarService } from '../../services/toolbar.service';
 import { WebSocketService } from '../../services/web-socket.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { LeafView } from '../leaf-view';
-import { OperationalDataViewState } from './operational-data-view.state';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 export type GroupItem = {
@@ -73,7 +70,6 @@ export class OperationalDataView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GroupItem>();
     private readonly toolbar = inject(ToolbarService);
     private readonly webSocket = inject(WebSocketService);
-    private readonly state = inject(OperationalDataViewState);
     private liveNodes: LiveNode[] = [];
     private webSocketSubscription?: Subscription;
 

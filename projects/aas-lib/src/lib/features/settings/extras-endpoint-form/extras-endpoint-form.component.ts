@@ -91,8 +91,7 @@ export class ExtrasEndpointFormComponent {
             .pipe()
             .subscribe({
                 next: () => this.modal.close(),
-                error: error =>
-                    this._messages.update(state => [...state, convertToString(error, this.currentLang())]),
+                error: error => this._messages.update(state => [...state, convertToString(error, this.currentLang())]),
             });
     }
 }

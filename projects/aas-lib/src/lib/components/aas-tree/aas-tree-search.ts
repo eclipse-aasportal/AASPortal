@@ -420,8 +420,7 @@ export class AASTreeSearch {
         }
 
         return (
-            this.containsString(convertToString(a), b) ||
-            this.containsString(convertToString(a, this.currentLang()), b)
+            this.containsString(convertToString(a), b) || this.containsString(convertToString(a, this.currentLang()), b)
         );
     }
 

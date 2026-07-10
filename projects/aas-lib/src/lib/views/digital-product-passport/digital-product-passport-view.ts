@@ -8,10 +8,9 @@
 
 import { aas, getReferable, isFile } from 'aas-core';
 import { RouterModule } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable } from 'rxjs';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { LangChangeEvent, TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import {
     ChangeDetectionStrategy,
     Component,
@@ -19,7 +18,6 @@ import {
     effect,
     inject,
     OnDestroy,
-    Signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';

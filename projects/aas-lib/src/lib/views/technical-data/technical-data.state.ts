@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getReferable, isSubmodelElementCollection } from 'aas-core';
 import { ChildState } from '../../components/child-state';

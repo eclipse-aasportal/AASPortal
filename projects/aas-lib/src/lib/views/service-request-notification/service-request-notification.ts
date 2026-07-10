@@ -13,7 +13,6 @@ import {
     effect,
     inject,
     OnDestroy,
-    Signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';
@@ -25,8 +24,6 @@ import { encodeBase64Url, toString } from '../../utilities';
 import { StartService } from '../../services/start.service';
 import { RouterLink } from '@angular/router';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
-import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'fhg-service-request-notification',

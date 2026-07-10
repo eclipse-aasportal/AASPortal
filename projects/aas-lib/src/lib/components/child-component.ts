@@ -6,9 +6,8 @@
  *
  *****************************************************************************/
 
-import { Component, computed, inject, Signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({ selector: 'awp-child', changeDetection: ChangeDetectionStrategy.Eager, template: '' })
 export abstract class ChildComponent {
