@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { Component, Signal, signal, computed } from '@angular/core';
+import { Component, Signal, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { from, map, mergeMap, toArray } from 'rxjs';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AASEndpointScheduleType, convertToString } from 'aas-core';
 import { ExtrasEndpointService } from './extras-endpoint.service';
 
@@ -24,22 +24,22 @@ export type ExtrasEndpointItem = {
 
 @Component({
     selector: 'fhg-extras-endpoint',
-    imports: [FormsModule, NgbToast, NgbCollapse, TranslateModule],
+    imports: [FormsModule, NgbToast, NgbCollapse, TranslatePipe],
     providers: [ExtrasEndpointService],
     templateUrl: './extras-endpoint-form.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './extras-endpoint-form.component.scss',
 })
 export class ExtrasEndpointFormComponent {
+    private readonly modal = inject(NgbActiveModal);
+    private readonly translate = inject(TranslateService);
+    private readonly api = inject(ExtrasEndpointService);
     private readonly _messages = signal<string[]>([]);
     private readonly _endpoints: Signal<ExtrasEndpointItem[]>;
 
-    public constructor(
-        private readonly modal: NgbActiveModal,
-        private readonly translate: TranslateService,
-        private readonly api: ExtrasEndpointService,
-    ) {
+    public constructor() {
         this._endpoints = toSignal(
-            api.getEndpoints().pipe(
+            this.api.getEndpoints().pipe(
                 mergeMap(values =>
                     from(values).pipe(
                         mergeMap(value =>
@@ -63,6 +63,8 @@ export class ExtrasEndpointFormComponent {
         );
     }
 
+    private readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
+
     public readonly messages = this._messages.asReadonly();
 
     public readonly endpoints = computed(() => this._endpoints().map(item => item));
@@ -79,8 +81,7 @@ export class ExtrasEndpointFormComponent {
             .pipe()
             .subscribe({
                 next: () => this.modal.close(),
-                error: error =>
-                    this._messages.update(state => [...state, convertToString(error, this.translate.currentLang)]),
+                error: error => this._messages.update(state => [...state, convertToString(error, this.currentLang())]),
             });
     }
 
@@ -91,7 +92,7 @@ export class ExtrasEndpointFormComponent {
             .subscribe({
                 next: () => this.modal.close(),
                 error: error =>
-                    this._messages.update(state => [...state, convertToString(error, this.translate.currentLang)]),
+                    this._messages.update(state => [...state, convertToString(error, this.currentLang())]),
             });
     }
 }

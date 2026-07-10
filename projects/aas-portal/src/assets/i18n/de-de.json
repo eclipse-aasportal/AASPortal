@@ -50,11 +50,11 @@
         "TITLE": "Asset-Status"
     },
     "Auth": {
-        "ENDPOINT": "Endpunkte",
-        "LOGIN": "Anmelden",
+        "ENDPOINT": "Endpunkte...",
+        "LOGIN": "Anmelden...",
         "LOGOUT": "Abmelden",
-        "REGISTER_USER": "Registrieren",
-        "UPDATE_PROFILE": "Profil"
+        "CREATE_ACCOUNT": "Registrieren...",
+        "UPDATE_PROFILE": "Profil..."
     },
     "Browser": {
         "TITLE": "AAS-Browser",
@@ -210,11 +210,11 @@
         "NEW_PASSWORD_SENT": "Ein neues Password wurde versendet.",
         "NO_SHELL_AVAILABLE": "Keine Verwaltungsschale ausgewählt."
     },
-     "LicenseInfo": {
+    "LicenseInfo": {
         "SHOW_LICENSE_TEXT": "Lizenzen anzeigen",
         "HIDE_LICENSE_TEXT": "Lizenzen verbergen"
     },
-   "LoginForm": {
+    "LoginForm": {
         "CAPTION": "Login",
         "CREATE_ACCOUNT": "Ein Konto erstellen.",
         "EMAIL_REQUIRED": "E-Mail erforderlich.",

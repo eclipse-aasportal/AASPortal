@@ -8,10 +8,10 @@
 
 <div class="p-1">
     <div class="row mb-2">
-        <label class="col-sm-3 col-form-lable text-nowrap" [for]="'source-lable-' + item().id"
-            translate>Dashboard.LABEL_NAME</label>
+        <label class="col-sm-3 col-form-lable text-nowrap" [for]="'source-label-' + item().id"
+            translate="Dashboard.LABEL_NAME"></label>
         <div class="col-sm-9">
-            <select class="form-select" [id]="'source-lable-' + item().id" [(ngModel)]="item().source">
+            <select class="form-select" [id]="'source-label-' + item().id" [(ngModel)]="item().source">
                 @for (source of item().sources; track source) {
                 <option [ngValue]="source.label">{{source.label}}</option>
                 }
@@ -20,7 +20,7 @@
     </div>
     <div class="row mb-2">
         <label class="col-sm-3 col-form-lable text-nowrap" [for]="'color-' + item().id"
-            translate>Dashboard.LABEL_COLOR</label>
+            translate="Dashboard.LABEL_COLOR"></label>
         <div class="col-sm-9">
             <input #colorInput type="color" class="form-control form-control-color" [id]="'color-' + + item().id"
                 [value]="getColor(item())" (change)="changeColor(item(), colorInput.value)">
@@ -28,7 +28,7 @@
     </div>
     <div class="row mb-2">
         <label class="col-sm-3 col-form-lable text-nowrap" [for]="'chart-type-' + item().id"
-            translate>Dashboard.LABEL_CHART_TYPE</label>
+            translate="Dashboard.LABEL_CHART_TYPE"></label>
         <div class="col-sm-9">
             <select class="form-select" [id]="'chart-type-' + item().id" [(ngModel)]="item().chartType">
                 @for (chartType of chartTypes(); track chartType) {
@@ -38,14 +38,14 @@
         </div>
     </div>
     <div class="row mb-2">
-        <label [for]="'min' + item().id" class="col-sm-3 col-form-label" translate>Dashboard.LABEL_MIN</label>
+        <label [for]="'min' + item().id" class="col-sm-3 col-form-label" translate="Dashboard.LABEL_MIN"></label>
         <div class="col-sm-9">
             <input #inputMin type="text" class="form-control" [id]="'min' + item().id" [value]="getMin(item())"
                 (change)="changeMin(item(), inputMin.value)">
         </div>
     </div>
     <div class="row">
-        <label [for]="'max' + item().id" class="col-sm-3 col-form-label" translate>Dashboard.LABEL_MAX</label>
+        <label [for]="'max' + item().id" class="col-sm-3 col-form-label" translate="Dashboard.LABEL_MAX"></label>
         <div class="col-sm-9">
             <input #inputMax type="text" class="form-control" [id]="'max' + item().id" [value]="getMax(item())"
                 (change)="changeMax(item(), inputMax.value)">

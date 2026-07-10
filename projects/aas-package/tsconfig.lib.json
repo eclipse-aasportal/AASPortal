@@ -5,7 +5,9 @@
         "outDir": "./dist/lib",
         "declaration": true,
         "declarationMap": true,
-        "declarationDir": "./dist/types"
+        "declarationDir": "./dist/types",
+        "noEmit": false,
+        "rootDir": "./src/lib"
     },
     "include": [
         "./src/lib/**/*.ts"

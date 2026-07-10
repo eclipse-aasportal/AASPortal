@@ -9,14 +9,14 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { catchError, from, mergeMap, Observable, of, tap } from 'rxjs';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap/dropdown';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { TranslateDirective } from '@ngx-translate/core';
+import { EndpointAuth } from 'aas-core';
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
 import { EndpointAuthForm } from './endpoint-auth-form/endpoint-auth-form';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { EndpointAuth } from 'projects/aas-core/dist/types';
 
 @Component({
     selector: 'fhg-auth',
@@ -28,7 +28,6 @@ import { EndpointAuth } from 'projects/aas-core/dist/types';
 export class AuthComponent {
     private readonly auth = inject(AuthService);
     private readonly notify = inject(NotifyService);
-    private readonly api = inject(EndpointsApi);
     private readonly router = inject(Router);
     private readonly modal = inject(NgbModal);
 

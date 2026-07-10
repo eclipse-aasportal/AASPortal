@@ -10,31 +10,31 @@
     <form (submit)="submit($event)">
         <h5 class="text-info text-center">
             <i class="bi bi-person-circle"></i>
-            <span class="ms-2" translate>ProfileForm.CAPTION</span>
+            <span class="ms-2" translate="ProfileForm.CAPTION"></span>
         </h5>
         <div class="form-floating mb-3">
             <input type="email" class="form-control text-secondary" id="AID_EMAIL" [formField]="email" />
-            <label for="AID_EMAIL" translate>ProfileForm.EMAIL</label>
+            <label for="AID_EMAIL" translate="ProfileForm.EMAIL"></label>
         </div>
         <div class="form-floating mb-3">
             <input type="text" class="form-control" id="intputProfileName" [formField]="name" />
-            <label for="intputProfileName" translate>ProfileForm.NAME</label>
+            <label for="intputProfileName" translate="ProfileForm.NAME"></label>
         </div>
         <div ngbAccordion [closeOthers]="true">
             <div ngbAccordionItem>
                 <h2 ngbAccordionHeader>
-                    <button ngbAccordionButton translate>ProfileForm.CHANGE_PASSWORD</button>
+                    <button ngbAccordionButton translate="ProfileForm.CHANGE_PASSWORD"></button>
                 </h2>
                 <div ngbAccordionCollapse>
                     <div ngbAccordionBody>
                         <div class="form-floating mb-3">
                             <input type="password" class="form-control" id="AID_OLD_PASSWORD" [formField]="password" />
-                            <label for="AID_OLD_PASSWORD" translate>ProfileForm.OLD_PASSWORD</label>
+                            <label for="AID_OLD_PASSWORD" translate="ProfileForm.OLD_PASSWORD"></label>
                             <fhg-form-error [field]="password()"></fhg-form-error>
                         </div>
                         <div class="form-floating mb-3">
                             <input type="password" class="form-control" id="AID_NEW_PASSWORD" [formField]="password1" />
-                            <label for="AID_NEW_PASSWORD" translate>ProfileForm.NEW_PASSWORD</label>
+                            <label for="AID_NEW_PASSWORD" translate="ProfileForm.NEW_PASSWORD"></label>
                             <fhg-form-error [field]="password1()"></fhg-form-error>
                         </div>
                         <div class="form-floating">
@@ -44,7 +44,7 @@
                                 id="AID_CONFIRM_NEW_PASSWORD"
                                 [formField]="password2"
                             />
-                            <label for="AID_CONFIRM_NEW_PASSWORD" translate>ProfileForm.CONFIRM_NEW_PASSWORD</label>
+                            <label for="AID_CONFIRM_NEW_PASSWORD" translate="ProfileForm.CONFIRM_NEW_PASSWORD"></label>
                             <fhg-form-error [field]="password2()"></fhg-form-error>
                         </div>
                     </div>
@@ -52,18 +52,14 @@
             </div>
         </div>
         <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-danger" id="AID_DELETE_ACCOUNT" (click)="deleteAccount()" translate>
-                ProfileForm.DELETE_ACCOUNT
-            </button>
+            <button type="button" class="btn btn-danger" id="AID_DELETE_ACCOUNT" (click)="deleteAccount()" translate="ProfileForm.DELETE_ACCOUNT"></button>
             <button
                 type="submit"
                 class="btn btn-primary px-4"
                 id="AID_SUBMIT"
                 [disabled]="form().invalid() && !form().dirty()"
-                translate
-            >
-                ProfileForm.SUBMIT
-            </button>
+                translate="ProfileForm.SUBMIT"
+            ></button>
         </div>
     </form>
 </main>

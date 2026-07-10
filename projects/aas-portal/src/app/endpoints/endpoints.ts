@@ -6,12 +6,13 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'fhg-endpoints',
     imports: [],
     templateUrl: './endpoints.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './endpoints.css',
 })
 export class Endpoints {}

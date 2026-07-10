@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, inject, Signal, signal } from '@angular/core';
+import { Component, inject, Signal, signal, ChangeDetectionStrategy, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AASDocument } from 'aas-core';
@@ -15,20 +15,24 @@ import { ViewRoute } from '../types';
 import { VIEW_ROUTE_NAME } from './view-route-name';
 import { VIEW_ROUTES } from './views-routes';
 import { encodeBase64Url } from '../utilities';
+import { TranslateService } from '@ngx-translate/core';
 
 /**
  * Provides a specific view component.
  */
-@Component({ selector: 'awp-view', template: '' })
+@Component({ selector: 'awp-view', changeDetection: ChangeDetectionStrategy.Eager, template: '' })
 export abstract class View {
     protected readonly route = inject(ActivatedRoute);
     protected readonly api = inject(EndpointsApi);
+    protected readonly translate = inject(TranslateService);
     protected readonly viewRoutes = inject(VIEW_ROUTES);
     protected readonly viewRouteName = inject(VIEW_ROUTE_NAME);
 
     protected constructor() {
         this.view = this.viewRoutes.find(item => item.path === this.viewRouteName)!;
     }
+
+    protected readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
 
     protected view: ViewRoute;
 

@@ -11,7 +11,7 @@ import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, stringFormat } from 'aas-core';
 import { FavoritesService } from '../favorites.service';
 import { messageToString } from 'aas-lib';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 export interface FavoritesItem {
     selected: boolean;
@@ -27,7 +27,7 @@ export interface FavoritesItem {
     selector: 'fhg-favorites-form',
     templateUrl: './favorites-form.component.html',
     styleUrls: ['./favorites-form.component.scss'],
-    imports: [NgbToast, TranslateModule],
+    imports: [NgbToast, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FavoritesFormComponent {

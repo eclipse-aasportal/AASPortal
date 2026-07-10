@@ -46,17 +46,12 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NameplateView extends LeafView implements OnDestroy {
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly state = inject(NameplateViewState);
 
-    public constructor(translate: TranslateService) {
+    public constructor() {
         super();
-
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.getCurrentLang());
 
         effect(() => {
             const template = this.toolbarTemplate();

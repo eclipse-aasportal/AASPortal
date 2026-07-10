@@ -2,13 +2,13 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "compileOnSave": false,
     "compilerOptions": {
-        "baseUrl": "./",
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "importHelpers": true,
         "isolatedModules": true,
         "module": "es2022",
         "moduleResolution": "bundler",
+        "noEmit": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitOverride": true,
         "noImplicitReturns": true,
@@ -26,5 +26,28 @@
     ],
     "ts-node": {
         "esm": true
-    }
+    },
+    "references": [
+        {
+            "path": "./projects/aas-core/tsconfig.json"
+        },
+        {
+            "path": "./projects/aas-package/tsconfig.json"
+        },
+        {
+            "path": "./projects/aas-node/tsconfigjson"
+        },
+        {
+            "path": "./projects/aas-server/tsconfig.json"
+        },
+        {
+            "path": "./projects/aas-lib/tsconfig.json"
+        },
+        {
+            "path": "./projects/aas-portal/tsconfig.json"
+        },
+        {
+            "path": "./projects/aas-browser/tsconfig.json"
+        }
+    ]
 }

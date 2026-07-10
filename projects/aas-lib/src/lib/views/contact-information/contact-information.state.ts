@@ -53,7 +53,6 @@ export class ContactInformationState extends ChildState {
      */
     public readonly contacts = computed(() => {
         const contacts: DataSheetData[] = [];
-        const currentLang = this.translate.getCurrentLang();
         const document = this.document();
         const submodel = this.submodel();
         const env = document?.content;
@@ -63,8 +62,8 @@ export class ContactInformationState extends ChildState {
 
         let index = 1;
         for (const element of submodel.submodelElements) {
-            const dataSheet = createDataSheet(document, element, currentLang, {
-                name: `${getDisplayName(element, env, currentLang)} [${index}]`,
+            const dataSheet = createDataSheet(document, element, this.currentLang(), {
+                name: `${getDisplayName(element, env, this.currentLang())} [${index}]`,
                 type: 'A',
                 include: [
                     'RoleOfContactPerson',

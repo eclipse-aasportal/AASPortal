@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getReferable, isSubmodelElementCollection } from 'aas-core';
 import { ChildState } from '../../components/child-state';
@@ -107,7 +107,7 @@ export class TechnicalDataState extends ChildState {
 
         const generalInfo = getReferable(submodel, 'GeneralInformation');
         if (generalInfo) {
-            const dataSheet = createDataSheet(document, generalInfo, this.translate.getCurrentLang());
+            const dataSheet = createDataSheet(document, generalInfo, this.currentLang());
             if (dataSheet.items.length > 0) {
                 dataSheets.push(dataSheet);
             }
@@ -116,7 +116,7 @@ export class TechnicalDataState extends ChildState {
         const productClassifications = getReferable(submodel, 'ProductClassifications');
         if (isSubmodelElementCollection(productClassifications) && productClassifications.value) {
             for (const item of productClassifications.value) {
-                const dataSheet = createDataSheet(document, item, this.translate.getCurrentLang());
+                const dataSheet = createDataSheet(document, item, this.currentLang());
                 if (dataSheet.items.length > 0) {
                     dataSheets.push(dataSheet);
                 }
@@ -126,7 +126,7 @@ export class TechnicalDataState extends ChildState {
         const technicalProperties = getReferable(submodel, 'TechnicalProperties');
         if (isSubmodelElementCollection(technicalProperties) && technicalProperties.value) {
             for (const item of technicalProperties.value) {
-                const dataSheet = createDataSheet(document, item, this.translate.getCurrentLang());
+                const dataSheet = createDataSheet(document, item, this.currentLang());
                 if (dataSheet.items.length > 0) {
                     dataSheets.push(dataSheet);
                 }
@@ -135,7 +135,7 @@ export class TechnicalDataState extends ChildState {
 
         const furtherInfo = getReferable(submodel, 'FurtherInformation');
         if (furtherInfo) {
-            const dataSheet = createDataSheet(document, furtherInfo, this.translate.getCurrentLang());
+            const dataSheet = createDataSheet(document, furtherInfo, this.currentLang());
             if (dataSheet.items.length > 0) {
                 dataSheets.push(dataSheet);
             }

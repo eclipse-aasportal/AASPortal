@@ -27,7 +27,7 @@
         >
             @for (option of favoritesLists(); track option; let i = $index) {
                 @if (i === 0) {
-                    <option class="fst-italic fw-light" [value]="''" translate>Shells.FAVORITES</option>
+                    <option class="fst-italic fw-light" [value]="''" translate="Shells.FAVORITES"></option>
                 } @else {
                     <option class="fst-normal fw-normal" [value]="option">{{ option }}</option>
                 }
@@ -98,9 +98,7 @@
     </div>
     <div class="btn-group me-2 my-1">
         <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints" translate>
-                Shells.VIEWS
-            </button>
+            <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints" translate="Shells.VIEWS"></button>
             <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
                 @for (view of views(); track view.path) {
                     <button ngbDropdownItem (click)="openView(view)" [disabled]="someSelected() === false">

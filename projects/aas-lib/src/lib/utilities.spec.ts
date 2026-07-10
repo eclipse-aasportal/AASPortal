@@ -42,11 +42,8 @@ describe('utilities', () => {
         let translate: Mocked<TranslateService>;
 
         beforeEach(() => {
-            translate = createSpyObj<TranslateService>(['instant', 'getCurrentLang'], {
-                currentLang: 'en-us',
-            });
-
-            translate.getCurrentLang.mockImplementation(() => 'en-us');
+            translate = createSpyObj<TranslateService>(['instant']);
+            translate.instant.mockImplementation(key => key);
         });
 
         it('converts a message of type string', () => {

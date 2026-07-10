@@ -74,16 +74,11 @@ export class OperationalDataView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly webSocket = inject(WebSocketService);
     private readonly state = inject(OperationalDataViewState);
-    private readonly currentLang: Signal<string>;
     private liveNodes: LiveNode[] = [];
     private webSocketSubscription?: Subscription;
 
     public constructor() {
         super();
-
-        const translate = inject(TranslateService);
-        const langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => langChange()?.lang ?? translate.getCurrentLang());
 
         effect(() => {
             const template = this.toolbarTemplate();

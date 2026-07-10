@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { NotifyService } from '../notify/notify.service';
@@ -35,16 +35,15 @@ describe('AuthComponent', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error', 'info']),
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [AuthComponent],
         }).compileComponents();
     });
 

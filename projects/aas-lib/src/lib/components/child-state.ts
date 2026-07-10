@@ -6,19 +6,15 @@
  *
  *****************************************************************************/
 
-import { computed, Signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { computed } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
 /**
  * Represents the state of a child component.
  */
 export abstract class ChildState {
-    protected constructor(protected readonly translate: TranslateService) {
-        const langChange = toSignal(this.translate.onLangChange);
-        this.currentLang = computed(() => langChange()?.lang ?? this.translate.getCurrentLang());
-    }
+    protected constructor(protected readonly translate: TranslateService) {}
 
     /** The current language. */
-    protected readonly currentLang: Signal<string>;
+    protected readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
 }

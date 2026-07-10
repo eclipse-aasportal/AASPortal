@@ -66,18 +66,12 @@ const emptyMainData: MainData = {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DigitalProductPassportView extends CompositeView implements OnDestroy {
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly state = inject(DigitalProductPassportViewState);
 
     public constructor() {
         super();
-
-        const translate = inject(TranslateService);
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
 
         effect(() => {
             const template = this.toolbarTemplate();

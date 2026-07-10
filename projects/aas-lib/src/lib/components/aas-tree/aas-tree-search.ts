@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import trim from 'lodash-es/trim';
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     aas,
@@ -47,6 +47,8 @@ export class AASTreeSearch {
     private matchIndex$ = signal(-1);
     private nodes: TreeNode[] = [];
 
+    private readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
+
     /** Marks a hit if the value is greater or equal to zero. */
     public readonly matchIndex = this.matchIndex$.asReadonly();
 
@@ -72,7 +74,7 @@ export class AASTreeSearch {
                         term.query = query;
                     }
                 } else {
-                    term.text = expression.toLocaleLowerCase(this.translate.getCurrentLang());
+                    term.text = expression.toLocaleLowerCase(this.currentLang());
                 }
             }
 
@@ -290,7 +292,7 @@ export class AASTreeSearch {
                 }
             } else if (term.text) {
                 match =
-                    node.name.toLocaleLowerCase(this.translate.getCurrentLang()).indexOf(term.text) >= 0 ||
+                    node.name.toLocaleLowerCase(this.currentLang()).indexOf(term.text) >= 0 ||
                     this.contains(element, term.text);
             }
 
@@ -380,18 +382,18 @@ export class AASTreeSearch {
                     let min: number;
                     let max: number;
                     if (isDate) {
-                        min = parseDate(b.substring(0, index).trim(), this.translate.currentLang)?.getTime() ?? 0;
-                        max = parseDate(b.substring(index + 3).trim(), this.translate.currentLang)?.getTime() ?? 0;
+                        min = parseDate(b.substring(0, index).trim(), this.currentLang())?.getTime() ?? 0;
+                        max = parseDate(b.substring(index + 3).trim(), this.currentLang())?.getTime() ?? 0;
                     } else {
-                        min = parseNumber(b.substring(0, index).trim(), this.translate.currentLang);
-                        max = parseNumber(b.substring(index + 3).trim(), this.translate.currentLang);
+                        min = parseNumber(b.substring(0, index).trim(), this.currentLang());
+                        max = parseNumber(b.substring(index + 3).trim(), this.currentLang());
                     }
 
                     return typeof min === 'number' && typeof max === 'number' && a >= min && a <= max;
                 } else {
                     const d = isDate
-                        ? (parseDate(b, this.translate.currentLang)?.getTime() ?? 0)
-                        : parseNumber(b, this.translate.currentLang);
+                        ? (parseDate(b, this.currentLang())?.getTime() ?? 0)
+                        : parseNumber(b, this.currentLang());
 
                     if (typeof d !== 'number') {
                         return false;
@@ -419,7 +421,7 @@ export class AASTreeSearch {
 
         return (
             this.containsString(convertToString(a), b) ||
-            this.containsString(convertToString(a, this.translate.currentLang), b)
+            this.containsString(convertToString(a, this.currentLang()), b)
         );
     }
 

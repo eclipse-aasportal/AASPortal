@@ -50,11 +50,11 @@
         "TITLE": "Asset-Status"
     },
     "Auth": {
-        "ENDPOINTS": "Endpoints",
-        "LOGIN": "Login",
+        "ENDPOINTS": "Endpoints...",
+        "LOGIN": "Login...",
         "LOGOUT": "Logout",
-        "REGISTER_USER": "Register",
-        "UPDATE_PROFILE": "Profile"
+        "CREATE_ACCOUNT": "Register...",
+        "UPDATE_PROFILE": "Profile..."
     },
     "Browser": {
         "EMPTY": "No Asset Administration Shell available.",

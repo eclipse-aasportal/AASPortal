@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AASDocument,
@@ -35,8 +35,10 @@ export class AASTableFilter {
     private readonly translate = inject(TranslateService);
     private queryParser?: QueryParser;
 
+    private readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
+
     public start(expression: string): void {
-        this.queryParser = new QueryParser(expression, this.translate.getCurrentLang());
+        this.queryParser = new QueryParser(expression, this.currentLang());
     }
 
     public match(document: AASDocument): boolean {
@@ -94,7 +96,7 @@ export class AASTableFilter {
     }
 
     private contains(document: AASDocument, value: string): boolean {
-        const language = this.translate.getCurrentLang();
+        const language = this.currentLang();
         value = value.toLocaleLowerCase(language);
         return (
             document.idShort.toLocaleLowerCase(language).indexOf(value) >= 0 ||

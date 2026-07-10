@@ -3,14 +3,17 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "outDir": "./dist/lib",
+        "rootDir": "./src/lib",
         "declaration": true,
         "declarationMap": true,
-        "declarationDir": "./dist/types"
+        "declarationDir": "./dist/types",
+        "noEmit": false
     },
     "include": [
-        "./src/lib/**/*.ts"
+        "src/lib/**/*.ts"
     ],
     "exclude": [
-        "./src/lib/**/*.spec.ts"
+        "src/lib/test/**/*",
+        "src/lib/**/*.spec.ts"
     ]
 }

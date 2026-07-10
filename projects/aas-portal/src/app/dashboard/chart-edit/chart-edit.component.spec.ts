@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { NotifyService } from 'aas-lib';
 import { ChartEditComponent } from './chart-edit.component';
@@ -41,17 +41,15 @@ describe('ChartEditComponent', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                ChartEditComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [ChartEditComponent],
         }).compileComponents();
     });
 

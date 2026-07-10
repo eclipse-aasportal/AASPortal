@@ -75,17 +75,17 @@ export class MainComponent implements OnInit, OnDestroy {
     public readonly links = signal<LinkDescriptor[]>([
         {
             id: LinkId.SHELLS,
-            name: 'Shells',
+            name: 'Main.SHELLS',
             url: '/shells',
         },
         {
             id: LinkId.AAS,
-            name: 'AAS',
+            name: 'Main.AAS',
             url: '/shells/:aasId',
         },
         {
             id: LinkId.CONCEPT_DESCRIPTIONS,
-            name: 'Concept Descriptions',
+            name: 'Main.CONCEPT_DESCRIPTIONS',
             url: '/concept-descriptions',
         },
     ]).asReadonly();

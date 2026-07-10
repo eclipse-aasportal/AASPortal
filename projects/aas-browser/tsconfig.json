@@ -2,16 +2,12 @@
     "extends": "../../tsconfig.json",
     "compileOnSave": false,
     "compilerOptions": {
-        "outDir": "./build",
         "types": [
             "@angular/localize"
         ],
         "paths": {
             "aas-lib": [
-                "projects/aas-lib/src/public-api"
-            ],
-            "@app/*": [
-                "src/app/*"
+                "../aas-lib/src/public-api"
             ]
         }
     },

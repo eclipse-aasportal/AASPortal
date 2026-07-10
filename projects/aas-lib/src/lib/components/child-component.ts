@@ -6,20 +6,15 @@
  *
  *****************************************************************************/
 
-import { Component, computed, inject, Signal } from '@angular/core';
+import { Component, computed, inject, Signal, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-@Component({ selector: 'awp-child', template: '' })
+@Component({ selector: 'awp-child', changeDetection: ChangeDetectionStrategy.Eager, template: '' })
 export abstract class ChildComponent {
-    protected constructor() {
-        const langChange = toSignal(this.translate.onLangChange);
-        this.currentLang = computed(() => langChange()?.lang ?? this.translate.getCurrentLang());
-    }
-
     /** The translate service. */
     protected readonly translate = inject(TranslateService);
 
     /** The current active language. */
-    protected readonly currentLang: Signal<string>;
+    protected readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
 }

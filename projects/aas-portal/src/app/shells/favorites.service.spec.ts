@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ApplicationRef, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { lastValueFrom, of } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AuthService, CookieService } from 'aas-lib';
@@ -73,7 +73,7 @@ describe('FavoritesService', () => {
                     },
                 }),
                 provideZonelessChangeDetection(),
-                provideHttpClient(),
+                provideHttpClient(withXhr()),
                 provideHttpClientTesting(),
             ],
         });

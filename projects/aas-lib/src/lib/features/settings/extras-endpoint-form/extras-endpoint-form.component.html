@@ -10,7 +10,7 @@
     <div class="modal-header text-info">
         <h4 class="modal-title">
             <i class="bi bi-gear"></i>
-            <span class="ms-2" translate>ExtrasEndpointForm.CAPTION</span>
+            <span class="ms-2" translate="ExtrasEndpointForm.CAPTION"></span>
         </h4>
         <button type="button" class="btn-close" (click)="submit()"></button>
     </div>
@@ -26,9 +26,9 @@
             <thead>
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col" translate>ExtrasEndpointForm.NAME</th>
-                    <th scope="col" translate>ExtrasEndpointForm.COUNT</th>
-                    <th scope="col" translate>ExtrasEndpointForm.UPDATE</th>
+                    <th scope="col" translate="ExtrasEndpointForm.NAME"></th>
+                    <th scope="col" translate="ExtrasEndpointForm.COUNT"></th>
+                    <th scope="col" translate="ExtrasEndpointForm.UPDATE"></th>
                 </tr>
             </thead>
             <tbody>
@@ -62,20 +62,18 @@
             [attr.aria-expanded]="!isCollapsed()"
             aria-controls="collapseReset"
         >
-            <span translate>ExtrasEndpointForm.RESET</span><span>...</span>
+            <span translate="ExtrasEndpointForm.RESET"></span><span>...</span>
         </button>
         <div #collapse="ngbCollapse" class="mt-2" [(ngbCollapse)]="isCollapsed">
             <div class="card">
                 <div class="card-body">
-                    <p class="card-text" translate>ExtrasEndpointForm.CONFIRM_RESET_INDEX</p>
-                    <button type="button" class="btn btn-danger" (click)="reset()" translate>
-                        ExtrasEndpointForm.RESET
-                    </button>
+                    <p class="card-text" translate="ExtrasEndpointForm.CONFIRM_RESET_INDEX"></p>
+                    <button type="button" class="btn btn-danger" (click)="reset()" translate="ExtrasEndpointForm.RESET"></button>
                 </div>
             </div>
         </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" translate>ExtrasEndpointForm.CLOSE</button>
+        <button type="submit" class="btn btn-primary" translate="ExtrasEndpointForm.CLOSE"></button>
     </div>
 </form>

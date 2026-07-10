@@ -94,7 +94,7 @@ export class NameplateState extends ChildState {
             return dataSheets;
         }
 
-        let dataSheet = createDataSheet(document, submodel, this.translate.getCurrentLang(), {
+        let dataSheet = createDataSheet(document, submodel, this.currentLang(), {
             type: 'B',
             name: this.translate.instant('Nameplate.GENERAL'),
             exclude: ['Markings', 'AssetSpecificProperties'],
@@ -120,7 +120,7 @@ export class NameplateState extends ChildState {
         if (isSubmodelElementList(markings) && markings.value) {
             let index = 1;
             for (const marking of markings.value) {
-                dataSheet = createDataSheet(document, marking, this.translate.getCurrentLang(), {
+                dataSheet = createDataSheet(document, marking, this.currentLang(), {
                     name: `${getDisplayName(marking, env)} [${index}]`,
                     type: 'B',
                 });
@@ -134,7 +134,7 @@ export class NameplateState extends ChildState {
 
         const assetProperties = getReferable(submodel, 'AssetSpecificProperties');
         if (isSubmodelElementCollection(assetProperties) && assetProperties.value) {
-            dataSheet = createDataSheet(document, assetProperties, this.translate.getCurrentLang());
+            dataSheet = createDataSheet(document, assetProperties, this.currentLang());
             if (dataSheet.items.length > 0) {
                 dataSheets.push(dataSheet);
             }

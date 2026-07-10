@@ -511,7 +511,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
 
         if (isMultiLanguageProperty(referable)) {
             return {
-                value: getLocaleValue(referable.value, this.translate.getCurrentLang()) ?? '-',
+                value: getLocaleValue(referable.value, this.currentLang()) ?? '-',
                 valueType: 'text',
             };
         }
@@ -522,7 +522,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
 
         if (isRange(referable)) {
             return {
-                value: `${convertToString(referable.min, this.translate.getCurrentLang())} ... ${convertToString(referable.max, this.translate.getCurrentLang())}`,
+                value: `${convertToString(referable.min, this.currentLang())} ... ${convertToString(referable.max, this.currentLang())}`,
                 valueType: 'text',
             };
         }
@@ -535,7 +535,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
     }
 
     private getPropertyValue(property: aas.Property): string | undefined {
-        return toDisplayValue(property.value, property.valueType, this.translate.getCurrentLang());
+        return toDisplayValue(property.value, property.valueType, this.currentLang());
     }
 
     private referenceToString(reference: aas.Reference | undefined): string {

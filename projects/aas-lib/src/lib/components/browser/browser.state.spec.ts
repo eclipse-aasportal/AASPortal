@@ -10,10 +10,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { aas } from 'aas-core';
 import { FakeLoader } from '../../../test/mocks';
-
 import { BrowserData, BrowserElement, BrowserState } from './browser.state';
-import { aas } from 'projects/aas-core/dist/types';
 
 describe('BrowserState', () => {
     let service: BrowserState;

@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { FavoriteComponent } from './favorite.component';
 import { CookieService } from '../../services/cookie.service';
@@ -34,17 +34,15 @@ describe('FavoriteComponent', () => {
                     provide: EndpointsApi,
                     useValue: api,
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                FavoriteComponent,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [FavoriteComponent],
         }).compileComponents();
     });
 

@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import { LocalizeComponent } from './localize.component';
@@ -30,18 +30,15 @@ describe('LocalizeComponent', () => {
                     provide: WINDOW,
                     useValue: window,
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                LocalizeComponent,
-                TranslateModule.forRoot({
-                    fallbackLang: 'en-us',
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [LocalizeComponent],
         }).compileComponents();
     });
 

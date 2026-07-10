@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { catchError, EMPTY, map, mergeMap, Observable, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslateService } from '@ngx-translate/core';
@@ -48,14 +48,13 @@ export interface VariableItem {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationCallFormComponent {
+    private readonly modal = inject(NgbActiveModal);
+    private readonly translate = inject(TranslateService);
+    private readonly api = inject(OperationCallFormApiService);
     private operation: aas.Operation | undefined;
     private document: AASDocument | null = null;
 
-    public constructor(
-        private modal: NgbActiveModal,
-        private translate: TranslateService,
-        private api: OperationCallFormApiService,
-    ) {}
+    private readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
 
     public readonly name = signal('');
 
@@ -121,7 +120,7 @@ export class OperationCallFormComponent {
                 const value =
                     typeof item.value === 'boolean'
                         ? item.value.toString()
-                        : toInvariant(item.value, item.type as aas.DataTypeDefXsd, this.translate.currentLang);
+                        : toInvariant(item.value, item.type as aas.DataTypeDefXsd, this.currentLang());
 
                 if (value == null) {
                     throw new ApplicationError(ERRORS.INVALID_OPERATION_VARIABLE_EXPRESSION, {
@@ -160,7 +159,7 @@ export class OperationCallFormComponent {
 
                 let value = source.value;
                 if (!value) {
-                    value = convertToString(getDefaultValue(valueType), this.translate.currentLang);
+                    value = convertToString(getDefaultValue(valueType), this.currentLang());
                 }
 
                 values.push({

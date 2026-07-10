@@ -10,11 +10,11 @@
     <form novalidate (submit)="submit($event)">
         <h5 class="text-info text-center">
             <i class="bi bi-person-circle"></i>
-            <span class="ms-2" translate>RegisterForm.CAPTION</span>
+            <span class="ms-2" translate="RegisterForm.CAPTION"></span>
         </h5>
         <div class="form-floating mb-3">
             <input #inputEMail type="email" class="form-control" id="intputRegisterEMail" [formField]="email" />
-            <label for="intputRegisterEMail" translate>RegisterForm.EMAIL</label>
+            <label for="intputRegisterEMail" translate="RegisterForm.EMAIL"></label>
             <fhg-form-error [field]="email()"></fhg-form-error>
         </div>
         <div class="form-floating mb-3">
@@ -24,16 +24,16 @@
                 id="AID_USER_NAME"
                 [formField]="name"
             />
-            <label for="AID_USER_NAME" translate>RegisterForm.NAME</label>
+            <label for="AID_USER_NAME" translate="RegisterForm.NAME"></label>
         </div>
         <div class="form-floating mb-3">
             <input type="password" class="form-control" id="AID_PASSWORD_1" [formField]="password1" />
-            <label for="AID_PASSWORD_1" translate>RegisterForm.PASSWORD</label>
+            <label for="AID_PASSWORD_1" translate="RegisterForm.PASSWORD"></label>
             <fhg-form-error [field]="password1()"></fhg-form-error>
         </div>
         <div class="form-floating mb-3">
             <input type="password" class="form-control" id="AID_PASSWORD_2" [formField]="password2" />
-            <label for="AID_PASSWORD_2" translate>RegisterForm.CONFIRM_PASSWORD</label>
+            <label for="AID_PASSWORD_2" translate="RegisterForm.CONFIRM_PASSWORD"></label>
             <fhg-form-error [field]="password2()"></fhg-form-error>
         </div>
         <button
@@ -41,9 +41,7 @@
             class="btn btn-primary w-100"
             id="AID_REGISTER_OK"
             [disabled]="form().invalid()"
-            translate
-        >
-            RegisterForm.OK
-        </button>
+            translate="RegisterForm.OK"
+        ></button>
     </form>
 </main>
