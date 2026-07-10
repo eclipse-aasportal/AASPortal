@@ -7,7 +7,16 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, vitest } from 'vitest';
-import { Component, DOCUMENT, effect, inject, Injectable, provideZonelessChangeDetection, signal } from '@angular/core';
+import {
+    Component,
+    DOCUMENT,
+    effect,
+    inject,
+    Injectable,
+    provideZonelessChangeDetection,
+    signal,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
@@ -57,7 +66,7 @@ export class TreeSearch {
     public readonly matchIndex = signal(-1);
 }
 
-@Component({ template: '<div></div>', standalone: true })
+@Component({ template: '<div></div>', changeDetection: ChangeDetectionStrategy.Eager, standalone: true })
 class TestTreeComponent extends TreeComponent {
     private readonly treeSearch = inject(TreeSearch);
 

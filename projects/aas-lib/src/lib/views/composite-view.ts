@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, computed } from '@angular/core';
+import { Component, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Params } from '@angular/router';
 import { combineLatest, first, from, mergeMap, of, toArray, map, Observable } from 'rxjs';
 
@@ -17,7 +17,7 @@ import { View } from './view';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 /** Provides a view for an Asset Asset Administration with a set of specific submodels. */
-@Component({ selector: 'awp-composite-view', template: '' })
+@Component({ selector: 'awp-composite-view', changeDetection: ChangeDetectionStrategy.Eager, template: '' })
 export abstract class CompositeView extends View {
     protected constructor() {
         super();

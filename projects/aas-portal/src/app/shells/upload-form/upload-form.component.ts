@@ -9,14 +9,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { AASEndpoint } from 'aas-core';
 
 @Component({
     selector: 'fhg-upload-form',
     templateUrl: './upload-form.component.html',
     styleUrls: ['./upload-form.component.scss'],
-    imports: [FormsModule, TranslateModule],
+    imports: [FormsModule, TranslateDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadFormComponent {

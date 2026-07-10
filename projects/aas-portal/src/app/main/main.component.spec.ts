@@ -37,6 +37,7 @@ class TestAuthComponent {}
 @Component({
     selector: 'fhg-localize',
     template: '<div></div>',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: true,
 })
 class TestLocalizeComponent {

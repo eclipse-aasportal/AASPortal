@@ -8,7 +8,7 @@
 
 import { AASDocument, aas } from 'aas-core';
 
-export function createDocument(name: string, endpoint= "http://localhost/container1"): AASDocument {
+export function createDocument(name: string, endpoint = 'http://localhost/container1'): AASDocument {
     const document: AASDocument = {
         id: `http://localhost/aas/${name}`,
         idShort: name,

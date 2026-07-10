@@ -103,7 +103,7 @@
                             "json-summary"
                         ],
                         "include": [
-                            "projects/aas-portal/src/**/*.{test,spec}.ts"
+                            "projects/aas-portal/src/**/*.spec.ts"
                         ],
                         "runnerConfig": "projects/aas-portal/vitest.config.ts",
                         "outputFile": "coverage/aas-portal.xml",
@@ -124,8 +124,8 @@
                     "builder": "@angular-eslint/builder:lint",
                     "options": {
                         "lintFilePatterns": [
-                            "projects/aas-portal/src/app/**/*.ts",
-                            "projects/aas-portal/src/app/**/*.html"
+                            "projects/aas-portal/src/**/*.ts",
+                            "projects/aas-portal/src/**/*.html"
                         ]
                     }
                 }
@@ -228,7 +228,7 @@
                             "json-summary"
                         ],
                         "include": [
-                            "projects/aas-browser/src/app/**/*.spec.ts"
+                            "projects/aas-browser/src/**/*.spec.ts"
                         ],
                         "runnerConfig": "projects/aas-browser/vitest.config.ts",
                         "outputFile": "coverage/aas-browser.xml",
@@ -278,8 +278,8 @@
                     "builder": "@angular-eslint/builder:lint",
                     "options": {
                         "lintFilePatterns": [
-                            "projects/aas-lib/src/lib/**/*.ts",
-                            "projects/aas-lib/src/lib/**/*.html"
+                            "projects/aas-lib/src/**/*.ts",
+                            "projects/aas-lib/src/**/*.html"
                         ]
                     }
                 },

@@ -177,7 +177,7 @@ export class CarbonFootprintState extends ChildState {
             }
         }
 
-        return `${total.toLocaleString(this.translate.getCurrentLang())} ${unit}`;
+        return `${total.toLocaleString(this.currentLang())} ${unit}`;
     }
 
     private totalPcfCO2eq_1_0(env: aas.Environment, submodel: aas.Submodel): string {
@@ -204,7 +204,7 @@ export class CarbonFootprintState extends ChildState {
             }
         }
 
-        return `${total.toLocaleString(this.translate.getCurrentLang())} ${unit}`;
+        return `${total.toLocaleString(this.currentLang())} ${unit}`;
     }
 
     private createCarbonFootprints_0_9(submodel: aas.Submodel): DataSheetData[] {
@@ -239,7 +239,7 @@ export class CarbonFootprintState extends ChildState {
     }
 
     private createCarbonFootprint_1_0(productCarbonFootprint: aas.SubmodelElementCollection): DataSheetData {
-        return createDataSheet(untracked(this.document)!, productCarbonFootprint, this.translate.getCurrentLang(), {
+        return createDataSheet(untracked(this.document)!, productCarbonFootprint, this.currentLang(), {
             type: 'A',
             include: [
                 'PcfCO2eq',
@@ -260,7 +260,7 @@ export class CarbonFootprintState extends ChildState {
     }
 
     private createCarbonFootprint_0_9(productCarbonFootprint: aas.SubmodelElementCollection): DataSheetData {
-        return createDataSheet(untracked(this.document)!, productCarbonFootprint, this.translate.getCurrentLang(), {
+        return createDataSheet(untracked(this.document)!, productCarbonFootprint, this.currentLang(), {
             type: 'A',
             include: [
                 'PCFCO2eq',

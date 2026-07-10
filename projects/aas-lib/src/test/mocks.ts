@@ -62,7 +62,7 @@ export function createSpyObj<T extends object>(
 export function mockFetchJson(
     data: unknown,
     options?: { ok?: boolean; status?: number; headers?: Record<string, string> },
-) {
+): Mocked<typeof fetch> {
     const { ok = true, status = 200, headers } = options || {};
     const mock = vi.fn().mockImplementation(() =>
         Promise.resolve({
@@ -77,13 +77,13 @@ export function mockFetchJson(
     return mock;
 }
 
-export function mockFetchReject(error: unknown) {
+export function mockFetchReject(error: unknown): Mocked<typeof fetch> {
     const mock = vi.fn().mockImplementation(() => Promise.reject(error));
     (global as any).fetch = mock;
     return mock;
 }
 
-export function restoreFetch() {
+export function restoreFetch(): void {
     try {
         // Remove global fetch so tests can restore environment
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

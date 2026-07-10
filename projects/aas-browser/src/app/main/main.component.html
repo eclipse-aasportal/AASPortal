@@ -18,7 +18,7 @@
                 </button>
                 <div [ngbCollapse]="isMenuCollapsed()" class="collapse navbar-collapse">
                     <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto">
-                        @for (link of links(); track link) {
+                        @for (link of links(); track link.id) {
                             <li [ngbNavItem]="link.id" class="nav-item">
                                 <a
                                     ngbNavLink

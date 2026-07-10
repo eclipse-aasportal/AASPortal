@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { Library } from 'aas-core';
 import { LicenseInfoComponent } from './license-info.component';
@@ -20,17 +20,16 @@ describe('LicenseInfoComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
-            imports: [
-                LicenseInfoComponent,
-                TranslateModule.forRoot({
-                    fallbackLang: 'en-us',
+            providers: [
+                provideZonelessChangeDetection(),
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
             ],
+            imports: [LicenseInfoComponent],
         }).compileComponents();
 
         libraries = [

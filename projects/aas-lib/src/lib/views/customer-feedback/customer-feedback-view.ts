@@ -6,15 +6,13 @@
  *
  *****************************************************************************/
 
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { DecimalPipe } from '@angular/common';
 import { EMPTY, Observable, Subscription } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
 import {
     ChangeDetectionStrategy,
     Component,
     OnDestroy,
-    Signal,
     TemplateRef,
     computed,
     effect,
@@ -45,17 +43,12 @@ const maxStars = 5;
 export class CustomerFeedbackView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
-    private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
-    private readonly translate = inject(TranslateService);
     private readonly state = inject(CustomerFeedbackViewState);
 
     public constructor() {
         super();
-
-        const langChange = toSignal(this.translate.onLangChange);
-        this.currentLang = computed(() => langChange()?.lang ?? this.translate.getCurrentLang());
 
         effect(() => {
             const template = this.toolbarTemplate();

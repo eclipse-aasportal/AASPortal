@@ -231,14 +231,7 @@ export interface WebSocketData {
 
 /** Defines the message types. */
 export type AASNodeMessageType =
-    | 'Added'
-    | 'Removed'
-    | 'Update'
-    | 'EndpointAdded'
-    | 'EndpointRemoved'
-    | 'EndpointUpdate'
-    | 'Reset'
-    | 'End';
+    'Added' | 'Removed' | 'Update' | 'EndpointAdded' | 'EndpointRemoved' | 'EndpointUpdate' | 'Reset' | 'End';
 
 /** Server message. */
 export type AASNodeMessage = {

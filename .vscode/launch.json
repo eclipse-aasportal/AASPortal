@@ -57,7 +57,7 @@
                 "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
                 "IDENTITY_PROVIDER": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "COOKIE_STORAGE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
-                "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users", 
+                "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "HOST_URL": "http://localhost:4200",
             }
         },
@@ -90,7 +90,7 @@
                 "CLIENT_SECRET": "7YiU4JXS4yaYHJrytrXNw7y71l3z12QN",
                 "REDIRECT_URI": "http://localhost:4200/api/callback",
                 "COOKIE_STORAGE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
-                "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users", 
+                "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
             }
         },
         {
@@ -198,5 +198,16 @@
                 "create-app-info"
             ]
         },
+        {
+            "name": "Launch coverage-summary",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "coverage"
+            ]
+        }
     ]
 }

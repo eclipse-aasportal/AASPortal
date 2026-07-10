@@ -10,12 +10,12 @@
     <div class="modal-header text-info">
         <h4 class="modal-title">
             <i class="bi bi-plus-circle"></i>
-            <span class="ms-2" translate>EndpointAuthForm.CAPTION</span>
+            <span class="ms-2" translate="EndpointAuthForm.CAPTION"></span>
         </h4>
         <button type="button" class="btn-close" (click)="cancel()"></button>
     </div>
     <div class="modal-body">
-        <label class="form-lable" for="AID_SELECT_ENDPOINT" translate>EndpointAuthForm.ENDPOINT</label>
+        <label class="form-lable" for="AID_SELECT_ENDPOINT" translate="EndpointAuthForm.ENDPOINT"></label>
         <select id="AID_SELECT_ENDPOINT" class="form-select" [formField]="endpoint">
             @for (item of items().value(); track item.name) {
                 <option [value]="item.name">{{ item.name }}</option>
@@ -35,12 +35,12 @@
                 @switch (items[idx].authorization().value()) {
                     @case ('EndpointAuthForm.API_KEY') {
                         <div class="col-4">
-                            <label class="form-lable" for="AID_HEADER_NAME" translate>EndpointAuthForm.KEY</label>
+                            <label class="form-lable" for="AID_HEADER_NAME" translate="EndpointAuthForm.KEY"></label>
                             <input type="text" id="AID_HEADER_NAME" class="form-control" [formField]="items[idx].key" />
                             <fhg-form-error [field]="items[idx].key()"></fhg-form-error>
                         </div>
                         <div class="col-8">
-                            <label class="form-lable" for="AID_ACCESS_KEY" translate>EndpointAuthForm.VALUE</label>
+                            <label class="form-lable" for="AID_ACCESS_KEY" translate="EndpointAuthForm.VALUE"></label>
                             <input
                                 type="password"
                                 id="AID_ACCESS_KEY"
@@ -52,7 +52,7 @@
                     }
                     @case ('EndpointAuthForm.BEARER_TOKEN') {
                         <div class="col-12">
-                            <label class="form-lable" for="AID_BEARER_TOKEN" translate>EndpointAuthForm.TOKEN</label>
+                            <label class="form-lable" for="AID_BEARER_TOKEN" translate="EndpointAuthForm.TOKEN"></label>
                             <input
                                 type="password"
                                 id="AID_BEARER_TOKEN"
@@ -67,9 +67,7 @@
         }
     </div>
     <div class="modal-footer">
-        <button type="submit" id="AID_SUBMIT" class="btn btn-primary" [disabled]="form().invalid() || !form().dirty()" translate>
-            EndpointAuthForm.OK
-        </button>
-        <button type="button" id="AID_CANCEL" class="btn btn-secondary" (click)="cancel()" translate>EndpointAuthForm.CANCEL</button>
+        <button type="submit" id="AID_SUBMIT" class="btn btn-primary" [disabled]="form().invalid() || !form().dirty()" translate="EndpointAuthForm.OK"></button>
+        <button type="button" id="AID_CANCEL" class="btn btn-secondary" (click)="cancel()" translate="EndpointAuthForm.CANCEL"></button>
     </div>
 </form>

@@ -13,7 +13,6 @@ import {
     effect,
     inject,
     OnDestroy,
-    Signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';
@@ -25,8 +24,6 @@ import { encodeBase64Url, toString } from '../../utilities';
 import { StartService } from '../../services/start.service';
 import { RouterLink } from '@angular/router';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
-import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'fhg-service-request-notification',
@@ -39,8 +36,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class ServiceRequestNotification extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
 
     public constructor() {
         super();
@@ -51,10 +46,6 @@ export class ServiceRequestNotification extends LeafView implements OnDestroy {
                 this.toolbar.set(template);
             }
         });
-
-        const translate = inject(TranslateService);
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');

@@ -9,7 +9,7 @@
 <div class="modal-header text-info">
     <h4 class="modal-title">
         <i class="bi bi-question-square"></i>
-        <span class="ms-2" translate>ConfirmDialog.CAPTION</span>
+        <span class="ms-2" translate="ConfirmDialog.CAPTION"></span>
     </h4>
     @if (cancelable()) {
         <button type="button" class="btn-close" (click)="cancel()"></button>
@@ -20,14 +20,8 @@
 </div>
 <div class="modal-footer">
     @if (cancelable()) {
-        <button type="button" id="AID_PROMPT_CANCEL" class="btn btn-secondary" (click)="cancel()" translate>
-            ConfirmDialog.CANCEL
-        </button>
+        <button type="button" id="AID_PROMPT_CANCEL" class="btn btn-secondary" (click)="cancel()" translate="ConfirmDialog.CANCEL"></button>
     }
-    <button type="button" id="AID_PROMPT_NO" class="btn btn-secondary" (click)="close(false)" translate>
-        ConfirmDialog.NO
-    </button>
-    <button type="button" id="AID_PROMPT_YES" class="btn btn-primary" (click)="close(true)" translate>
-        ConfirmDialog.YES
-    </button>
+    <button type="button" id="AID_PROMPT_NO" class="btn btn-secondary" (click)="close(false)" translate="ConfirmDialog.NO"></button>
+    <button type="button" id="AID_PROMPT_YES" class="btn btn-primary" (click)="close(true)" translate="ConfirmDialog.YES"></button>
 </div>

@@ -17,19 +17,22 @@ import { HierarchicalStructure } from './hierarchical-structure';
 import { VIEW_ROUTES } from '../views-routes';
 
 import hierarchicalStructures_1_1 from '../../../test/assets/hierarchical-structures-1-1.json';
+import { WINDOW } from '../../services/window.service';
 
 describe('HierarchicalStructure', () => {
     let component: HierarchicalStructure;
     let fixture: ComponentFixture<HierarchicalStructure>;
     let api: Mocked<EndpointsApi>;
+    let window: Mocked<Window & typeof globalThis>;
     let document: AASDocument;
 
     beforeEach(async () => {
         api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
+        window = createSpyObj<Window & typeof globalThis>(['addEventListener', 'removeEventListener']);
         document = {
             address: '',
             crc32: 0,
-            idShort: 'BillofMaterialAAS',
+            idShort: 'HierarchicalStructuresBoM',
             readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/HierarchicalStructuresBoM/1/1',
@@ -46,6 +49,10 @@ describe('HierarchicalStructure', () => {
                 {
                     provide: VIEW_ROUTES,
                     useValue: [],
+                },
+                {
+                    provide: WINDOW,
+                    useValue: window,
                 },
                 provideTranslateService({
                     loader: {

@@ -10,7 +10,7 @@
     <div class="modal-header text-info">
         <h4 class="modal-title">
             <i class="bi bi-terminal"></i>
-            <span class="ms-2" translate>PromptDialog.CAPTION</span>
+            <span class="ms-2" translate="PromptDialog.CAPTION"></span>
         </h4>
         <button type="button" class="btn-close" (click)="cancel()"></button>
     </div>
@@ -26,11 +26,7 @@
         }
     </div>
     <div class="modal-footer">
-        <button type="button" id="AID_PROMPT_CANCEL" class="btn btn-secondary" (click)="cancel()" translate>
-            PromptDialog.CANCEL
-        </button>
-        <button type="submit" id="AID_PROMPT_OK" class="btn btn-primary" [disabled]="form().invalid()" translate>
-            PromptDialog.OK
-        </button>
+        <button type="button" id="AID_PROMPT_CANCEL" class="btn btn-secondary" (click)="cancel()" translate="PromptDialog.CANCEL"></button>
+        <button type="submit" id="AID_PROMPT_OK" class="btn btn-primary" [disabled]="form().invalid()" translate="PromptDialog.OK"></button>
     </div>
 </form>

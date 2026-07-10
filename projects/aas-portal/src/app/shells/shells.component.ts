@@ -25,7 +25,7 @@ import {
 } from '@angular/core';
 
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, concatMap, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
 import { AASDocument, AASEndpoint, QueryParser } from 'aas-core';
 import {
@@ -51,7 +51,7 @@ import { INFO } from '../messages';
     selector: 'fhg-shells',
     templateUrl: './shells.component.html',
     styleUrls: ['./shells.component.scss'],
-    imports: [AASTable, NgClass, TranslateModule, NgbModule, FormsModule],
+    imports: [AASTable, NgClass, TranslateDirective, TranslatePipe, NgbModule, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**

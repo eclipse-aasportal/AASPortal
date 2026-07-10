@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { first, lastValueFrom, of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
@@ -112,17 +112,15 @@ describe('TechnicalDataView', () => {
                         },
                     ],
                 },
-                provideZonelessChangeDetection(),
-            ],
-            imports: [
-                TechnicalDataView,
-                TranslateModule.forRoot({
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
+                provideZonelessChangeDetection(),
             ],
+            imports: [TechnicalDataView],
         }).compileComponents();
 
         TestBed.overrideComponent(TechnicalDataView, {

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, computed } from '@angular/core';
+import { Component, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Params } from '@angular/router';
 import { combineLatest, first, from, map, mergeMap, Observable, of, toArray } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -15,7 +15,7 @@ import { aas, AASDocument, getSemanticId, isEnvironment } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
 import { View } from './view';
 
-@Component({ selector: 'awp-leaf-view', template: '' })
+@Component({ selector: 'awp-leaf-view', changeDetection: ChangeDetectionStrategy.Eager, template: '' })
 export abstract class LeafView extends View {
     private readonly tuple = computed(() => this.tuples().at(this.index() - 1));
 

@@ -249,11 +249,11 @@ export class HandoverDocumentationState extends ChildState {
         }
 
         if (isProperty(referable)) {
-            return toDisplayValue(referable.value, referable.valueType, this.translate.getCurrentLang()) ?? '-';
+            return toDisplayValue(referable.value, referable.valueType, this.currentLang()) ?? '-';
         }
 
         if (isMultiLanguageProperty(referable)) {
-            return getLocaleValue(referable.value, this.translate.getCurrentLang()) ?? '-';
+            return getLocaleValue(referable.value, this.currentLang()) ?? '-';
         }
 
         if (isFile(referable)) {

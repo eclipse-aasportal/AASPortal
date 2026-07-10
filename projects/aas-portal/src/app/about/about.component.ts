@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { EMPTY, Observable } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import {
     Component,
     OnDestroy,
@@ -29,7 +29,7 @@ import { environment } from '../../environments/environment';
     selector: 'fhg-about',
     templateUrl: './about.component.html',
     styleUrls: ['./about.component.scss'],
-    imports: [TranslateModule, LicenseInfoComponent],
+    imports: [TranslateDirective, LicenseInfoComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutComponent implements OnInit, OnDestroy {

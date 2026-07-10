@@ -71,6 +71,8 @@ export class FavoriteComponent {
         });
     }
 
+    private readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
+
     public readonly endpoint = input('');
 
     public readonly id = input('');
@@ -92,7 +94,7 @@ export class FavoriteComponent {
             return aas.idShort;
         }
 
-        return getLocaleValue(displayName, this.translate.getCurrentLang()) ?? aas.idShort;
+        return getLocaleValue(displayName, this.currentLang()) ?? aas.idShort;
     });
 
     public readonly thumbnail = computed(() => {
@@ -136,7 +138,7 @@ export class FavoriteComponent {
         }
 
         details.push({ name: 'Favorite.ENDPOINT', value: document.endpoint });
-        const displayName = getLocaleValue(aas.displayName, this.translate.currentLang);
+        const displayName = getLocaleValue(aas.displayName, this.currentLang());
         if (displayName) {
             details.push({
                 name: 'Favorite.DISPLAY_NAME',
@@ -163,7 +165,7 @@ export class FavoriteComponent {
             return notes;
         }
 
-        const description = getLocaleValue(aas.description, this.translate.currentLang);
+        const description = getLocaleValue(aas.description, this.currentLang());
         if (description) {
             notes.push(description);
         }

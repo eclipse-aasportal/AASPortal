@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { NotifyService } from '../../../lib/core/notify/notify.service';
 import { FakeLoader } from '../../../test/mocks';
 
@@ -18,15 +18,16 @@ describe('NotifyService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
-            imports: [
-                TranslateModule.forRoot({
+            providers: [
+                provideZonelessChangeDetection(),
+                provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
                         useClass: FakeLoader,
                     },
                 }),
             ],
+            imports: [],
         });
 
         service = TestBed.inject(NotifyService);

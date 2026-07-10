@@ -232,7 +232,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
             symbolType: 'image',
             symbol: document?.thumbnail ?? undefined,
             type: 'routerLink',
-            name: getDisplayName(shell, document?.content, this.translate.getCurrentLang()),
+            name: getDisplayName(shell, document?.content, this.currentLang()),
             suffix: `[${document?.id}]`,
             options: { ...item.options, document },
         };

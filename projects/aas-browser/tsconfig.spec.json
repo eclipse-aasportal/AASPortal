@@ -3,11 +3,19 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "isolatedModules": false,
-        "types": [
-            "vitest/globals"
-        ]
+        "noEmit": false,
+        "outDir": "./out-tsc/spec",
+        "types": ["node"]
     },
     "include": [
         "src/**/*.ts"
-    ]
+    ],
+    "angularCompilerOptions": {
+        "extendedDiagnostics": {
+            "checks": {
+                "nullishCoalescingNotNullable": "suppress",
+                "optionalChainNotNullable": "suppress"
+            }
+        }
+    }
 }

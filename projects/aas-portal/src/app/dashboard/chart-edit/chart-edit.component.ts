@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { Component, input, signal } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Component, input, signal, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { convertToString } from 'aas-core';
 import { NotifyService, CommandHandler } from 'aas-lib';
@@ -19,17 +19,18 @@ import { SetChartTypeCommand } from '../commands/set-chart-type-command';
 
 @Component({
     selector: 'fhg-chart-edit',
-    imports: [FormsModule, TranslateModule],
+    imports: [FormsModule, TranslateDirective, TranslatePipe],
     templateUrl: './chart-edit.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './chart-edit.component.scss',
 })
 export class ChartEditComponent {
-    public constructor(
-        private readonly commandHandler: CommandHandler,
-        private readonly notify: NotifyService,
-        private readonly translate: TranslateService,
-        private readonly service: DashboardService,
-    ) {}
+    private readonly commandHandler = inject(CommandHandler);
+    private readonly notify = inject(NotifyService);
+    private readonly translate = inject(TranslateService);
+    private readonly service = inject(DashboardService);
+
+    private readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
 
     public readonly chartTypes = signal<DashboardChartType[]>([
         DashboardChartType.Line,
@@ -64,7 +65,7 @@ export class ChartEditComponent {
 
     public getMin(chart: DashboardChartItem): string {
         return typeof chart.min === 'number' && !Number.isNaN(chart.min)
-            ? convertToString(chart.min, this.translate.currentLang)
+            ? convertToString(chart.min, this.currentLang())
             : '-';
     }
 
@@ -80,7 +81,7 @@ export class ChartEditComponent {
 
     public getMax(chart: DashboardChartItem): string {
         return typeof chart.max === 'number' && chart.max && !Number.isNaN(chart.max)
-            ? convertToString(chart.max, this.translate.currentLang)
+            ? convertToString(chart.max, this.currentLang())
             : '-';
     }
 

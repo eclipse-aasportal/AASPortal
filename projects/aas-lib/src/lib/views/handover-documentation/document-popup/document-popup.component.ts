@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { DocumentationItem } from '../handover-documentation.state';
 import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -15,6 +15,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
     selector: 'fhg-document-popup',
     imports: [TranslateDirective],
     templateUrl: './document-popup.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './document-popup.component.scss',
 })
 export class DocumentPopupComponent {

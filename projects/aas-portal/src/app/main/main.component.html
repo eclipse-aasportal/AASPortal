@@ -61,18 +61,28 @@
         <div class="text-nowrap text-truncate">© {{ year() }} Fraunhofer IOSB-INA - AASPortal (v{{ version() }})</div>
         <div class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0" (keydown)="onKeyDown($event)">
             <span>{{ documentCount() }}&nbsp;</span>
-            <span translate>Main.SHELLS</span>
+            <span translate="Main.SHELLS"></span>
             @if (changedDocuments() > 0) {
                 <span>&nbsp;{{ changedDocuments() }}</span>
             }
             <span>&nbsp;/&nbsp;{{ endpointCount() }}&nbsp;</span>
-            <span translate>Main.ENDPOINTS</span>
+            <span translate="Main.ENDPOINTS"></span>
         </div>
         <fhg-progress></fhg-progress>
         <div class="me-auto">
-            <a class="ms-3" href="{{ 'Main.GTC_URL' | translate }}" target="_blank" translate>Main.GTC</a>
-            <a class="ms-3" href="{{ 'Main.PUBLISHING_NOTES_URL' | translate }}" target="_blank" translate>Main.PUBLISHING_NOTES</a>
-            <a class="ms-3" href="{{ 'Main.DATA_PROTECTION_POLICY_URL' | translate }}" target="_blank" translate>Main.DATA_PROTECTION_POLICY</a>
+            <a class="ms-3" href="{{ 'Main.GTC_URL' | translate }}" target="_blank" translate="Main.GTC"></a>
+            <a
+                class="ms-3"
+                href="{{ 'Main.PUBLISHING_NOTES_URL' | translate }}"
+                target="_blank"
+                translate="Main.PUBLISHING_NOTES"
+            ></a>
+            <a
+                class="ms-3"
+                href="{{ 'Main.DATA_PROTECTION_POLICY_URL' | translate }}"
+                target="_blank"
+                translate="Main.DATA_PROTECTION_POLICY"
+            ></a>
         </div>
     </div>
 </div>

@@ -10,12 +10,12 @@
     <div class="modal-header text-info">
         <h4 class="modal-title">
             <i class="bi bi-plus-circle"></i>
-            <span class="ms-2" translate>UpdateEndpointForm.CAPTION</span>
+            <span class="ms-2" translate="UpdateEndpointForm.CAPTION"></span>
         </h4>
         <button type="button" class="btn-close" (click)="cancel()"></button>
     </div>
     <div class="modal-body">
-        <label class="form-lable" for="AID_SELECT_ENDPOINT" translate>UpdateEndpointForm.ENDPOINTS</label>
+        <label class="form-lable" for="AID_SELECT_ENDPOINT" translate="UpdateEndpointForm.ENDPOINTS"></label>
         <select id="AID_SELECT_ENDPOINT" class="form-select" [formField]="form.endpoint">
             @for (item of items(); track item.name) {
                 <option [value]="item.name">{{ item.name }}</option>
@@ -24,7 +24,7 @@
 
         @let idx = index();
         @if (idx >= 0) {
-            <label class="form-lable mt-3" for="div-endpoint-url" translate>UpdateEndpointForm.URL</label>
+            <label class="form-lable mt-3" for="div-endpoint-url" translate="UpdateEndpointForm.URL"></label>
             <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
                 <button type="button" class="btn btn-secondary" ngbDropdownToggle>
                     {{ 'UpdateEndpointForm.' + template().type | translate }}
@@ -45,7 +45,7 @@
                 />
             </div>
             <fhg-form-error [field]="form.items[idx].url()"></fhg-form-error>
-            <label class="form-lable mt-3" for="schedule-options" translate>UpdateEndpointForm.SCHEDULE</label>
+            <label class="form-lable mt-3" for="schedule-options" translate="UpdateEndpointForm.SCHEDULE"></label>
             <div class="border border-light-subtle rounded p-2 mb-2" id="schedule-options">
                 <div class="form-check form-check-inline">
                     <input
@@ -79,7 +79,7 @@
                         value="once"
                         [formField]="form.items[idx].schedule"
                     />
-                    <label class="form-check-label" for="AID_SCHEDULE_ONCE" translate>UpdateEndpointForm.ONCE</label>
+                    <label class="form-check-label" for="AID_SCHEDULE_ONCE" translate="UpdateEndpointForm.ONCE"></label>
                 </div>
                 <div class="form-check form-check-inline">
                     <input
@@ -89,7 +89,7 @@
                         value="every"
                         [formField]="form.items[idx].schedule"
                     />
-                    <label class="form-check-label" for="AID_SCHEDULE_EVERY" translate>UpdateEndpointForm.EVERY</label>
+                    <label class="form-check-label" for="AID_SCHEDULE_EVERY" translate="UpdateEndpointForm.EVERY"></label>
                 </div>
                 @if (form.items[idx].schedule().value() === 'every') {
                     <div class="input-group mt-3">
@@ -100,7 +100,7 @@
                             aria-label="Hours"
                             [formField]="form.items[idx].hours"
                         />
-                        <span class="input-group-text" translate>UpdateEndpointForm.HOURS</span>
+                        <span class="input-group-text" translate="UpdateEndpointForm.HOURS"></span>
                         <input
                             type="number"
                             class="form-control awp-number-input"
@@ -108,7 +108,7 @@
                             aria-label="Minutes"
                             [formField]="form.items[idx].minutes"
                         />
-                        <span class="input-group-text" translate>UpdateEndpointForm.MINUTES</span>
+                        <span class="input-group-text" translate="UpdateEndpointForm.MINUTES"></span>
                     </div>
                     <fhg-form-error [field]="form.items[idx].hours()"></fhg-form-error>
                     <fhg-form-error [field]="form.items[idx].minutes()"></fhg-form-error>
@@ -127,7 +127,7 @@
                     @switch (form.items[idx].authorization().value()) {
                         @case ('UpdateEndpointForm.API_KEY') {
                             <div class="col-4">
-                                <label class="form-lable" for="AID_HEADER_NAME" translate>UpdateEndpointForm.KEY</label>
+                                <label class="form-lable" for="AID_HEADER_NAME" translate="UpdateEndpointForm.KEY"></label>
                                 <input
                                     type="text"
                                     id="AID_HEADER_NAME"
@@ -169,10 +169,8 @@
         }
     </div>
     <div class="modal-footer">
-        <button type="button" id="AID_DELETE_ENDPOINT" class="btn btn-danger me-auto" (click)="deleteEndpoint()" translate>
-            UpdateEndpointForm.DELETE
-        </button>
-        <button type="submit" class="btn btn-primary" [disabled]="!canClose()" translate>UpdateEndpointForm.OK</button>
-        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>UpdateEndpointForm.CANCEL</button>
+        <button type="button" id="AID_DELETE_ENDPOINT" class="btn btn-danger me-auto" (click)="deleteEndpoint()" translate="UpdateEndpointForm.DELETE"></button>
+        <button type="submit" class="btn btn-primary" [disabled]="!canClose()" translate="UpdateEndpointForm.OK"></button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()" translate="UpdateEndpointForm.CANCEL"></button>
     </div>
 </form>

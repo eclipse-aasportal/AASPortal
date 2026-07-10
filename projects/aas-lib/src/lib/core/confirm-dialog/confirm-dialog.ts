@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective } from '@ngx-translate/core';
 
@@ -17,6 +17,7 @@ import { TranslateDirective } from '@ngx-translate/core';
     selector: 'fhg-confirm-dialog',
     imports: [TranslateDirective],
     templateUrl: './confirm-dialog.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './confirm-dialog.scss',
 })
 export class ConfirmDialog {

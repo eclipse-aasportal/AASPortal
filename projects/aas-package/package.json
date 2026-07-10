@@ -1,6 +1,6 @@
 {
     "name": "aas-package",
-    "version": "3.7",
+    "version": "3.8",
     "description": "AASX package library.",
     "module": "./dist/aas-package.js",
     "main": "./dist/aas-package.js",

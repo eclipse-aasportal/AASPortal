@@ -5,6 +5,7 @@
  * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Mocked, vi } from 'vitest';
 import { TranslateLoader, TranslationObject } from '@ngx-translate/core';

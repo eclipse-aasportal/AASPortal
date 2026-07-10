@@ -6,22 +6,11 @@
  *
  *****************************************************************************/
 
-import { LangChangeEvent, TranslateDirective, TranslateService } from '@ngx-translate/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    inject,
-    OnDestroy,
-    Signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { aas, AASDocument, getReferable } from 'aas-core';
 
@@ -46,17 +35,12 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NameplateView extends LeafView implements OnDestroy {
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly state = inject(NameplateViewState);
 
-    public constructor(translate: TranslateService) {
+    public constructor() {
         super();
-
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.getCurrentLang());
 
         effect(() => {
             const template = this.toolbarTemplate();

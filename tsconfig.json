@@ -2,13 +2,13 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "compileOnSave": false,
     "compilerOptions": {
-        "baseUrl": "./",
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "importHelpers": true,
         "isolatedModules": true,
         "module": "es2022",
         "moduleResolution": "bundler",
+        "noEmit": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitOverride": true,
         "noImplicitReturns": true,
@@ -18,7 +18,8 @@
         "sourceMap": true,
         "strict": true,
         "target": "es2024",
-        "useUnknownInCatchVariables": false
+        "useUnknownInCatchVariables": false,
+        "types": ["node"]
     },
     "lib": [
         "ES2024",

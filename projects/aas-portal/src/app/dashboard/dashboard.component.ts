@@ -8,7 +8,7 @@
 
 import 'chart.js/auto';
 import { EMPTY, first, Observable, Subscription } from 'rxjs';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
@@ -62,7 +62,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
     selector: 'fhg-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
-    imports: [FormsModule, TranslateModule, ChartEditComponent],
+    imports: [FormsModule, TranslatePipe, ChartEditComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {

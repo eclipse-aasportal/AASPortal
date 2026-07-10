@@ -28,9 +28,7 @@ import { PromptDialog } from '../../../core/prompt-dialog/prompt-dialog';
 import { validateEndpointUrl } from '../../../utilities';
 
 type AuthorizationType =
-    | 'UpdateEndpointForm.NO_AUTH'
-    | 'UpdateEndpointForm.API_KEY'
-    | 'UpdateEndpointForm.BEARER_TOKEN';
+    'UpdateEndpointForm.NO_AUTH' | 'UpdateEndpointForm.API_KEY' | 'UpdateEndpointForm.BEARER_TOKEN';
 
 interface EndpointItem {
     name: string;
