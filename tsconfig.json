@@ -18,7 +18,8 @@
         "sourceMap": true,
         "strict": true,
         "target": "es2024",
-        "useUnknownInCatchVariables": false
+        "useUnknownInCatchVariables": false,
+        "types": ["node"]
     },
     "lib": [
         "ES2024",
@@ -26,28 +27,5 @@
     ],
     "ts-node": {
         "esm": true
-    },
-    "references": [
-        {
-            "path": "./projects/aas-core/tsconfig.json"
-        },
-        {
-            "path": "./projects/aas-package/tsconfig.json"
-        },
-        {
-            "path": "./projects/aas-node/tsconfigjson"
-        },
-        {
-            "path": "./projects/aas-server/tsconfig.json"
-        },
-        {
-            "path": "./projects/aas-lib/tsconfig.json"
-        },
-        {
-            "path": "./projects/aas-portal/tsconfig.json"
-        },
-        {
-            "path": "./projects/aas-browser/tsconfig.json"
-        }
-    ]
+    }
 }
