@@ -23,8 +23,8 @@
         </select>
         @let idx = index();
         @if (index() >= 0) {
-            <label class="form-lable mt-2" for="AID_SELECT_AUTHORIZATION" translate
-                >EndpointAuthForm.AUTHORIZATION</label
+            <label class="form-lable mt-2" for="AID_SELECT_AUTHORIZATION" translate="EndpointAuthForm.AUTHORIZATION"
+                ></label
             >
             <select id="AID_SELECT_AUTHORIZATION" class="form-select" [formField]="items[idx].authorization">
                 @for (item of authorizations(); track item) {

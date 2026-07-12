@@ -3,6 +3,7 @@
     "compilerOptions": {
         "noEmit": false,
         "outDir": "./out-tsc/app",
+        "rootDir": "..",
         "types": [
             "@angular/localize"
         ]

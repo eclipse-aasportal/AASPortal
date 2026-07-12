@@ -106,7 +106,7 @@
                             "projects/aas-portal/src/**/*.spec.ts"
                         ],
                         "runnerConfig": "projects/aas-portal/vitest.config.ts",
-                        "outputFile": "coverage/aas-portal.xml",
+                        "outputFile": "projects/aas-portal/coverage/coverage.xml",
                         "reporters": [
                             "default",
                             "junit"
@@ -231,7 +231,7 @@
                             "projects/aas-browser/src/**/*.spec.ts"
                         ],
                         "runnerConfig": "projects/aas-browser/vitest.config.ts",
-                        "outputFile": "coverage/aas-browser.xml",
+                        "outputFile": "projects/aas-browser/coverage/coverage.xml",
                         "reporters": [
                             "default",
                             "junit"
@@ -304,7 +304,7 @@
                             "projects/aas-lib/src/**/*.spec.ts"
                         ],
                         "runnerConfig": "projects/aas-lib/vitest.config.ts",
-                        "outputFile": "coverage/aas-lib.xml",
+                        "outputFile": "projects/aas-lib/coverage/coverage.xml",
                         "reporters": [
                             "default",
                             "junit"

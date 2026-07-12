@@ -5,12 +5,12 @@ export default defineConfig({
         coverage: {
             enabled: true,
             include: ['src/app'],
-            reportsDirectory: '../../coverage/aas-node',
+            reportsDirectory: './coverage',
             reporter: ['text', 'json', 'html', 'clover', 'json-summary'],
         },
         environment: 'node',
-        include: ['src/**/*.{test,spec}.ts'],
-        outputFile: '../../coverage/aas-node.xml',
+        include: ['src/**/*.spec.ts'],
+        outputFile: './coverage/coverage.xml',
         reporters: ['default', 'junit'],
     },
 });

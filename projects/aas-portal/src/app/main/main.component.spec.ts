@@ -21,7 +21,7 @@ import {
 } from '@angular/core';
 
 import { AASDocument } from 'aas-core';
-import { AuthComponent, IndexChange, LocalizeComponent, NotifyComponent, ToolbarService } from 'aas-lib';
+import { AuthComponent, IndexChange, LocalizeComponent, NotifyComponent, SettingsComponent, ToolbarService } from 'aas-lib';
 
 import { MainComponent } from './main.component';
 import { createSpyObj, FakeLoader } from '../../test/mocks';
@@ -33,6 +33,14 @@ import { createSpyObj, FakeLoader } from '../../test/mocks';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAuthComponent {}
+
+@Component({
+    selector: 'fhg-settings',
+    template: '<div></div>',
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class TestSettingsComponent {}
 
 @Component({
     selector: 'fhg-localize',
@@ -91,10 +99,10 @@ describe('MainComponent', () => {
 
         TestBed.overrideComponent(MainComponent, {
             remove: {
-                imports: [NotifyComponent, LocalizeComponent, AuthComponent],
+                imports: [NotifyComponent, LocalizeComponent, AuthComponent, SettingsComponent],
             },
             add: {
-                imports: [TestNotifyComponent, TestLocalizeComponent, TestAuthComponent],
+                imports: [TestNotifyComponent, TestLocalizeComponent, TestAuthComponent, TestSettingsComponent],
             },
         });
     });

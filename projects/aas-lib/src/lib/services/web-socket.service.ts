@@ -20,8 +20,6 @@ export class WebSocketService {
 
     /**
      * Creates a subject that communicates with a server via WebSocket.
-     * @param url The URL of the source.
-     * @returns A subject.
      */
     public constructor() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

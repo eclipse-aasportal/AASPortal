@@ -17,18 +17,18 @@ import { HierarchicalStructure } from './hierarchical-structure';
 import { VIEW_ROUTES } from '../views-routes';
 
 import hierarchicalStructures_1_1 from '../../../test/assets/hierarchical-structures-1-1.json';
-import { WINDOW } from '../../services/window.service';
+import { WINDOW, WindowService } from '../../services/window.service';
 
 describe('HierarchicalStructure', () => {
     let component: HierarchicalStructure;
     let fixture: ComponentFixture<HierarchicalStructure>;
     let api: Mocked<EndpointsApi>;
-    let window: Mocked<Window & typeof globalThis>;
+    let window: Mocked<WindowService>;
     let document: AASDocument;
 
     beforeEach(async () => {
         api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
-        window = createSpyObj<Window & typeof globalThis>(['addEventListener', 'removeEventListener']);
+        window = createSpyObj<WindowService>(['addEventListener', 'removeEventListener']);
         document = {
             address: '',
             crc32: 0,

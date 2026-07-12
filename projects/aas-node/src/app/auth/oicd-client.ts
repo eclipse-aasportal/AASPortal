@@ -20,7 +20,7 @@ import { Variable } from '../variable.js';
 import { ERRORS } from '../errors.js';
 import { COOKIE_STORAGE, CookieStorage } from '../cookie-storage/cookie-storage.js';
 
-const AuthorizationServerSchema = z.object({
+export const AuthorizationServerSchema = z.object({
     issuer: z.url(),
     authorization_endpoint: z.url(),
     token_endpoint: z.url(),
