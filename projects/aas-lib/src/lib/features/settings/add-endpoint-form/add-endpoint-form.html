@@ -60,7 +60,11 @@
                     value="disabled"
                     [formField]="form.schedule"
                 />
-                <label class="form-check-label" for="AID_SCHEDULE_DISABLED" translate="AddEndpointForm.DISABLED"></label>
+                <label
+                    class="form-check-label"
+                    for="AID_SCHEDULE_DISABLED"
+                    translate="AddEndpointForm.DISABLED"
+                ></label>
             </div>
             <div class="form-check form-check-inline">
                 <input
@@ -116,9 +120,11 @@
             }
         </div>
         @if (template().type === 'AAS_API') {
-            <label class="form-lable mt-2" for="AID_SELECT_AUTHORIZATION" translate
-                >AddEndpointForm.AUTHORIZATION</label
-            >
+            <label
+                class="form-lable mt-2"
+                for="AID_SELECT_AUTHORIZATION"
+                translate="AddEndpointForm.AUTHORIZATION"
+            ></label>
             <select id="AID_SELECT_AUTHORIZATION" class="form-select" [formField]="form.authorization">
                 @for (item of authorizations(); track item) {
                     <option [value]="item">{{ item | translate }}</option>
@@ -155,7 +161,12 @@
         }
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" [disabled]="form().invalid()" translate="AddEndpointForm.OK"></button>
+        <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="form().invalid()"
+            translate="AddEndpointForm.OK"
+        ></button>
         <button type="button" class="btn btn-secondary" (click)="cancel()" translate="AddEndpointForm.CANCEL"></button>
     </div>
 </form>

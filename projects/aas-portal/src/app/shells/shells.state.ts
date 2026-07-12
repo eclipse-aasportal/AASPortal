@@ -180,19 +180,8 @@ export class ShellsState {
     }
 
     /**
-     * Retrieves the first page of documents based on the provided filter and limit.
-     * If no filter is provided, uses the current untracked filter text.
-     *
-     * @param filter - Optional string to filter the documents
-     * @param limit - Optional number to limit the amount of documents per page
+     * Retrieves the first page of AAS documents cuments per page
      * @returns void
-     *
-     * @remarks
-     * This method makes an API call to get documents with the following:
-     * - No previous page reference (starts from beginning)
-     * - Uses provided limit or falls back to untracked limit
-     * - Applies language settings from translation service
-     * - Pipes the result through setPageAndLoadContents
      */
     public getFirstPage(): void {
         this.update({ position: { next: undefined, previous: null } });

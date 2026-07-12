@@ -99,7 +99,7 @@ export function extension(path: string): string | undefined {
 
 /**
  * Encodes a string to Base64Url.
- * @param s The string to encode.
+ * @param str The string to encode.
  * @returns The encoded string.
  */
 export function encodeBase64Url(str: string): string {
@@ -111,7 +111,7 @@ export function encodeBase64Url(str: string): string {
 
 /**
  * Decodes a Base64Url string.
- * @param s The encoded string.
+ * @param str The encoded string.
  * @returns The decoded string.
  */
 export function decodeBase64Url(str: string): string {

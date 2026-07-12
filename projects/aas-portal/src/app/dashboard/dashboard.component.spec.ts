@@ -9,6 +9,7 @@
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { EMPTY } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -22,7 +23,6 @@ import { ChartEditComponent } from './chart-edit/chart-edit.component';
 
 import data from '../../test/assets/test-pages.json';
 import { createSpyObj, FakeLoader, MockWebSocketService } from '../../test/mocks';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-chart-edit',
@@ -39,11 +39,13 @@ export class TestChartEditComponent {
 describe('DashboardComponent', () => {
     let start: Mocked<StartService>;
     let service: Mocked<DashboardService>;
+    let api: Mocked<DashboardApiService>;
     let window: Mocked<WindowService>;
     let modal: Mocked<NgbModal>;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'save']);
+        api = createSpyObj<DashboardApiService>(['getBlobValue']);
 
         vi.useFakeTimers();
 
@@ -80,7 +82,7 @@ describe('DashboardComponent', () => {
                 },
                 {
                     provide: DashboardApiService,
-                    useValue: createSpyObj<DashboardApiService>(['getBlobValue']),
+                    useValue: api,
                 },
                 {
                     provide: WINDOW,
@@ -112,7 +114,7 @@ describe('DashboardComponent', () => {
                     },
                 }),
             ],
-            imports: [],
+            imports: [DashboardComponent],
         }).compileComponents();
 
         TestBed.overrideComponent(DashboardComponent, {

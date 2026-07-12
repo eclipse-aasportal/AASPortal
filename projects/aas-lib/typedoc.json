@@ -3,8 +3,11 @@
         "../../typedoc.base.jsonc"
     ],
     "entryPoints": [
-        "src/public-api.ts",
-        "src/lib/**/*.ts"
+        "src/public-api.ts"
+    ],
+    "exclude": [
+        "src/**/*.spec.ts",
+        "src/test/**/*"
     ],
     "tsconfig": "tsconfig.lib.json"
 }

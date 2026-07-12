@@ -4,10 +4,18 @@
         "moduleResolution": "bundler",
         "noEmit": false,
         "outDir": "./out-tsc/app",
-        "types": ["@angular/localize"]
+        "rootDir": "..",
+        "types": [
+            "@angular/localize"
+        ]
     },
-    "include": ["src/**/*.ts"],
-    "exclude": ["src/test/**/*", "src/app/**/*.spec.ts"],
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "src/**/*.spec.ts",
+        "src/test/**/*"
+    ],
     "angularCompilerOptions": {
         "extendedDiagnostics": {
             "checks": {

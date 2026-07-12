@@ -64,7 +64,6 @@ export class DocumentsController extends Controller {
     /**
      * @summary Gets the first occurrence of an AAS document with the specified identifier.
      * @param id The AAS identifier.
-     * @param endpoint The optional name of the AAS endpoint.
      * @returns The first occurrence of an AAS document with the specified identifier.
      */
     @Get('documents/{id}')
@@ -79,8 +78,7 @@ export class DocumentsController extends Controller {
     }
 
     /**
-     * @summary Gets the AAS document that provides an Asset with the specified identifier from the specified endpoint.
-     * @param endpoint The endpoint name (Base64-URL encoded).
+     * @summary Gets the AAS document that provides an Asset with the specified identifier.
      * @param id The Asset identifier (Base64-URL encoded).
      * @returns The AAS document
      */

@@ -1,102 +1,70 @@
 /******************************************************************************
  *
- * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,",
- * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft",
- * zur Foerderung der angewandten Forschung e.V.",
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
  *
  *****************************************************************************/
 
-import { readFileSync } from 'fs';
+import { execFileSync } from 'child_process';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from 'fs';
+import { resolve } from 'path';
 
 main();
 
 function main(): void {
-    const aasCoreSummary = read('./coverage/aas-core/coverage-summary.json');
-    const aasNodeSummary = read('./coverage/aas-node/coverage-summary.json');
-    const aasLibSummary = read('./coverage/aas-lib/coverage-summary.json');
-    const aasPortalSummary = read('./coverage/aas-portal/coverage-summary.json');
-    const aasServerSummary = read('./coverage/aas-server/coverage-summary.json');
-    const aasBrowserSummary = read('./coverage/aas-browser/coverage-summary.json');
+    const projectRoot = process.cwd();
+    const packageJson = readJson<{ workspaces?: string[] }>(resolve(projectRoot, 'package.json'));
+    const coverageFiles = (packageJson.workspaces ?? [])
+        .map(workspace => resolve(projectRoot, workspace, 'coverage', 'coverage-final.json'))
+        .filter(coverageFile => existsSync(coverageFile));
 
-    const statementsTotal =
-        aasCoreSummary.total.statements.total +
-        aasNodeSummary.total.statements.total +
-        aasLibSummary.total.statements.total +
-        aasPortalSummary.total.statements.total +
-        aasServerSummary.total.statements.total +
-        aasBrowserSummary.total.statements.total;
+    if (coverageFiles.length === 0) {
+        throw new Error('No workspace coverage-final.json files were found. Run the workspace tests first.');
+    }
 
-    const statementsCovered =
-        aasCoreSummary.total.statements.covered +
-        aasNodeSummary.total.statements.covered +
-        aasLibSummary.total.statements.covered +
-        aasPortalSummary.total.statements.covered +
-        aasServerSummary.total.statements.covered +
-        aasBrowserSummary.total.statements.covered;
+    const tempDir = resolve(projectRoot, '.nyc_output');
+    const reportDir = resolve(projectRoot, 'coverage');
+    const mergedCoverageFile = resolve(tempDir, 'coverage.json');
 
-    const branchesTotal =
-        aasCoreSummary.total.branches.total +
-        aasNodeSummary.total.branches.total +
-        aasLibSummary.total.branches.total +
-        aasPortalSummary.total.branches.total +
-        aasServerSummary.total.branches.total +
-        aasBrowserSummary.total.branches.total;
+    rmSync(tempDir, { recursive: true, force: true });
+    rmSync(reportDir, { recursive: true, force: true });
+    mkdirSync(tempDir, { recursive: true });
+    mkdirSync(reportDir, { recursive: true });
 
-    const branchesCovered =
-        aasCoreSummary.total.branches.covered +
-        aasNodeSummary.total.branches.covered +
-        aasLibSummary.total.branches.covered +
-        aasPortalSummary.total.branches.covered +
-        aasServerSummary.total.branches.covered +
-        aasBrowserSummary.total.branches.covered;
+    coverageFiles.forEach((coverageFile, index) => {
+        copyFileSync(coverageFile, resolve(tempDir, `${index + 1}.json`));
+    });
 
-    const functionsTotal =
-        aasCoreSummary.total.functions.total +
-        aasNodeSummary.total.functions.total +
-        aasLibSummary.total.functions.total +
-        aasPortalSummary.total.functions.total +
-        aasServerSummary.total.functions.total +
-        aasBrowserSummary.total.functions.total;
+    execFileSync('nyc', ['merge', tempDir, mergedCoverageFile], { stdio: 'inherit' });
 
-    const functionsCovered =
-        aasCoreSummary.total.functions.covered +
-        aasNodeSummary.total.functions.covered +
-        aasLibSummary.total.functions.covered +
-        aasPortalSummary.total.functions.covered +
-        aasServerSummary.total.functions.covered +
-        aasBrowserSummary.total.functions.covered;
+    for (const entry of readdirSync(tempDir)) {
+        if (entry !== 'coverage.json') {
+            rmSync(resolve(tempDir, entry), { recursive: true, force: true });
+        }
+    }
 
-    const total =
-        aasCoreSummary.total.lines.total +
-        aasNodeSummary.total.lines.total +
-        aasLibSummary.total.lines.total +
-        aasPortalSummary.total.lines.total +
-        aasServerSummary.total.lines.total +
-        aasBrowserSummary.total.lines.total;
-
-    const covered =
-        aasCoreSummary.total.lines.covered +
-        aasNodeSummary.total.lines.covered +
-        aasLibSummary.total.lines.covered +
-        aasPortalSummary.total.lines.covered +
-        aasServerSummary.total.lines.covered +
-        aasBrowserSummary.total.lines.covered;
-
-    console.info('=============================== Coverage summary ===============================');
-    console.info(
-        `Statements   : ${((statementsCovered / statementsTotal) * 100).toFixed(2)}% ( ${statementsCovered}/${statementsTotal} )`,
+    execFileSync(
+        'nyc',
+        [
+            'report',
+            '--temp-dir',
+            tempDir,
+            '--report-dir',
+            reportDir,
+            '--reporter=text-summary',
+            '--reporter=html',
+            '--reporter=lcov',
+            '--reporter=cobertura',
+            '--reporter=json',
+            '--reporter=json-summary',
+        ],
+        { stdio: 'inherit' },
     );
-    console.info(
-        `Branches     : ${((branchesCovered / branchesTotal) * 100).toFixed(2)}% ( ${branchesCovered}/${branchesTotal} )`,
-    );
-    console.info(
-        `Functions    : ${((functionsCovered / functionsTotal) * 100).toFixed(2)}% ( ${functionsCovered}/${functionsTotal} )`,
-    );
-    console.info(`Lines        : ${((covered / total) * 100).toFixed(2)}% ( ${covered}/${total} )`);
-    console.info('================================================================================');
+
+    console.info(`Merged coverage report written to ${reportDir}`);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function read(path: string): any {
-    return JSON.parse(readFileSync(path).toString());
+function readJson<T>(path: string): T {
+    return JSON.parse(readFileSync(path).toString()) as T;
 }

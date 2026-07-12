@@ -143,7 +143,6 @@ export interface ApiUrl {
      * @param id The Asset Administration Shell identifier.
      * @param submodelId The submodel identifier.
      * @param idShortPath The idShort path of the File element.
-     * @param options Additional request options.
      */
     getFileUrl(endpoint: string | undefined, id: string, submodelId: string, idShortPath: string): string;
 }

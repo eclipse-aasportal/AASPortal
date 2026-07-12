@@ -11,7 +11,8 @@
         "watch": "ng test aas-browser --coverage=false",
         "test": "ng test aas-browser --no-watch",
         "lint": "ng lint aas-browser",
-        "format": "ng lint aas-browser --fix"
+        "format": "ng lint aas-browser --fix",
+        "docs": "typedoc --out docs"
     },
     "private": true
 }

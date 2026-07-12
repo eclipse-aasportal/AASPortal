@@ -18,12 +18,12 @@ import { createSpyObj, FakeLoader } from '../../test/mocks';
 import { StartState, StartTileItem } from './start.state';
 
 describe('StartComponent', () => {
-    let start: Mocked<StartService>;
-    let sanitizer: Mocked<DomSanitizer>;
-    let state: Partial<StartState>;
-    let favorites: StartTileItem[];
     let fixture: ComponentFixture<StartComponent>;
     let component: StartComponent;
+    let start: Mocked<StartService>;
+    let sanitizer: Mocked<DomSanitizer>;
+    let state: Mocked<StartState>;
+    let favorites: StartTileItem[];
     let items: WritableSignal<StartTileItem[]>;
 
     beforeEach(async () => {
@@ -40,7 +40,7 @@ describe('StartComponent', () => {
         ] as StartTileItem[];
 
         items = signal(favorites);
-        state = { welcome: signal('Welcome'), items };
+        state = createSpyObj<StartState>([], { welcome: signal('Welcome'), items });
 
         await TestBed.configureTestingModule({
             providers: [
@@ -55,6 +55,10 @@ describe('StartComponent', () => {
                 {
                     provide: DomSanitizer,
                     useValue: sanitizer,
+                },
+                {
+                    provide: StartState,
+                    useValue: state,
                 },
                 provideTranslateService({
                     loader: {

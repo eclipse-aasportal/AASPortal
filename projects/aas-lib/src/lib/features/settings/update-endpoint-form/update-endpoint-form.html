@@ -31,7 +31,12 @@
                 </button>
                 <div class="dropdown-menu" ngbDropdownMenu>
                     @for (item of templates(); track item) {
-                        <button type="button" id="{{ 'AID_TYPE_' + item.type }}" (click)="selectTemplate(item)" ngbDropdownItem>
+                        <button
+                            type="button"
+                            id="{{ 'AID_TYPE_' + item.type }}"
+                            (click)="selectTemplate(item)"
+                            ngbDropdownItem
+                        >
                             {{ 'UpdateEndpointForm.' + item.type | translate }}
                         </button>
                     }
@@ -55,9 +60,11 @@
                         value="disabled"
                         [formField]="form.items[idx].schedule"
                     />
-                    <label class="form-check-label" for="AID_SCHEDULE_DISABLED" translate
-                        >UpdateEndpointForm.DISABLED</label
-                    >
+                    <label
+                        class="form-check-label"
+                        for="AID_SCHEDULE_DISABLED"
+                        translate="UpdateEndpointForm.DISABLED"
+                    ></label>
                 </div>
                 <div class="form-check form-check-inline">
                     <input
@@ -67,9 +74,11 @@
                         value="manual"
                         [formField]="form.items[idx].schedule"
                     />
-                    <label class="form-check-label" for="AID_SCHEDULE_MANUAL" translate
-                        >UpdateEndpointForm.MANUAL</label
-                    >
+                    <label
+                        class="form-check-label"
+                        for="AID_SCHEDULE_MANUAL"
+                        translate="UpdateEndpointForm.MANUAL"
+                    ></label>
                 </div>
                 <div class="form-check form-check-inline">
                     <input
@@ -89,7 +98,11 @@
                         value="every"
                         [formField]="form.items[idx].schedule"
                     />
-                    <label class="form-check-label" for="AID_SCHEDULE_EVERY" translate="UpdateEndpointForm.EVERY"></label>
+                    <label
+                        class="form-check-label"
+                        for="AID_SCHEDULE_EVERY"
+                        translate="UpdateEndpointForm.EVERY"
+                    ></label>
                 </div>
                 @if (form.items[idx].schedule().value() === 'every') {
                     <div class="input-group mt-3">
@@ -115,9 +128,11 @@
                 }
             </div>
             @if (template().type === 'AAS_API') {
-                <label class="form-lable mt-2" for="AID_SELECT_AUTHORIZATION" translate
-                    >UpdateEndpointForm.AUTHORIZATION</label
-                >
+                <label
+                    class="form-lable mt-2"
+                    for="AID_SELECT_AUTHORIZATION"
+                    translate="UpdateEndpointForm.AUTHORIZATION"
+                ></label>
                 <select id="AID_SELECT_AUTHORIZATION" class="form-select" [formField]="form.items[idx].authorization">
                     @for (item of authorizations(); track item) {
                         <option [value]="item">{{ item | translate }}</option>
@@ -127,7 +142,11 @@
                     @switch (form.items[idx].authorization().value()) {
                         @case ('UpdateEndpointForm.API_KEY') {
                             <div class="col-4">
-                                <label class="form-lable" for="AID_HEADER_NAME" translate="UpdateEndpointForm.KEY"></label>
+                                <label
+                                    class="form-lable"
+                                    for="AID_HEADER_NAME"
+                                    translate="UpdateEndpointForm.KEY"
+                                ></label>
                                 <input
                                     type="text"
                                     id="AID_HEADER_NAME"
@@ -137,9 +156,11 @@
                                 <fhg-form-error [field]="form.items[idx].key()"></fhg-form-error>
                             </div>
                             <div class="col-8">
-                                <label class="form-lable" for="AID_ACCESS_KEY" translate
-                                    >UpdateEndpointForm.VALUE</label
-                                >
+                                <label
+                                    class="form-lable"
+                                    for="AID_ACCESS_KEY"
+                                    translate="UpdateEndpointForm.VALUE"
+                                ></label>
                                 <input
                                     type="password"
                                     id="AID_ACCESS_KEY"
@@ -151,9 +172,11 @@
                         }
                         @case ('UpdateEndpointForm.BEARER_TOKEN') {
                             <div class="col-12">
-                                <label class="form-lable" for="AID_BEARER_TOKEN" translate
-                                    >UpdateEndpointForm.TOKEN</label
-                                >
+                                <label
+                                    class="form-lable"
+                                    for="AID_BEARER_TOKEN"
+                                    translate="UpdateEndpointForm.TOKEN"
+                                ></label>
                                 <input
                                     type="password"
                                     id="AID_BEARER_TOKEN"
@@ -169,8 +192,24 @@
         }
     </div>
     <div class="modal-footer">
-        <button type="button" id="AID_DELETE_ENDPOINT" class="btn btn-danger me-auto" (click)="deleteEndpoint()" translate="UpdateEndpointForm.DELETE"></button>
-        <button type="submit" class="btn btn-primary" [disabled]="!canClose()" translate="UpdateEndpointForm.OK"></button>
-        <button type="button" class="btn btn-secondary" (click)="cancel()" translate="UpdateEndpointForm.CANCEL"></button>
+        <button
+            type="button"
+            id="AID_DELETE_ENDPOINT"
+            class="btn btn-danger me-auto"
+            (click)="deleteEndpoint()"
+            translate="UpdateEndpointForm.DELETE"
+        ></button>
+        <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="!canClose()"
+            translate="UpdateEndpointForm.OK"
+        ></button>
+        <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cancel()"
+            translate="UpdateEndpointForm.CANCEL"
+        ></button>
     </div>
 </form>

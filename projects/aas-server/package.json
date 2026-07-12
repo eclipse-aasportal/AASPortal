@@ -17,7 +17,8 @@
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "eslint src/app/**/*.ts",
         "format": "eslint src/app/**/*.ts --fix",
-        "start": "docker build -f Dockerfile -t aasserver . && docker run -d --name AASServer -p 50010:50010 --restart=always aasserver"
+        "start": "docker build -f Dockerfile -t aasserver . && docker run -d --name AASServer -p 50010:50010 --restart=always aasserver",
+        "docs": "typedoc --out docs"
     },
     "dependencies": {
         "@xmldom/xmldom": "^0.8.10",
