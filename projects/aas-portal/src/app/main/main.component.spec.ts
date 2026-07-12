@@ -21,7 +21,14 @@ import {
 } from '@angular/core';
 
 import { AASDocument } from 'aas-core';
-import { AuthComponent, IndexChange, LocalizeComponent, NotifyComponent, SettingsComponent, ToolbarService } from 'aas-lib';
+import {
+    AuthComponent,
+    IndexChange,
+    LocalizeComponent,
+    NotifyComponent,
+    SettingsComponent,
+    ToolbarService,
+} from 'aas-lib';
 
 import { MainComponent } from './main.component';
 import { createSpyObj, FakeLoader } from '../../test/mocks';
