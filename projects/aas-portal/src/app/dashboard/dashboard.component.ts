@@ -11,6 +11,7 @@ import { EMPTY, first, Observable, Subscription } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
     Component,
     ElementRef,
@@ -29,34 +30,30 @@ import {
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
 import {
-    CommandHandler,
-    NotifyService,
-    PromptDialog,
-    StartService,
-    ToolbarService,
-    WebSocketService,
-    WINDOW,
-} from 'aas-lib';
-
-import { MovePreviousCommand } from './commands/move-previous-command';
-import { MoveNextCommand } from './commands/move-next-command';
-import { DeletePageCommand } from './commands/delete-page-command';
-import { RenamePageCommand } from './commands/rename-page-command';
-import { AddNewPageCommand } from './commands/add-new-page-command';
-import { DeleteItemCommand } from './commands/delete-item-command';
-import { DashboardApiService } from './dashboard-api.service';
-import { Dashboard } from './dashboard';
-import { DashboardService } from './dashboard.service';
-import { ChartEditComponent } from './chart-edit/chart-edit.component';
-import {
+    AddNewPageCommand,
     ChartConfigurationTuple,
+    ChartEditComponent,
+    CommandHandler,
+    Dashboard,
+    DashboardApiService,
     DashboardChart,
     DashboardChartItem,
     DashboardPage,
+    DashboardService,
     DashboardSource,
+    DeleteItemCommand,
+    DeletePageCommand,
+    MoveNextCommand,
+    MovePreviousCommand,
+    NotifyService,
+    PromptDialog,
+    RenamePageCommand,
+    StartService,
+    ToolbarService,
     ViewPortSize,
-} from './dashboard-types';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+    WebSocketService,
+    WINDOW,
+} from 'aas-lib';
 
 @Component({
     selector: 'fhg-dashboard',

@@ -10,12 +10,13 @@ import { Component, input, signal, ChangeDetectionStrategy, inject, computed } f
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { convertToString } from 'aas-core';
-import { NotifyService, CommandHandler } from 'aas-lib';
 import { DashboardChartItem, DashboardChartType } from '../dashboard-types';
 import { SetColorCommand } from '../commands/set-color-command';
 import { SetMinMaxCommand } from '../commands/set-min-max-command';
 import { DashboardService } from '../dashboard.service';
 import { SetChartTypeCommand } from '../commands/set-chart-type-command';
+import { CommandHandler } from '../../../services/command-handler';
+import { NotifyService } from '../../../core/notify/notify.service';
 
 @Component({
     selector: 'fhg-chart-edit',

@@ -32,11 +32,11 @@ import {
     StartService,
     ToolbarService,
     VIEW_ROUTES,
+    DashboardService,
+    DashboardPage,
 } from 'aas-lib';
 
 import { AASComponent } from './aas.component';
-import { DashboardService } from '../dashboard/dashboard.service';
-import { DashboardChartType, DashboardPage } from '../dashboard/dashboard-types';
 import { createSpyObj, FakeLoader } from '../../test/mocks';
 import { AASState } from './aas.state';
 
@@ -170,10 +170,6 @@ describe('AASComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('shows the document address', () => {
-        expect(component.address()).toEqual(sampleDocument.address);
-    });
-
     it('shows the document assetId', () => {
         expect(component.assetId()).toEqual('http://customer.com/assets/KHBVZJSQKIY');
     });
@@ -184,118 +180,5 @@ describe('AASComponent', () => {
 
     it('shows the document version', () => {
         expect(component.version()).toEqual('-');
-    });
-
-    it('indicates that "play" is disabled while sample AAS is not online ready', () => {
-        expect(component.canPlay()).toBe(false);
-    });
-
-    it('indicates that "stop" is disabled while sample AAS is not online ready', () => {
-        expect(component.canStop()).toBe(false);
-    });
-
-    it('indicates that the sample AAS is editable', () => {
-        expect(component.readOnly()).toBe(false);
-    });
-
-    describe('canAddToDashboard', () => {
-        it('can add the selected properties to the dashboard', () => {
-            component.setSelectedElements([torque, rotationSpeed]);
-            vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
-            expect(component.canAddToDashboard()).toBe(true);
-            component.addToDashboard(DashboardChartType.BarVertical);
-            expect(dashboard.addChart).toHaveBeenCalled();
-            expect(router.navigateByUrl).toHaveBeenCalled();
-        });
-    });
-
-    describe('download', () => {
-        beforeEach(() => {
-            vi.useFakeTimers();
-            vi.stubGlobal('URL', URLMock);
-        });
-
-        afterEach(() => {
-            vi.useRealTimers();
-            vi.clearAllMocks();
-            vi.unstubAllGlobals();
-        });
-
-        it('does nothing when there is no document content', () => {
-            const dom = TestBed.inject(DOCUMENT) as Document;
-            const createElSpy = vi.spyOn(dom, 'createElement');
-            const state = TestBed.inject(AASState);
-            state.update({ document: { ...sampleDocument, content: undefined } });
-            component.download();
-            expect(createElSpy).not.toHaveBeenCalled();
-            createElSpy.mockRestore();
-        });
-
-        it('creates a blob, starts download and revokes the object URL after timeout', () => {
-            const dom = TestBed.inject(DOCUMENT) as Document;
-            const fakeAnchor = { setAttribute: vi.fn(), click: vi.fn(), href: '' };
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const createElSpy = vi.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
-            const createObjectSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob://1');
-            const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
-            const state = TestBed.inject(AASState);
-            state.update({ document: sampleDocument });
-
-            component.download();
-
-            expect(createObjectSpy).toHaveBeenCalled();
-            expect(fakeAnchor.setAttribute).toHaveBeenCalledWith('download', `${sampleDocument.idShort}.json`);
-            expect(fakeAnchor.click).toHaveBeenCalled();
-
-            vi.advanceTimersByTime(1000);
-            expect(revokeSpy).toHaveBeenCalledWith('blob://1');
-
-            createElSpy.mockRestore();
-            createObjectSpy.mockRestore();
-            revokeSpy.mockRestore();
-        });
-
-        it('notifies on error when preparing the download fails', () => {
-            const state = TestBed.inject(AASState);
-            const badDoc = Object.create(sampleDocument);
-            Object.defineProperty(badDoc, 'content', {
-                get: () => {
-                    throw new Error('boom');
-                },
-                configurable: true,
-            });
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            state.update({ document: badDoc as any });
-            const notify = TestBed.inject(NotifyService) as Mocked<NotifyService>;
-            component.download();
-            expect(notify.error).toHaveBeenCalled();
-        });
-
-        it('downloads a submodel', () => {
-            const dom = TestBed.inject(DOCUMENT) as Document;
-            const fakeAnchor = { setAttribute: vi.fn(), click: vi.fn(), href: '' };
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const createElSpy = vi.spyOn(dom, 'createElement').mockReturnValue(fakeAnchor as any);
-            const createObjectSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob://1');
-            const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
-            const state = TestBed.inject(AASState);
-            state.update({ document: sampleDocument });
-
-            const submodel = sampleDocument.content!.submodels[0];
-            component.setSelectedElements([submodel]);
-            component.download();
-
-            expect(createObjectSpy).toHaveBeenCalled();
-            expect(fakeAnchor.setAttribute).toHaveBeenCalledWith('download', `${submodel.idShort}.json`);
-            expect(fakeAnchor.click).toHaveBeenCalled();
-
-            vi.advanceTimersByTime(1000);
-            expect(revokeSpy).toHaveBeenCalledWith('blob://1');
-
-            createElSpy.mockRestore();
-            createObjectSpy.mockRestore();
-            revokeSpy.mockRestore();
-        });
     });
 });

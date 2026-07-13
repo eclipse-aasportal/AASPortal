@@ -117,6 +117,7 @@ export type ViewRouteName =
     | 'Browser'
     | 'CarbonFootprint'
     | 'ContactInformation'
+    | 'Content'
     | 'CustomerFeedback'
     | 'DigitalProductPassport'
     | 'HandoverDocumentation'

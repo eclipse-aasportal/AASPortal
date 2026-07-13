@@ -188,10 +188,11 @@
             ],
         },
         {
-            "name": "Debug create-app-info test",
+            "name": "Launch create-app-info test",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}/projects/aas-package",
+            "console": "integratedTerminal",
             "program": "npm",
             "runtimeArgs": [
                 "run-script",
@@ -203,6 +204,7 @@
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
             "program": "npm",
             "runtimeArgs": [
                 "run-script",

@@ -15,6 +15,7 @@ import {
     API_URL,
     AuthInterceptor,
     CacheInterceptor,
+    ChartComponent,
     CustomerFeedbackCardComponent,
     FavoriteComponent,
     NotifyService,
@@ -28,7 +29,6 @@ import {
 } from 'aas-lib';
 
 import { routes } from './app.routes';
-import { ChartComponent } from './dashboard/chart/chart.component';
 import { AboutCardComponent } from './about/about-card.component';
 import { ApiUrlService } from './api-url.service';
 

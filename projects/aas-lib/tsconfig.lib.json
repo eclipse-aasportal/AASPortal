@@ -6,7 +6,7 @@
         "declaration": true,
         "declarationMap": true,
         "inlineSources": true,
-        "noEmit": false,
+        "noEmit": false
     },
     "include": ["src/**/*.ts"],
     "exclude": [

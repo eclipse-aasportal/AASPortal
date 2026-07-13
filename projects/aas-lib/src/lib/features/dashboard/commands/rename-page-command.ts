@@ -8,36 +8,38 @@
 
 import { ApplicationError } from 'aas-core';
 import { DashboardCommand } from './dashboard-command';
-import { ERRORS } from '../../types/errors';
 import { DashboardService } from '../dashboard.service';
 import { DashboardPage } from '../dashboard-types';
+import { ERRORS } from '../../../messages';
 
-export class AddNewPageCommand extends DashboardCommand {
+export class RenamePageCommand extends DashboardCommand {
     public constructor(
         service: DashboardService,
-        private pageName?: string,
+        private page: DashboardPage,
+        private newName: string,
     ) {
-        super('Add new page', service);
+        super('Delete page', service);
     }
 
     protected executing(): void {
-        const name = this.pageName?.trim();
-        if (!name && this.service.pages().some(page => page.name === name)) {
+        const name = this.newName?.trim();
+        if (!name) {
+            throw new Error('Valid page name expected.');
+        }
+
+        if (this.service.pages().some(item => item.name === name)) {
             throw new ApplicationError(ERRORS.DASHBOARD_PAGE_ALREADY_EXISTS, { name }, 409);
         }
 
-        this.addNewPage(name);
+        this.renamePage(name);
     }
 
-    private addNewPage(name?: string): void {
-        name = name?.trim() ?? this.service.createPageName();
-        const page: DashboardPage = {
-            name: name,
-            active: false,
-            items: [],
-            requests: [],
-        };
+    private renamePage(name: string): void {
+        const index = this.service.pages().indexOf(this.page);
+        if (index < 0) {
+            return;
+        }
 
-        this.service.addPage(page);
+        this.service.updatePage({ ...this.page, name }, this.page.name);
     }
 }

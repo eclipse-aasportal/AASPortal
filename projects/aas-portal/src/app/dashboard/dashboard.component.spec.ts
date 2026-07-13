@@ -13,13 +13,21 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { EMPTY } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { NotifyService, StartService, WebSocketService, WINDOW, ToolbarService, WindowService } from 'aas-lib';
+import {
+    NotifyService,
+    StartService,
+    WebSocketService,
+    WINDOW,
+    ToolbarService,
+    WindowService,
+    DashboardService,
+    DashboardApiService,
+    DashboardState,
+    DashboardChartItem,
+    ChartEditComponent,
+} from 'aas-lib';
 
 import { DashboardComponent } from './dashboard.component';
-import { DashboardApiService } from './dashboard-api.service';
-import { DashboardService } from './dashboard.service';
-import { DashboardChartItem, DashboardState } from './dashboard-types';
-import { ChartEditComponent } from './chart-edit/chart-edit.component';
 
 import data from '../../test/assets/test-pages.json';
 import { createSpyObj, FakeLoader, MockWebSocketService } from '../../test/mocks';

@@ -10,10 +10,10 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { WebSocketService } from 'aas-lib';
 import { ChartComponent } from './chart.component';
 import { DashboardApiService } from '../dashboard-api.service';
-import { createSpyObj, FakeLoader, MockWebSocketService } from '../../../test/mocks';
+import { WebSocketService } from '../../../services/web-socket.service';
+import { createSpyObj, FakeLoader, MockWebSocketService } from '../../../../test/mocks';
 
 describe('ChartComponent', () => {
     let api: Mocked<DashboardApiService>;
