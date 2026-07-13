@@ -17,7 +17,7 @@ import { View } from './view';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 /** Provides a view for an Asset Asset Administration with a set of specific submodels. */
-@Component({ selector: 'awp-composite-view', changeDetection: ChangeDetectionStrategy.Eager, template: '' })
+@Component({ selector: 'awp-composite-view', changeDetection: ChangeDetectionStrategy.OnPush, template: '' })
 export abstract class CompositeView extends View {
     protected constructor() {
         super();
@@ -70,17 +70,13 @@ export abstract class CompositeView extends View {
             mergeMap(params => this.documentsFromParams(params)),
             first(),
             map(documents => {
-                if (!documents) {
-                    return [];
-                }
-
                 return [...this.filter(documents)];
             }),
         ),
         { initialValue: [] },
     );
 
-    private documentsFromParams(params: Params): Observable<AASDocument[] | undefined> {
+    private documentsFromParams(params: Params): Observable<AASDocument[]> {
         if (params?.id) {
             const endpoint = params.endpoint ? decodeBase64Url(params.endpoint) : undefined;
             return this.api
@@ -96,7 +92,7 @@ export abstract class CompositeView extends View {
             );
         }
 
-        return of(undefined);
+        return of([]);
     }
 
     private *filter(documents: AASDocument[]): Generator<[AASDocument, ViewRouteMap]> {

@@ -11,11 +11,11 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
-import { AASContentState } from './aas-content.state';
+import { DocumentContentState, DocumentStateData } from './document-content.state';
 import { FakeLoader } from '../../../test/mocks';
 
-describe.skip('AASContentState', () => {
-    let service: AASContentState;
+describe('DocumentContentState', () => {
+    let service: DocumentContentState;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -30,11 +30,11 @@ describe.skip('AASContentState', () => {
             ],
         });
 
-        service = TestBed.inject(AASContentState);
+        service = TestBed.inject(DocumentContentState);
     });
 
     it('should be created', () => {
-        expect(service).toBeTruthy();
+        expect(service).toBeInstanceOf(DocumentContentState);
     });
 
     it('provides the current active document', () => {
@@ -51,5 +51,35 @@ describe.skip('AASContentState', () => {
 
     it('provides a list of the current selected elements', () => {
         expect(service.selectedElements()).toEqual([]);
+    });
+
+    it('can update the state', () => {
+        const newState = {
+            document: {
+                id: 'doc1',
+                content: null,
+                address: '',
+                crc32: 0,
+                idShort: '',
+                readonly: false,
+                timestamp: 0,
+                endpoint: '',
+            },
+            live: 'online' as const,
+            searchExpression: 'test',
+            selectedElements: [
+                {
+                    idShort: 'element1',
+                    modelType: 'AnnotatedRelationshipElement',
+                },
+            ],
+        } satisfies Partial<DocumentStateData>;
+
+        service.update(newState);
+
+        expect(service.document()).toEqual(newState.document);
+        expect(service.live()).toEqual(newState.live);
+        expect(service.searchExpression()).toEqual(newState.searchExpression);
+        expect(service.selectedElements()).toEqual(newState.selectedElements);
     });
 });

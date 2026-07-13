@@ -6,45 +6,44 @@
  *
  *****************************************************************************/
 
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { EMPTY, map, Observable, first, combineLatest } from 'rxjs';
+import { EMPTY, map, Observable, first, combineLatest, of } from 'rxjs';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import {
     ChangeDetectionStrategy,
     Component,
     DOCUMENT,
     OnDestroy,
-    OnInit,
     TemplateRef,
     computed,
     effect,
     inject,
     linkedSignal,
+    untracked,
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, isSubmodel, toJsonValue, jsonization } from 'aas-core';
+import { aas, isProperty, isNumberType, isBlob, isSubmodel, toJsonValue, jsonization, AASDocument } from 'aas-core';
 
-import { AASContentState } from './aas-content.state';
+import { DocumentContentState } from './document-content.state';
 import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
 import { NotifyService } from '../../core/notify/notify.service';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
-import { EndpointsApi } from '../../services/endpoints-api';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
-import { VIEW_ROUTES } from '../views-routes';
 import { decodeBase64Url, encodeBase64Url } from '../../utilities';
 import { DashboardChartType, DashboardPage } from '../../features/dashboard/dashboard-types';
 import { CompositeView } from '../composite-view';
+import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 @Component({
     selector: 'fhg-aas',
-    templateUrl: './aas-content.html',
-    styleUrls: ['./aas-content.scss'],
+    templateUrl: './document-content.html',
+    styleUrls: ['./document-content.scss'],
+    providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'content' }],
     imports: [TranslateDirective, TranslatePipe, FormsModule, AASTreeComponent, RouterModule, NgbNavModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**
  * Component responsible for managing and displaying Asset Administration Shell (AAS) functionality.
@@ -58,8 +57,8 @@ import { CompositeView } from '../composite-view';
  * - Search functionality
  * - Download capabilities
  */
-export class AASContent extends CompositeView implements OnDestroy {
-    private readonly state = inject(AASContentState);
+export class DocumentContent extends CompositeView implements OnDestroy {
+    private readonly state = inject(DocumentContentState);
     private readonly router = inject(Router);
     private readonly notify = inject(NotifyService);
     private readonly dashboard = inject(DashboardService);
@@ -76,6 +75,15 @@ export class AASContent extends CompositeView implements OnDestroy {
                 this.toolbar.set(template);
             }
         });
+
+        effect(() => {
+            const document = this.document();
+            if (untracked(this.state.document) === document) {
+                return;
+            }
+
+            this.state.update({ document, selectedElements: [] });
+        });
     }
 
     /**
@@ -85,16 +93,6 @@ export class AASContent extends CompositeView implements OnDestroy {
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     public readonly aasTree = viewChild<AASTreeComponent>('aasTree');
-
-    public readonly address = computed(() => this.state.document()?.address ?? '-');
-
-    public readonly idShort = computed(() => this.state.document()?.idShort ?? '-');
-
-    public readonly id = computed(() => this.state.document()?.id ?? '-');
-
-    public readonly assetId = computed(() => this.state.document()?.assetId ?? '-');
-
-    public readonly readOnly = computed(() => !!this.state.document()?.readonly);
 
     public readonly live = this.state.live;
 

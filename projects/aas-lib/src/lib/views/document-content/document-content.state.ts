@@ -10,23 +10,23 @@ import { Injectable, signal } from '@angular/core';
 import { aas, AASDocument, equalArray } from 'aas-core';
 import { LiveState } from '../../types';
 
-export type AASData = {
+export type DocumentStateData = {
     document: AASDocument | null;
     live: LiveState;
     searchExpression: string;
     selectedElements: aas.Referable[];
 };
 
-const initialState: AASData = {
+const initialState: DocumentStateData = {
     document: null,
     live: 'offline',
     searchExpression: '',
     selectedElements: [],
-};  
+};
 
 /** Provides the state of the AAS page. */
 @Injectable({ providedIn: 'root' })
-export class AASContentState {
+export class DocumentContentState {
     private readonly document$ = signal(initialState.document);
     private readonly live$ = signal(initialState.live);
     private readonly searchExpression$ = signal(initialState.searchExpression);
@@ -46,7 +46,7 @@ export class AASContentState {
     /** The selected elements. */
     public readonly selectedElements = this.selectedElements$.asReadonly();
 
-    public update(newState: Partial<AASData>): void {
+    public update(newState: Partial<DocumentStateData>): void {
         if (newState.document !== undefined) {
             this.document$.set(newState.document);
         }

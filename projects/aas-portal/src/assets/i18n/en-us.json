@@ -5,6 +5,10 @@
         "PLACEHOLDER_SEARCH": "Search",
         "EMPTY": "No AAS document available."
     },
+    "AASContent": {
+        "TITLE": "AAS Tree",
+        "EMPTY": "Kein AAS-Document verfügbar."
+    },
     "AASTable": {
         "COLUMN_NAME": "Name",
         "COLUMN_ID": "ID",

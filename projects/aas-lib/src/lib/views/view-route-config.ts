@@ -34,7 +34,7 @@ import {
     TECHNICAL_DATA_1_2,
 } from './views-constants';
 import { AssetStatus } from './asset-status/asset-status';
-import { AASContent } from './content/aas-content';
+import { DocumentContent } from './document-content/document-content';
 
 /** The routes to the specific views. */
 export const viewRoutes: ViewRoute[] = [
@@ -70,11 +70,11 @@ export const viewRoutes: ViewRoute[] = [
         },
     },
     {
-        path: 'Content',
-        component: AASContent,
+        path: 'content',
+        component: DocumentContent,
         data: {
-            type: 'Default'
-        }
+            type: 'Default',
+        },
     },
     {
         path: 'CustomerFeedback',

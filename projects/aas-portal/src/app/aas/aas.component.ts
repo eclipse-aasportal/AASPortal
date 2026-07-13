@@ -254,7 +254,7 @@ export class AASComponent implements OnInit, OnDestroy {
         const id = this.document()?.id;
         if (id === undefined) return undefined;
 
-        return [`/content`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
+        return [`/views/content`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 
     public openBrowserView(): (string | { endpoint: string; id: string })[] | undefined {
