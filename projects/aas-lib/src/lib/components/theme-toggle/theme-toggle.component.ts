@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { ThemeService } from '../../services/theme.service';
 
@@ -15,7 +15,6 @@ import { ThemeService } from '../../services/theme.service';
     templateUrl: './theme-toggle.component.html',
     styleUrls: ['./theme-toggle.component.scss'],
     imports: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThemeToggleComponent {
     private readonly themeService = inject(ThemeService);

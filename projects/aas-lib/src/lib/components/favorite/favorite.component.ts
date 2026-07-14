@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
+import { Component, computed, effect, input, signal } from '@angular/core';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getLocaleValue } from 'aas-core';
 import { encodeBase64Url } from '../../utilities';
@@ -22,7 +22,6 @@ export type FavoriteDetail = {
     templateUrl: './favorite.component.html',
     styleUrl: './favorite.component.scss',
     imports: [TranslateDirective, TranslatePipe],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FavoriteComponent {
     private readonly document$ = signal<AASDocument | undefined>(undefined);

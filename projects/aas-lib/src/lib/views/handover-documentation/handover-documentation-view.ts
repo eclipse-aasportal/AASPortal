@@ -10,7 +10,7 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { ToolbarService } from '../../services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
@@ -30,7 +30,6 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     styleUrls: ['./handover-documentation-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'HandoverDocumentation' }],
     imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HandoverDocumentation, RouterModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HandoverDocumentationView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

@@ -6,17 +6,7 @@
  *
  *****************************************************************************/
 
-import {
-    ChangeDetectionStrategy,
-    Component,
-    effect,
-    ElementRef,
-    inject,
-    InjectionToken,
-    input,
-    linkedSignal,
-    viewChild,
-} from '@angular/core';
+import { Component, effect, ElementRef, inject, InjectionToken, input, linkedSignal, viewChild } from '@angular/core';
 import QRCode from 'qrcode';
 import { AASDocument } from 'aas-core';
 import { WINDOW } from '../../services/window.service';
@@ -32,7 +22,6 @@ export const QR_CODE = new InjectionToken<typeof QRCode>('Draw QR code', { facto
     selector: 'fhg-thumbnail-qrcode',
     templateUrl: './thumbnail-qrcode.html',
     styleUrl: './thumbnail-qrcode.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThumbnailQRCode {
     public constructor() {

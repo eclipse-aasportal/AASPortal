@@ -8,7 +8,7 @@
 
 import upperFirst from 'lodash-es/upperFirst';
 import { RouterLink } from '@angular/router';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, untracked } from '@angular/core';
 import {
     aas,
     getAbbreviation,
@@ -45,7 +45,6 @@ const ignore = new Set(['parent', 'methodId', 'objectId', 'nodeId']);
     styleUrl: './browser.component.scss',
     providers: [BrowserState],
     imports: [RouterLink, ConceptDescriptionComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**
  * The `BrowserComponent` displays the elements of an AAS document in a hierarchical structure.

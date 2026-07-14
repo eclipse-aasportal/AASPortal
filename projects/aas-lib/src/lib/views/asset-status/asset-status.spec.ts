@@ -9,7 +9,7 @@
 import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
@@ -29,7 +29,6 @@ import asset_status from '../../../test/assets/asset-status.json';
     selector: 'fhg-thumbnail-qrcode',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestThumbnailQRCode {
     public readonly document = input<AASDocument>();

@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
@@ -33,7 +33,6 @@ import contactInformation from '../../../test/assets/contact-information-1-0.jso
     selector: 'fhg-thumbnail-qrcode',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestThumbnailQRCode {
     public readonly document = input<AASDocument>();
@@ -43,7 +42,6 @@ export class TestThumbnailQRCode {
     selector: 'fhg-contact-information',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestContactInformation {
     public readonly document = input<AASDocument>();

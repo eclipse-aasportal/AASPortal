@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import {
     applyEach,
     form,
@@ -90,7 +90,6 @@ function ItemSchema(item: SchemaPathTree<EndpointItem>): void {
     imports: [FormField, TranslateDirective, TranslatePipe, NgbDropdownModule, FormError],
     templateUrl: './update-endpoint-form.html',
     styleUrl: './update-endpoint-form.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UpdateEndpointForm {
     private readonly activeModal = inject(NgbActiveModal);

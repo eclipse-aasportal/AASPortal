@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
 
@@ -48,7 +48,6 @@ import sample from '../../../test/assets/dpp-sample.json';
     selector: 'fhg-thumbnail-qrcode',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestThumbnailQRCode {
     public readonly document = input<AASDocument>();
@@ -58,7 +57,6 @@ export class TestThumbnailQRCode {
     selector: 'fhg-nameplate',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestNameplate {
     public readonly document = input<AASDocument>();
@@ -69,7 +67,6 @@ export class TestNameplate {
     selector: 'fhg-carbon-footprint',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestCarbonFootprint {
     public readonly document = input<AASDocument>();
@@ -81,7 +78,6 @@ export class TestCarbonFootprint {
     selector: 'fhg-handover-documentation',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestHandoverDocumentation {
     public readonly document = input<AASDocument>();

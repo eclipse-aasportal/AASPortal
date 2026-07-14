@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective } from '@ngx-translate/core';
 import { catchError, concat, from, map, mergeMap, Observable, of, tap } from 'rxjs';
@@ -23,7 +23,6 @@ import { NotifyService } from '../../core/notify/notify.service';
     imports: [NgbDropdownModule, TranslateDirective],
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsComponent {
     public readonly auth = inject(AuthService);

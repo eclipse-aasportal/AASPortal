@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap/dropdown';
 
@@ -17,7 +17,6 @@ import { ApiKeyFormComponent } from './api-key-form/api-key-form.component';
     templateUrl: './auth.component.html',
     styleUrls: ['./auth.component.scss'],
     imports: [NgbDropdown],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent implements OnInit {
     private readonly modal = inject(NgbModal);

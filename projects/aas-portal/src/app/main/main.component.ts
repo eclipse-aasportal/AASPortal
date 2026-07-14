@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgbCollapseModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
@@ -62,7 +62,6 @@ export interface LinkDescriptor {
         ThemeToggleComponent,
         SettingsComponent,
     ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent {
     protected readonly route = inject(ActivatedRoute);

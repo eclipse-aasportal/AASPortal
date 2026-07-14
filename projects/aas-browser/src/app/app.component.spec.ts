@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from './app.component';
 import { MainComponent } from './main/main.component';
 
@@ -17,7 +17,6 @@ import { MainComponent } from './main/main.component';
     template: '<div></div>',
     styleUrls: [],
     imports: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestMainComponent {}
 

@@ -49,7 +49,8 @@ describe('SessionStore', () => {
                 'find',
                 'findOne',
                 'deleteMany',
-                'deleteOne',
+                'findOneAndDelete',
+                'findOneAndReplace',
                 'countDocuments',
             ]),
         );
@@ -123,7 +124,7 @@ describe('SessionStore', () => {
             const sessionData: SessionData = {
                 cookie: {
                     originalMaxAge: 1000,
-                    expires: new Date(),
+                    expires: new Date(Date.now() + 1000),
                     secure: false,
                     httpOnly: true,
                     domain: 'example.com',
@@ -135,7 +136,7 @@ describe('SessionStore', () => {
 
             const query = createSpyObj<mongoose.Query<SessionDataDocument | null, SessionDataDocument>>(['exec'], {});
             query.exec.mockResolvedValue(null);
-            model.findOne.mockReturnValue(query as unknown as ReturnType<typeof model.findOne>);
+            model.findOneAndReplace.mockReturnValue(query as unknown as ReturnType<typeof model.findOneAndReplace>);
 
             await new Promise<void>((resolve, reject) => {
                 store.set(sessionId, sessionData, err => {
@@ -190,8 +191,7 @@ describe('SessionStore', () => {
             store['getTTL'] = vi.fn().mockReturnValue(1000);
             const query = createSpyObj<mongoose.Query<SessionDataDocument | null, SessionDataDocument>>(['exec'], {});
             query.exec.mockResolvedValue(existingDoc);
-            model.findOne.mockReturnValue(query as unknown as ReturnType<typeof model.findOne>);
-            model.deleteOne.mockReturnValue(Promise.resolve() as unknown as ReturnType<typeof model.deleteOne>);
+            model.findOneAndReplace.mockReturnValue(query as unknown as ReturnType<typeof model.findOneAndReplace>);
 
             await new Promise<void>((resolve, reject) => {
                 store.set(sessionId, sessionData, err => {
@@ -210,8 +210,7 @@ describe('SessionStore', () => {
             const sessionId = 'session-id';
             const query = createSpyObj<mongoose.Query<SessionDataDocument | null, SessionDataDocument>>(['exec'], {});
             query.exec.mockResolvedValue(null);
-            model.findOne.mockReturnValue(query as unknown as ReturnType<typeof model.findOne>);
-
+            model.findOneAndDelete.mockReturnValue(query as unknown as ReturnType<typeof model.findOneAndDelete>);
             await new Promise<void>((resolve, reject) => {
                 store.destroy(sessionId, err => {
                     if (err) {

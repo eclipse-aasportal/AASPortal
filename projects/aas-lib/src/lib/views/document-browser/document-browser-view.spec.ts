@@ -11,7 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { first, lastValueFrom, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { EndpointsApi } from '../../services/endpoints-api';
@@ -31,7 +31,6 @@ import sampleDocument from '../../../test/assets/sample-document.json';
     selector: 'fhg-thumbnail-qrcode',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestThumbnailQRCode {
     public readonly document = input<AASDocument>();
@@ -41,7 +40,6 @@ export class TestThumbnailQRCode {
     selector: 'fhg-browser',
     template: '<div></div>',
     styles: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestBrowserComponent {
     public readonly env = input<aas.Environment | null | undefined>(undefined);

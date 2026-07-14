@@ -20,7 +20,6 @@ import {
     TemplateRef,
     computed,
     effect,
-    ChangeDetectionStrategy,
     viewChild,
     viewChildren,
     Inject,
@@ -60,7 +59,6 @@ import {
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     imports: [FormsModule, TranslatePipe, ChartEditComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent extends Dashboard implements OnInit, OnDestroy {
     @Inject(WINDOW) private readonly window = inject(WINDOW);

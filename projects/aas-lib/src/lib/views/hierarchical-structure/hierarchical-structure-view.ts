@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, effect, inject, OnDestroy, TemplateRef, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
 import { LeafView } from '../leaf-view';
@@ -24,7 +24,6 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HierarchicalStructure],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'HierarchicalStructure' }],
     templateUrl: './hierarchical-structure-view.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './hierarchical-structure-view.scss',
 })
 export class HierarchicalStructureView extends LeafView implements OnDestroy {

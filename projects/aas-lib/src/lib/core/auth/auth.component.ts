@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { catchError, from, mergeMap, Observable, of, tap } from 'rxjs';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap/dropdown';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -22,7 +22,6 @@ import { EndpointAuthForm } from './endpoint-auth-form/endpoint-auth-form';
     templateUrl: './auth.component.html',
     styleUrls: ['./auth.component.scss'],
     imports: [NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, TranslateDirective],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent {
     private readonly auth = inject(AuthService);

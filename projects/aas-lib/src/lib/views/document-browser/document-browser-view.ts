@@ -9,7 +9,7 @@
 import { Observable, of } from 'rxjs';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { encodeBase64Url } from '../../utilities';
 import { ToolbarService } from '../../services/toolbar.service';
@@ -26,7 +26,6 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     styleUrl: './document-browser-view.scss',
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'Browser' }],
     imports: [TranslateDirective, TranslatePipe, NgbPaginationModule, BrowserComponent, ThumbnailQRCode],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**
  * The `DocumentBrowserView` component displays an AAS document in a hierarchical structure using the `BrowserComponent`.

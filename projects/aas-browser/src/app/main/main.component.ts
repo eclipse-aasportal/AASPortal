@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, OnInit, signal, inject, OnDestroy } from '@angular/core';
+import { Component, computed, OnInit, signal, inject, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgbNav, NgbNavItem, NgbNavLink } from '@ng-bootstrap/ng-bootstrap/nav';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
@@ -52,7 +52,6 @@ export interface LinkDescriptor {
         AuthComponent,
         TranslatePipe,
     ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent implements OnInit, OnDestroy {
     private readonly toolbar = inject(ToolbarService);

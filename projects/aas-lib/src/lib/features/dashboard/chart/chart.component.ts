@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, effect, ElementRef, inject, input, viewChild } from '@angular/core';
+import { Component, effect, ElementRef, inject, input, viewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { TranslateDirective } from '@ngx-translate/core';
 
@@ -22,7 +22,6 @@ import { WebSocketService } from '../../../services/web-socket.service';
     styleUrl: './chart.component.scss',
     standalone: true,
     imports: [TranslateDirective],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartComponent extends Dashboard {
     private configuration?: ChartConfigurationTuple;

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, Signal, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Signal, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbCollapse, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -27,7 +27,6 @@ export type ExtrasEndpointItem = {
     imports: [FormsModule, NgbToast, NgbCollapse, TranslatePipe],
     providers: [ExtrasEndpointService],
     templateUrl: './extras-endpoint-form.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './extras-endpoint-form.component.scss',
 })
 export class ExtrasEndpointFormComponent {

@@ -10,7 +10,7 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { aas, AASDocument, getReferable } from 'aas-core';
 
@@ -32,7 +32,6 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     styleUrls: ['./nameplate-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'Nameplate' }],
     imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate, RouterModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NameplateView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ProgressService } from './progress.service';
 
 @Component({
@@ -14,7 +14,6 @@ import { ProgressService } from './progress.service';
     imports: [],
     templateUrl: './progress.component.html',
     styleUrl: './progress.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProgressComponent {
     private readonly service = inject(ProgressService);

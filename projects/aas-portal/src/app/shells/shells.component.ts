@@ -11,7 +11,6 @@ import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
 import {
-    ChangeDetectionStrategy,
     Component,
     ElementRef,
     OnDestroy,
@@ -52,7 +51,6 @@ import { INFO } from '../messages';
     templateUrl: './shells.component.html',
     styleUrls: ['./shells.component.scss'],
     imports: [AASTable, NgClass, TranslateDirective, TranslatePipe, NgbModule, FormsModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**
  * Component responsible for managing AAS (Asset Administration Shell) documents and endpoints.

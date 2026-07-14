@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { Params } from '@angular/router';
 import { combineLatest, first, from, mergeMap, of, toArray, map, Observable } from 'rxjs';
 
@@ -16,8 +16,10 @@ import { ViewRoute, ViewRouteMap } from '../types';
 import { View } from './view';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-/** Provides a view for an Asset Asset Administration with a set of specific submodels. */
-@Component({ selector: 'awp-composite-view', changeDetection: ChangeDetectionStrategy.OnPush, template: '' })
+/**
+ * Provides a view for an Asset Asset Administration with a set of specific submodels.
+ */
+@Component({ selector: 'awp-composite-view', template: '' })
 export abstract class CompositeView extends View {
     protected constructor() {
         super();
@@ -68,7 +70,6 @@ export abstract class CompositeView extends View {
                 return routeParams.id || routeParams.docs ? routeParams : queryParams;
             }),
             mergeMap(params => this.documentsFromParams(params)),
-            first(),
             map(documents => {
                 return [...this.filter(documents)];
             }),

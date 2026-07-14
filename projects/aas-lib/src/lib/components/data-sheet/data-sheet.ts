@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, input, computed } from '@angular/core';
+import { Component, input, computed } from '@angular/core';
 import { DataSheetData } from '../../types';
 
 /**
@@ -17,7 +17,6 @@ import { DataSheetData } from '../../types';
     imports: [],
     templateUrl: './data-sheet.html',
     styleUrl: './data-sheet.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DataSheet {
     /** The data to visualize as data sheet. */

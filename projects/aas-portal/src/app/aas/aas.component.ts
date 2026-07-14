@@ -13,7 +13,6 @@ import { FormsModule } from '@angular/forms';
 import { EMPTY, map, Observable, first, combineLatest } from 'rxjs';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import {
-    ChangeDetectionStrategy,
     Component,
     DOCUMENT,
     OnDestroy,
@@ -47,7 +46,6 @@ import { AASState } from './aas.state';
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
     imports: [TranslateDirective, TranslatePipe, FormsModule, NgClass, RouterModule, NgbNavModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 /**
  * Component responsible for managing and displaying Asset Administration Shell (AAS) functionality.

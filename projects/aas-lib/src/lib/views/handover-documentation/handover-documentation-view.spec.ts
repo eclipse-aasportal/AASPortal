@@ -11,7 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { first, lastValueFrom, of } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { aas, AASDocument } from 'aas-core';
 
 import { ToolbarService } from '../../services/toolbar.service';
@@ -32,7 +32,6 @@ import handoverDocumentation_1_2 from '../../../test/assets/handover-documentati
     selector: 'fhg-thumbnail-qrcode',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestThumbnailQRCode {
     public readonly document = input<AASDocument>();
@@ -42,7 +41,6 @@ export class TestThumbnailQRCode {
     selector: 'fhg-handover-documentation',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestHandoverDocumentation {
     public readonly document = input<AASDocument>();

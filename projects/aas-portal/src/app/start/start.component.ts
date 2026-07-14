@@ -8,16 +8,7 @@
 
 import { Observable, of } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    effect,
-    OnDestroy,
-    TemplateRef,
-    viewChild,
-    computed,
-    inject,
-} from '@angular/core';
+import { Component, effect, OnDestroy, TemplateRef, viewChild, computed, inject } from '@angular/core';
 
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartState, StartTileItem } from './start.state';
@@ -30,7 +21,6 @@ import { StartState, StartTileItem } from './start.state';
     templateUrl: './start.component.html',
     styleUrl: './start.component.scss',
     imports: [NgComponentOutlet],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StartComponent implements OnDestroy {
     private readonly state = inject(StartState);

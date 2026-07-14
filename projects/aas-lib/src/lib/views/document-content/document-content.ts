@@ -6,13 +6,11 @@
  *
  *****************************************************************************/
 
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { EMPTY, map, Observable, first, combineLatest, of } from 'rxjs';
-import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { EMPTY, Observable } from 'rxjs';
 import {
-    ChangeDetectionStrategy,
     Component,
     DOCUMENT,
     OnDestroy,
@@ -21,50 +19,69 @@ import {
     effect,
     inject,
     linkedSignal,
-    untracked,
+    signal,
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isBlob, isSubmodel, toJsonValue, jsonization, AASDocument } from 'aas-core';
+import {
+    aas,
+    isProperty,
+    isNumberType,
+    isBlob,
+    isSubmodel,
+    toJsonValue,
+    jsonization,
+    AASDocument,
+    equalArray,
+} from 'aas-core';
 
-import { DocumentContentState } from './document-content.state';
 import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
 import { NotifyService } from '../../core/notify/notify.service';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
 import { ToolbarService } from '../../services/toolbar.service';
 import { StartService } from '../../services/start.service';
-import { decodeBase64Url, encodeBase64Url } from '../../utilities';
+import { encodeBase64Url } from '../../utilities';
 import { DashboardChartType, DashboardPage } from '../../features/dashboard/dashboard-types';
 import { CompositeView } from '../composite-view';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
+import { LiveState } from '../../types';
+
+export type DocumentContentData = {
+    document: AASDocument | null;
+    live: LiveState;
+    searchExpression: string;
+    selectedElements: aas.Referable[];
+};
+
+const initialState: DocumentContentData = {
+    document: null,
+    live: 'offline',
+    searchExpression: '',
+    selectedElements: [],
+};
 
 @Component({
     selector: 'fhg-aas',
     templateUrl: './document-content.html',
     styleUrls: ['./document-content.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'content' }],
-    imports: [TranslateDirective, TranslatePipe, FormsModule, AASTreeComponent, RouterModule, NgbNavModule],
+    imports: [TranslateDirective, TranslatePipe, FormsModule, AASTreeComponent],
 })
 /**
- * Component responsible for managing and displaying Asset Administration Shell (AAS) functionality.
- * Handles document viewing, live mode operations, dashboard integration, and element manipulation.
- *
- * @remarks
- * This component provides features including:
- * - Live mode controls (play/stop)
- * - Dashboard integration
- * - Element creation, editing, and deletion
- * - Search functionality
- * - Download capabilities
+ * Represents the main content view for an Asset Administration Shell (AAS) document.
  */
 export class DocumentContent extends CompositeView implements OnDestroy {
-    private readonly state = inject(DocumentContentState);
     private readonly router = inject(Router);
     private readonly notify = inject(NotifyService);
     private readonly dashboard = inject(DashboardService);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly dom = inject(DOCUMENT);
+    private readonly live$ = signal(initialState.live);
+    private readonly searchExpression$ = signal(initialState.searchExpression);
+    private readonly selectedElements$ = signal(initialState.selectedElements, {
+        equal: (a, b) => equalArray(a, b),
+    });
 
     public constructor() {
         super();
@@ -74,15 +91,6 @@ export class DocumentContent extends CompositeView implements OnDestroy {
             if (template !== undefined) {
                 this.toolbar.set(template);
             }
-        });
-
-        effect(() => {
-            const document = this.document();
-            if (untracked(this.state.document) === document) {
-                return;
-            }
-
-            this.state.update({ document, selectedElements: [] });
         });
     }
 
@@ -94,50 +102,48 @@ export class DocumentContent extends CompositeView implements OnDestroy {
 
     public readonly aasTree = viewChild<AASTreeComponent>('aasTree');
 
-    public readonly live = this.state.live;
+    public readonly live = this.live$.asReadonly();
 
-    public readonly searchExpression = this.state.searchExpression;
+    public readonly searchExpression = this.searchExpression$.asReadonly();
 
     public readonly dashboardPages = this.dashboard.pages;
 
     public readonly dashboardPage = this.dashboard.activePage;
 
-    public readonly selectedElements = this.state.selectedElements;
+    public readonly selectedElements = this.selectedElements$.asReadonly();
 
     public readonly canPlay = computed(() => {
-        const state = this.state.live();
-        return (this.state.document()?.onlineReady ?? false) && state === 'offline';
+        const live = this.live();
+        return (this.document()?.onlineReady ?? false) && live === 'offline';
     });
 
     public readonly canStop = computed(() => {
-        const state = this.state.live();
-        return (this.state.document()?.onlineReady ?? false) && state === 'online';
+        const live = this.live();
+        return (this.document()?.onlineReady ?? false) && live === 'online';
     });
 
     public getSubmodels(): aas.Submodel[] | undefined {
-        return this.state.document()?.content?.submodels ?? [];
+        return this.document()?.content?.submodels ?? [];
     }
 
     /**
      * Computed signal that determines if a new element can be created.
      * Returns true if exactly one element is selected, false otherwise.
-     * @readonly
-     * @returns {Signal<boolean>} A signal indicating whether a new element can be created
+     * @returns A signal indicating whether a new element can be created
      */
     public readonly canNewElement = computed(() => this.selectedElements().length === 1);
 
     /**
      * Computed signal that determines if editing is allowed for the selected elements.
      * Returns true when exactly one element is selected, false otherwise.
-     *
-     * @returns {Signal<boolean>} A signal containing true if exactly one element is selected, false otherwise
+     * @returns A signal containing true if exactly one element is selected, false otherwise
      */
     public readonly canEditElement = computed(() => this.selectedElements().length === 1);
 
     /**
      * Computed signal that determines if the selected elements can be deleted.
      * Returns true if there are selected elements and none of them are Asset Administration Shells.
-     * @returns {boolean} True if elements can be deleted, false otherwise.
+     * @returns True if elements can be deleted, false otherwise.
      */
     public readonly canDeleteElement = computed(() => {
         const selectedElements = this.selectedElements();
@@ -149,7 +155,7 @@ export class DocumentContent extends CompositeView implements OnDestroy {
     /**
      * Computed signal that determines if selected elements can be added to the dashboard.
      *
-     * @returns {boolean} True if:
+     * @returns True if:
      * - A dashboard page is selected
      * - At least one element is selected
      * - All selected elements are either number properties or time series
@@ -165,29 +171,6 @@ export class DocumentContent extends CompositeView implements OnDestroy {
             selectedElements.every(element => this.isNumberProperty(element) || this.isTimeSeries(element))
         );
     });
-
-    public ngOnInit(): void {
-        combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())])
-            .pipe(
-                map(([routeParams, queryParams]) => {
-                    return routeParams.id || routeParams.docs ? routeParams : queryParams;
-                }),
-                first(),
-            )
-            .subscribe(params => {
-                if (params.search) {
-                    this.state.update({ searchExpression: params.search });
-                }
-
-                if (params.id) {
-                    if (params.endpoint) {
-                        this.getDocument(decodeBase64Url(params.id), decodeBase64Url(params.endpoint));
-                    } else {
-                        this.getDocument(decodeBase64Url(params.id));
-                    }
-                }
-            });
-    }
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
@@ -223,48 +206,43 @@ export class DocumentContent extends CompositeView implements OnDestroy {
      * This method updates the document state while preserving other document properties.
      */
     public clearThumbnail(): void {
-        this.state.update({ document: { ...this.document()!, thumbnail: undefined } });
+        this.update({ document: { ...this.document()!, thumbnail: undefined } });
     }
 
     /**
      * Initiates live mode by updating the state to 'online'.
      * Changes the current state to indicate that the system is actively running.
-     * @public
      */
     public play(): void {
-        this.state.update({ live: 'online' });
+        this.update({ live: 'online' });
     }
 
     /**
      * Stops the live mode by updating the state to 'offline'.
      */
     public stop(): void {
-        this.state.update({ live: 'offline' });
+        this.update({ live: 'offline' });
     }
 
     /**
      * Adds a chart to the active dashboard page based on the selected elements and chart type.
      * Navigates to the dashboard view after adding the chart.
-     *
      * @param chartType - The type of chart to be added to the dashboard
-     * @returns void
-     * @throws No explicit throws, but will silently return if document or page is null
      */
     public addToDashboard(chartType: string): void {
-        const document = this.state.document();
+        const document = this.document();
         const page = this.dashboard.activePage();
         if (!document || !page) {
             return;
         }
 
-        this.dashboard.addChart(page.name, document, this.state.selectedElements(), chartType as DashboardChartType);
+        this.dashboard.addChart(page.name, document, this.selectedElements(), chartType as DashboardChartType);
         this.router.navigate(['/dashboard'], { queryParams: { page } });
     }
 
     /**
      * Sets the active page in the dashboard.
      * @param page - The dashboard page object to be set as active
-     * @throws {Error} When page object is invalid or undefined
      */
     public setDashboardPage(page: DashboardPage): void {
         this.dashboard.setActivePage(page.name);
@@ -275,7 +253,7 @@ export class DocumentContent extends CompositeView implements OnDestroy {
      * @param value - The new search expression string to be set
      */
     public setSearchExpression(value: string): void {
-        this.state.update({ searchExpression: value });
+        this.update({ searchExpression: value });
     }
 
     /**
@@ -283,7 +261,7 @@ export class DocumentContent extends CompositeView implements OnDestroy {
      */
     public download(): void {
         try {
-            const document = this.state.document();
+            const document = this.document();
             if (!document || !document.content) {
                 return;
             }
@@ -316,7 +294,7 @@ export class DocumentContent extends CompositeView implements OnDestroy {
     }
 
     public setSelectedElements(selectedElements: aas.Referable[]): void {
-        this.state.update({ selectedElements });
+        this.update({ selectedElements });
     }
 
     public findNext(): void {
@@ -366,28 +344,17 @@ export class DocumentContent extends CompositeView implements OnDestroy {
         );
     }
 
-    private getDocument(id: string, endpoint?: string): void {
-        this.api.getDocument('AssetAdministrationShell', id, endpoint).subscribe({
-            next: document => this.state.update({ document }),
-            error: error => console.debug(error),
-        });
-    }
-
-    private versionToString(administration?: aas.AdministrativeInformation): string {
-        let version: string = administration?.version ?? '';
-        const revision: string = administration?.revision ?? '';
-        if (revision.length > 0) {
-            if (version.length > 0) {
-                version += ' (' + revision + ')';
-            } else {
-                version = revision;
-            }
+    private update(newState: Partial<DocumentContentData>): void {
+        if (newState.live) {
+            this.live$.set(newState.live);
         }
 
-        if (version.length === 0) {
-            version = '-';
+        if (newState.searchExpression !== undefined) {
+            this.searchExpression$.set(newState.searchExpression);
         }
 
-        return version;
+        if (newState.selectedElements) {
+            this.selectedElements$.set(newState.selectedElements);
+        }
     }
 }

@@ -8,18 +8,7 @@
 
 import { FormsModule } from '@angular/forms';
 import { Route, RouterLinkWithHref } from '@angular/router';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    effect,
-    inject,
-    input,
-    model,
-    output,
-    signal,
-    untracked,
-    WritableSignal,
-} from '@angular/core';
+import { Component, effect, inject, input, model, output, signal, untracked, WritableSignal } from '@angular/core';
 
 import {
     aas,
@@ -101,7 +90,6 @@ const initialState: AASTreeData = {
     templateUrl: '../tree/tree.component.html',
     styleUrl: '../tree/tree.component.scss',
     providers: [AASTreeSearch, AASTreeApi],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOptions> {
     private readonly search = inject(AASTreeSearch);

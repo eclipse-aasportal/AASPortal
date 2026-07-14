@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, inject, Signal, signal, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, inject, Signal, signal, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AASDocument } from 'aas-core';
@@ -20,7 +20,7 @@ import { TranslateService } from '@ngx-translate/core';
 /**
  * Provides a specific view component.
  */
-@Component({ selector: 'awp-view', changeDetection: ChangeDetectionStrategy.Eager, template: '' })
+@Component({ selector: 'awp-view', template: '' })
 export abstract class View {
     protected readonly route = inject(ActivatedRoute);
     protected readonly api = inject(EndpointsApi);

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { NgbAccordionModule, NgbCollapse, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { form, FormField, readonly, validate } from '@angular/forms/signals';
@@ -32,7 +32,6 @@ export interface ProfileData {
     templateUrl: './profile-form.html',
     styleUrls: ['./profile-form.scss'],
     imports: [NgbCollapse, NgbAccordionModule, TranslateDirective, FormField, FormError],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileForm {
     private readonly auth = inject(AuthService);

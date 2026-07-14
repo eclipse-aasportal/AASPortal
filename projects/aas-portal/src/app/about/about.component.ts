@@ -8,17 +8,7 @@
 
 import { EMPTY, Observable } from 'rxjs';
 import { TranslateDirective } from '@ngx-translate/core';
-import {
-    Component,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    signal,
-    ChangeDetectionStrategy,
-    viewChild,
-    effect,
-    inject,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, signal, viewChild, effect, inject } from '@angular/core';
 
 import { Library } from 'aas-core';
 import { IndexChange, LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
@@ -30,7 +20,6 @@ import { environment } from '../../environments/environment';
     templateUrl: './about.component.html',
     styleUrls: ['./about.component.scss'],
     imports: [TranslateDirective, LicenseInfoComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutComponent implements OnInit, OnDestroy {
     private readonly api = inject(AboutApiService);

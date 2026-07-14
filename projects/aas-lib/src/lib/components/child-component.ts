@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
-@Component({ selector: 'awp-child', changeDetection: ChangeDetectionStrategy.Eager, template: '' })
+@Component({ selector: 'awp-child', template: '' })
 export abstract class ChildComponent {
     /** The translate service. */
     protected readonly translate = inject(TranslateService);

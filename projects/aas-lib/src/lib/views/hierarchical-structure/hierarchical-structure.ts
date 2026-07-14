@@ -8,7 +8,7 @@
 
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, untracked } from '@angular/core';
 import { catchError, concatMap, map, of, Subject } from 'rxjs';
 
 import {
@@ -59,7 +59,6 @@ const HAS_PART = 'https://admin-shell.io/idta/HierarchicalStructures/HasPart/1/0
     templateUrl: '../../components/tree/tree.component.html',
     styleUrl: '../../components/tree/tree.component.scss',
     imports: [FormsModule, RouterLinkWithHref, MaxLengthPipe],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions> {
     private readonly api = inject(EndpointsApi);

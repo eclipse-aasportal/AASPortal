@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { form, required, email, FormField } from '@angular/forms/signals';
 import { TranslateDirective } from '@ngx-translate/core';
 import { Router } from '@angular/router';
@@ -20,7 +20,6 @@ import { FormError } from '../../../share/components/form-error/form-error';
     templateUrl: './login-form.html',
     styleUrls: ['./login-form.scss'],
     imports: [TranslateDirective, FormField, FormError],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginForm {
     private readonly auth = inject(AuthService);

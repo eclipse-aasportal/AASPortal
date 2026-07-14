@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest'
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { EMPTY } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import {
@@ -38,7 +38,6 @@ import { createSpyObj, FakeLoader, MockWebSocketService } from '../../test/mocks
     template: '<div></div>',
     styles: [],
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestChartEditComponent {
     public readonly item = input.required<DashboardChartItem>();

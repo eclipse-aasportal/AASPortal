@@ -6,16 +6,7 @@
  *
  *****************************************************************************/
 
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    inject,
-    OnDestroy,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { LeafView } from '../leaf-view';
 import { ToolbarService } from '../../services/toolbar.service';
@@ -32,7 +23,6 @@ import { aas, isProperty, isSubmodelElementCollection, isSubmodelElementList } f
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'AssetStatus' }],
     templateUrl: './asset-status.html',
     styleUrl: './asset-status.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetStatus extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -16,7 +16,6 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
     templateUrl: './api-key-form.component.html',
     styleUrls: ['./api-key-form.component.scss'],
     imports: [TranslateDirective, TranslatePipe, FormField],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApiKeyFormComponent {
     private readonly modal = inject(NgbActiveModal);

@@ -9,18 +9,10 @@
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Router, provideRouter } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    DOCUMENT,
-    input,
-    output,
-    provideZonelessChangeDetection,
-    signal,
-} from '@angular/core';
+import { Component, input, output, provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { AASDocument, aas, noop } from 'aas-core';
 import {
@@ -42,21 +34,10 @@ import { AASState } from './aas.state';
 
 import { rotationSpeed, sampleDocument, torque } from '../../test/assets/sample-document';
 
-const URLMock = vi.fn(
-    class {
-        public static createObjectURL(): string {
-            return '';
-        }
-
-        public static revokeObjectURL(): void {}
-    },
-);
-
 @Component({
     selector: 'fhg-aas-tree',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAASTreeComponent {
     public document = input<AASDocument | null>(null);
@@ -78,7 +59,6 @@ describe('AASComponent', () => {
     let fixture: ComponentFixture<AASComponent>;
     let component: AASComponent;
     let dashboard: Mocked<DashboardService>;
-    let router: Router;
     let api: Mocked<EndpointsApi>;
     let start: Mocked<StartService>;
     let pages: DashboardPage[];
@@ -154,7 +134,6 @@ describe('AASComponent', () => {
             },
         });
 
-        router = TestBed.inject(Router);
         const state = TestBed.inject(AASState);
         state.update({ document: sampleDocument });
 

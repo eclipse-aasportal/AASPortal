@@ -9,7 +9,7 @@
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
 import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, computed, input, signal } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, computed, input, signal } from '@angular/core';
 
 import { CultureInfo } from './culture-info';
 import { WINDOW } from '../../services/window.service';
@@ -19,7 +19,6 @@ import { WINDOW } from '../../services/window.service';
     templateUrl: './localize.component.html',
     styleUrls: ['./localize.component.scss'],
     imports: [NgbModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LocalizeComponent implements OnInit, OnDestroy {
     private readonly subscription = new Subscription();

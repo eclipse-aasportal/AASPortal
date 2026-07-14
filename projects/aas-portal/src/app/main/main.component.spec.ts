@@ -11,14 +11,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    input,
-    provideZonelessChangeDetection,
-    Signal,
-    signal,
-} from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, Signal, signal } from '@angular/core';
 
 import { AASDocument } from 'aas-core';
 import {
@@ -37,7 +30,6 @@ import { createSpyObj, FakeLoader } from '../../test/mocks';
     selector: 'fhg-auth',
     template: '<div></div>',
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAuthComponent {}
 
@@ -45,14 +37,12 @@ class TestAuthComponent {}
     selector: 'fhg-settings',
     template: '<div></div>',
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestSettingsComponent {}
 
 @Component({
     selector: 'fhg-localize',
     template: '<div></div>',
-    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: true,
 })
 class TestLocalizeComponent {
@@ -63,7 +53,6 @@ class TestLocalizeComponent {
     selector: 'fhg-notify',
     template: '<div></div>',
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestNotifyComponent {}
 

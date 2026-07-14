@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, input, signal, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { Component, input, signal, inject, computed } from '@angular/core';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { convertToString } from 'aas-core';
@@ -22,7 +22,6 @@ import { NotifyService } from '../../../core/notify/notify.service';
     selector: 'fhg-chart-edit',
     imports: [FormsModule, TranslateDirective, TranslatePipe],
     templateUrl: './chart-edit.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './chart-edit.component.scss',
 })
 export class ChartEditComponent {
