@@ -11,7 +11,7 @@
         "serve": "rimraf build && npm run tsoa && tsc -p tsconfig.app.json",
         "test": "rimraf src/test/assets/tmp && vitest --run",
         "watch": "vitest --watch --coverage=false",
-        "coverage": "node coverage-summary.js",
+        "coverage": "node merge-coverage.js",
         "build": "rimraf dist && npm run tsoa && node esbuild.prod.js",
         "build:debug": "rimraf dist && npm run tsoa && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",

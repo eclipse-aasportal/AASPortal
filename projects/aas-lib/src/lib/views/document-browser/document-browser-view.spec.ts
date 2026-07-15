@@ -25,7 +25,7 @@ import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { BrowserState } from '../../components/browser/browser.state';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 
-import sampleDocument from '../../../test/assets/sample-document.json';
+import content from '../../../test/assets/sample-document.json';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
@@ -59,7 +59,7 @@ describe('DocumentBrowserView', () => {
         api = createSpyObj<EndpointsApi>(['getDocument']);
         start = createSpyObj<StartService>(['add', 'save']);
         route = createSpyObj<ActivatedRoute>(
-            {},
+            [],
             {
                 params: of({
                     endpoint: encodeBase64Url('endpoint'),
@@ -77,7 +77,7 @@ describe('DocumentBrowserView', () => {
             timestamp: 0,
             id: 'http://customer.com/aas/9175_7013_7091_9168',
             endpoint: 'endpoint',
-            content: sampleDocument as aas.Environment,
+            content: content as aas.Environment,
         };
 
         api.getDocument.mockReturnValue(of(document));

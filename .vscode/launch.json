@@ -186,30 +186,6 @@
                 "--include",
                 "${file}"
             ],
-        },
-        {
-            "name": "Launch create-app-info test",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceFolder}/projects/aas-package",
-            "console": "integratedTerminal",
-            "program": "npm",
-            "runtimeArgs": [
-                "run-script",
-                "create-app-info"
-            ]
-        },
-        {
-            "name": "Launch coverage-summary",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal",
-            "program": "npm",
-            "runtimeArgs": [
-                "run-script",
-                "coverage"
-            ]
         }
     ]
 }

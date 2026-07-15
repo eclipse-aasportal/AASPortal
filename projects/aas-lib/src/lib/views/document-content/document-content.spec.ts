@@ -8,11 +8,10 @@
 
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ActivatedRoute, Router, provideRouter } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { Component, DOCUMENT, input, output, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, DOCUMENT, input, model, output, provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { AASDocument, aas, noop } from 'aas-core';
 import { LiveState } from '../../types';
@@ -30,7 +29,6 @@ import { encodeBase64Url } from '../../utilities';
 import { DashboardChartType, DashboardPage } from '../../features/dashboard/dashboard-types';
 
 import { rotationSpeed, sampleDocument, torque } from '../../../test/assets/sample-document';
-import content from '../../../test/assets/sample-document.json';
 
 const URLMock = vi.fn(
     class {
@@ -48,11 +46,12 @@ const URLMock = vi.fn(
     styleUrls: [],
 })
 class TestAASTreeComponent {
-    public document = input<AASDocument | null>(null);
-    public state = input<LiveState | null>('offline');
-    public searchExpression = input('');
-    public selected = input<aas.Referable[]>([torque, rotationSpeed]);
-    public selectedChange = output<aas.Referable[]>();
+    public readonly document = input<AASDocument | null>(null);
+    public readonly live = model<LiveState>('offline');
+    public readonly selectedElements = output<aas.Referable[]>();
+    public readonly searchExpression = input<string | undefined>(undefined);
+    public readonly allowSelection = input(false);
+    public readonly enableValue = input(false);
 
     public findNext(): void {
         noop();
@@ -67,12 +66,11 @@ describe('DocumentContent', () => {
     let fixture: ComponentFixture<DocumentContent>;
     let component: DocumentContent;
     let dashboard: Mocked<DashboardService>;
-    let router: Router;
+    let router: Mocked<Router>;
     let route: Mocked<ActivatedRoute>;
     let api: Mocked<EndpointsApi>;
     let start: Mocked<StartService>;
     let pages: DashboardPage[];
-    let document: AASDocument;
 
     beforeEach(async () => {
         pages = [{ name: 'Dashboard 1', items: [], requests: [], active: true }];
@@ -91,35 +89,27 @@ describe('DocumentContent', () => {
 
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
         start.save.mockReturnValue(of(void 0));
-        route = createSpyObj<ActivatedRoute>(
-            {},
-            {
-                params: of({
-                    endpoint: encodeBase64Url('endpoint'),
-                    id: encodeBase64Url('http://customer.com/aas/9175_7013_7091_9168'),
-                }),
-                queryParams: of({}),
-            },
-        );
+        route = createSpyObj<ActivatedRoute>([], {
+            params: of({
+                endpoint: encodeBase64Url('endpoint'),
+                id: encodeBase64Url('http://customer.com/aas/9175_7013_7091_9168'),
+            }),
+            queryParams: of({}),
+        });
 
-        document = {
-            address: '',
-            crc32: 0,
-            idShort: 'ExampleMotor',
-            readonly: false,
-            timestamp: 0,
-            id: 'http://customer.com/aas/9175_7013_7091_9168',
-            endpoint: 'endpoint',
-            content: content as aas.Environment,
-        };
+        router = createSpyObj<Router>(['navigateByUrl', 'navigate']);
 
-        api.getDocument.mockReturnValue(of(document));
+        api.getDocument.mockReturnValue(of(sampleDocument));
 
         await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: ActivatedRoute,
                     useValue: route,
+                },
+                {
+                    provide: Router,
+                    useValue: router,
                 },
                 {
                     provide: EndpointsApi,
@@ -157,7 +147,6 @@ describe('DocumentContent', () => {
                         },
                     ],
                 },
-                provideRouter([]),
                 provideZonelessChangeDetection(),
                 provideTranslateService({
                     loader: {
@@ -178,7 +167,6 @@ describe('DocumentContent', () => {
             },
         });
 
-        router = TestBed.inject(Router);
         fixture = TestBed.createComponent(DocumentContent);
         component = fixture.componentInstance;
         await fixture.whenStable();
@@ -211,11 +199,11 @@ describe('DocumentContent', () => {
     describe('canAddToDashboard', () => {
         it('can add the selected properties to the dashboard', () => {
             component.setSelectedElements([torque, rotationSpeed]);
-            vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+            router.navigate.mockResolvedValue(true);
             expect(component.canAddToDashboard()).toBe(true);
             component.addToDashboard(DashboardChartType.BarVertical);
             expect(dashboard.addChart).toHaveBeenCalled();
-            expect(router.navigateByUrl).toHaveBeenCalled();
+            expect(router.navigate).toHaveBeenCalled();
         });
     });
 

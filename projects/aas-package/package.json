@@ -11,7 +11,7 @@
     "scripts": {
         "test": "rimraf src/test/assets/tmp && vitest --run",
         "watch": "vitest --watch --coverage=false",
-        "coverage": "node coverage-summary.js",
+        "coverage": "node merge-coverage.js",
         "build": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.prod.js",
         "build:debug": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",
