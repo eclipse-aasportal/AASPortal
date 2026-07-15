@@ -19,7 +19,7 @@ import { HierarchicalStructure } from './hierarchical-structure';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { StartService } from '../../services/start.service';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';

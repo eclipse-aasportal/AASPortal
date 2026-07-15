@@ -12,7 +12,7 @@ import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { TechnicalData } from './technical-data';
 import { TechnicalDataViewState } from './technical-data-view.state';

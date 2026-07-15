@@ -9,7 +9,7 @@
 import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { LeafView } from '../leaf-view';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { encodeBase64Url, toString } from '../../utilities';
 import { StartService } from '../../services/start.service';

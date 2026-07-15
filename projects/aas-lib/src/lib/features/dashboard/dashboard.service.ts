@@ -19,7 +19,7 @@ import {
     DashboardState,
 } from './dashboard-types';
 import { AuthService } from '../../core/auth/auth.service';
-import { CookieService } from '../../services/cookie.service';
+import { CookieService } from '../../share/services/cookie.service';
 import { encodeBase64Url } from '../../utilities';
 
 const initialState: DashboardState = [{ name: 'Dashboard 1', active: true, items: [], requests: [] }];

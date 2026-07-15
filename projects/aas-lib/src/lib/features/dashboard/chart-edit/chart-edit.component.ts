@@ -15,7 +15,7 @@ import { SetColorCommand } from '../commands/set-color-command';
 import { SetMinMaxCommand } from '../commands/set-min-max-command';
 import { DashboardService } from '../dashboard.service';
 import { SetChartTypeCommand } from '../commands/set-chart-type-command';
-import { CommandHandler } from '../../../services/command-handler';
+import { CommandHandler } from '../../../share/services/command-handler';
 import { NotifyService } from '../../../core/notify/notify.service';
 
 @Component({

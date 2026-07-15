@@ -13,7 +13,7 @@ import { Component, OnDestroy, TemplateRef, computed, effect, inject, viewChild 
 
 import { aas, AASDocument } from 'aas-core';
 import { ScoreComponent } from '../../components/score/score.component';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';
 import { FeedbackItem, GeneralItem } from './customer-feedback.types';

@@ -23,7 +23,7 @@ import {
 } from '@angular/core';
 
 import { noop } from 'aas-core';
-import { WINDOW } from '../../services/window.service';
+import { WINDOW } from '../../share/services/window.service';
 import { ChildComponent } from '../child-component';
 import { MaxLengthPipe } from '../../share/pipes/max-length.pipe';
 

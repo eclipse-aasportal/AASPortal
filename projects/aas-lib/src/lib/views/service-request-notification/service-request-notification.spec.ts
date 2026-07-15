@@ -17,7 +17,7 @@ import { aas, AASDocument } from 'aas-core';
 import { ServiceRequestNotification } from './service-request-notification';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { StartService } from '../../services/start.service';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';

@@ -39,7 +39,7 @@ import {
 } from 'aas-core';
 
 import { getDisplayName, getUrl } from '../../utilities';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { WebSocketService } from '../../services/web-socket.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { LeafView } from '../leaf-view';

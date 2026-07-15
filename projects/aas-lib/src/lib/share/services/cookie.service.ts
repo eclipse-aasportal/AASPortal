@@ -11,7 +11,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, mergeMap, Observable, of } from 'rxjs';
 
 import { WINDOW } from './window.service';
-import { AuthService } from '../core/auth/auth.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Injectable({
     providedIn: 'root',

@@ -20,7 +20,7 @@ import { EndpointsApi } from '../../services/endpoints-api';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
 import { StartService } from '../../services/start.service';
 import { NotifyService } from '../../core/notify/notify.service';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { VIEW_ROUTES } from '../views-routes';
 import { DocumentContent } from './document-content';

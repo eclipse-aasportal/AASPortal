@@ -15,7 +15,7 @@ import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
 
 import { EndpointsApi } from '../../services/endpoints-api';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';

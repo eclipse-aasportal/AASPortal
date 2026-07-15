@@ -12,7 +12,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import { LocalizeComponent } from './localize.component';
-import { WINDOW, WindowService } from '../../services/window.service';
+import { WINDOW, WindowService } from '../../share/services/window.service';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 
 describe('LocalizeComponent', () => {

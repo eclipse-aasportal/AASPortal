@@ -38,7 +38,7 @@ import {
 import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
 import { NotifyService } from '../../core/notify/notify.service';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url } from '../../utilities';
 import { DashboardChartType, DashboardPage } from '../../features/dashboard/dashboard-types';
@@ -345,6 +345,10 @@ export class DocumentContent extends CompositeView implements OnDestroy {
     }
 
     private update(newState: Partial<DocumentContentData>): void {
+        if (newState.document !== undefined) {
+            
+        }
+
         if (newState.live) {
             this.live$.set(newState.live);
         }

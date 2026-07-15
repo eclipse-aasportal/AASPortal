@@ -14,7 +14,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { first, lastValueFrom, of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url } from '../../utilities';

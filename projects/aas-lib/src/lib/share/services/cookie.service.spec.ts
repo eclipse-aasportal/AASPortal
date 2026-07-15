@@ -10,12 +10,12 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
+import { lastValueFrom, of } from 'rxjs';
 
 import { CookieService } from './cookie.service';
-import { createSpyObj } from '../../test/mocks';
-import { AuthService } from '../core/auth/auth.service';
+import { createSpyObj } from '../../../test/mocks';
+import { AuthService } from '../../core/auth/auth.service';
 import { WINDOW, WindowService } from './window.service';
-import { lastValueFrom, of } from 'rxjs';
 
 describe('CookieService', () => {
     let service: CookieService;
