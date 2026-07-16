@@ -18,22 +18,11 @@ import {
     computed,
     effect,
     inject,
-    linkedSignal,
     signal,
     viewChild,
 } from '@angular/core';
 
-import {
-    aas,
-    isProperty,
-    isNumberType,
-    isBlob,
-    isSubmodel,
-    toJsonValue,
-    jsonization,
-    AASDocument,
-    equalArray,
-} from 'aas-core';
+import { aas, isProperty, isNumberType, isSubmodel, toJsonValue, jsonization, equalArray } from 'aas-core';
 
 import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
 import { NotifyService } from '../../core/notify/notify.service';
@@ -47,14 +36,12 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
 import { LiveState } from '../../types';
 
 export type DocumentContentData = {
-    document: AASDocument | null;
     live: LiveState;
     searchExpression: string;
     selectedElements: aas.Referable[];
 };
 
 const initialState: DocumentContentData = {
-    document: null,
     live: 'offline',
     searchExpression: '',
     selectedElements: [],
@@ -122,91 +109,25 @@ export class DocumentContent extends CompositeView implements OnDestroy {
         return (this.document()?.onlineReady ?? false) && live === 'online';
     });
 
-    public getSubmodels(): aas.Submodel[] | undefined {
-        return this.document()?.content?.submodels ?? [];
-    }
-
     /**
-     * Computed signal that determines if a new element can be created.
-     * Returns true if exactly one element is selected, false otherwise.
-     * @returns A signal indicating whether a new element can be created
-     */
-    public readonly canNewElement = computed(() => this.selectedElements().length === 1);
-
-    /**
-     * Computed signal that determines if editing is allowed for the selected elements.
-     * Returns true when exactly one element is selected, false otherwise.
-     * @returns A signal containing true if exactly one element is selected, false otherwise
-     */
-    public readonly canEditElement = computed(() => this.selectedElements().length === 1);
-
-    /**
-     * Computed signal that determines if the selected elements can be deleted.
-     * Returns true if there are selected elements and none of them are Asset Administration Shells.
-     * @returns True if elements can be deleted, false otherwise.
-     */
-    public readonly canDeleteElement = computed(() => {
-        const selectedElements = this.selectedElements();
-        return (
-            selectedElements.length > 0 && selectedElements.every(item => item.modelType !== 'AssetAdministrationShell')
-        );
-    });
-
-    /**
-     * Computed signal that determines if selected elements can be added to the dashboard.
+     * Determines if selected elements can be added to the dashboard.
      *
-     * @returns True if:
+     * @returns `true` if:
      * - A dashboard page is selected
      * - At least one element is selected
      * - All selected elements are either number properties or time series
-     *
-     * @remarks
-     * This is used to enable/disable dashboard-related functionality based on the current selection state.
      */
     public readonly canAddToDashboard = computed(() => {
         const selectedElements = this.selectedElements();
         return (
             this.dashboardPage() != null &&
             selectedElements.length > 0 &&
-            selectedElements.every(element => this.isNumberProperty(element) || this.isTimeSeries(element))
+            selectedElements.every(element => this.isNumberProperty(element))
         );
     });
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
-    }
-
-    /**
-     * Retrieves the thumbnail image URL for the current document.
-     *
-     * @returns {string} The URL of the thumbnail image. If no thumbnail is set in the document,
-     * returns the default AAS thumbnail path '/assets/resources/aas-idta.png'
-     */
-    public getThumbnail(): string {
-        const thumbnail = this.document()?.thumbnail;
-        if (thumbnail) {
-            return thumbnail;
-        }
-
-        return '/assets/resources/aas-idta.png';
-    }
-
-    /** The URL of the thumbnail. */
-    public readonly thumbnail = linkedSignal(() => {
-        const document = this.document();
-        if (!document) {
-            return '/assets/resources/aas-idta.png';
-        }
-
-        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
-    });
-
-    /**
-     * Clears the thumbnail of the current document by setting it to undefined.
-     * This method updates the document state while preserving other document properties.
-     */
-    public clearThumbnail(): void {
-        this.update({ document: { ...this.document()!, thumbnail: undefined } });
     }
 
     /**
@@ -334,21 +255,7 @@ export class DocumentContent extends CompositeView implements OnDestroy {
         return false;
     }
 
-    // Hack, Hack
-    private isTimeSeries(element: aas.Referable): boolean {
-        return (
-            isBlob(element) &&
-            element.value != null &&
-            element.idShort === 'TimeSeriesHistory' &&
-            element.contentType === 'application/json'
-        );
-    }
-
     private update(newState: Partial<DocumentContentData>): void {
-        if (newState.document !== undefined) {
-            
-        }
-
         if (newState.live) {
             this.live$.set(newState.live);
         }

@@ -258,7 +258,6 @@ describe('DocumentContent', () => {
                 configurable: true,
             });
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const notify = TestBed.inject(NotifyService) as Mocked<NotifyService>;
             component.download();
             expect(notify.error).toHaveBeenCalled();
