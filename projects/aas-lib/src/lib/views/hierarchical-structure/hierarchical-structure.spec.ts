@@ -17,7 +17,7 @@ import { HierarchicalStructure } from './hierarchical-structure';
 import { VIEW_ROUTES } from '../views-routes';
 
 import hierarchicalStructures_1_1 from '../../../test/assets/hierarchical-structures-1-1.json';
-import { WINDOW, WindowService } from '../../services/window.service';
+import { WINDOW, WindowService } from '../../share/services/window.service';
 
 describe('HierarchicalStructure', () => {
     let component: HierarchicalStructure;

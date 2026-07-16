@@ -9,20 +9,11 @@
 import { TranslateDirective } from '@ngx-translate/core';
 import { DecimalPipe } from '@angular/common';
 import { EMPTY, Observable, Subscription } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    OnDestroy,
-    TemplateRef,
-    computed,
-    effect,
-    inject,
-    viewChild,
-} from '@angular/core';
+import { Component, OnDestroy, TemplateRef, computed, effect, inject, viewChild } from '@angular/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { ScoreComponent } from '../../components/score/score.component';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';
 import { FeedbackItem, GeneralItem } from './customer-feedback.types';
@@ -38,7 +29,6 @@ const maxStars = 5;
     styleUrls: ['./customer-feedback-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'CustomerFeedback' }],
     imports: [ScoreComponent, DecimalPipe, TranslateDirective],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerFeedbackView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GeneralItem>();

@@ -34,6 +34,7 @@ import {
     TECHNICAL_DATA_1_2,
 } from './views-constants';
 import { AssetStatus } from './asset-status/asset-status';
+import { DocumentContent } from './document-content/document-content';
 
 /** The routes to the specific views. */
 export const viewRoutes: ViewRoute[] = [
@@ -66,6 +67,13 @@ export const viewRoutes: ViewRoute[] = [
         data: {
             type: 'Leaf',
             semanticIds: [CONTACT_INFORMATION_1_0],
+        },
+    },
+    {
+        path: 'content',
+        component: DocumentContent,
+        data: {
+            type: 'Default',
         },
     },
     {

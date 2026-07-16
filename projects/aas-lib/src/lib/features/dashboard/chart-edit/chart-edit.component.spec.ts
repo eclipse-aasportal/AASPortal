@@ -11,13 +11,13 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
-import { NotifyService } from 'aas-lib';
 import { ChartEditComponent } from './chart-edit.component';
 import { DashboardService } from '../dashboard.service';
 import { DashboardState } from '../dashboard-types';
 
-import data from '../../../test/assets/test-pages.json';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import data from '../../../../test/assets/test-pages.json';
+import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { NotifyService } from '../../../core/notify/notify.service';
 
 describe('ChartEditComponent', () => {
     let service: Mocked<DashboardService>;

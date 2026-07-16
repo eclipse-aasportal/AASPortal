@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, computed, effect, Input, input, untracked } from '@angular/core';
+import { Component, computed, effect, Input, input, untracked } from '@angular/core';
 import { TranslateDirective } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
@@ -25,7 +25,6 @@ import { ChildComponent } from '../../components/child-component';
     styleUrl: './carbon-footprint.scss',
     providers: [CarbonFootprintState],
     imports: [NgbAccordionModule, NgbPaginationModule, TranslateDirective],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarbonFootprint extends ChildComponent {
     // Determines wether the view is used from inside the dpp view or standalone

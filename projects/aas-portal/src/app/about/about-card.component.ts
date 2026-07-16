@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { TranslateDirective } from '@ngx-translate/core';
 import { IndexChange } from 'aas-lib';
 import { environment } from '../../environments/environment';
@@ -17,7 +17,6 @@ import { environment } from '../../environments/environment';
     styleUrl: './about-card.component.scss',
     standalone: true,
     imports: [TranslateDirective],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutCardComponent {
     private readonly indexChange = inject(IndexChange);

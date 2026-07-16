@@ -40,16 +40,4 @@ describe('AASState', () => {
     it('provides the current active document', () => {
         expect(service.document()).toBeNull();
     });
-
-    it('provides the current live state', () => {
-        expect(service.live()).toEqual('offline');
-    });
-
-    it('provides the current search expression', () => {
-        expect(service.searchExpression()).toEqual('');
-    });
-
-    it('provides a list of the current selected elements', () => {
-        expect(service.selectedElements()).toEqual([]);
-    });
 });

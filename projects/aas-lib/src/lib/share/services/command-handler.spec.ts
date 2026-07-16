@@ -10,10 +10,10 @@ import { beforeEach, describe, expect, it, Mock, vitest } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { noop } from 'aas-core';
-import { Command } from './command';
+import { Command } from '../../services/command';
 import { CommandHandler } from './command-handler';
-import { createSpyObj } from '../../test/mocks';
-import { NotifyService } from '../core/notify/notify.service';
+import { createSpyObj } from '../../../test/mocks';
+import { NotifyService } from '../../core/notify/notify.service';
 
 class TestCommand extends Command {
     public constructor(

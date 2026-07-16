@@ -12,7 +12,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { FavoriteComponent } from './favorite.component';
-import { CookieService } from '../../services/cookie.service';
+import { CookieService } from '../../share/services/cookie.service';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 

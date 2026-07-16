@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, signal } from '@angular/core';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Library } from 'aas-core';
@@ -16,7 +16,6 @@ import { Library } from 'aas-core';
     templateUrl: './license-info.component.html',
     styleUrls: ['./license-info.component.scss'],
     imports: [NgbCollapseModule, TranslatePipe],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LicenseInfoComponent {
     public readonly libraries = input<Library[]>([]);

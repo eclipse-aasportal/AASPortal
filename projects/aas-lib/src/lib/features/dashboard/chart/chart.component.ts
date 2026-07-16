@@ -6,15 +6,15 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, effect, ElementRef, inject, input, viewChild } from '@angular/core';
+import { Component, effect, ElementRef, inject, input, viewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { TranslateDirective } from '@ngx-translate/core';
 
 import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
-import { WebSocketService } from 'aas-lib';
 import { Dashboard } from '../dashboard';
 import { DashboardApiService } from '../dashboard-api.service';
 import { ChartConfigurationTuple, DashboardChart } from '../dashboard-types';
+import { WebSocketService } from '../../../services/web-socket.service';
 
 @Component({
     selector: 'fhg-chart',
@@ -22,7 +22,6 @@ import { ChartConfigurationTuple, DashboardChart } from '../dashboard-types';
     styleUrl: './chart.component.scss',
     standalone: true,
     imports: [TranslateDirective],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartComponent extends Dashboard {
     private configuration?: ChartConfigurationTuple;

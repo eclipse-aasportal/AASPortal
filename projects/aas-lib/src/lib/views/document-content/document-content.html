@@ -1,0 +1,87 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="container-fluid px-2">
+    @let doc = document();
+    @if (doc) {
+        <div class="overflow-auto">
+            <fhg-aas-tree
+                [live]="live()"
+                [searchExpression]="searchExpression()"
+                [document]="doc"
+                [allowSelection]="true"
+                [enableValue]="true"
+                (selectedElements)="setSelectedElements($event)"
+            >
+            </fhg-aas-tree>
+        </div>
+    } @else {
+        <div class="alert alert-info text-center mt-2" role="alert" translate="AASContent.EMPTY"></div>
+    }
+
+    <!-- Toolbar -->
+    <ng-template #toolbar>
+        <div class="input-group me-2 my-1">
+            <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+                <i class="bi bi-house-add"></i>
+            </button>
+        </div>
+        <div class="btn-group me-2 my-1">
+            <button type="button" class="btn btn-primary" (click)="play()" [disabled]="canPlay() === false">
+                <i class="bi bi-play-fill"></i>
+            </button>
+            <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="canStop() === false">
+                <i class="bi bi-stop-fill"></i>
+            </button>
+        </div>
+        <div class="input-group me-2 my-1">
+            <select class="form-select" [ngModel]="dashboardPage()" (ngModelChange)="setDashboardPage($event)">
+                @for (page of dashboardPages(); track page) {
+                    <option [ngValue]="page">{{ page.name }}</option>
+                }
+            </select>
+            <button
+                type="button"
+                class="btn btn-primary"
+                (click)="addToDashboard('Line')"
+                [disabled]="!canAddToDashboard()"
+            >
+                <i class="bi bi-graph-up"></i>
+            </button>
+            <button
+                type="button"
+                class="btn btn-primary"
+                (click)="addToDashboard('BarVertical')"
+                [disabled]="!canAddToDashboard()"
+            >
+                <i class="bi bi-bar-chart-line-fill"></i>
+            </button>
+        </div>
+        <div class="btn-group me-2 my-1">
+            <button type="button" class="btn btn-primary" (click)="download()">
+                <i class="bi bi-download"></i>
+            </button>
+        </div>
+        <div class="input-group flex-grow-1 me-2 my-1">
+            <div class="input-group-text"><i class="bi bi-search"></i></div>
+            <input
+                type="search"
+                class="form-control"
+                [ngModel]="searchExpression()"
+                (ngModelChange)="setSearchExpression($event)"
+                [placeholder]="'AAS.PLACEHOLDER_SEARCH' | translate"
+            />
+            <button type="button" class="btn btn-primary" (click)="findNext()">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+            <button type="button" class="btn btn-primary" (click)="findPrevious()">
+                <i class="bi bi-chevron-up"></i>
+            </button>
+        </div>
+    </ng-template>
+</div>

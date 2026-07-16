@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { catchError, EMPTY, map, mergeMap, Observable, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
@@ -45,7 +45,6 @@ export interface VariableItem {
     styleUrls: ['./operation-call-form.component.scss'],
     imports: [FormsModule],
     providers: [OperationCallFormApiService],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationCallFormComponent {
     private readonly modal = inject(NgbActiveModal);

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import upperFirst from 'lodash-es/upperFirst';
-import { ChangeDetectionStrategy, Component, computed, input, signal, WritableSignal } from '@angular/core';
+import { Component, computed, input, signal, WritableSignal } from '@angular/core';
 import { aas, isReference } from 'aas-core';
 import { isLangString, referenceToString } from '../../utilities';
 
@@ -35,7 +35,6 @@ export interface ConceptDescriptionsData {
     templateUrl: './concept-description.component.html',
     styleUrl: './concept-description.component.scss',
     imports: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConceptDescriptionComponent {
     public readonly conceptDescription = input<aas.ConceptDescription>();

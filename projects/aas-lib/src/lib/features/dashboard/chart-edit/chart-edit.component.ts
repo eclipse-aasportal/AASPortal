@@ -6,22 +6,22 @@
  *
  *****************************************************************************/
 
-import { Component, input, signal, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { Component, input, signal, inject, computed } from '@angular/core';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { convertToString } from 'aas-core';
-import { NotifyService, CommandHandler } from 'aas-lib';
 import { DashboardChartItem, DashboardChartType } from '../dashboard-types';
 import { SetColorCommand } from '../commands/set-color-command';
 import { SetMinMaxCommand } from '../commands/set-min-max-command';
 import { DashboardService } from '../dashboard.service';
 import { SetChartTypeCommand } from '../commands/set-chart-type-command';
+import { CommandHandler } from '../../../share/services/command-handler';
+import { NotifyService } from '../../../core/notify/notify.service';
 
 @Component({
     selector: 'fhg-chart-edit',
     imports: [FormsModule, TranslateDirective, TranslatePipe],
     templateUrl: './chart-edit.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './chart-edit.component.scss',
 })
 export class ChartEditComponent {

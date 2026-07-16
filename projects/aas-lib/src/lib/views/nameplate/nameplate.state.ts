@@ -48,6 +48,7 @@ export class NameplateState extends ChildState {
             if (!submodel) {
                 return;
             }
+
             this.update({ submodel, dataSheets: this.createDataSheets(document, submodel) });
         });
 

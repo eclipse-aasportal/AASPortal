@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, stringFormat } from 'aas-core';
 import { FavoritesService } from '../favorites.service';
@@ -28,7 +28,6 @@ export interface FavoritesItem {
     templateUrl: './favorites-form.component.html',
     styleUrls: ['./favorites-form.component.scss'],
     imports: [NgbToast, TranslateDirective],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FavoritesFormComponent {
     private _items = signal<FavoritesItem[]>([]);

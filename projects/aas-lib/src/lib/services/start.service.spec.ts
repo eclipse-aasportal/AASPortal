@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { lastValueFrom, of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
 import { createSpyObj } from '../../test/mocks';
-import { CookieService } from './cookie.service';
+import { CookieService } from '../share/services/cookie.service';
 import { AuthService } from '../core/auth/auth.service';
 import { START_TILE_TYPES, START_TILES, StartService, StartTile, StartTileType } from './start.service';
 
@@ -20,7 +20,6 @@ import { START_TILE_TYPES, START_TILES, StartService, StartTile, StartTileType }
     selector: 'fhg-test-card',
     template: '<div></div>',
     styles: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestCardComponent {}
 

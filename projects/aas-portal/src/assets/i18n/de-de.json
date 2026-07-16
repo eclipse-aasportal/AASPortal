@@ -1,8 +1,15 @@
 {
     "AAS": {
-        "PLACEHOLDER_SEARCH": "Suche"
+        "BROWSER": "AAS Browser",
+        "CONTENT": "AAS Content",
+        "PLACEHOLDER_SEARCH": "Suche",
+        "EMPTY": "Kein AAS-Document verfügbar."
     },
-    "AASTable": {
+    "AASContent": {
+        "TITLE": "AAS-Baum",
+        "EMPTY": "Kein AAS-Document verfügbar."
+    },
+     "AASTable": {
         "COLUMN_NAME": "Name",
         "COLUMN_ID": "ID",
         "COLUMN_ENDPOINT": "Endpunkt",

@@ -18,7 +18,7 @@ import { AASTreeComponent } from './aas-tree.component';
 import { sampleDocument } from '../../../test/assets/sample-document';
 import { NotifyService } from '../../core/notify/notify.service';
 import { WebSocketService } from '../../services/web-socket.service';
-import { WINDOW } from '../../services/window.service';
+import { WINDOW } from '../../share/services/window.service';
 import { AASTreeApi } from './aas-tree-api';
 import { createSpyObj, FakeLoader, MockWebSocketService } from '../../../test/mocks';
 import { VIEW_ROUTES } from '../../views/views-routes';

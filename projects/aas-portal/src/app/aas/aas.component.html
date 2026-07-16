@@ -6,8 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-<div class="container h-100 w-100 px-2" style="overflow-y:auto">
-
+<div class="container h-100 w-100 px-2" style="overflow-y: auto">
     <!-- Header of AAS View -->
     @if (document()) {
         <div class="fhg-aas-header">
@@ -17,8 +16,8 @@
                     <div class="d-flex flex-column text-center">
                         <div class="bg-primary text-center py-2 my-2 fs-5">
                             <div class="d-flex flex-column data-entry">
-                                <label style="font-size: 15px;">AAS Overview</label>
-                                <label style="font-size: 20px;">{{idShort()}}</label>
+                                <label style="font-size: 15px">AAS Overview</label>
+                                <label style="font-size: 20px">{{ idShort() }}</label>
                             </div>
                         </div>
                     </div>
@@ -30,85 +29,87 @@
                             [src]="thumbnail()"
                             alt="thumbnail"
                             (error)="thumbnail.set('/assets/resources/aas-idta.png')"
-                            style="max-height: 180px;"
+                            style="max-height: 180px"
                         />
                     </div>
                     <div class="d-flex flex-column ps-1">
                         <div class="col-md-6 p-1 d-flex flex-column mt-0">
                             <label class="label" translate="LABEL_VERSION"></label>
-                            <label class="ms-2">{{version()}}</label>
+                            <label class="ms-2">{{ version() }}</label>
                         </div>
                         <div class="col-md-6 p-1 d-flex flex-column mt-0">
                             <label class="label" translate="LABEL_AAS_ID"></label>
-                            <label class="ms-2">{{id()}}</label>
+                            <label class="ms-2">{{ id() }}</label>
                         </div>
                         <div class="col-md-6 p-1 d-flex flex-column mt-0">
                             <label class="label" translate="LABEL_ASSET_ID"></label>
-                            <label class="ms-2">{{assetId()}}</label>
+                            <label class="ms-2">{{ assetId() }}</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="d-flex flex-sm-column flex-row align-items-end mb-sm-0 mb-4">
                     <div class="d-flex flex-column mt-1 mx-4">
-                        <label class="label">AAS Content<br>View</label>
-                        <!-- TODO: Implement AAS Content View -->
-                        <button disabled [routerLink]="openShellView()" type="button" class="btn btn-primary" style="font-size: 1.5rem; width: min-content"><i class="bi bi-box-arrow-up-right"></i></button>
+                        <label class="label"translate="AAS.CONTENT"></label>
+                        <button
+                            [routerLink]="openContentView()"
+                            type="button"
+                            class="btn btn-primary"
+                            style="font-size: 1.5rem; width: min-content"
+                        >
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </button>
                     </div>
                     <div class="d-flex flex-column mt-1 mx-4">
-                        <label class="label">AAS Browser</label>
-                        <button [routerLink]="openBrowserView()" type="button" class="btn btn-primary" style="font-size: 1.5rem; width: min-content"><i class="bi bi-box-arrow-up-right"></i></button>
+                        <label class="label" translate="AAS.BROWSER"></label>
+                        <button
+                            [routerLink]="openBrowserView()"
+                            type="button"
+                            class="btn btn-primary"
+                            style="font-size: 1.5rem; width: min-content"
+                        >
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    }
 
-    <!-- Body of AAS View -->
-    <div class="fhg-aas-document">
-        <ul ngbNav #nav="ngbNav" class="nav-tabs">
-            <li [ngbNavItem]="1">
-                <button ngbNavLink>Submodels</button>
-                <ng-template ngbNavContent>
-                    <div class="d-flex flex-row flex-wrap">
-                        @for (submodel of getSubmodels(); track submodel) {
-                            <div class="d-flex flex-row mx-2 my-1 py-2 px-3 border border-1 border-black rounded-3 align-items-center bg-primary-subtle w-md-40">
-                                <div class="me-4 text-secondary" style="font-size: 3.5rem;">
-                                    <i class="bi" [ngClass]="getSubmodelIcon(submodel)"></i>
-                                </div>
-                                <div class="me-4">
-                                    <label  style="font-size:14px; overflow-wrap: anywhere; word-break: break-word;">{{getSubmodelSemanticId(submodel)}}</label>
-                                    <h4 style="overflow-wrap: anywhere; word-break: break-word;">{{submodel.idShort}}</h4>
-                                </div>
-                                <div class="ms-auto">
-                                    <button [routerLink]="openSubmodelView(submodel)" type="button" class="btn btn-primary" style="font-size: 1.5rem;"><i class="bi bi-box-arrow-up-right"></i></button>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </ng-template>
-            </li>
-            <li [ngbNavItem]="2">
-                <button ngbNavLink>AAS Tree</button>
-                <ng-template ngbNavContent>
-                    <fhg-aas-tree
-                        #aasTree
-                        [live]="live()"
-                        [searchExpression]="searchExpression()"
-                        [document]="document()"
-                        [allowSelection]="true"
-                        [enableValue]="true"
-                        (selectedElements)="setSelectedElements($event)"
+        <!-- Body of AAS View -->
+        <div class="fhg-aas-document">
+            <div class="d-flex flex-row flex-wrap">
+                @for (submodel of getSubmodels(); track submodel) {
+                    <div
+                        class="d-flex flex-row mx-2 my-1 py-2 px-3 border border-1 border-black rounded-3 align-items-center bg-primary-subtle w-md-40"
                     >
-                    </fhg-aas-tree>
-                </ng-template>
-            </li>
-        </ul>
-
-        <div [ngbNavOutlet]="nav" class="mt-2"></div>
-    </div>
-
-
+                        <div class="me-4 text-secondary" style="font-size: 3.5rem">
+                            <i class="bi" [ngClass]="getSubmodelIcon(submodel)"></i>
+                        </div>
+                        <div class="me-4">
+                            <label style="font-size: 14px; overflow-wrap: anywhere; word-break: break-word">{{
+                                getSubmodelSemanticId(submodel)
+                            }}</label>
+                            <h4 style="overflow-wrap: anywhere; word-break: break-word">
+                                {{ submodel.idShort }}
+                            </h4>
+                        </div>
+                        <div class="ms-auto">
+                            <button
+                                [routerLink]="openSubmodelView(submodel)"
+                                type="button"
+                                class="btn btn-primary"
+                                style="font-size: 1.5rem"
+                            >
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    } @else {
+        <div class="alert alert-info text-center mt-2" role="alert">{{ 'AAS.EMPTY' | translate }}</div>
+    }
 </div>
 
 <!-- Toolbar -->
@@ -116,58 +117,6 @@
     <div class="input-group me-2 my-1">
         <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
             <i class="bi bi-house-add"></i>
-        </button>
-    </div>
-    <div class="btn-group me-2 my-1">
-        <button type="button" class="btn btn-primary" (click)="play()" [disabled]="canPlay() === false">
-            <i class="bi bi-play-fill"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="canStop() === false">
-            <i class="bi bi-stop-fill"></i>
-        </button>
-    </div>
-    <div class="input-group me-2 my-1">
-        <select class="form-select" [ngModel]="dashboardPage()" (ngModelChange)="setDashboardPage($event)">
-            @for (page of dashboardPages(); track page) {
-                <option [ngValue]="page">{{ page.name }}</option>
-            }
-        </select>
-        <button
-            type="button"
-            class="btn btn-primary"
-            (click)="addToDashboard('Line')"
-            [disabled]="!canAddToDashboard()"
-        >
-            <i class="bi bi-graph-up"></i>
-        </button>
-        <button
-            type="button"
-            class="btn btn-primary"
-            (click)="addToDashboard('BarVertical')"
-            [disabled]="!canAddToDashboard()"
-        >
-            <i class="bi bi-bar-chart-line-fill"></i>
-        </button>
-    </div>
-    <div class="btn-group me-2 my-1">
-        <button type="button" class="btn btn-primary" (click)="download()">
-            <i class="bi bi-download"></i>
-        </button>
-    </div>
-    <div class="input-group flex-grow-1 me-2 my-1">
-        <div class="input-group-text"><i class="bi bi-search"></i></div>
-        <input
-            type="search"
-            class="form-control"
-            [ngModel]="searchExpression()"
-            (ngModelChange)="setSearchExpression($event)"
-            [placeholder]="'AAS.PLACEHOLDER_SEARCH' | translate"
-        />
-        <button type="button" class="btn btn-primary" (click)="findNext()">
-            <i class="bi bi-chevron-down"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="findPrevious()">
-            <i class="bi bi-chevron-up"></i>
         </button>
     </div>
 </ng-template>

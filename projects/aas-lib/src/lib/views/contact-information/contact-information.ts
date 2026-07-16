@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import { Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
@@ -22,7 +22,6 @@ import { ChildComponent } from '../../components/child-component';
     imports: [NgbAccordionModule],
     templateUrl: './contact-information.html',
     styleUrl: './contact-information.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContactInformation extends ChildComponent {
     /**

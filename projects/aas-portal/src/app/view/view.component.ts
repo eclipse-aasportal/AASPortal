@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { ToolbarService, VIEW_ROUTES } from 'aas-lib';
@@ -21,7 +21,6 @@ import { ViewState } from './view.state';
     templateUrl: './view.component.html',
     styleUrls: ['./view.component.scss'],
     imports: [RouterOutlet],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewComponent implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

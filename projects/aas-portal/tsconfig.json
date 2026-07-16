@@ -3,6 +3,7 @@
     "compileOnSave": false,
     "compilerOptions": {
         "outDir": "./build",
+        "rootDir": "..",
         "paths": {
             "aas-lib": [
                 "../aas-lib/src/public-api"

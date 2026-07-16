@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { form, FormField, required, SchemaPathTree, applyEach } from '@angular/forms/signals';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
@@ -56,7 +56,6 @@ function ItemSchema(item: SchemaPathTree<EndpointAuthItem>): void {
     imports: [FormField, TranslateDirective, TranslatePipe, FormError],
     templateUrl: './endpoint-auth-form.html',
     styleUrl: './endpoint-auth-form.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EndpointAuthForm {
     private readonly modal = inject(NgbActiveModal);

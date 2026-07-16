@@ -9,7 +9,7 @@
 import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
@@ -17,7 +17,7 @@ import { aas, AASDocument } from 'aas-core';
 import { ServiceRequestNotification } from './service-request-notification';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { StartService } from '../../services/start.service';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
@@ -27,7 +27,6 @@ import { EndpointsApi } from '../../services/endpoints-api';
     selector: 'fhg-thumbnail-qrcode',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestThumbnailQRCode {
     public readonly document = input<AASDocument>();

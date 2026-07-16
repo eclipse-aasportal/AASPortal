@@ -9,7 +9,7 @@
 import { inject, Injectable, InjectionToken, linkedSignal, Type } from '@angular/core';
 import { catchError, map, Observable, of } from 'rxjs';
 import { AuthService } from '../core/auth/auth.service';
-import { CookieService } from './cookie.service';
+import { CookieService } from '../share/services/cookie.service';
 import { rxResource } from '@angular/core/rxjs-interop';
 
 export type StartTileType = {

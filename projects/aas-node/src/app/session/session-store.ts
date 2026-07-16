@@ -151,30 +151,23 @@ export class SessionStore extends session.Store {
     }
 
     private async deleteSessionData(_id: string): Promise<void> {
-        const doc = await this.model.findOne({ _id }).exec();
-        await doc?.deleteOne();
+        await this.model.findOneAndDelete({ _id }).exec();
     }
 
     private async getSessionData(_id: string): Promise<SessionData | undefined> {
-        const doc = await this.model.findOne({ _id }).exec();
-        return doc?.session;
+        return (await this.model.findOne({ _id }).exec())?.session;
     }
 
     private async setSessionData(_id: string, data: SessionData): Promise<void> {
-        let doc = await this.model.findOne({ _id }).exec();
         const cookie = isToJson(data.cookie) ? data.cookie.toJSON(data.cookie) : data.cookie;
-        if (doc) {
-            const ttl = this.getTTL(data);
-            if (ttl <= 0) {
-                await this.deleteSessionData(_id);
-                return;
-            }
-
-            doc.session = { ...data, cookie };
-        } else {
-            doc = new this.model({ _id, session: { ...data, cookie } });
+        const ttl = this.getTTL(data);
+        if (ttl <= 0) {
+            await this.deleteSessionData(_id);
+            return;
         }
 
+        const doc = new this.model({ _id, session: { ...data, cookie } });
+        await this.model.findOneAndReplace({ _id }, doc, { upsert: true }).exec();
         await doc.save();
     }
 

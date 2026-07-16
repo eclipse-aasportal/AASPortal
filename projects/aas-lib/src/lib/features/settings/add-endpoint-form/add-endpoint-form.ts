@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { form, FormField, max, min, required, validate } from '@angular/forms/signals';
 import { NgbActiveModal, NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
@@ -41,7 +41,6 @@ export interface EndpointTemplate {
     imports: [FormField, TranslateDirective, TranslatePipe, NgbDropdownModule, FormError],
     templateUrl: './add-endpoint-form.html',
     styleUrl: './add-endpoint-form.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddEndpointForm {
     private readonly modal = inject(NgbActiveModal);

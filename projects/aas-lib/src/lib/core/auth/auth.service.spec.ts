@@ -15,7 +15,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 
 import { User } from 'aas-core';
-import { WINDOW } from '../../services/window.service';
+import { WINDOW } from '../../share/services/window.service';
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';

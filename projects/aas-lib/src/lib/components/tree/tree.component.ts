@@ -10,7 +10,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterLinkWithHref } from '@angular/router';
 import {
     AfterViewInit,
-    ChangeDetectionStrategy,
     Component,
     computed,
     DOCUMENT,
@@ -24,7 +23,7 @@ import {
 } from '@angular/core';
 
 import { noop } from 'aas-core';
-import { WINDOW } from '../../services/window.service';
+import { WINDOW } from '../../share/services/window.service';
 import { ChildComponent } from '../child-component';
 import { MaxLengthPipe } from '../../share/pipes/max-length.pipe';
 
@@ -82,7 +81,6 @@ export type TreeData<TId = TreeId, TOptions = Record<string, unknown>> = {
     imports: [FormsModule, RouterLinkWithHref, MaxLengthPipe],
     templateUrl: './tree.component.html',
     styleUrl: './tree.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export abstract class TreeComponent<TId = TreeId, TOptions = Record<string, unknown>>
     extends ChildComponent

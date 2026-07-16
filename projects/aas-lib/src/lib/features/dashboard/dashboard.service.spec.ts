@@ -11,11 +11,12 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { AuthService, CookieService } from 'aas-lib';
 import { DashboardService } from './dashboard.service';
 
-import data from '../../test/assets/test-pages.json';
-import { createSpyObj, FakeLoader } from '../../test/mocks';
+import data from '../../../test/assets/test-pages.json';
+import { CookieService } from '../../share/services/cookie.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { createSpyObj, FakeLoader } from '../../../test/mocks';
 
 describe('DashboardService', () => {
     let service: DashboardService;

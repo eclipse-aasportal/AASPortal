@@ -6,13 +6,13 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { email, form, minLength, required, FormField, validate } from '@angular/forms/signals';
 import { TranslateDirective } from '@ngx-translate/core';
 
 import { NotifyService } from '../../notify/notify.service';
 import { AuthService } from '../auth.service';
-import { WINDOW } from '../../../services/window.service';
+import { WINDOW } from '../../../share/services/window.service';
 import { FormError } from '../../../share/components/form-error/form-error';
 
 export interface RegistrationData {
@@ -27,7 +27,6 @@ export interface RegistrationData {
     templateUrl: './register-form.html',
     styleUrls: ['./register-form.scss'],
     imports: [TranslateDirective, FormField, FormError],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterForm {
     private readonly window = inject(WINDOW);

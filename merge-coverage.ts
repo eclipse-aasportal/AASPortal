@@ -36,7 +36,25 @@ function main(): void {
         copyFileSync(coverageFile, resolve(tempDir, `${index + 1}.json`));
     });
 
-    execFileSync('nyc', ['merge', tempDir, mergedCoverageFile], { stdio: 'inherit' });
+    // Prefer running the nyc JS directly with node if available. That avoids shell/.cmd issues on Windows.
+    const nycJs = resolve(projectRoot, 'node_modules', 'nyc', 'bin', 'nyc.js');
+    const useNodeRunner = existsSync(nycJs);
+
+    const runNyc = (args: string[]): void => {
+        if (useNodeRunner) {
+            execFileSync(process.execPath, [nycJs, ...args], { stdio: 'inherit' });
+        } else {
+            const nycCmd = process.platform === 'win32' ? 'nyc.cmd' : 'nyc';
+            const nycPath = resolve(projectRoot, 'node_modules', '.bin', nycCmd);
+            const nycExecutable = existsSync(nycPath) ? nycPath : nycCmd;
+            // Use a shell on Windows so .cmd shims execute correctly
+            const options: Record<string, unknown> = { stdio: 'inherit' };
+            if (process.platform === 'win32') options.shell = true;
+            execFileSync(nycExecutable, args, options);
+        }
+    };
+
+    runNyc(['merge', tempDir, mergedCoverageFile]);
 
     for (const entry of readdirSync(tempDir)) {
         if (entry !== 'coverage.json') {
@@ -44,23 +62,19 @@ function main(): void {
         }
     }
 
-    execFileSync(
-        'nyc',
-        [
-            'report',
-            '--temp-dir',
-            tempDir,
-            '--report-dir',
-            reportDir,
-            '--reporter=text-summary',
-            '--reporter=html',
-            '--reporter=lcov',
-            '--reporter=cobertura',
-            '--reporter=json',
-            '--reporter=json-summary',
-        ],
-        { stdio: 'inherit' },
-    );
+    runNyc([
+        'report',
+        '--temp-dir',
+        tempDir,
+        '--report-dir',
+        reportDir,
+        '--reporter=text-summary',
+        '--reporter=html',
+        '--reporter=lcov',
+        '--reporter=cobertura',
+        '--reporter=json',
+        '--reporter=json-summary',
+    ]);
 
     console.info(`Merged coverage report written to ${reportDir}`);
 }

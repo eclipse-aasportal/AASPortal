@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { ApplicationConfig, ErrorHandler, provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -15,6 +15,7 @@ import {
     API_URL,
     AuthInterceptor,
     CacheInterceptor,
+    ChartComponent,
     CustomerFeedbackCardComponent,
     FavoriteComponent,
     NotifyService,
@@ -28,14 +29,13 @@ import {
 } from 'aas-lib';
 
 import { routes } from './app.routes';
-import { ChartComponent } from './dashboard/chart/chart.component';
 import { AboutCardComponent } from './about/about-card.component';
 import { ApiUrlService } from './api-url.service';
 
 export const appConfig: ApplicationConfig = {
     providers: [
         provideRouter(routes),
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
+        provideHttpClient(withInterceptorsFromDi()),
         provideTranslateService({
             fallbackLang: 'en-us',
             loader: provideTranslateHttpLoader({ prefix: 'assets/i18n/', suffix: '.json' }),

@@ -12,14 +12,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    input,
-    model,
-    provideZonelessChangeDetection,
-    signal,
-} from '@angular/core';
+import { Component, input, model, provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { AASDocument, aas } from 'aas-core';
 import {
@@ -41,7 +34,6 @@ import { createSpyObj, FakeLoader } from '../../test/mocks';
     selector: 'fhg-aas-table',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestAASTable {
     public readonly viewMode = input<ViewMode>(ViewMode.List);

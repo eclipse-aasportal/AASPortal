@@ -11,7 +11,6 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { EMPTY, Observable, Subscription } from 'rxjs';
 import {
-    ChangeDetectionStrategy,
     Component,
     computed,
     effect,
@@ -40,7 +39,7 @@ import {
 } from 'aas-core';
 
 import { getDisplayName, getUrl } from '../../utilities';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { WebSocketService } from '../../services/web-socket.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { LeafView } from '../leaf-view';
@@ -64,7 +63,6 @@ export type Group = { idShort: string; name: string; items: GroupItem[] };
     styleUrl: './operational-data-view.scss',
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'OperationalData' }],
     imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective, RouterLink],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationalDataView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GroupItem>();

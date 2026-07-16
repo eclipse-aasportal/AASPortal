@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { Component, effect, inject, OnDestroy, TemplateRef, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
 import { LeafView } from '../leaf-view';
 import { encodeBase64Url } from '../../utilities';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { StartService } from '../../services/start.service';
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -24,7 +24,6 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HierarchicalStructure],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'HierarchicalStructure' }],
     templateUrl: './hierarchical-structure-view.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './hierarchical-structure-view.scss',
 })
 export class HierarchicalStructureView extends LeafView implements OnDestroy {

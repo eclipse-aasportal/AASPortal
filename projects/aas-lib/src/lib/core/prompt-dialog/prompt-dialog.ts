@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective } from '@ngx-translate/core';
@@ -19,7 +19,6 @@ import { TranslateDirective } from '@ngx-translate/core';
     imports: [FormField, TranslateDirective],
     templateUrl: './prompt-dialog.html',
     styleUrl: './prompt-dialog.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PromptDialog {
     private readonly modal = inject(NgbActiveModal);

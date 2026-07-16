@@ -10,9 +10,9 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { of, Observable } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { CarbonFootprint } from './carbon-footprint';
 import { LeafView } from '../leaf-view';
@@ -37,7 +37,6 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     ],
     templateUrl: './carbon-footprint-view.html',
     styleUrl: './carbon-footprint-view.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarbonFootprintView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

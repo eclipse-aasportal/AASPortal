@@ -9,18 +9,7 @@
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateDirective } from '@ngx-translate/core';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    WritableSignal,
-    computed,
-    effect,
-    inject,
-    input,
-    model,
-    signal,
-    untracked,
-} from '@angular/core';
+import { Component, WritableSignal, computed, effect, inject, input, model, signal, untracked } from '@angular/core';
 
 import { AASDocument } from 'aas-core';
 
@@ -48,7 +37,6 @@ export type AASTableItem = {
     styleUrls: ['./aas-table.scss'],
     imports: [FormsModule, MaxLengthPipe, TranslateDirective, RouterLink],
     providers: [AASTableFilter],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASTable {
     private readonly filter = inject(AASTableFilter);

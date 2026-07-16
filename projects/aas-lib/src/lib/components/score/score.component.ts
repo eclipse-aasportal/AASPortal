@@ -6,14 +6,13 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
 @Component({
     selector: 'fhg-score',
     templateUrl: './score.component.html',
     styleUrls: ['./score.component.scss'],
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScoreComponent {
     public readonly score = input(0.0);

@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, TemplateRef } from '@angular/core';
 import { ToolbarService } from './toolbar.service';
-import { createSpyObj } from '../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('ToolbarService', () => {
     let service: ToolbarService;

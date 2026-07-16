@@ -10,7 +10,6 @@ import { Injectable, WritableSignal, computed, inject, signal, untracked } from 
 import { nanoid } from 'nanoid';
 import { EMPTY, map, mergeMap, Observable, skipWhile, tap } from 'rxjs';
 import { aas, AASDocument, getUnit, LiveNode } from 'aas-core';
-import { AuthService, CookieService, encodeBase64Url } from 'aas-lib';
 
 import {
     DashboardChartItem,
@@ -19,6 +18,9 @@ import {
     DashboardSource,
     DashboardState,
 } from './dashboard-types';
+import { AuthService } from '../../core/auth/auth.service';
+import { CookieService } from '../../share/services/cookie.service';
+import { encodeBase64Url } from '../../utilities';
 
 const initialState: DashboardState = [{ name: 'Dashboard 1', active: true, items: [], requests: [] }];
 

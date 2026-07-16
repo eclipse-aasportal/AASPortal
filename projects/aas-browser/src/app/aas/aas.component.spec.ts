@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { aas } from 'aas-core';
 import { API_URL, BrowserComponent, BrowserState, ToolbarService } from 'aas-lib';
 
@@ -24,7 +24,6 @@ import { AASApi } from './aas-api';
     template: '<div></div>',
     styles: [],
     imports: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestBrowserComponent {
     public readonly env = input<aas.Environment | null | undefined>(undefined);

@@ -11,27 +11,26 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { first, lastValueFrom, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { encodeBase64Url } from '../../utilities';
 import { BrowserComponent } from '../../components/browser/browser.component';
 import { StartService } from '../../services/start.service';
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { VIEW_ROUTES } from '../views-routes';
 import { DocumentBrowserView } from './document-browser-view';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { BrowserState } from '../../components/browser/browser.state';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 
-import sampleDocument from '../../../test/assets/sample-document.json';
+import content from '../../../test/assets/sample-document.json';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',
     template: '<div></div>',
     styleUrls: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestThumbnailQRCode {
     public readonly document = input<AASDocument>();
@@ -41,7 +40,6 @@ export class TestThumbnailQRCode {
     selector: 'fhg-browser',
     template: '<div></div>',
     styles: [],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestBrowserComponent {
     public readonly env = input<aas.Environment | null | undefined>(undefined);
@@ -60,16 +58,13 @@ describe('DocumentBrowserView', () => {
     beforeEach(async () => {
         api = createSpyObj<EndpointsApi>(['getDocument']);
         start = createSpyObj<StartService>(['add', 'save']);
-        route = createSpyObj<ActivatedRoute>(
-            {},
-            {
-                params: of({
-                    endpoint: encodeBase64Url('endpoint'),
-                    id: encodeBase64Url('http://customer.com/aas/9175_7013_7091_9168'),
-                }),
-                queryParams: of({}),
-            },
-        );
+        route = createSpyObj<ActivatedRoute>([], {
+            params: of({
+                endpoint: encodeBase64Url('endpoint'),
+                id: encodeBase64Url('http://customer.com/aas/9175_7013_7091_9168'),
+            }),
+            queryParams: of({}),
+        });
 
         document = {
             address: '',
@@ -79,7 +74,7 @@ describe('DocumentBrowserView', () => {
             timestamp: 0,
             id: 'http://customer.com/aas/9175_7013_7091_9168',
             endpoint: 'endpoint',
-            content: sampleDocument as aas.Environment,
+            content: content as aas.Environment,
         };
 
         api.getDocument.mockReturnValue(of(document));

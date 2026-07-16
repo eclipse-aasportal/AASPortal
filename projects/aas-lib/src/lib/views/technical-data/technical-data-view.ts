@@ -10,9 +10,9 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../share/services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { TechnicalData } from './technical-data';
 import { TechnicalDataViewState } from './technical-data-view.state';
@@ -34,7 +34,6 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     ],
     templateUrl: './technical-data-view.html',
     styleUrl: './technical-data-view.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TechnicalDataView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

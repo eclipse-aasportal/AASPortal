@@ -16,7 +16,7 @@ import { createSpyObj, FakeLoader } from '../../../../test/mocks';
 import { RegisterForm } from './register-form';
 import { AuthService } from '../auth.service';
 import { NotifyService } from '../../notify/notify.service';
-import { WINDOW } from '../../../services/window.service';
+import { WINDOW } from '../../../share/services/window.service';
 
 describe('RegisterForm', () => {
     let fixture: ComponentFixture<RegisterForm>;
