@@ -10,6 +10,7 @@
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "watch": "ng test aas-browser --coverage=false",
         "test": "ng test aas-browser --no-watch",
+        "test:unit": "ng test aas-browser --no-watch --coverage=false",
         "lint": "ng lint aas-browser",
         "format": "ng lint aas-browser --fix",
         "docs": "typedoc --out docs"

@@ -11,6 +11,7 @@
         "tsoa": "tsoa spec-and-routes -c tsoa.config.json",
         "serve": "rimraf build && npm run tsoa && tsc -p tsconfig.app.json",
         "test": "vitest --run",
+        "test:unit": "vitest --run --coverage=false",
         "watch": "vitest --watch --coverage=false",
         "build": "rimraf dist && npm run tsoa && node esbuild.prod.js",
         "build:debug": "rimraf dist && npm run tsoa && node esbuild.dev.js",

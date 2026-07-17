@@ -10,6 +10,7 @@
     "type": "module",
     "scripts": {
         "test": "rimraf src/test/assets/tmp && vitest --run",
+        "test:unit": "vitest --run --coverage=false",
         "watch": "vitest --watch --coverage=false",
         "coverage": "node merge-coverage.js",
         "build": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.prod.js",
