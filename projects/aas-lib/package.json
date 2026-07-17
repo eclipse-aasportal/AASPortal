@@ -6,6 +6,7 @@
     "scripts": {
         "ng": "ng",
         "test": "ng test aas-lib --no-watch",
+        "test:unit": "ng test aas-browser --no-watch --coverage=false",
         "watch": "ng test aas-lib --coverage=false",
         "build": "ng build aas-lib",
         "build:debug": "ng build aas-lib --configuration development",

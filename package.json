@@ -16,6 +16,7 @@
 		"lint": "npm run lint --workspaces",
 		"format": "npm run format --workspaces",
 		"test": "npm run test --workspaces",
+		"test:unit": "npm run test --workspaces",
 		"tsc": "npm run tsc --workspaces",
 		"build": "npm run build --workspaces",
 		"build:debug": "npm run build:debug --workspaces",

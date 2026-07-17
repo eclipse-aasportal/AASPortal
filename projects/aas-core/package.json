@@ -11,6 +11,7 @@
     "type": "module",
     "scripts": {
         "test": "vitest --run",
+        "test:unit": "vitest --run --coverage=false",
         "watch": "vitest --watch --coverage=false",
         "build": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.prod.js",
         "build:debug": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.dev.js",
