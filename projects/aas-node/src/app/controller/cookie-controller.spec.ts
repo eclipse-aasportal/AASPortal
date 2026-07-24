@@ -15,7 +15,7 @@ import { describe, it, expect, Mocked, vi, beforeAll, afterAll } from 'vitest';
 import { createSpyObj } from '../../test/mocks.js';
 import { RegisterRoutes } from '../routes/routes.js';
 import { errorHandler } from '../../test/assets/error-handler.js';
-import { COOKIE_STORAGE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
 import { Authentication } from './authentication.js';
 
 describe('CookieController', () => {
@@ -27,7 +27,7 @@ describe('CookieController', () => {
         storage = createSpyObj<CookieStorage>(['deleteCookie', 'getCookie', 'setCookie']);
         authentication = createSpyObj<Authentication>(['authentication']);
         authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
-        container.registerInstance(COOKIE_STORAGE, storage);
+        container.registerInstance(COOKIE_STORE, storage);
         container.registerInstance(Authentication, authentication);
 
         app = express();

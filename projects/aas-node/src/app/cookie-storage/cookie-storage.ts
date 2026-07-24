@@ -11,7 +11,7 @@ import { InjectionToken } from 'tsyringe';
 import { ERRORS } from '../errors.js';
 
 /** Injection token. */
-export const COOKIE_STORAGE: InjectionToken<CookieStorage> = 'COOKIE_STORAGE';
+export const COOKIE_STORE: InjectionToken<CookieStorage> = 'COOKIE_STORE';
 
 /** Defines user storage. */
 export abstract class CookieStorage {

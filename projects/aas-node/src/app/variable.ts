@@ -33,7 +33,7 @@ export class Variable {
     public readonly CONTENT_ROOT: string = path.resolve(process.env.CONTENT_ROOT ?? './');
 
     /** The URL of the cookie storage. */
-    public readonly COOKIE_STORAGE?: string = process.env.COOKIE_STORAGE;
+    public readonly COOKIE_STORE?: string = process.env.COOKIE_STORE;
 
     /** The CORS origin settings. */
     public readonly CORS_ORIGIN: string | string[] = process.env.CORS_ORIGIN

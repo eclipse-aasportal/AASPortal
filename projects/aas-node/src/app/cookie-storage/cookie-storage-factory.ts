@@ -17,7 +17,7 @@ export class CookieStorageFactory {
 
     public static getInstance(c: DependencyContainer): CookieStorage {
         if (!CookieStorageFactory.instance) {
-            const value = c.resolve(Variable).COOKIE_STORAGE;
+            const value = c.resolve(Variable).COOKIE_STORE;
             if (!value || value.startsWith('file:')) {
                 CookieStorageFactory.instance = c.resolve(LocalCookieStorage);
             } else if (value.startsWith('mongodb')) {

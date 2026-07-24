@@ -23,7 +23,7 @@ describe('LocalCookieStorage', () => {
     beforeEach(async () => {
         vi.spyOn(fs, 'existsSync').mockReturnValue(true);
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        variable = createSpyObj<Variable>([], { COOKIE_STORAGE: undefined });
+        variable = createSpyObj<Variable>([], { COOKIE_STORE: undefined });
         storage = new LocalCookieStorage(logger, variable);
     });
 

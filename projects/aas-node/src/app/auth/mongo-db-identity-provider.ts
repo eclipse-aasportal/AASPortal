@@ -12,7 +12,7 @@ import { Logger, LOGGER, MongoDBConnectionProvider } from 'aas-package';
 
 import { Variable } from '../variable.js';
 import { IdentityProvider, UserData } from './identity-provider.js';
-import { COOKIE_STORAGE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
 
 interface UserDocument extends UserData, mongoose.Document {}
 
@@ -31,7 +31,7 @@ export class MongoDBIdentityProvider extends IdentityProvider {
 
     public constructor(
         @inject(LOGGER) logger: Logger,
-        @inject(COOKIE_STORAGE) cookies: CookieStorage,
+        @inject(COOKIE_STORE) cookies: CookieStorage,
         @inject(Variable) variable: Variable,
         @inject(MongoDBConnectionProvider) connectionProvider: MongoDBConnectionProvider,
     ) {

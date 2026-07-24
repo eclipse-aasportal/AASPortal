@@ -44,11 +44,11 @@ export class MongoDBCookieStorage extends CookieStorage {
     ) {
         super();
 
-        if (!variable.COOKIE_STORAGE) {
-            throw new Error('COOKIE_STORAGE variable is not set');
+        if (!variable.COOKIE_STORE) {
+            throw new Error('COOKIE_STORE variable is not set');
         }
 
-        this.connection = connectionProvider.getConnection(variable.COOKIE_STORAGE);
+        this.connection = connectionProvider.getConnection(variable.COOKIE_STORE);
         this.model = this.connection.model<UserCookiesDocument>('UserCookies', this.schema);
         this.logger.info('Using MongoDB cookie storage');
     }
