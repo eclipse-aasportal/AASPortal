@@ -7,12 +7,13 @@
  *****************************************************************************/
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { DashboardApiService } from './dashboard-api.service';
+import { encodeBase64Url } from '../../utilities';
 
 describe('DashboardApiService', () => {
     let service: DashboardApiService;
@@ -21,7 +22,7 @@ describe('DashboardApiService', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
                 provideZonelessChangeDetection(),
             ],
@@ -45,7 +46,7 @@ describe('DashboardApiService', () => {
         const smId = encodeBase64Url('http://localhost/submodel');
         const path = 'Blob';
         const url = `/api/v1/endpoints/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
-        const value = window.btoa('Hello World!');
+        const value = btoa('Hello World!');
 
         service.getBlobValue(url).subscribe(value => {
             expect(value).toEqual(value);
@@ -56,7 +57,3 @@ describe('DashboardApiService', () => {
         req.flush(value);
     });
 });
-
-function encodeBase64Url(s: string): string {
-    return window.btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}

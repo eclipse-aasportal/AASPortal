@@ -11,14 +11,14 @@ import { Body, Controller, Delete, Get, OperationId, Path, Post, Route, Request,
 import express from 'express';
 import { ApplicationError } from 'aas-core';
 
-import { COOKIE_STORAGE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
 import { ERRORS } from '../errors.js';
 
 @injectable()
 @Route('/api/v1/cookies')
 @Tags('Cookies')
 export class CookiesController extends Controller {
-    public constructor(@inject(COOKIE_STORAGE) private readonly storage: CookieStorage) {
+    public constructor(@inject(COOKIE_STORE) private readonly storage: CookieStorage) {
         super();
     }
 

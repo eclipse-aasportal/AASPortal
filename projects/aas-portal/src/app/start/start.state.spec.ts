@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -47,7 +47,7 @@ describe('StartState', () => {
                         useClass: FakeLoader,
                     },
                 }),
-                provideHttpClient(withXhr()),
+                provideHttpClient(),
                 provideHttpClientTesting(),
                 provideZonelessChangeDetection(),
             ],

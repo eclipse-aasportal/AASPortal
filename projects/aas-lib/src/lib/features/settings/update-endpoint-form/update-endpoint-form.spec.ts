@@ -11,7 +11,7 @@ import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { UpdateEndpointForm, UpdateEndpointResult } from './update-endpoint-form';
 import { AASEndpoint } from 'aas-core';
@@ -43,7 +43,7 @@ describe('UpdateEndpointForm', () => {
                     },
                 }),
                 provideZonelessChangeDetection(),
-                provideHttpClient(withXhr()),
+                provideHttpClient(),
                 provideHttpClientTesting(),
             ],
             imports: [UpdateEndpointForm, FormError],

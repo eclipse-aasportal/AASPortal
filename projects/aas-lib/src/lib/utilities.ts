@@ -98,34 +98,6 @@ export function extension(path: string): string | undefined {
 }
 
 /**
- * Encodes a string to Base64Url.
- * @param str The string to encode.
- * @returns The encoded string.
- */
-export function encodeBase64Url(str: string): string {
-    const utf8Bytes = new TextEncoder().encode(str);
-    let binary = '';
-    utf8Bytes.forEach(b => (binary += String.fromCharCode(b)));
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-/**
- * Decodes a Base64Url string.
- * @param str The encoded string.
- * @returns The decoded string.
- */
-export function decodeBase64Url(str: string): string {
-    str = str.replace(/-/g, '+').replace(/_/g, '/');
-    while (str.length % 4) {
-        str += '=';
-    }
-
-    const binary = atob(str);
-    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
-    return new TextDecoder().decode(bytes);
-}
-
-/**
  * Checks if the specified string is base64 encoded
  * @param s The string to test.
  * @return true if base64 encoded
@@ -881,4 +853,77 @@ export function validateEndpointUrl(value: string, type: AASEndpointType): strin
 
         return undefined;
     }
+}
+
+const BASE64URL_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+/**
+ * Encodes a string to Base64URL format (without btoa and replace).
+ * @param input The string to encode.
+ * @returns The Base64URL encoded string.
+ */
+export function encodeBase64Url(input: string): string {
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(input);
+
+    let result = '';
+
+    for (let i = 0; i < bytes.length; i += 3) {
+        const byte1 = bytes[i];
+        const byte2 = bytes[i + 1] ?? 0;
+        const byte3 = bytes[i + 2] ?? 0;
+
+        const index1 = byte1 >> 2;
+        const index2 = ((byte1 & 0x03) << 4) | (byte2 >> 4);
+        const index3 = ((byte2 & 0x0f) << 2) | (byte3 >> 6);
+        const index4 = byte3 & 0x3f;
+
+        result += BASE64URL_ALPHABET[index1];
+        result += BASE64URL_ALPHABET[index2];
+        result += i + 1 < bytes.length ? BASE64URL_ALPHABET[index3] : '';
+        result += i + 2 < bytes.length ? BASE64URL_ALPHABET[index4] : '';
+    }
+
+    return result;
+}
+
+/**
+ * Decodes a Base64URL encoded string to its original string representation.
+ * @param input The Base64URL encoded string to decode.
+ * @returns The original string representation.
+ */
+export function decodeBase64Url(input: string): string {
+    const revMap: Record<string, number> = {};
+    for (let i = 0; i < BASE64URL_ALPHABET.length; i++) {
+        revMap[BASE64URL_ALPHABET[i]] = i;
+    }
+
+    const pad = (4 - (input.length % 4)) % 4;
+    const paddedInput = input + '='.repeat(pad);
+
+    const bytes: number[] = [];
+
+    for (let i = 0; i < paddedInput.length; i += 4) {
+        const char1 = paddedInput[i];
+        const char2 = paddedInput[i + 1];
+        const char3 = paddedInput[i + 2];
+        const char4 = paddedInput[i + 3];
+
+        const val1 = revMap[char1];
+        const val2 = revMap[char2];
+        const val3 = char3 === '=' ? 0 : revMap[char3];
+        const val4 = char4 === '=' ? 0 : revMap[char4];
+
+        const byte1 = (val1 << 2) | (val2 >> 4);
+        const byte2 = ((val2 & 15) << 4) | (val3 >> 2);
+        const byte3 = ((val3 & 3) << 6) | val4;
+
+        bytes.push(byte1);
+
+        if (char3 !== '=') bytes.push(byte2);
+        if (char4 !== '=') bytes.push(byte3);
+    }
+
+    const decoder = new TextDecoder('utf-8');
+    return decoder.decode(new Uint8Array(bytes));
 }

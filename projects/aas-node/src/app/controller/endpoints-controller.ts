@@ -30,7 +30,7 @@ import { decodeBase64Url } from 'aas-package';
 import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 import { EndpointProvider } from '../provider/endpoint-provider.js';
 import { ERRORS } from '../errors.js';
-import { COOKIE_STORAGE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
@@ -38,7 +38,7 @@ import { COOKIE_STORAGE, CookieStorage } from '../cookie-storage/cookie-storage.
 export class EndpointsController extends Controller {
     public constructor(
         @inject(EndpointProvider) private readonly provider: EndpointProvider,
-        @inject(COOKIE_STORAGE) private readonly cookieStorage: CookieStorage,
+        @inject(COOKIE_STORE) private readonly cookieStorage: CookieStorage,
         @inject(AAS_INDEX) private readonly index: AASIndex,
     ) {
         super();

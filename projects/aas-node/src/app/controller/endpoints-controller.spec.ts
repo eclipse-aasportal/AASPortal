@@ -21,7 +21,7 @@ import { Authentication } from './authentication.js';
 import { errorHandler } from '../../test/assets/error-handler.js';
 import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 import { EndpointProvider } from '../provider/endpoint-provider.js';
-import { COOKIE_STORAGE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
 
 describe('EndpointsController', () => {
     let app: Express;
@@ -48,7 +48,7 @@ describe('EndpointsController', () => {
         container.registerInstance(EndpointProvider, provider);
         container.registerInstance(Authentication, authentication);
         container.registerInstance(AAS_INDEX, index);
-        container.registerInstance(COOKIE_STORAGE, cookieStorage);
+        container.registerInstance(COOKIE_STORE, cookieStorage);
 
         app = express();
         app.use(json());

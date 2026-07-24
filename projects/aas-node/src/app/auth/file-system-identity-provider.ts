@@ -14,7 +14,7 @@ import fs from 'fs';
 import { LOGGER, Logger } from 'aas-package';
 import { IdentityProvider, UserData } from './identity-provider.js';
 import { Variable } from '../variable.js';
-import { COOKIE_STORAGE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
 
 @injectable()
 export class FileSystemIdentityProvider extends IdentityProvider {
@@ -22,7 +22,7 @@ export class FileSystemIdentityProvider extends IdentityProvider {
 
     public constructor(
         @inject(LOGGER) logger: Logger,
-        @inject(COOKIE_STORAGE) cookies: CookieStorage,
+        @inject(COOKIE_STORE) cookies: CookieStorage,
         @inject(Variable) variable: Variable,
     ) {
         super(logger, cookies, variable);

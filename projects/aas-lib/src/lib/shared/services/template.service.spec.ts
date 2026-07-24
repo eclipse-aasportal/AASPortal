@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { aas, TemplateDescriptor, types } from 'aas-core';
 
 import { NotifyService } from '../../core/notify/notify.service';
@@ -28,7 +28,7 @@ describe('TemplateService', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
                 },
-                provideHttpClient(withXhr()),
+                provideHttpClient(),
                 provideHttpClientTesting(),
                 provideZonelessChangeDetection(),
             ],

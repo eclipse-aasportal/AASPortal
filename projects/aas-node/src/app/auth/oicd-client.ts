@@ -18,7 +18,7 @@ import { Logger, LOGGER } from 'aas-package';
 import { IdentityProviderClient, RefreshTokenResponse } from './identity-provider-client.js';
 import { Variable } from '../variable.js';
 import { ERRORS } from '../errors.js';
-import { COOKIE_STORAGE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
 
 export const AuthorizationServerSchema = z.object({
     issuer: z.url(),
@@ -62,7 +62,7 @@ export class OicdClient extends IdentityProviderClient {
 
     public constructor(
         @inject(LOGGER) logger: Logger,
-        @inject(COOKIE_STORAGE) cookies: CookieStorage,
+        @inject(COOKIE_STORE) cookies: CookieStorage,
         @inject(Variable) private readonly variable: Variable,
     ) {
         super(logger, cookies);

@@ -66,7 +66,7 @@ describe('MongoDBCookieStorage', () => {
             }),
         } as unknown as mongoose.Connection);
 
-        variable = createSpyObj<Variable>([], { COOKIE_STORAGE: 'mongodb://localhost:27017/cookies' });
+        variable = createSpyObj<Variable>([], { COOKIE_STORE: 'mongodb://localhost:27017/cookies' });
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         storage = new MongoDBCookieStorage(logger, connectionProvider, variable);
     });

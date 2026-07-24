@@ -32,8 +32,8 @@ export class LocalCookieStorage extends CookieStorage {
 
         this.cookiesDirectory = slash(
             resolve(
-                variable.COOKIE_STORAGE
-                    ? new URL(variable.COOKIE_STORAGE).pathname
+                variable.COOKIE_STORE
+                    ? new URL(variable.COOKIE_STORE).pathname
                     : fileURLToPath(new URL('./users', import.meta.url)),
             ),
         );
