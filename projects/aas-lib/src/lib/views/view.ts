@@ -10,7 +10,7 @@ import { Component, inject, Signal, signal, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AASDocument } from 'aas-core';
-import { EndpointsApi } from '../services/endpoints-api';
+import { EndpointsApi } from '../shared/services/endpoints-api';
 import { ViewRoute } from '../types';
 import { VIEW_ROUTE_NAME } from './view-route-name';
 import { VIEW_ROUTES } from './views-routes';

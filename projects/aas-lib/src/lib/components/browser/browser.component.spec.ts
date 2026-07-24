@@ -13,7 +13,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { BrowserComponent } from './browser.component';
 import { BrowserState } from './browser.state';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { API_URL } from '../../api-url';
 
 import sampleDocument from '../../../test/assets/sample-document.json';

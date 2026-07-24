@@ -14,8 +14,8 @@ import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { encodeBase64Url, getUrl, toString } from '../../utilities';
-import { ToolbarService } from '../../share/services/toolbar.service';
-import { StartService } from '../../services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
 import { Nameplate } from '../nameplate/nameplate';

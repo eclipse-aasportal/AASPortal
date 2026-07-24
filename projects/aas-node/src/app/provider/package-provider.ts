@@ -79,7 +79,7 @@ export class PackageProvider {
             if (address) {
                 const document = await client.createDocument(address);
                 await this.index.insert(document);
-                this.sender.send({ type: 'Added', document });
+                this.sender.send({ type: 'Added', document, start: Date.now() });
             }
         } finally {
             await client.close();
@@ -100,7 +100,7 @@ export class PackageProvider {
             try {
                 await client.deletePackage(document.id, document.address);
                 await this.index.delete(endpointName, id);
-                this.sender.send({ type: 'Removed', document: { ...document, content: null } });
+                this.sender.send({ type: 'Removed', document: { ...document, content: null }, start: Date.now() });
             } finally {
                 await client.close();
             }

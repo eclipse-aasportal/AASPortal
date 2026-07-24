@@ -13,7 +13,7 @@ import { HttpRequest } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 
 import { WebSocketData } from 'aas-core';
-import { createSpyObj, MockWebSocketService } from '../../test/mocks';
+import { createSpyObj, MockWebSocketService } from '../../../test/mocks';
 import { CacheInterceptor } from './cache.interceptor';
 import { WebSocketService } from './web-socket.service';
 

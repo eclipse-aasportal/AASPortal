@@ -9,10 +9,10 @@
 import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { LeafView } from '../leaf-view';
-import { ToolbarService } from '../../share/services/toolbar.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { encodeBase64Url, toString } from '../../utilities';
-import { StartService } from '../../services/start.service';
+import { StartService } from '../../shared/services/start.service';
 import { RouterLink } from '@angular/router';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 

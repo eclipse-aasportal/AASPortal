@@ -14,7 +14,7 @@ import { of } from 'rxjs';
 import { DashboardService } from './dashboard.service';
 
 import data from '../../../test/assets/test-pages.json';
-import { CookieService } from '../../share/services/cookie.service';
+import { CookieService } from '../../shared/services/cookie.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 

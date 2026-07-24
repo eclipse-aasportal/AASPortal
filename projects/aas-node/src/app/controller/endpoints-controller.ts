@@ -24,7 +24,7 @@ import {
 } from 'tsoa';
 import express from 'express';
 
-import { ApplicationError, EndpointAuth, type AASEndpoint } from 'aas-core';
+import { UpdateIndexStatus, ApplicationError, EndpointAuth, type AASEndpoint } from 'aas-core';
 import { decodeBase64Url } from 'aas-package';
 
 import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
@@ -50,7 +50,7 @@ export class EndpointsController extends Controller {
      */
     @Get('')
     @Security('oauth2', ['reader', 'editor', 'admin'])
-    @OperationId('getEndpoints')
+    @OperationId('GetEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
         return (await this.index.getEndpoints()).map(endpoint => {
             if (endpoint.headers) {
@@ -70,20 +70,20 @@ export class EndpointsController extends Controller {
      * @summary Gets the number of registered endpoints.
      * @returns The number of registered endpoints.
      */
-    @Get('count')
-    @OperationId('getCount')
-    public async getCount(): Promise<{ count: number }> {
-        return { count: await this.index.getEndpointCount() };
+    @Get('endpoint-count')
+    @OperationId('GetEndpointCount')
+    public async getEndpointCount(): Promise<number> {
+        return await this.index.getEndpointCount();
     }
 
     /**
      * @summary The total count of AAS documents over all endpoints.
      * @returns The total count of AAS documents.
      */
-    @Get('documents-count')
-    @OperationId('getDocumentCount')
-    public async getDocumentCount(): Promise<{ count: number }> {
-        return { count: await this.index.getCount() };
+    @Get('document-count')
+    @OperationId('GetDocumentCount')
+    public async getDocumentCount(): Promise<number> {
+        return await this.index.getDocumentCount();
     }
 
     /**
@@ -91,10 +91,10 @@ export class EndpointsController extends Controller {
      * @param name The endpoint name.
      * @returns The total number of AAS documents.
      */
-    @Get('{name}/documents-count')
-    @OperationId('getEndpointDocumentCount')
-    public async getEndpointDocumentCount(@Path() name: string): Promise<{ count: number }> {
-        return { count: await this.index.getCount(decodeBase64Url(name)) };
+    @Get('{name}/document-count')
+    @OperationId('GetEndpointDocumentCount')
+    public async getEndpointDocumentCount(@Path() name: string): Promise<number> {
+        return await this.index.getDocumentCount(decodeBase64Url(name));
     }
 
     /**
@@ -103,7 +103,7 @@ export class EndpointsController extends Controller {
      */
     @Post('')
     @Security('oauth2', ['editor', 'admin'])
-    @OperationId('addEndpoint')
+    @OperationId('AddEndpoint')
     public async addEndpoint(@Body() endpoint: AASEndpoint): Promise<void> {
         await this.provider.addEndpoint(endpoint);
     }
@@ -115,7 +115,7 @@ export class EndpointsController extends Controller {
      */
     @Put('{name}')
     @Security('oauth2', ['editor', 'admin'])
-    @OperationId('updateEndpoint')
+    @OperationId('UpdateEndpoint')
     public async updateEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         if (decodeBase64Url(name) !== endpoint.name) {
             throw new Error('Endpoint name cannot be changed.');
@@ -130,30 +130,31 @@ export class EndpointsController extends Controller {
      */
     @Delete('{name}')
     @Security('oauth2', ['editor', 'admin'])
-    @OperationId('deleteEndpoint')
+    @OperationId('DeleteEndpoint')
     public async deleteEndpoint(@Path() name: string): Promise<void> {
         await this.provider.removeEndpoint(decodeBase64Url(name));
-    }
-
-    /**
-     * @summary Resets the endpoint configuration.
-     */
-    @Delete('')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('reset')
-    public async reset(): Promise<void> {
-        await this.provider.reset();
     }
 
     /**
      * @summary Starts a scan of the endpoint with the specified name.
      * @param name The endpoint name (Base64-URL encoded).
      */
-    @Put('{name}/scan')
+    @Put('{name}/start-scan')
     @Security('oauth2', ['editor', 'admin'])
-    @OperationId('startEndpointScan')
+    @OperationId('StartEndpointScan')
     public async startEndpointScan(@Path() name: string): Promise<void> {
         await this.provider.startEndpointScan(decodeBase64Url(name));
+    }
+
+    /**
+     * @summary Cancels a running scan of the endpoint with the specified name.
+     * @param name The endpoint name (Base64-URL encoded).
+     */
+    @Put('{name}/cancel-scan')
+    @Security('oauth2', ['editor', 'admin'])
+    @OperationId('CancelEndpointScan')
+    public async cancelEndpointScan(@Path() name: string): Promise<void> {
+        await this.provider.cancelEndpointScan(decodeBase64Url(name));
     }
 
     /**
@@ -161,7 +162,7 @@ export class EndpointsController extends Controller {
      * @returns The authentication information for all endpoints of the current authenticated user.
      */
     @Get('auth')
-    @OperationId('getAllEndpointAuth')
+    @OperationId('GetAllEndpointAuth')
     public async getAllEndpointAuth(@Request() req: express.Request): Promise<EndpointAuth[]> {
         const user = req.user;
         if (!user) {
@@ -187,7 +188,7 @@ export class EndpointsController extends Controller {
      * @param items The updated endpoint authentication information.
      */
     @Patch('auth')
-    @OperationId('updateEndpointAuthItems')
+    @OperationId('UpdateEndpointAuthItems')
     public async updateEndpointAuthItems(
         @Body() items: EndpointAuth[],
         @Request() req: express.Request,
@@ -198,5 +199,16 @@ export class EndpointsController extends Controller {
         }
 
         await this.cookieStorage.updatesEndpoints(user.id, items);
+    }
+
+    /**
+     * Gets the scan status of the AAS endpoint with the specified name.
+     * @param name The name of the AAS endpoint.
+     * @returns The scan status of the AAS endpoint.
+     */
+    @Get('{name}/status')
+    @OperationId('GetUpdateStatus')
+    public async getUpdateStatus(@Path() name: string): Promise<UpdateIndexStatus> {
+        return this.provider.getUpdateStatus(decodeBase64Url(name));
     }
 }

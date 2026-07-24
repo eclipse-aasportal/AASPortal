@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Endpoint, AASDocument, TemplateDescriptor, AASEndpoint, UserRole, EndpointAuth } from 'aas-core';
+import { AASDocument, AASEndpoint, UserRole, EndpointAuth } from 'aas-core';
 import { aasV2 } from 'aas-package';
 
 /** Extend Express Request type to include 'user' */
@@ -36,9 +36,18 @@ export interface AASRegistryModelType {
     name: 'AssetAdministrationShellDescriptor' | 'Asset';
 }
 
+/** Defines the supported endpoint types. */
+export type EndpointType = 'file' | 'http' | 'opc';
+
+/** Represents an endpoint of an AAS resource. */
+export interface EndpointDescriptor {
+    address: string;
+    type: EndpointType;
+}
+
 /** The self-describing information of a network resource. */
 export interface AASRegistryDescriptor {
-    endpoints: Endpoint[];
+    endpoints: EndpointDescriptor[];
 }
 
 /** Descriptor of a Submodel. */
@@ -63,47 +72,54 @@ export interface AssetAdministrationShellDescriptor extends AASRegistryDescripto
     submodels: SubmodelDescriptor[];
 }
 
-export enum ScanResultKind {
-    Add,
-    Remove,
-    Update,
-    End,
-}
+export const EndpointScanMessageKind = {
+    Start: 0,
+    Add: 1,
+    Remove: 2,
+    Update: 3,
+    End: 4,
+} as const;
+
+export type EndpointScanMessageKind = (typeof EndpointScanMessageKind)[keyof typeof EndpointScanMessageKind];
 
 /** The result of an endpoint scan. */
-export interface ScanResult {
-    type: 'ScanEndResult' | 'ScanEndpointResult';
-    kind: ScanResultKind;
+export type EndpointScanMessage = {
+    type: 'EndpointScanMessage';
     taskId: number;
-}
-
-/** The result of an endpoint scan. */
-export interface ScanEndpointResult extends ScanResult {
-    endpoint: AASEndpoint;
-    document: AASDocument;
-}
-
-export function isScanEndpointResult(result: ScanResult): result is ScanEndpointResult {
-    return result.type === 'ScanEndpointResult';
-}
-
-/** The result of a template scan. */
-export interface ScanTemplatesResult extends ScanResult {
-    templates: TemplateDescriptor[];
-}
+    endpoint: string;
+    /** The start time. */
+    start: number;
+} & (
+    | {
+          kind: 'Start' | 'End';
+      }
+    | {
+          kind: 'Added' | 'Updated' | 'Removed';
+          document: AASDocument;
+      }
+);
 
 export interface WorkerData {
     taskId: number;
-    type: 'ScanEndpointData';
+    type: 'EndpointScanData' | 'CancelEndpointScanData';
 }
 
-export interface ScanEndpointData extends WorkerData {
-    type: 'ScanEndpointData';
+export interface EndpointScanData extends WorkerData {
+    type: 'EndpointScanData';
     endpoint: AASEndpoint;
 }
 
-export function isScanEndpointData(data: WorkerData): data is ScanEndpointData {
-    return data.type === 'ScanEndpointData';
+export interface CancelEndpointScanData extends WorkerData {
+    type: 'CancelEndpointScanData';
+    endpoint: string;
+}
+
+export function isEndpointScanData(data: WorkerData): data is EndpointScanData {
+    return data.type === 'EndpointScanData';
+}
+
+export function isCancelEndpointScanData(data: WorkerData): data is CancelEndpointScanData {
+    return data.type === 'CancelEndpointScanData';
 }
 
 export type EventListener = (...args: unknown[]) => void;

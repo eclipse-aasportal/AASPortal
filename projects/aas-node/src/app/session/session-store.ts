@@ -36,7 +36,7 @@ export class SessionStore extends session.Store {
     private ttl: number = 86400;
     private readonly schema = new mongoose.Schema<SessionDataDocument>(
         {
-            _id: { type: String, required: true, index: true },
+            _id: { type: String, required: true },
             session: { type: mongoose.Schema.Types.Mixed, required: false },
         },
         { expires: this.ttl },

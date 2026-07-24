@@ -15,7 +15,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { NotifyService } from '../../core/notify/notify.service';
 
 describe('SettingsComponent', () => {

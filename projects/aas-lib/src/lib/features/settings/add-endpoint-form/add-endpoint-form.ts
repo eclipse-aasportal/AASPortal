@@ -12,8 +12,9 @@ import { form, FormField, max, min, required, validate } from '@angular/forms/si
 import { NgbActiveModal, NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { AASEndpoint, AASEndpointScheduleType, AASEndpointType } from 'aas-core';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { FormError } from '../../../shared/components/form-error/form-error';
 import { validateEndpointUrl } from '../../../utilities';
+import { EndpointTemplate, templates } from '../endpoint-templates';
 
 type AuthorizationType = 'AddEndpointForm.NO_AUTH' | 'AddEndpointForm.API_KEY' | 'AddEndpointForm.BEARER_TOKEN';
 
@@ -30,12 +31,6 @@ interface EndpointModel {
     minutes: number;
 }
 
-export interface EndpointTemplate {
-    type: AASEndpointType;
-    value: string;
-    placeholder: string;
-}
-
 @Component({
     selector: 'fhg-add-endpoint-form',
     imports: [FormField, TranslateDirective, TranslatePipe, NgbDropdownModule, FormError],
@@ -44,29 +39,7 @@ export interface EndpointTemplate {
 })
 export class AddEndpointForm {
     private readonly modal = inject(NgbActiveModal);
-    private readonly _templates = signal<EndpointTemplate[]>([
-        {
-            type: 'AAS_API',
-            value: '',
-            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_HTTP',
-        },
-        {
-            type: 'OPC_UA',
-            value: '',
-            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_OPCUA',
-        },
-        {
-            type: 'WebDAV',
-            value: '',
-            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_WEBDAV',
-        },
-        {
-            type: 'FileSystem',
-            value: '',
-            placeholder: 'AddEndpointForm.PLACEHOLDER_URL_FILE',
-        },
-    ]);
-
+    private readonly _templates = signal<EndpointTemplate[]>(templates);
     private readonly endpoints = httpResource<string[]>(() => '/api/v1/endpoints', {
         defaultValue: [] as string[],
         parse: values => (values as AASEndpoint[]).map(value => value.name).sort(),
@@ -109,16 +82,17 @@ export class AddEndpointForm {
             return null;
         });
         validate(schemaPath.url, ({ value, valueOf }) => {
-            if (!validateEndpointUrl(value(), valueOf(schemaPath.type))) {
-                return { kind: 'validUrl', message: 'AddEndpointForm.ERROR_URL_INVALID' };
+            const result = validateEndpointUrl(value(), valueOf(schemaPath.type));
+            if (result) {
+                return { kind: 'validUrl', message: 'AddEndpointForm.' + result };
             }
 
             return null;
         });
-        min(schemaPath.minutes, 0, { message: 'AddEndpointForm.ERROR_MINUTES_MIN' });
-        max(schemaPath.minutes, 59, { message: 'AddEndpointForm.ERROR_MINUTES_MAX' });
-        min(schemaPath.hours, 0, { message: 'AddEndpointForm.ERROR_HOURS_MIN' });
-        max(schemaPath.hours, 23, { message: 'AddEndpointForm.ERROR_HOURS_MAX' });
+        min(schemaPath.minutes, 0, { message: 'AddEndpointForm.ERROR_MINUTES' });
+        max(schemaPath.minutes, 59, { message: 'AddEndpointForm.ERROR_MINUTES' });
+        min(schemaPath.hours, 0, { message: 'AddEndpointForm.ERROR_HOURS' });
+        max(schemaPath.hours, 999, { message: 'AddEndpointForm.ERROR_HOURS' });
         required(schemaPath.key, {
             when: ({ valueOf }) => valueOf(schemaPath.authorization) === 'AddEndpointForm.API_KEY',
             message: 'AddEndpointForm.API_KEY_NAME_REQUIRED',

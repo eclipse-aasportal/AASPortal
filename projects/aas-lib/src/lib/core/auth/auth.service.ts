@@ -12,7 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { map, Observable, of, switchMap, take, throwError } from 'rxjs';
 import { UserProfile, UserRole, User, Credentials, EndpointAuth } from 'aas-core';
-import { HttpCache } from '../../services/http-cache';
+import { HttpCache } from '../../shared/services/http-cache';
 
 @Injectable({
     providedIn: 'root',

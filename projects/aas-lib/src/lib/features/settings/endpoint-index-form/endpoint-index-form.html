@@ -1,0 +1,88 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<form (submit)="submit($event)" class="modal-content">
+    <div class="modal-header text-info">
+        <h4 class="modal-title">
+            <i class="bi bi-gear"></i>
+            <span class="ms-2" translate="EndpointIndexForm.CAPTION"></span>
+        </h4>
+        <button type="button" class="btn-close" (click)="close()"></button>
+    </div>
+    <div class="modal-body">
+        <ul class="list-group">
+            @for (item of items(); track item.name; let i = $index) {
+                <li class="list-goup-item d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">{{ item.name }}</div>
+                    @if (item.status === 'idle') {
+                        <div class="me-2">
+                            <span>{{ item.aasCount }}</span
+                            ><span class="ms-2">{{ 'EndpointIndexForm.SHELLS' | translate }}</span>
+                        </div>
+                        @if (item.schedule === 'manual') {
+                            <div>
+                                <button
+                                    type="button"
+                                    class="btn btn-lg btn-outline-primary border-0"
+                                    [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
+                                    [openDelay]="300"
+                                    placement="top"
+                                    container="body"
+                                    (click)="startScan(item.name).subscribe()"
+                                >
+                                    <i class="bi bi-caret-right-square"></i>
+                                </button>
+                            </div>
+                        }
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-lg btn-outline-danger border-0"
+                                [ngbTooltip]="'EndpointIndexForm.CLEAR_ENDPOINT_INDEX_TOOL_TIP' | translate"
+                                [openDelay]="300"
+                                placement="top"
+                                container="body"
+                                (click)="clearIndex(item.name).subscribe()"
+                            >
+                                <i class="bi bi-eraser-fill"></i>
+                            </button>
+                        </div>
+                    } @else {
+                        <div class="spinner-border spinner-border-sm text-info me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="">{{ item.duration | duration }}</div>
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-lg btn-outline-danger border-0"
+                                [ngbTooltip]="'EndpointIndexForm.CANCEL_SCAN_TOOL_TIP' | translate"
+                                [openDelay]="300"
+                                placement="top"
+                                container="body"
+                                (click)="cancelScan(item.name).subscribe()"
+                            >
+                                <i class="bi bi-stop-circle"></i>
+                            </button>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="modal-footer">
+        <button
+            type="button"
+            id="AID_CLEAR_INDEX"
+            class="btn btn-danger me-auto"
+            (click)="clearIndex()"
+            translate="EndpointIndexForm.CLEAR"
+        ></button>
+        <button type="submit" class="btn btn-primary" translate="EndpointIndexForm.CLOSE"></button>
+    </div>
+</form>

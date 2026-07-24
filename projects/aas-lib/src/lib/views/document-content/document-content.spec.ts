@@ -16,11 +16,11 @@ import { Component, DOCUMENT, input, model, output, provideZonelessChangeDetecti
 import { AASDocument, aas, noop } from 'aas-core';
 import { LiveState } from '../../types';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
-import { StartService } from '../../services/start.service';
+import { StartService } from '../../shared/services/start.service';
 import { NotifyService } from '../../core/notify/notify.service';
-import { ToolbarService } from '../../share/services/toolbar.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { VIEW_ROUTES } from '../views-routes';
 import { DocumentContent } from './document-content';

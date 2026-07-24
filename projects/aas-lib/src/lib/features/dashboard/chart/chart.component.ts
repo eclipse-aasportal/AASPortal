@@ -14,7 +14,7 @@ import { LiveNode, LiveRequest, WebSocketData } from 'aas-core';
 import { Dashboard } from '../dashboard';
 import { DashboardApiService } from '../dashboard-api.service';
 import { ChartConfigurationTuple, DashboardChart } from '../dashboard-types';
-import { WebSocketService } from '../../../services/web-socket.service';
+import { WebSocketService } from '../../../shared/services/web-socket.service';
 
 @Component({
     selector: 'fhg-chart',

@@ -12,8 +12,8 @@ import { TranslateDirective } from '@ngx-translate/core';
 
 import { NotifyService } from '../../notify/notify.service';
 import { AuthService } from '../auth.service';
-import { WINDOW } from '../../../share/services/window.service';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { WINDOW } from '../../../shared/services/window.service';
+import { FormError } from '../../../shared/components/form-error/form-error';
 
 export interface RegistrationData {
     id: string;

@@ -45,7 +45,7 @@ describe('MySqlIndex', () => {
             };
 
             connection.query.mockResolvedValue([[result], []]);
-            await expect(index.getCount()).resolves.toEqual(42);
+            await expect(index.getDocumentCount()).resolves.toEqual(42);
             expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM `documents`;');
         });
 
@@ -56,7 +56,7 @@ describe('MySqlIndex', () => {
             };
 
             connection.query.mockResolvedValue([[result], []]);
-            await expect(index.getCount('Samples')).resolves.toEqual(42);
+            await expect(index.getDocumentCount('Samples')).resolves.toEqual(42);
             expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM `documents` WHERE endpoint = ?;', [
                 'Samples',
             ]);

@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { QR_CODE, ThumbnailQRCode } from './thumbnail-qrcode';
-import { WINDOW, WindowService } from '../../share/services/window.service';
+import { WINDOW, WindowService } from '../../shared/services/window.service';
 
 import sample from '../../../test/assets/dpp-sample.json';
 import { createSpyObj } from '../../../test/mocks';

@@ -802,9 +802,9 @@ export function hasSpecificView(viewRoutes: ViewRoute[], arg: aas.Submodel | AAS
  * Validates the specified endpoint URL based on the endpoint type.
  * @param value The endpoint URL to validate.
  * @param type The type of the endpoint.
- * @returns `true` if the endpoint URL is valid for the specified type; otherwise `false`.
+ * @returns `undefined` if the endpoint URL is valid for the specified type; otherwise an error ID.
  */
-export function validateEndpointUrl(value: string, type: AASEndpointType): boolean {
+export function validateEndpointUrl(value: string, type: AASEndpointType): string | undefined {
     try {
         const url = new URL(value);
         switch (type) {
@@ -817,64 +817,68 @@ export function validateEndpointUrl(value: string, type: AASEndpointType): boole
             case 'WebDAV':
                 return validateWebDAVEndpoint(url);
         }
-    } catch {
-        return false;
+    } catch (error) {
+        return error?.message;
     }
 
-    function validateAASApiEndpoint(url: URL): boolean {
+    function validateAASApiEndpoint(url: URL): string | undefined {
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-            return false;
+            return 'HTTP_OR_HTTPS_PROTOCOL_REQUIRED';
         }
 
         if (!url.hostname) {
-            return false;
+            return 'HOSTNAME_REQUIRED';
+        }
+
+        if (!url.pathname.endsWith('/')) {
+            return 'ENDING_SLASH_REQUIRED';
         }
 
         const version = url.searchParams.get('version');
         if (version && !semver.valid(semver.coerce(version))) {
-            return false;
+            return 'INVALID_VERSION';
         }
 
-        return true;
+        return undefined;
     }
 
-    function validateFileSystemEndpoint(url: URL): boolean {
+    function validateFileSystemEndpoint(url: URL): string | undefined {
         if (url.protocol !== 'file:') {
-            return false;
+            return 'FILE_PROTOCOL_REQUIRED';
         }
 
         if (url.hostname !== '') {
-            return false;
+            return 'EMPTY_HOSTNAME_REQUIRED';
         }
 
         if (url.pathname === '/') {
-            return false;
+            return 'PATHNAME_REQUIRED';
         }
 
-        return true;
+        return undefined;
     }
 
-    function validateOpcuaEndpoint(url: URL): boolean {
+    function validateOpcuaEndpoint(url: URL): string | undefined {
         if (url.protocol !== 'opc.tcp:') {
-            return false;
+            return 'OPC_TCP_PROTOCOL_REQUIRED';
         }
 
         if (!url.hostname) {
-            return false;
+            return 'HOSTNAME_REQUIRED';
         }
 
-        return true;
+        return undefined;
     }
 
-    function validateWebDAVEndpoint(url: URL): boolean {
+    function validateWebDAVEndpoint(url: URL): string | undefined {
         if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-            return false;
+            return 'HTTP_OR_HTTPS_PROTOCOL_REQUIRED';
         }
 
         if (!url.hostname) {
-            return false;
+            return 'HOSTNAME_REQUIRED';
         }
 
-        return true;
+        return undefined;
     }
 }

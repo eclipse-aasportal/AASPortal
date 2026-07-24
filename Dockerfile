@@ -1,5 +1,5 @@
 # Creates an all-in-one Docker image
-ARG NODE_IMAGE=node:24.15.0-alpine
+ARG NODE_IMAGE=node:24.18.0-alpine
 
 FROM $NODE_IMAGE AS build
 ARG GITHUB_RUN_NUMBER=520

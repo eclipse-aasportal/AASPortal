@@ -12,8 +12,8 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { encodeBase64Url } from '../../utilities';
-import { ToolbarService } from '../../share/services/toolbar.service';
-import { StartService } from '../../services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
 import { BrowserComponent } from '../../components/browser/browser.component';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { DocumentBrowserViewState } from './document-browser-view.state';

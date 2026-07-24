@@ -23,9 +23,9 @@ import {
 } from '@angular/core';
 
 import { noop } from 'aas-core';
-import { WINDOW } from '../../share/services/window.service';
+import { WINDOW } from '../../shared/services/window.service';
 import { ChildComponent } from '../child-component';
-import { MaxLengthPipe } from '../../share/pipes/max-length.pipe';
+import { MaxLengthPipe } from '../../shared/pipes/max-length.pipe';
 
 export type TreeId = string | number | object;
 

@@ -13,9 +13,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { aas, TemplateDescriptor, types } from 'aas-core';
 
-import { NotifyService } from '../core/notify/notify.service';
-import { TemplateService } from './template.service';
-import { createSpyObj, mockFetchJson, restoreFetch } from '../../test/mocks';
+import { NotifyService } from '../../core/notify/notify.service';
+import { TemplateService } from '../../shared/services/template.service';
+import { createSpyObj, mockFetchJson, restoreFetch } from '../../../test/mocks';
 
 describe('TemplateService', () => {
     let service: TemplateService;

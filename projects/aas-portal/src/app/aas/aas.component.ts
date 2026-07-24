@@ -8,7 +8,7 @@
 
 import { NgClass } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, map, Observable, first, combineLatest } from 'rxjs';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
@@ -45,7 +45,7 @@ import { AASState } from './aas.state';
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    imports: [TranslateDirective, TranslatePipe, FormsModule, NgClass, RouterModule, NgbNavModule],
+    imports: [TranslateDirective, FormsModule, NgClass, RouterModule, NgbNavModule],
 })
 /**
  * Component responsible for managing and displaying Asset Administration Shell (AAS) functionality.

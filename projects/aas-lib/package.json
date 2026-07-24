@@ -1,6 +1,6 @@
 {
     "name": "aas-lib",
-    "version": "3.8",
+    "version": "3.9",
     "sideEffects": false,
     "type": "module",
     "scripts": {

@@ -14,9 +14,9 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 
 import { AASDocument } from 'aas-core';
-import { ToolbarService } from '../../share/services/toolbar.service';
-import { StartService } from '../../services/start.service';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { CustomerFeedbackView } from './customer-feedback-view';

@@ -11,8 +11,8 @@ import { Observable, of } from 'rxjs';
 
 import { LeafView } from '../leaf-view';
 import { encodeBase64Url } from '../../utilities';
-import { ToolbarService } from '../../share/services/toolbar.service';
-import { StartService } from '../../services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';

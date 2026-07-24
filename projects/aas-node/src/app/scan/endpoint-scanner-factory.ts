@@ -22,6 +22,7 @@ import { ApiClientV3 } from '../client/api/api-client-v3.js';
 import { ApiClientV1 } from '../client/api/api-client-v1.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { HttpClient } from '../http-client.js';
+import { ScannerController } from './scanner-controller.js';
 
 @singleton()
 export class EndpointScannerFactory {
@@ -31,7 +32,7 @@ export class EndpointScannerFactory {
         @inject(HttpClient) private readonly http: HttpClient,
     ) {}
 
-    public create(endpoint: AASEndpoint): EndpointScanner {
+    public create(endpoint: AASEndpoint, controller: ScannerController): EndpointScanner {
         switch (endpoint.type) {
             case 'AAS_API': {
                 let client: ApiClient;
@@ -44,13 +45,14 @@ export class EndpointScannerFactory {
                     throw new ApplicationError(`AAS server version ${version} is not supported.`, {}, 500);
                 }
 
-                return new AASServerScanner(client);
+                return new AASServerScanner(controller, client);
             }
             case 'OPC_UA':
-                return new OpcuaServerScanner(new OpcuaClient(this.logger, endpoint));
+                return new OpcuaServerScanner(controller, new OpcuaClient(this.logger, endpoint));
             case 'WebDAV':
             case 'FileSystem':
                 return new DirectoryScanner(
+                    controller,
                     new AasxDirectory(this.logger, endpoint, this.fileStorageProvider.get(endpoint.url)),
                 );
             default:

@@ -12,8 +12,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { FavoriteComponent } from './favorite.component';
-import { CookieService } from '../../share/services/cookie.service';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { CookieService } from '../../shared/services/cookie.service';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 
 describe('FavoriteComponent', () => {

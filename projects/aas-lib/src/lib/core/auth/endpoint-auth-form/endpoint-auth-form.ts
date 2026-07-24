@@ -12,7 +12,7 @@ import { form, FormField, required, SchemaPathTree, applyEach } from '@angular/f
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { AASEndpoint, EndpointAuth } from 'aas-core';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { FormError } from '../../../shared/components/form-error/form-error';
 
 type AuthorizationType = 'EndpointAuthForm.NO_AUTH' | 'EndpointAuthForm.API_KEY' | 'EndpointAuthForm.BEARER_TOKEN';
 
