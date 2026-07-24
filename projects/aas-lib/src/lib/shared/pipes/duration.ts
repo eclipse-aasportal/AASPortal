@@ -12,7 +12,7 @@ import { Pipe, PipeTransform } from '@angular/core';
     name: 'duration',
 })
 export class Duration implements PipeTransform {
-    transform(value: unknown): unknown {
+    public transform(value: unknown): unknown {
         if (typeof value === 'number') {
             const seconds = Math.floor(value / 1000);
             const minutes = Math.floor(seconds / 60);
