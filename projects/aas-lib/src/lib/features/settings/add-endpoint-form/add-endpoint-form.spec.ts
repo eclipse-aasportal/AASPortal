@@ -17,7 +17,7 @@ import { AASEndpoint } from 'aas-core';
 
 import { AddEndpointForm } from './add-endpoint-form';
 import { createSpyObj, FakeLoader } from '../../../../test/mocks';
-import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { FormError } from '../../../shared/components/form-error/form-error';
 
 describe('AddEndpointForm', () => {
@@ -40,7 +40,7 @@ describe('AddEndpointForm', () => {
                     },
                 }),
                 provideZonelessChangeDetection(),
-                provideHttpClient(withXhr()),
+                provideHttpClient(),
                 provideHttpClientTesting(),
                 provideRouter([]),
             ],

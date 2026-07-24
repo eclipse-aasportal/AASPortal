@@ -9,7 +9,7 @@
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, HttpEventType, provideHttpClient, withXhr } from '@angular/common/http';
+import { HttpClient, HttpEventType, provideHttpClient } from '@angular/common/http';
 import { lastValueFrom, of } from 'rxjs';
 import { AASDocument, AASEndpoint } from 'aas-core';
 import { AuthService } from '../../core/auth/auth.service';
@@ -33,7 +33,7 @@ describe('EndpointsApi', () => {
                     provide: AuthService,
                     useValue: auth,
                 },
-                provideHttpClient(withXhr()),
+                provideHttpClient(),
                 provideHttpClientTesting(),
             ],
         });
