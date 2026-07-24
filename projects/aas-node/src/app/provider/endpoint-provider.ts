@@ -8,10 +8,19 @@
 
 import { inject, singleton } from 'tsyringe';
 import { LOGGER, Logger } from 'aas-package';
-import { LiveRequest, WebSocketData, AASEndpoint, AASEndpointSchedule, convertToString } from 'aas-core';
+import {
+    LiveRequest,
+    WebSocketData,
+    AASEndpoint,
+    AASEndpointSchedule,
+    convertToString,
+    AASDocument,
+    ApplicationError,
+    UpdateIndexStatus,
+} from 'aas-core';
 
 import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
-import { ScanResultKind, ScanResult, ScanEndpointResult, ScanEndpointData, isScanEndpointResult } from '../types.js';
+import { EndpointScanMessage, EndpointScanData, CancelEndpointScanData } from '../types.js';
 import { Parallel } from './parallel.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
@@ -27,7 +36,6 @@ import { MessageSender } from './message-sender.js';
 export class EndpointProvider {
     private wsServer!: WSNode;
     private sender!: MessageSender;
-    private resetRequested = false;
 
     public constructor(
         @inject(Variable) private readonly variable: Variable,
@@ -80,7 +88,7 @@ export class EndpointProvider {
      * @param endpoint The endpoint to update.
      */
     public async updateEndpoint(endpoint: AASEndpoint): Promise<void> {
-        const old = await this.index.updateEndpoint(endpoint);
+        await this.index.updateEndpoint(endpoint);
         this.sender.send({
             type: 'EndpointUpdate',
             endpoint: endpoint,
@@ -96,14 +104,8 @@ export class EndpointProvider {
             task = this.taskHandler.createTask(endpoint.name, this, 'ScanEndpoint');
         }
 
-        const oldType = old.schedule?.type;
         const newType = endpoint.schedule?.type;
-        if (oldType !== newType && newType === 'disabled') {
-            await this.index.clear(endpoint.name);
-            return;
-        }
-
-        if (newType === 'manual') {
+        if (newType === 'manual' || newType === 'disabled') {
             return;
         }
 
@@ -132,21 +134,48 @@ export class EndpointProvider {
     }
 
     /**
-     * Restores the default AAS server configuration.
+     * Clears the AAS index.
+     * @param endpoint The name of the endpoint to clear. If not specified, all endpoints are cleared.
      */
-    public async reset(): Promise<void> {
-        if (this.resetRequested) {
-            return;
-        }
+    public async clearIndex(endpoint?: string): Promise<void> {
+        if (endpoint) {
+            const task = this.taskHandler.find(endpoint, 'ScanEndpoint');
+            if (task) {
+                const data: CancelEndpointScanData = {
+                    taskId: task.id,
+                    type: 'CancelEndpointScanData',
+                    endpoint: endpoint,
+                };
 
-        this.resetRequested = true;
-        await this.parallel.terminate();
-        await this.index.clear();
-        await this.initializeIndex();
-        await this.startScan();
-        this.resetRequested = false;
-        this.sender.send({ type: 'Reset' });
-        this.logger.info('AASNode index reset.');
+                await this.parallel.cancel(data);
+            }
+
+            await this.index.clear(endpoint);
+            await this.startScan(endpoint);
+            this.sender.send({ type: 'Cleared', endpoint });
+            this.logger.info(`Index of endpoint "${endpoint}" cleared.`);
+        } else {
+            const endpoints = (await this.index.getEndpoints()).map(endpoint => endpoint.name);
+            const promises: Promise<void>[] = [];
+            for (const endpoint of endpoints) {
+                const task = this.taskHandler.find(endpoint, 'ScanEndpoint');
+                if (task) {
+                    const data: CancelEndpointScanData = {
+                        taskId: task.id,
+                        type: 'CancelEndpointScanData',
+                        endpoint: endpoint,
+                    };
+
+                    promises.push(this.parallel.cancel(data));
+                }
+            }
+
+            await Promise.all(promises);
+            await this.index.clear();
+            await this.startScan();
+            this.sender.send({ type: 'Cleared' });
+            this.logger.info('Index cleared.');
+        }
     }
 
     /**
@@ -156,7 +185,11 @@ export class EndpointProvider {
     public async startEndpointScan(name: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(name);
         if (endpoint.schedule?.type !== 'manual') {
-            throw new Error(`Endpoint ${name} is not configured for the manual start of a scan.`);
+            throw new ApplicationError(
+                `Endpoint ${name} is not configured for the manual start of a scan.`,
+                { name },
+                500,
+            );
         }
 
         let task = this.taskHandler.find(name, 'ScanEndpoint');
@@ -165,10 +198,38 @@ export class EndpointProvider {
         }
 
         if (task.state === 'inProgress') {
-            throw new Error(`Scanning endpoint ${name} is already in progress.`);
+            throw new ApplicationError(`Scanning endpoint ${name} is already in progress.`, { name }, 500);
         }
 
         task.handle = setTimeout(this.scanEndpoint, 0, task, endpoint);
+    }
+
+    /**
+     * Cancels a scan of the AAS endpoint with the specified name.
+     * @param name The name of the endpoint.
+     * @returns A promise that resolves when the scan is canceled or if no scan was in progress.
+     */
+    public async cancelEndpointScan(name: string): Promise<void> {
+        const task = this.taskHandler.find(name, 'ScanEndpoint');
+        if (task === undefined) {
+            return;
+        }
+
+        const data: CancelEndpointScanData = {
+            taskId: task.id,
+            type: 'CancelEndpointScanData',
+            endpoint: name,
+        };
+        await this.parallel.cancel(data);
+    }
+
+    public getUpdateStatus(name: string): UpdateIndexStatus {
+        const task = this.taskHandler.find(name, 'ScanEndpoint');
+        if (task === undefined || task.state === 'idle') {
+            return { name, status: 'idle' };
+        }
+
+        return { name, status: 'scanning', start: task.start };
     }
 
     public destroy(): void {
@@ -228,9 +289,13 @@ export class EndpointProvider {
         return client.createSubscription(socket, message, env);
     }
 
-    private startScan = async (): Promise<void> => {
+    private startScan = async (name?: string): Promise<void> => {
         try {
             for (const endpoint of await this.index.getEndpoints()) {
+                if (name && endpoint.name !== name) {
+                    continue;
+                }
+
                 const type = endpoint.schedule?.type;
                 if (type === 'manual' || type === 'disabled') {
                     continue;
@@ -266,8 +331,8 @@ export class EndpointProvider {
     }
 
     private scanEndpoint = (task: Task, endpoint: AASEndpoint): void => {
-        const data: ScanEndpointData = {
-            type: 'ScanEndpointData',
+        const data: EndpointScanData = {
+            type: 'EndpointScanData',
             taskId: task.id,
             endpoint,
         };
@@ -277,39 +342,38 @@ export class EndpointProvider {
         this.parallel.execute(data);
     };
 
-    private parallelOnMessage = async (result: ScanResult): Promise<void> => {
+    private parallelOnMessage = async (message: EndpointScanMessage): Promise<void> => {
         try {
-            if (isScanEndpointResult(result)) {
-                switch (result.kind) {
-                    case ScanResultKind.Update:
-                        await this.onUpdate(result);
-                        break;
-                    case ScanResultKind.Add:
-                        await this.onAdded(result);
-                        break;
-                    case ScanResultKind.Remove:
-                        await this.onRemoved(result);
-                        break;
-                }
+            switch (message.kind) {
+                case 'Start':
+                    this.sender.send({ type: 'Start', endpoint: message.endpoint, start: message.start });
+                    break;
+                case 'Updated':
+                    await this.onUpdate(message.document, message.start);
+                    break;
+                case 'Added':
+                    await this.onAdded(message.document, message.start);
+                    break;
+                case 'Removed':
+                    await this.onRemoved(message.document, message.start);
+                    break;
             }
         } catch (error) {
             this.logger.error(error);
         }
     };
 
-    private parallelOnEnd = async (result: ScanResult): Promise<void> => {
-        const task = this.taskHandler.get(result.taskId);
+    private parallelOnEnd = async (message: EndpointScanMessage): Promise<void> => {
+        const task = this.taskHandler.get(message.taskId);
         if (task === undefined || task.owner !== this) {
             return;
         }
 
-        const endpoint = await this.index.findEndpoint(task.endpointName);
+        const endpoint = await this.index.findEndpoint(task.name);
         if (endpoint !== undefined) {
             task.state = 'idle';
             task.end = Date.now();
-
-            this.sender.send({ type: 'End', endpoint: endpoint });
-
+            this.sender.send({ type: 'End', endpoint: endpoint.name, start: message.start });
             const type = endpoint.schedule?.type;
             if (type === 'once' || type === 'manual' || type === 'disabled') {
                 return;
@@ -324,38 +388,21 @@ export class EndpointProvider {
         }
     };
 
-    private async onUpdate(result: ScanEndpointResult): Promise<void> {
-        const document = result.document;
-        const endpoint = await this.index.findEndpoint(document.endpoint);
-        if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
-            return;
-        }
-
+    private async onUpdate(document: AASDocument, start: number): Promise<void> {
         await this.index.update(document);
-        this.sender.send({ type: 'Update', document: { ...document, content: null } });
+        this.logger.info(`Updated: AAS ${document.idShort} [${document.id}] in ${document.endpoint}`);
+        this.sender.send({ type: 'Updated', document: { ...document, content: null }, start });
     }
 
-    private async onAdded(result: ScanEndpointResult): Promise<void> {
-        const document = result.document;
-        const endpoint = await this.index.findEndpoint(document.endpoint);
-        if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
-            return;
-        }
-
+    private async onAdded(document: AASDocument, start: number): Promise<void> {
         await this.index.insert(document);
-        this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${endpoint.url}`);
-        this.sender.send({ type: 'Added', document });
+        this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${document.endpoint}`);
+        this.sender.send({ type: 'Added', document, start });
     }
 
-    private async onRemoved(result: ScanEndpointResult): Promise<void> {
-        const endpoint = await this.index.findEndpoint(result.endpoint.name);
-        if (endpoint === undefined || endpoint.schedule?.type === 'disabled') {
-            return;
-        }
-
-        const document = result.document;
-        await this.index.delete(result.endpoint.name, document.id);
-        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${result.endpoint.url}`);
-        this.sender.send({ type: 'Removed', document: { ...document, content: null } });
+    private async onRemoved(document: AASDocument, start: number): Promise<void> {
+        await this.index.delete(document.endpoint, document.id);
+        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${document.endpoint}`);
+        this.sender.send({ type: 'Removed', document: { ...document, content: null }, start });
     }
 }

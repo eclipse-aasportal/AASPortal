@@ -30,7 +30,7 @@ export class WebSocketService {
             .pipe(
                 retry({
                     delay: () => {
-                        console.log(
+                        console.warn(
                             `WebSocket connection failed. Retrying in ${this.reconnectInterval / 1000} seconds...`,
                         );
 

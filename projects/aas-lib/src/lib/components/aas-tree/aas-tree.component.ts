@@ -45,9 +45,9 @@ import { AASTreeApi } from './aas-tree-api';
 import { LiveState } from '../../types';
 import { basename, encodeBase64Url, findRouteForShell, findRouteForSubmodel } from '../../utilities';
 import { VIEW_ROUTES } from '../../views/views-routes';
-import { WebSocketService } from '../../services/web-socket.service';
+import { WebSocketService } from '../../shared/services/web-socket.service';
 import { NotifyService } from '../../core/notify/notify.service';
-import { MaxLengthPipe } from '../../share/pipes/max-length.pipe';
+import { MaxLengthPipe } from '../../shared/pipes/max-length.pipe';
 import {
     Tree,
     TreeComponent,

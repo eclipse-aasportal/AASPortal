@@ -18,7 +18,7 @@ import { ProfileForm } from './profile-form';
 import { createSpyObj, FakeLoader } from '../../../../test/mocks';
 import { AuthService } from '../auth.service';
 import { NotifyService } from '../../notify/notify.service';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { FormError } from '../../../shared/components/form-error/form-error';
 import { PromptDialog } from '../../prompt-dialog/prompt-dialog';
 
 describe('ProfileForm', () => {

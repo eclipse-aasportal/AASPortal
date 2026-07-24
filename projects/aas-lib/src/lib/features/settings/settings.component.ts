@@ -13,9 +13,9 @@ import { catchError, concat, from, map, mergeMap, Observable, of, tap } from 'rx
 import { AASEndpoint } from 'aas-core';
 import { AuthService } from '../../core/auth/auth.service';
 import { AddEndpointForm } from './add-endpoint-form/add-endpoint-form';
-import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpoint-form.component';
+import { EndpointIndexForm } from './endpoint-index-form/endpoint-index-form';
 import { UpdateEndpointForm, UpdateEndpointResult } from './update-endpoint-form/update-endpoint-form';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { NotifyService } from '../../core/notify/notify.service';
 
 @Component({
@@ -118,10 +118,14 @@ export class SettingsComponent {
      *
      * @returns An Observable that completes when the dialog has been closed.
      */
-    public extras(): Observable<void> {
+    public console(): Observable<void> {
+        if (!this.auth.isAuthenticated()) {
+            return this.auth.login();
+        }
+
         return this.auth.ensureAuthorized('editor').pipe(
             mergeMap(() => {
-                const modalRef = this.modal.open(ExtrasEndpointFormComponent, { backdrop: 'static', scrollable: true });
+                const modalRef = this.modal.open(EndpointIndexForm, { backdrop: 'static', scrollable: true });
                 return from(modalRef.result);
             }),
         );

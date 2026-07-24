@@ -14,7 +14,7 @@ import path from 'path/posix';
 import { noop } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
 
-import { ScanResultKind, ScanResult, WorkerData } from '../types.js';
+import { EndpointScanMessage, WorkerData } from '../types.js';
 import { Variable } from '../variable.js';
 
 /** Represents a worker task for scanning an endpoint. */
@@ -51,13 +51,13 @@ class WorkerTask extends EventEmitter {
     }
 
     private workerOnMessage = (value: Uint8Array): void => {
-        const result: ScanResult = JSON.parse(Buffer.from(value).toString());
-        switch (result.kind) {
-            case ScanResultKind.End:
-                this.emit('end', result, this);
+        const message: EndpointScanMessage = JSON.parse(Buffer.from(value).toString());
+        switch (message.kind) {
+            case 'End':
+                this.emit('end', message, this);
                 break;
             default:
-                this.emit('message', result);
+                this.emit('message', message);
                 break;
         }
     };
@@ -71,7 +71,9 @@ class WorkerTask extends EventEmitter {
     };
 }
 
-/** Provides a pool of worker threads. */
+/**
+ * Provides a pool of worker threads.
+ */
 @singleton()
 export class Parallel extends EventEmitter {
     private readonly script: string;
@@ -109,6 +111,35 @@ export class Parallel extends EventEmitter {
         }
     }
 
+    /**
+     * Cancels a task with the given task ID.
+     * @param data The message to cancel the corresponding task.
+     * @returns A promise that resolves when the task is canceled or if the task was not found.
+     */
+    public cancel(data: WorkerData): Promise<void> {
+        return new Promise<void>(resolve => {
+            const index = this.waiting.findIndex(item => item.data.taskId === data.taskId);
+            if (index >= 0) {
+                const task = this.waiting[index];
+                this.waiting.splice(index, 1);
+                this.destroyTask(task);
+                return resolve();
+            }
+
+            const task = [...this.pool.values()].find(item => item?.data.taskId === data.taskId);
+            if (!task?.worker) {
+                return resolve();
+            }
+
+            task.worker.postMessage(data);
+            task.once('end', () => resolve());
+        });
+    }
+
+    /**
+     * Terminates all worker threads and clears the pool.
+     * @returns A promise that resolves when all workers have been terminated.
+     */
     public async terminate(): Promise<void> {
         await Promise.allSettled(
             [...this.pool].filter(([, task]) => task !== null).map(([worker]) => worker.terminate()),
@@ -132,11 +163,11 @@ export class Parallel extends EventEmitter {
         return undefined;
     }
 
-    private taskOnMessage = (result: ScanResult): void => {
+    private taskOnMessage = (result: EndpointScanMessage): void => {
         this.emit('message', result);
     };
 
-    private taskOnEnd = (result: ScanResult, task: WorkerTask): void => {
+    private taskOnEnd = (result: EndpointScanMessage, task: WorkerTask): void => {
         this.emit('end', result);
 
         if (!task) {

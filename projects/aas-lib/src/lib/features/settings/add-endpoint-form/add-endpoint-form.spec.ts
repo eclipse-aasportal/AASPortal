@@ -18,7 +18,7 @@ import { AASEndpoint } from 'aas-core';
 import { AddEndpointForm } from './add-endpoint-form';
 import { createSpyObj, FakeLoader } from '../../../../test/mocks';
 import { provideHttpClient, withXhr } from '@angular/common/http';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { FormError } from '../../../shared/components/form-error/form-error';
 
 describe('AddEndpointForm', () => {
     let component: AddEndpointForm;

@@ -9,15 +9,6 @@
 import * as z from 'zod';
 import * as aas from './aas.js';
 
-/** Defines the supported endpoint types. */
-export type EndpointType = 'file' | 'http' | 'opc';
-
-/** Represents an endpoint of an AAS resource. */
-export interface Endpoint {
-    address: string;
-    type: EndpointType;
-}
-
 /** Abbreviations for AAS model elements. */
 export type AASAbbreviation =
     | 'AAS'
@@ -80,6 +71,19 @@ export interface AASEndpoint {
     url: string;
     version?: string;
 }
+
+/** The index update status.  */
+export type UpdateIndexStatus = {
+    name: string;
+} & (
+    | {
+          status: 'idle';
+      }
+    | {
+          status: 'scanning';
+          start: number;
+      }
+);
 
 /** Authentication of a user for an AAS endpoint. */
 export interface EndpointAuth {
@@ -229,20 +233,15 @@ export interface WebSocketData {
     data: unknown;
 }
 
-/** Defines the message types. */
-export type AASNodeMessageType =
-    'Added' | 'Removed' | 'Update' | 'EndpointAdded' | 'EndpointRemoved' | 'EndpointUpdate' | 'Reset' | 'End';
-
 /** Server message. */
-export type AASNodeMessage = {
-    /** The type of change. */
-    type: AASNodeMessageType;
-} & (
+export type AASNodeMessage =
     | {
-          type: 'Reset';
+          type: 'Cleared';
+          endpoint?: string;
       }
     | {
-          type: 'Added' | 'Removed' | 'Update';
+          type: 'Added' | 'Removed' | 'Updated';
+          start: number;
           document: AASDocument;
       }
     | {
@@ -250,10 +249,10 @@ export type AASNodeMessage = {
           endpoint: AASEndpoint;
       }
     | {
-          type: 'End';
-          endpoint: AASEndpoint;
-      }
-);
+          type: 'Start' | 'End';
+          start: number;
+          endpoint: string;
+      };
 
 /**
  * Additional information for the client to, e.g. fetch the next part of the result set.

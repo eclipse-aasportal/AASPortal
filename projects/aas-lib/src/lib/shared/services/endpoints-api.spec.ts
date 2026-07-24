@@ -12,11 +12,11 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClient, HttpEventType, provideHttpClient, withXhr } from '@angular/common/http';
 import { lastValueFrom, of } from 'rxjs';
 import { AASDocument, AASEndpoint } from 'aas-core';
-import { AuthService } from '../core/auth/auth.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { EndpointsApi } from './endpoints-api';
-import { createSpyObj } from '../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
-import sample from '../../test/assets/dpp-sample.json';
+import sample from '../../../test/assets/dpp-sample.json';
 
 describe('EndpointsApi', () => {
     let service: EndpointsApi;
@@ -218,6 +218,21 @@ describe('EndpointsApi', () => {
             expect(req.request.method).toBe('DELETE');
             req.flush(null);
             expect(await promise).toBe(null);
+        });
+    });
+
+    describe('getDocumentCount', () => {
+        it('should GET /api/v1/endpoints/:name/document-count and return the document count', async () => {
+            const endpointName = 'endpoint6';
+            const encodedName = 'ZW5kcG9pbnQ2'; // encodeBase64Url('endpoint6')
+            const mockDocumentCount = 42;
+
+            const promise = lastValueFrom(service.getDocumentCount(endpointName));
+            const req = httpTestingController.expectOne(`/api/v1/endpoints/${encodedName}/document-count`);
+            expect(req.request.method).toBe('GET');
+            req.flush(mockDocumentCount);
+
+            expect(await promise).toEqual(mockDocumentCount);
         });
     });
 });

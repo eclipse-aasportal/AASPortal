@@ -16,7 +16,7 @@ import { EMPTY, from, mergeMap, throwError } from 'rxjs';
 
 import { AuthService } from '../auth.service';
 import { NotifyService } from '../../notify/notify.service';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { FormError } from '../../../shared/components/form-error/form-error';
 import { PromptDialog } from '../../prompt-dialog/prompt-dialog';
 
 export interface ProfileData {

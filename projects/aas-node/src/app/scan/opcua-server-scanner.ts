@@ -9,10 +9,14 @@
 import { AASDocument, PagedResult } from 'aas-core';
 import { OpcuaClient } from '../client/opcua/opcua-client.js';
 import { EndpointScanner } from './endpoint-scanner.js';
+import { ScannerController } from './scanner-controller.js';
 
 export class OpcuaServerScanner extends EndpointScanner {
-    public constructor(private readonly client: OpcuaClient) {
-        super();
+    public constructor(
+        controller: ScannerController,
+        private readonly client: OpcuaClient,
+    ) {
+        super(controller);
     }
 
     protected override open(): Promise<void> {

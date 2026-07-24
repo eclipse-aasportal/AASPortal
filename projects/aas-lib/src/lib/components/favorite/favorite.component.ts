@@ -10,7 +10,7 @@ import { Component, computed, effect, input, signal } from '@angular/core';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getLocaleValue } from 'aas-core';
 import { encodeBase64Url } from '../../utilities';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 
 export type FavoriteDetail = {
     name: string;

@@ -13,7 +13,7 @@ import { Component, WritableSignal, computed, effect, inject, input, model, sign
 
 import { AASDocument } from 'aas-core';
 
-import { MaxLengthPipe } from '../../share/pipes/max-length.pipe';
+import { MaxLengthPipe } from '../../shared/pipes/max-length.pipe';
 import { AASTableFilter } from './aas-table.filter';
 import { encodeBase64Url } from '../../utilities';
 

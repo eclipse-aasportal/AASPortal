@@ -13,8 +13,8 @@ import { Component, OnDestroy, TemplateRef, computed, effect, inject, viewChild 
 
 import { aas, AASDocument } from 'aas-core';
 import { ScoreComponent } from '../../components/score/score.component';
-import { ToolbarService } from '../../share/services/toolbar.service';
-import { StartService } from '../../services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';
 import { FeedbackItem, GeneralItem } from './customer-feedback.types';
 import { LeafView } from '../leaf-view';

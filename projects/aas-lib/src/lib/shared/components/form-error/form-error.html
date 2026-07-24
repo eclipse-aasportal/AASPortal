@@ -7,9 +7,9 @@
  !---------------------------------------------------------------------------->
 
 @if (field().touched() && field().invalid()) {
-    <ul class="text-danger fs-7">
+    <div class="d-flex flex-column text-danger fs-7">
         @for (error of field().errors(); track error) {
-            <li>{{ error.message | translate }}</li>
+            <div>{{ error.message | translate }}</div>
         }
-    </ul>
+    </div>
 }

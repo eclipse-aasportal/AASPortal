@@ -154,7 +154,7 @@ export class SqliteIndex extends AASIndex {
         this.logger.info(`AAS index connected to ${file} (SQLite).`);
     }
 
-    public override async getCount(endpoint?: string): Promise<number> {
+    public override async getDocumentCount(endpoint?: string): Promise<number> {
         return await new Promise((resolve, reject) => {
             try {
                 const value = endpoint ? this.getCountEndpoint.get(endpoint) : this.getCountAll.get();

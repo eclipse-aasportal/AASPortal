@@ -57,7 +57,7 @@ export class MySqlIndex extends AASIndex {
         await connection.end();
     }
 
-    public override async getCount(endpoint?: string): Promise<number> {
+    public override async getDocumentCount(endpoint?: string): Promise<number> {
         const connection = await this.getConnection();
         if (endpoint === undefined) {
             const result = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `documents`;');

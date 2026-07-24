@@ -65,7 +65,7 @@ describe('MainComponent', () => {
         documentSubject = new Subject<AASDocument | null>();
         documentSubject.next(null);
         toolbar = createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) });
-        indexChange = createSpyObj<IndexChange>(['clear'], {
+        indexChange = createSpyObj<IndexChange>(['reload'], {
             documentCount: (() => 42) as Signal<number>,
             endpointCount: (() => 1) as Signal<number>,
             changedDocuments: (() => 0) as Signal<number>,

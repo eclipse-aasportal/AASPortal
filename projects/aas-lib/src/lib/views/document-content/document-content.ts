@@ -27,8 +27,8 @@ import { aas, isProperty, isNumberType, isSubmodel, toJsonValue, jsonization, eq
 import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
 import { NotifyService } from '../../core/notify/notify.service';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
-import { ToolbarService } from '../../share/services/toolbar.service';
-import { StartService } from '../../services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url } from '../../utilities';
 import { DashboardChartType, DashboardPage } from '../../features/dashboard/dashboard-types';
 import { CompositeView } from '../composite-view';

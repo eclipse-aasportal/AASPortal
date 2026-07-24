@@ -12,8 +12,8 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-/** Offset for v3.8 */
-const offset = 550;
+/** Offset for v3.9 */
+const offset = 554;
 
 await main();
 

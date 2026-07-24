@@ -74,7 +74,7 @@ export class Variable {
         (process.env.LOG_LEVEL as 'Error' | 'Warning' | 'Info') ?? 'Info';
 
     /** The number of worker threads. */
-    public readonly MAX_WORKERS: number = process.env.MAX_WORKERS ? Number(process.env.MAX_WORKERS) : 8;
+    public readonly MAX_WORKERS: number = process.env.MAX_WORKERS ? Number(process.env.MAX_WORKERS) : 2;
 
     /** The time before a new endpoint scan starts.*/
     public readonly SCAN_ENDPOINT_TIMEOUT: number = process.env.SCAN_ENDPOINT_TIMEOUT

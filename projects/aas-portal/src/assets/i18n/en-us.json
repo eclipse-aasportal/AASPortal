@@ -3,7 +3,11 @@
         "BROWSER": "AAS Browser",
         "CONTENT": "AAS Content",
         "PLACEHOLDER_SEARCH": "Search",
-        "EMPTY": "No AAS document available."
+        "EMPTY": "No AAS document available.",
+        "VERSION": "Version",
+        "AAS_ID": "AAS ID",
+        "ASSET_ID": "Asset ID",
+        "OVERVIEW": "AAS Overview"
     },
     "AASContent": {
         "TITLE": "AAS Tree",
@@ -51,7 +55,20 @@
         "SCHEDULE": "Update endpoint index",
         "TOKEN": "Token",
         "VALUE": "Value",
-        "WebDAV": "WebDAV"
+        "WebDAV": "WebDAV",
+        "ERROR_NAME_REQUIRED": "Endpoint name required.",
+        "ERROR_NAME_EXISTS": "Endpoint with the specified name already exists.",
+        "ERROR_URL_INVALID": "Invalid URL.",
+        "API_KEY_NAME_REQUIRED": "API key name required.",
+        "API_KEY_VALUE_REQUIRED": "API key value required.",
+        "BEARER_TOKEN_REQUIRED": "Token required.",
+        "ERROR_MINUTES": "The value must be between 0 and 59.",
+        "ERROR_HOURS": "The value must be between 0 and 999.",
+        "ENDING_SLASH_REQUIRED": "Ending '/' required",
+        "HTTP_OR_HTTPS_PROTOCOL_REQUIRED": "Protocol http: or https: required.",
+        "Invalid URL": "Invalid URL",
+        "OPC_TCP_PROTOCOL_REQUIRED": "Protocol opc.tcp: required.",
+        "FILE_PROTOCOL_REQUIRED": "Protocol file: required."
     },
     "AssetStatus": {
         "TITLE": "Asset-Status"
@@ -141,6 +158,20 @@
         "TOKEN": "Token",
         "VALUE": "Value"
     },
+    "EndpointIndexForm": {
+        "CAPTION": "Endpoint Index",
+        "NAME": "Name",
+        "AAS_COUNT": "Shells",
+        "CONFIRM_RESET_INDEX": "Do you want to reset the endpoint index?",
+        "CLEAR": "Clear index...",
+        "CLOSE": "Close",
+        "START_SCAN_TOOL_TIP": "Update the endpoint index.",
+        "CLEAR_ENDPOINT_INDEX_TOOL_TIP": "Clear the endpoint index.",
+        "CANCEL_SCAN_TOOL_TIP": "Cancel the endpoint index update.",
+        "SHELLS": "Shells",
+        "CLEAR_INDEX_PROMPT": "To clear the index, enter '{{name}}'.",
+        "CLEAR_INDEX_KEY": "Clear index"
+    },
     "Error": {
         "AAS_ALREADY_EXISTS": "An AAS with the identifier '{{id}}' already exists.",
         "AAS_DOES_NOT_EXIST": "An asset administration shell with the identification '{{id}}' does not exist.",
@@ -167,19 +198,6 @@
         "UPLOAD_AASX_FILE_FAILED": "Uploading the AASX file {file} failed: {{message}}",
         "UPLOAD_FAILED": "Uploading and opening the file {{file}} failed. {{message}}",
         "USER_ALREADY_EXISTS": "An account to this e-mail already exists."
-    },
-    "ExtrasEndpointForm": {
-        "CAPTION": "Endpoint extras",
-        "NAME": "Name",
-        "COUNT": "Count",
-        "UPDATE": "Update",
-        "CONFIRM_RESET_INDEX": "Do you want to reset the endpoint index?",
-        "RESET": "Reset",
-        "CLOSE": "Close",
-        "disabled": "disabled",
-        "manual": "manual",
-        "once": "once",
-        "every": "cyclic"
     },
     "Favorite": {
         "ID_SHORT": "ID short",
@@ -323,10 +341,9 @@
         "TITLE": "Service Request Notification"
     },
     "Settings": {
-        "ADD_ENDPOINT": "Add Endpoint",
-        "EXTRAS": "Extras...",
-        "REMOVE_ENDPOINT": "Remove Endpoint",
-        "UPDATE_ENDPOINT": "Edit Endpoint",
+        "ADD_ENDPOINT": "Add Endpoint...",
+        "ENDPOINT_INDEX": "Endpoint Index...",
+        "UPDATE_ENDPOINT": "Edit Endpoint...",
         "AAS_ENDPOINT_ADDED": "Endpoint '{{endpoint}}' successfully added.",
         "AAS_ENDPOINT_UPDATED": "Endpoint '{{endpoint}}' successfully updated.",
         "AAS_ENDPOINT_DELETED": "Endpoint '{{endpoint}}' successfully removed."
@@ -384,6 +401,19 @@
         "SCHEDULE": "Update endpoint index",
         "URL": "URL",
         "VALUE": "Value",
-        "WebDAV": "WebDAV"
+        "WebDAV": "WebDAV",
+        "ERROR_NAME_REQUIRED": "Endpoint name required.",
+        "ERROR_NAME_EXISTS": "Endpoint with the specified name already exists.",
+        "ERROR_URL_INVALID": "Invalid URL.",
+        "API_KEY_NAME_REQUIRED": "API key name required.",
+        "API_KEY_VALUE_REQUIRED": "API key value required.",
+        "BEARER_TOKEN_REQUIRED": "Token required.",
+        "ERROR_MINUTES": "The value must be between 0 and 59.",
+        "ERROR_HOURS": "The value must be between 0 and 999.",
+        "ENDING_SLASH_REQUIRED": "Ending '/' required",
+        "HTTP_OR_HTTPS_PROTOCOL_REQUIRED": "Protocol http: or https: required.",
+        "Invalid URL": "Invalid URL",
+        "OPC_TCP_PROTOCOL_REQUIRED": "Protocol opc.tcp: required.",
+        "FILE_PROTOCOL_REQUIRED": "Protocol file: required."
     }
 }

@@ -9,23 +9,32 @@
 import EventEmitter from 'events';
 import { AASDocument, AASEndpoint, convertToString, PagedResult } from 'aas-core';
 import { AASIndex } from '../index/aas-index.js';
+import { ScannerController } from './scanner-controller.js';
 
 /**
  * Defines an automate to scan an AAS endpoint for new, deleted or updated Asset Administration Shells.
  */
 export abstract class EndpointScanner extends EventEmitter {
+    protected constructor(protected readonly controller: ScannerController) {
+        super();
+    }
+
     /**
      * Gets all documents of the current endpoint.
      * @param index The AAS index.
      * @param endpoint The endpoint.
      */
-    public async scanAsync(index: AASIndex, endpoint: AASEndpoint): Promise<void> {
+    public async scan(index: AASIndex, endpoint: AASEndpoint): Promise<void> {
         try {
             await this.open();
             let endpointCursor: string | undefined;
             do {
                 const result = await this.getDocuments(endpointCursor);
                 for (const b of result.result) {
+                    if (this.controller.cancelRequested) {
+                        break;
+                    }
+
                     const a = await index.find(b.endpoint, 'AssetAdministrationShell', b.id);
                     if (a === undefined) {
                         this.emit('add', b);
@@ -33,14 +42,16 @@ export abstract class EndpointScanner extends EventEmitter {
                 }
 
                 endpointCursor = result.paging_metadata.cursor;
-            } while (endpointCursor);
-
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            } while (endpointCursor && !this.controller.cancelRequested);
 
             let indexCursor: string | undefined;
             do {
                 const result = await index.getEndpointDocuments(endpoint.name, indexCursor);
                 for (const a of result.result) {
+                    if (this.controller.cancelRequested) {
+                        break;
+                    }
+
                     const b = await this.getDocument(a.address);
                     if (b === undefined) {
                         this.emit('remove', a);
@@ -50,7 +61,7 @@ export abstract class EndpointScanner extends EventEmitter {
                 }
 
                 indexCursor = result.paging_metadata.cursor;
-            } while (indexCursor);
+            } while (indexCursor && !this.controller.cancelRequested);
         } catch (error) {
             this.emit('error', `Scanning endpoint "${endpoint.name}" failed: ${convertToString(error)}`);
         } finally {

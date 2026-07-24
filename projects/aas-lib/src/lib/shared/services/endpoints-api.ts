@@ -10,8 +10,8 @@ import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { AASCursor, AASDocument, AASEndpoint, AASPagedResult, aas } from 'aas-core';
 import { first, map, mergeMap, Observable } from 'rxjs';
-import { encodeBase64Url } from '../utilities';
-import { AuthService } from '../core/auth/auth.service';
+import { encodeBase64Url } from '../../utilities';
+import { AuthService } from '../../core/auth/auth.service';
 
 /**
  * This service provides methods to interact with the AAS endpoints API,
@@ -206,5 +206,14 @@ export class EndpointsApi {
             reportProgress: true,
             observe: 'events',
         });
+    }
+
+    /**
+     * Gets the count of documents in the index for the specified AAS endpoint.
+     * @param endpoint The name of the AAS endpoint.
+     * @returns The count of documents in the index for the specified endpoint as an Observable<number>.
+     */
+    public getDocumentCount(endpoint: string): Observable<number> {
+        return this.http.get<number>(`/api/v1/endpoints/${encodeBase64Url(endpoint)}/document-count`);
     }
 }

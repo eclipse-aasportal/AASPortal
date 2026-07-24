@@ -14,9 +14,9 @@ import { first, lastValueFrom, of } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
-import { ToolbarService } from '../../share/services/toolbar.service';
-import { StartService } from '../../services/start.service';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { encodeBase64Url } from '../../utilities';
 import carbon_footprint_0_9 from '../../../test/assets/carbon-footprint-0-9.json';
 import { VIEW_ROUTES } from '../views-routes';

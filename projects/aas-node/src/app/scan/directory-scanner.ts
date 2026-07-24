@@ -9,13 +9,17 @@
 import { AASDocument, PagedResult } from 'aas-core';
 import { AasxDirectory } from '../client/fs/aasx-directory.js';
 import { EndpointScanner } from './endpoint-scanner.js';
+import { ScannerController } from './scanner-controller.js';
 
 /**
  * Defines an automate to scan a directory for new, deleted or updated Asset Administration Shells.
  */
 export class DirectoryScanner extends EndpointScanner {
-    public constructor(private readonly client: AasxDirectory) {
-        super();
+    public constructor(
+        controller: ScannerController,
+        private readonly client: AasxDirectory,
+    ) {
+        super(controller);
     }
 
     protected override async open(): Promise<void> {

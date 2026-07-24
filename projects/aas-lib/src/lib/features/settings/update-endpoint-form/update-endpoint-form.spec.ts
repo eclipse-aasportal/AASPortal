@@ -17,7 +17,7 @@ import { UpdateEndpointForm, UpdateEndpointResult } from './update-endpoint-form
 import { AASEndpoint } from 'aas-core';
 
 import { createSpyObj, FakeLoader } from '../../../../test/mocks';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { FormError } from '../../../shared/components/form-error/form-error';
 import { PromptDialog } from '../../../core/prompt-dialog/prompt-dialog';
 
 describe('UpdateEndpointForm', () => {

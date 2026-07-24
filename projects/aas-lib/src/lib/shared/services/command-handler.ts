@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Command } from '../../services/command';
+import { Command } from './command';
 import { NotifyService } from '../../core/notify/notify.service';
 
 @Injectable({

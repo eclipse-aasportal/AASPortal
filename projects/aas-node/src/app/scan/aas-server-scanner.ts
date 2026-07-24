@@ -9,13 +9,17 @@
 import { AASDocument, noop, PagedResult } from 'aas-core';
 import { ApiClient } from '../client/api/api-client.js';
 import { EndpointScanner } from './endpoint-scanner.js';
+import { ScannerController } from './scanner-controller.js';
 
 /**
  * Implements an automate to scan an AAS server for new, deleted or updated Asset Administration Shells.
  */
 export class AASServerScanner extends EndpointScanner {
-    public constructor(private readonly client: ApiClient) {
-        super();
+    public constructor(
+        controller: ScannerController,
+        private readonly client: ApiClient,
+    ) {
+        super(controller);
     }
 
     /**
@@ -41,6 +45,11 @@ export class AASServerScanner extends EndpointScanner {
         return this.client.getDocuments(cursor);
     }
 
+    /**
+     * Gets a single AAS document from the endpoint.
+     * @param address The address of the AAS document.
+     * @returns A single AAS document or undefined if the document could not be retrieved.
+     */
     protected override async getDocument(address: string): Promise<AASDocument | undefined> {
         try {
             return await this.client.createDocument(address);

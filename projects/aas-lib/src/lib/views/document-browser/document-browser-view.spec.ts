@@ -14,11 +14,11 @@ import { first, lastValueFrom, of } from 'rxjs';
 import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
 
 import { aas, AASDocument } from 'aas-core';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { encodeBase64Url } from '../../utilities';
 import { BrowserComponent } from '../../components/browser/browser.component';
-import { StartService } from '../../services/start.service';
-import { ToolbarService } from '../../share/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
 import { VIEW_ROUTES } from '../views-routes';
 import { DocumentBrowserView } from './document-browser-view';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';

@@ -3,7 +3,11 @@
         "BROWSER": "AAS Browser",
         "CONTENT": "AAS Content",
         "PLACEHOLDER_SEARCH": "Suche",
-        "EMPTY": "Kein AAS-Document verfügbar."
+        "EMPTY": "Kein AAS-Document verfügbar.",
+        "VERSION": "Version",
+        "AAS_ID": "AAS ID",
+        "ASSET_ID": "Asset ID",
+        "OVERVIEW": "AAS-Übersicht"
     },
     "AASContent": {
         "TITLE": "AAS-Baum",
@@ -51,7 +55,20 @@
         "SCHEDULE": "Endpunkt-Index aktualisieren",
         "TOKEN": "Token",
         "VALUE": "Value",
-        "WebDAV": "WebDAV"
+        "WebDAV": "WebDAV",
+        "ERROR_NAME_REQUIRED": "Name für Endpunkt erforderlich.",
+        "ERROR_NAME_EXISTS": "Ein Endpunkt mit diesem Namen existiert bereits.",
+        "ERROR_URL_INVALID": "Ungültige URL.",
+        "API_KEY_NAME_REQUIRED": "API-Key-Name erforderlich.",
+        "API_KEY_VALUE_REQUIRED": "API-Key-Wert erforderlich.",
+        "BEARER_TOKEN_REQUIRED": "Token erforderlich",
+        "ERROR_MINUTES": "Der Wert muss zwischen 0 und 59 sein.",
+        "ERROR_HOURS": "Der Wert muss zwischen 0 und 999 sein.",
+        "ENDING_SLASH_REQUIRED": "Abschließender '/' erforderlich",
+        "HTTP_OR_HTTPS_PROTOCOL_REQUIRED": "Protokoll http: oder https: erforderlich.",
+        "Invalid URL": "Ungültige URL",
+        "OPC_TCP_PROTOCOL_REQUIRED": "Protokoll opc.tcp: erforderlich.",
+        "FILE_PROTOCOL_REQUIRED": "Protokoll file: erforderlich."
     },
     "AssetStatus": {
         "TITLE": "Asset-Status"
@@ -141,6 +158,19 @@
         "TOKEN": "Token",
         "VALUE": "Value"
     },
+    "EndpointIndexForm": {
+        "CAPTION": "Endpunkt-Index",
+        "NAME": "Name",
+        "AAS_COUNT": "Verwaltungsschalen",
+        "CLEAR": "Index löschen...",
+        "CLOSE": "Schließen",
+        "START_SCAN_TOOL_TIP": "Endpunkt-Index aktualisieren.",
+        "CLEAR_ENDPOINT_INDEX_TOOL_TIP": "Endpunkt-Index löschen.",
+        "CANCEL_SCAN_TOOL_TIP": "Aktualisierung des Endpunkt-Index abbrechen.",
+        "SHELLS": "Verwaltungsschalen",
+        "CLEAR_INDEX_PROMPT": "Um den Index zu löschen, geben Sie '{{name}}' ein.",
+        "CLEAR_INDEX_KEY": "Index löschen"
+    },
     "Error": {
         "AAS_ALREADY_EXISTS": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert bereits.",
         "AAS_DOES_NOT_EXIST": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert nicht.",
@@ -167,19 +197,6 @@
         "UPLOAD_AASX_FILE_FAILED": "Der Upload der AASX Datei {{file}} ist fehlgeschlagen: {{message}}",
         "UPLOAD_FAILED": "Das Hochladen und öffnen der Datei {{file}} ist fehlgeschlagen. {{message}}",
         "USER_ALREADY_EXISTS": "Zu dieser E-Mail existiert bereits ein Konto."
-    },
-    "ExtrasEndpointForm": {
-        "CAPTION": "Endpoint-Extras",
-        "NAME": "Name",
-        "COUNT": "Anzahl",
-        "UPDATE": "Aktualisierung",
-        "CONFIRM_RESET_INDEX": "Möchten Sie das Endpunkt-?",
-        "RESET": "Reset",
-        "CLOSE": "Schließen",
-        "disabled": "deaktiviert",
-        "manual": "manuell",
-        "once": "einmalig",
-        "every": "zyklisch"
     },
     "Favorite": {
         "ID_SHORT": "ID-Short",
@@ -323,10 +340,9 @@
         "TITLE": "Serviceanfrage"
     },
     "Settings": {
-        "ADD_ENDPOINT": "Endpunkt hinzufügen",
-        "EXTRAS": "Endpunkt ???",
-        "REMOVE_ENDPOINT": "Endpunkt entfernen",
-        "UPDATE_ENDPOINT": "Endpunkt bearbeiten",
+        "ADD_ENDPOINT": "Endpunkt hinzufügen...",
+        "ENDPOINT_INDEX": "Endpunkt-Index...",
+        "UPDATE_ENDPOINT": "Endpunkt bearbeiten...",
         "AAS_ENDPOINT_ADDED": "Endpunkt '{{endpoint}}' erfolgreich hinzugefügt.",
         "AAS_ENDPOINT_UPDATED": "Endpunkt '{{endpoint}}' erfolgreich aktualisiert.",
         "AAS_ENDPOINT_DELETED": "Endpunkt '{{endpoint}}' erfolgreich entfernt."
@@ -384,6 +400,19 @@
         "SCHEDULE": "Endpunkt-Index aktualisieren",
         "URL": "URL",
         "VALUE": "Wert",
-        "WebDAV": "WebDAV"
+        "WebDAV": "WebDAV",
+        "ERROR_NAME_REQUIRED": "Name für Endpunkt erforderlich.",
+        "ERROR_NAME_EXISTS": "Ein Endpunkt mit diesem Namen existiert bereits.",
+        "ERROR_URL_INVALID": "Ungültige URL.",
+        "API_KEY_NAME_REQUIRED": "API-Key-Name erforderlich.",
+        "API_KEY_VALUE_REQUIRED": "API-Key-Wert erforderlich.",
+        "BEARER_TOKEN_REQUIRED": "Token erforderlich",
+        "ERROR_MINUTES": "Der Wert muss zwischen 0 und 59 sein.",
+        "ERROR_HOURS": "Der Wert muss zwischen 0 und 999 sein.",
+        "ENDING_SLASH_REQUIRED": "Abschließender '/' erforderlich",
+        "HTTP_OR_HTTPS_PROTOCOL_REQUIRED": "Protokoll http: oder https: erforderlich.",
+        "Invalid URL": "Ungültige URL",
+        "OPC_TCP_PROTOCOL_REQUIRED": "Protokoll opc.tcp: erforderlich.",
+        "FILE_PROTOCOL_REQUIRED": "Protokoll file: erforderlich."
     }
 }

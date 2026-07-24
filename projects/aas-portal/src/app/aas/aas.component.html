@@ -16,7 +16,7 @@
                     <div class="d-flex flex-column text-center">
                         <div class="bg-primary text-center py-2 my-2 fs-5">
                             <div class="d-flex flex-column data-entry">
-                                <label style="font-size: 15px">AAS Overview</label>
+                                <label style="font-size: 15px" translate="AAS.OVERVIEW"></label>
                                 <label style="font-size: 20px">{{ idShort() }}</label>
                             </div>
                         </div>
@@ -34,15 +34,15 @@
                     </div>
                     <div class="d-flex flex-column ps-1">
                         <div class="col-md-6 p-1 d-flex flex-column mt-0">
-                            <label class="label" translate="LABEL_VERSION"></label>
+                            <label class="label" translate="AAS.VERSION"></label>
                             <label class="ms-2">{{ version() }}</label>
                         </div>
                         <div class="col-md-6 p-1 d-flex flex-column mt-0">
-                            <label class="label" translate="LABEL_AAS_ID"></label>
+                            <label class="label" translate="AAS.AAS_ID"></label>
                             <label class="ms-2">{{ id() }}</label>
                         </div>
                         <div class="col-md-6 p-1 d-flex flex-column mt-0">
-                            <label class="label" translate="LABEL_ASSET_ID"></label>
+                            <label class="label" translate="AAS.ASSET_ID"></label>
                             <label class="ms-2">{{ assetId() }}</label>
                         </div>
                     </div>
@@ -50,7 +50,7 @@
 
                 <div class="d-flex flex-sm-column flex-row align-items-end mb-sm-0 mb-4">
                     <div class="d-flex flex-column mt-1 mx-4">
-                        <label class="label"translate="AAS.CONTENT"></label>
+                        <label class="label" translate="AAS.CONTENT"></label>
                         <button
                             [routerLink]="openContentView()"
                             type="button"
@@ -108,7 +108,7 @@
             </div>
         </div>
     } @else {
-        <div class="alert alert-info text-center mt-2" role="alert">{{ 'AAS.EMPTY' | translate }}</div>
+        <div class="alert alert-info text-center mt-2" role="alert" translate="AAS.EMPTY"></div>
     }
 </div>
 

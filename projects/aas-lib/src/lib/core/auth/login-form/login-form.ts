@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 import { Credentials } from 'aas-core';
 import { NotifyService } from '../../notify/notify.service';
 import { AuthService } from '../auth.service';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { FormError } from '../../../shared/components/form-error/form-error';
 
 @Component({
     selector: 'fhg-login',

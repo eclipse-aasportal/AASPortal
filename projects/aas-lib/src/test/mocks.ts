@@ -98,7 +98,7 @@ export class MockWebSocketService {
     private mockSubject = new Subject<any>();
 
     public sendMessage(message: any): void {
-        this.mockSubject.next({ data: message });
+        this.mockSubject.next(message);
     }
 
     public getMessages(): Observable<any> {

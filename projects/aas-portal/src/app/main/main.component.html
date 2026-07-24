@@ -59,7 +59,7 @@
     </div>
     <div class="fhg-main-statusbar fs-8">
         <div class="text-nowrap text-truncate">© {{ year() }} Fraunhofer IOSB-INA - AASPortal (v{{ version() }})</div>
-        <div class="badge text-bg-light mx-2 fhg-pointer" (click)="clear()" tabindex="0" (keydown)="onKeyDown($event)">
+        <div class="badge text-bg-light mx-2 fhg-pointer" (click)="reload()" tabindex="0" (keydown)="onKeyDown($event)">
             <span>{{ documentCount() }}&nbsp;</span>
             <span translate="Main.SHELLS"></span>
             @if (changedDocuments() > 0) {

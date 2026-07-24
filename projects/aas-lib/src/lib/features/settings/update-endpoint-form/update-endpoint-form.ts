@@ -23,9 +23,10 @@ import { NgbActiveModal, NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bo
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import semver from 'semver';
 import { AASEndpoint, AASEndpointScheduleType, AASEndpointType } from 'aas-core';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { FormError } from '../../../shared/components/form-error/form-error';
 import { PromptDialog } from '../../../core/prompt-dialog/prompt-dialog';
 import { validateEndpointUrl } from '../../../utilities';
+import { EndpointTemplate, templates } from '../endpoint-templates';
 
 type AuthorizationType =
     'UpdateEndpointForm.NO_AUTH' | 'UpdateEndpointForm.API_KEY' | 'UpdateEndpointForm.BEARER_TOKEN';
@@ -48,11 +49,6 @@ interface UpdateEndpointModel {
     items: EndpointItem[];
 }
 
-export interface EndpointTemplate {
-    type: AASEndpointType;
-    placeholder: string;
-}
-
 export interface UpdateEndpointResult {
     delete: string[];
     update: AASEndpoint[];
@@ -61,16 +57,17 @@ export interface UpdateEndpointResult {
 function ItemSchema(item: SchemaPathTree<EndpointItem>): void {
     readonly(item.name);
     validate(item.url, ({ value, valueOf }) => {
-        if (!validateEndpointUrl(value(), valueOf(item.type))) {
-            return { kind: 'validUrl', message: 'UpdateEndpointForm.ERROR_URL_INVALID' };
+        const result = validateEndpointUrl(value(), valueOf(item.type));
+        if (result) {
+            return { kind: 'validUrl', message: 'UpdateEndpointForm.' + result };
         }
 
         return null;
     });
-    min(item.minutes, 0, { message: 'UpdateEndpointForm.ERROR_MINUTES_MIN' });
-    max(item.minutes, 59, { message: 'UpdateEndpointForm.ERROR_MINUTES_MAX' });
-    min(item.hours, 0, { message: 'UpdateEndpointForm.ERROR_HOURS_MIN' });
-    max(item.hours, 23, { message: 'UpdateEndpointForm.ERROR_HOURS_MAX' });
+    min(item.minutes, 0, { message: 'UpdateEndpointForm.ERROR_MINUTES' });
+    max(item.minutes, 59, { message: 'UpdateEndpointForm.ERROR_MINUTES' });
+    min(item.hours, 0, { message: 'UpdateEndpointForm.ERROR_HOURS' });
+    max(item.hours, 999, { message: 'UpdateEndpointForm.ERROR_HOURS' });
     required(item.key, {
         when: ({ valueOf }) => valueOf(item.authorization) === 'UpdateEndpointForm.API_KEY',
         message: 'UpdateEndpointForm.API_KEY_NAME_REQUIRED',
@@ -96,24 +93,7 @@ export class UpdateEndpointForm {
     private readonly modal = inject(NgbModal);
     private readonly translate = inject(TranslateService);
     private readonly toDelete: string[] = [];
-    private readonly _templates = signal<EndpointTemplate[]>([
-        {
-            type: 'AAS_API',
-            placeholder: 'UpdateEndpointForm.PLACEHOLDER_URL_HTTP',
-        },
-        {
-            type: 'OPC_UA',
-            placeholder: 'UpdateEndpointForm.PLACEHOLDER_URL_OPCUA',
-        },
-        {
-            type: 'WebDAV',
-            placeholder: 'UpdateEndpointForm.PLACEHOLDER_URL_WEBDAV',
-        },
-        {
-            type: 'FileSystem',
-            placeholder: 'UpdateEndpointForm.PLACEHOLDER_URL_FILE',
-        },
-    ]);
+    private readonly _templates = signal<EndpointTemplate[]>(templates);
 
     private readonly _endpoints = httpResource<AASEndpoint[]>(() => '/api/v1/endpoints', {
         defaultValue: [] as AASEndpoint[],
@@ -274,6 +254,10 @@ export class UpdateEndpointForm {
                 endpoint.schedule = {
                     type: 'every',
                     values: [ms],
+                };
+            } else {
+                endpoint.schedule = {
+                    type: modelItem.schedule,
                 };
             }
 

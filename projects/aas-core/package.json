@@ -1,6 +1,6 @@
 {
     "name": "aas-core",
-    "version": "3.8",
+    "version": "3.9",
     "description": "Common types and utilities for the Web-AAS project",
     "module": "./dist/aas-core.js",
     "main": "./dist/aas-core.js",

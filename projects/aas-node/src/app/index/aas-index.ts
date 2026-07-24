@@ -38,7 +38,7 @@ export abstract class AASIndex {
      * @param endpoint Optional the name of the AAS endpoint.
      * @returns The number of AAS documents.
      */
-    public abstract getCount(endpoint?: string): Promise<number>;
+    public abstract getDocumentCount(endpoint?: string): Promise<number>;
 
     /**
      * Gets all registered AAS endpoints.

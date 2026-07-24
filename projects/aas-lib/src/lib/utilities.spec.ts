@@ -101,40 +101,45 @@ describe('utilities', () => {
     });
 
     describe('validateEndpointUrl', () => {
-        it('validates a valid HTTP URL for AAS_API endpoint type', () => {
-            expect(validateEndpointUrl('https://example.com/aas', 'AAS_API')).toBe(true);
+        it('should return undefine for valid AAS_API URLs', () => {
+            expect(validateEndpointUrl('https://example.com/aas/', 'AAS_API')).toBeUndefined();
+            expect(validateEndpointUrl('https://example.com', 'AAS_API')).toBeUndefined();
         });
 
-        it('invalidates an invalid HTTP URL for AAS_API endpoint type', () => {
-            expect(validateEndpointUrl('invalid-url', 'AAS_API')).toBe(false);
+        it('should return ENDING_SLASH_REQUIRED for invalid AAS_API URL', () => {
+            expect(validateEndpointUrl('https://example.com/aas', 'AAS_API')).toBe('ENDING_SLASH_REQUIRED');
         });
 
-        it('validates a valid OPC UA URL for OPC_UA endpoint type', () => {
-            expect(validateEndpointUrl('opc.tcp://example.com:4840', 'OPC_UA')).toBe(true);
+        it('should return error message for invalid AAS_API URL', () => {
+            expect(validateEndpointUrl('invalid-url', 'AAS_API')).toBe('Invalid URL');
         });
 
-        it('invalidates an invalid OPC UA URL for OPC_UA endpoint type', () => {
-            expect(validateEndpointUrl('invalid-url', 'OPC_UA')).toBe(false);
+        it('should return undefined for valid OPC_UA URL', () => {
+            expect(validateEndpointUrl('opc.tcp://example.com:4840', 'OPC_UA')).toBeUndefined();
         });
 
-        it('validates a valid WebDAV URL for WebDAV endpoint type', () => {
-            expect(validateEndpointUrl('https://example.com/webdav', 'WebDAV')).toBe(true);
+        it('should return error message for invalid OPC_UA URL', () => {
+            expect(validateEndpointUrl('invalid-url', 'OPC_UA')).toBe('Invalid URL');
         });
 
-        it('invalidates an invalid WebDAV URL for WebDAV endpoint type', () => {
-            expect(validateEndpointUrl('invalid-url', 'WebDAV')).toBe(false);
+        it('should return undefined for valid WebDAV URL', () => {
+            expect(validateEndpointUrl('https://example.com/webdav', 'WebDAV')).toBeUndefined();
         });
 
-        it('validates a valid file path for FileSystem endpoint type', () => {
-            expect(validateEndpointUrl('file://C:/example/path', 'FileSystem')).toBe(true);
+        it('should return error message for invalid WebDAV URL', () => {
+            expect(validateEndpointUrl('invalid-url', 'WebDAV')).toBe('Invalid URL');
         });
 
-        it('invalidates an invalid file path for FileSystem endpoint type', () => {
-            expect(validateEndpointUrl('invalid-path', 'FileSystem')).toBe(false);
+        it('should return undefine for valid FileSystem URL', () => {
+            expect(validateEndpointUrl('file://C:/example/path', 'FileSystem')).toBeUndefined();
         });
 
-        it('invalidates an HTTP URL with invalid version', () => {
-            expect(validateEndpointUrl('https://example.com/aas?version=invalid', 'AAS_API')).toBe(false);
+        it('should return error message for invalid FileSystem URL', () => {
+            expect(validateEndpointUrl('invalid-path', 'FileSystem')).toBe('Invalid URL');
+        });
+
+        it('should return INVALID_VERSION for AAS_API URL', () => {
+            expect(validateEndpointUrl('https://example.com/aas/?version=invalid', 'AAS_API')).toBe('INVALID_VERSION');
         });
     });
 });

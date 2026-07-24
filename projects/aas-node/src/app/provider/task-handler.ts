@@ -10,9 +10,9 @@ import { singleton } from 'tsyringe';
 
 export interface Task {
     id: number;
-    endpointName: string;
+    name: string;
     owner: object;
-    type: 'ScanEndpoint';
+    type: string;
     state: 'idle' | 'inProgress';
     start: number;
     end: number;
@@ -45,13 +45,13 @@ export class TaskHandler {
         return this._tasks.get(taskId);
     }
 
-    public createTask(endpointName: string, owner: object, type: 'ScanEndpoint'): Task {
+    public createTask(name: string, owner: object, type: string): Task {
         const id = this.nextTaskId;
         ++this.nextTaskId;
         const task: Task = {
             id,
             type,
-            endpointName,
+            name,
             owner,
             state: 'idle',
             start: 0,
@@ -59,13 +59,12 @@ export class TaskHandler {
         };
 
         this._tasks.set(id, task);
-
         return task;
     }
 
-    public find(endpointName: string, type: 'ScanEndpoint'): Task | undefined {
+    public find(name: string, type: string): Task | undefined {
         for (const task of this._tasks.values()) {
-            if (task.endpointName === endpointName && type === task.type) {
+            if (task.name === name && type === task.type) {
                 return task;
             }
         }

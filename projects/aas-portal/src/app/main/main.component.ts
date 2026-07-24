@@ -93,8 +93,8 @@ export class MainComponent {
 
     public readonly year = signal(new Date().getFullYear());
 
-    public clear(): void {
-        this.indexChange.clear().subscribe();
+    public reload(): void {
+        this.indexChange.reload();
     }
 
     public onKeyDown($event: KeyboardEvent): void {

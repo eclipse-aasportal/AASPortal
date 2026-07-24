@@ -16,12 +16,12 @@ import { of } from 'rxjs';
 import { aas, AASDocument } from 'aas-core';
 import { ServiceRequestNotification } from './service-request-notification';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
-import { StartService } from '../../services/start.service';
-import { ToolbarService } from '../../share/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 
 @Component({
     selector: 'fhg-thumbnail-qrcode',

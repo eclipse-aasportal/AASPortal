@@ -12,7 +12,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
 
-import { WindowService } from '../../share/services/window.service';
+import { WindowService } from '../../shared/services/window.service';
 import { CarbonFootprint } from './carbon-footprint';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { CarbonFootprintState } from './carbon-footprint.state';

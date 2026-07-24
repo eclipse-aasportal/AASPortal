@@ -40,7 +40,7 @@ describe('EndpointController', () => {
         vi.useFakeTimers();
 
         logger = createSpyObj<Logger>(['info', 'error']);
-        parallel = createSpyObj<Parallel>(['on', 'off', 'execute', 'terminate']);
+        parallel = createSpyObj<Parallel>(['on', 'off', 'execute', 'cancel', 'terminate']);
         parallel.terminate.mockResolvedValue();
 
         clientFactory = createSpyObj<EndpointClientFactory>(['create', 'testAsync']);
@@ -99,7 +99,7 @@ describe('EndpointController', () => {
             vi.runOnlyPendingTimers();
 
             expect(parallel.execute).toHaveBeenCalledWith({
-                type: 'ScanEndpointData',
+                type: 'EndpointScanData',
                 taskId: task?.id,
                 endpoint: configuredEndpoint,
             });
@@ -131,10 +131,7 @@ describe('EndpointController', () => {
             };
 
             index.updateEndpoint.mockResolvedValue(oldEndpoint);
-
             await provider.updateEndpoint(disabledEndpoint);
-
-            expect(index.clear).toHaveBeenCalledWith(disabledEndpoint.name);
             vi.runOnlyPendingTimers();
             expect(parallel.execute).not.toHaveBeenCalled();
         });
@@ -160,7 +157,7 @@ describe('EndpointController', () => {
             vi.runOnlyPendingTimers();
 
             expect(parallel.execute).toHaveBeenCalledWith({
-                type: 'ScanEndpointData',
+                type: 'EndpointScanData',
                 taskId: task?.id,
                 endpoint: recurringEndpoint,
             });
@@ -225,7 +222,7 @@ describe('EndpointController', () => {
             vi.runOnlyPendingTimers();
 
             expect(parallel.execute).toHaveBeenCalledWith({
-                type: 'ScanEndpointData',
+                type: 'EndpointScanData',
                 taskId: task?.id,
                 endpoint: {
                     ...endpoint,
@@ -235,24 +232,60 @@ describe('EndpointController', () => {
         });
     });
 
-    describe('reset', () => {
-        it('terminates workers, clears index and sends reset message', async () => {
-            await provider.reset();
+    describe('cancelEndpointScan', () => {
+        it('cancels an ongoing scan', async () => {
+            index.getEndpoint.mockResolvedValue({
+                ...endpoint,
+                schedule: { type: 'manual' },
+            });
 
-            expect(parallel.terminate).toHaveBeenCalled();
-            expect(index.clear).toHaveBeenCalledWith();
-            expect(sender.send).toHaveBeenCalledWith({ type: 'Reset' });
-            expect(logger.info).toHaveBeenCalledWith('AASNode index reset.');
+            const task = taskHandler.createTask(endpoint.name, provider, 'ScanEndpoint');
+            task.state = 'inProgress';
+
+            await provider.cancelEndpointScan(endpoint.name);
+
+            expect(parallel.cancel).toHaveBeenCalledWith({
+                endpoint: 'Samples',
+                taskId: task.id,
+                type: 'CancelEndpointScanData',
+            });
+        });
+    });
+
+    describe('clear', () => {
+        it('clears all endpoints when no endpoint name is provided', async () => {
+            await provider.clearIndex();
+
+            expect(index.clear).toHaveBeenCalled();
+            expect(sender.send).toHaveBeenCalledWith({
+                type: 'Cleared',
+            });
         });
 
-        it('ignores duplicate reset requests', async () => {
-            (provider as unknown as { resetRequested: boolean }).resetRequested = true;
+        it('clears a specific endpoint when an endpoint name is provided', async () => {
+            await provider.clearIndex(endpoint.name);
 
-            await provider.reset();
+            expect(index.clear).toHaveBeenCalledWith(endpoint.name);
+            expect(sender.send).toHaveBeenCalledWith({
+                type: 'Cleared',
+                endpoint: endpoint.name,
+            });
+        });
+    });
 
-            expect(parallel.terminate).not.toHaveBeenCalled();
-            expect(index.clear).not.toHaveBeenCalled();
-            expect(sender.send).not.toHaveBeenCalledWith({ type: 'Reset' });
+    describe('getEndpointStatus', () => {
+        it('should return idle status of an endpoint', () => {
+            const status = provider.getUpdateStatus('TestEndpoint');
+            expect(status).toEqual({ name: 'TestEndpoint', status: 'idle' });
+        });
+
+        it('should return scanning status of an endpoint', () => {
+            const task = taskHandler.createTask('TestEndpoint', provider, 'ScanEndpoint');
+            task.state = 'inProgress';
+            task.start = Date.now();
+
+            const status = provider.getUpdateStatus('TestEndpoint');
+            expect(status).toEqual({ name: 'TestEndpoint', status: 'scanning', start: task.start });
         });
     });
 });

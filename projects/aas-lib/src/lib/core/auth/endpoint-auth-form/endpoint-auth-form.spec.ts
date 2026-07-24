@@ -16,7 +16,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { AASEndpoint, EndpointAuth } from 'aas-core';
 import { EndpointAuthForm } from './endpoint-auth-form';
 import { createSpyObj, FakeLoader } from '../../../../test/mocks';
-import { FormError } from '../../../share/components/form-error/form-error';
+import { FormError } from '../../../shared/components/form-error/form-error';
 
 describe('EndpointAuthForm', () => {
     let component: EndpointAuthForm;

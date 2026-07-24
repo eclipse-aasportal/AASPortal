@@ -15,12 +15,12 @@ import { of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
-import { StartService } from '../../services/start.service';
-import { ToolbarService } from '../../share/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { EndpointsApi } from '../../services/endpoints-api';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { AssetStatus } from './asset-status';
 
 import asset_status from '../../../test/assets/asset-status.json';
