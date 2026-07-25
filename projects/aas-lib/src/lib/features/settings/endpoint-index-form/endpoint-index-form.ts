@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NgbActiveModal, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { from, interval, map, mergeMap, Observable, of, toArray, zip } from 'rxjs';
+import { filter, from, interval, map, mergeMap, Observable, of, toArray, zip } from 'rxjs';
 import { AASEndpointScheduleType } from 'aas-core';
 import { IndexChange } from '../../../shared/services/index-change';
 import { EndpointsApi } from '../../../shared/services/endpoints-api';
@@ -120,6 +120,7 @@ export class EndpointIndexForm {
         toSignal(
             this.api.getEndpoints().pipe(
                 mergeMap(endpoints => of(...endpoints)),
+                filter(endpoint => endpoint.schedule?.type !== 'disabled'),
                 mergeMap(endpoint =>
                     zip(
                         this.indexChange.getUpdateStatus(endpoint.name),
