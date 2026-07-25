@@ -184,7 +184,8 @@ export class EndpointProvider {
      */
     public async startEndpointScan(name: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(name);
-        if (endpoint.schedule?.type !== 'manual') {
+        const schedule = endpoint.schedule?.type;
+        if (schedule !== 'manual' && schedule !== 'once') {
             throw new ApplicationError(
                 `Endpoint ${name} is not configured for the manual start of a scan.`,
                 { name },

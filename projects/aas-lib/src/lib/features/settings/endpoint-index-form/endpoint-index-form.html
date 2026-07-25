@@ -24,7 +24,7 @@
                             <span>{{ item.aasCount }}</span
                             ><span class="ms-2">{{ 'EndpointIndexForm.SHELLS' | translate }}</span>
                         </div>
-                        @if (item.schedule === 'manual') {
+                        @if (item.schedule === 'manual' || item.schedule === 'once') {
                             <div>
                                 <button
                                     type="button"
