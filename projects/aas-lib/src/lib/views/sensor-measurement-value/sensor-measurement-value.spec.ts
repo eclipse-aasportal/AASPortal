@@ -29,9 +29,9 @@ describe('SensorMeasurementValue', () => {
     let environment: aas.Environment;
     let submodel: aas.Submodel;
 
-    beforeEach(async () => {
+    beforeEach(async (): Promise<void> => {
         messages = new Subject<WebSocketData>();
-        webSocket = { getMessages: () => messages, sendMessage: vi.fn() };
+        webSocket = { getMessages: (): Subject<WebSocketData> => messages, sendMessage: vi.fn() };
         environment = measurementValue as aas.Environment;
         submodel = environment.submodels[0];
         document = {
@@ -77,17 +77,25 @@ describe('SensorMeasurementValue', () => {
 
     it('rejects missing required fields, wrong types, duplicate fields, and semantic IDs', () => {
         const cases: Array<(submodel: aas.Submodel) => void> = [
-            submodel => submodel.submodelElements?.splice(0, 1),
-            submodel => {
+            (submodel: aas.Submodel): void => {
+                submodel.submodelElements?.splice(0, 1);
+            },
+            (submodel: aas.Submodel): void => {
                 const timestamp = submodel.submodelElements?.find(
                     item => item.idShort === 'MeasurementTimestamp',
                 ) as aas.Property;
                 timestamp.valueType = 'xs:string';
             },
-            submodel => submodel.submodelElements?.push(structuredClone(submodel.submodelElements[0])),
-            submodel => {
-                const qualifier = submodel.submodelElements?.find(item => item.idShort === 'MeasurementQualifier')!;
-                qualifier.semanticId!.keys[0].value = 'https://example.com/wrong';
+            (submodel: aas.Submodel): void => {
+                submodel.submodelElements?.push(structuredClone(submodel.submodelElements[0]));
+            },
+            (submodel: aas.Submodel): void => {
+                const qualifier = submodel.submodelElements?.find(item => item.idShort === 'MeasurementQualifier') as
+                    aas.SubmodelElementCollection | undefined;
+                const semanticKey = qualifier?.semanticId?.keys[0];
+                if (semanticKey) {
+                    semanticKey.value = 'https://example.com/wrong';
+                }
             },
         ];
         for (const mutate of cases) {
@@ -138,9 +146,8 @@ describe('SensorMeasurementValue', () => {
 
     it('does not subscribe when the primary value has no node ID', () => {
         const noLiveSubmodel = structuredClone(submodel) as aas.Submodel;
-        const measuredValue = noLiveSubmodel.submodelElements?.find(
-            item => item.idShort === 'MeasuredValue',
-        ) as aas.SubmodelElementCollection | undefined;
+        const measuredValue = noLiveSubmodel.submodelElements?.find(item => item.idShort === 'MeasuredValue') as
+            aas.SubmodelElementCollection | undefined;
         measuredValue?.value?.forEach(item => {
             if (item.idShort === 'Value') {
                 delete (item as aas.Property).nodeId;

@@ -151,8 +151,7 @@ export interface MeasurementValueData {
 }
 
 export type MeasurementValueValidation =
-    | { valid: true; data: MeasurementValueData }
-    | { valid: false; errors: string[] };
+    { valid: true; data: MeasurementValueData } | { valid: false; errors: string[] };
 
 /** Validates and normalizes an IDTA 02029-1 Measurement Value submodel. */
 export function validateSensorMeasurementValue(submodel: aas.Submodel | undefined): MeasurementValueValidation {
