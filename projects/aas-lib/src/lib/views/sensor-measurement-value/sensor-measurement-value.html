@@ -1,0 +1,81 @@
+<div class="container py-3">
+    @if (data(); as measurement) {
+        <div class="text-center border border-primary border-2 rounded-3 bg-primary-subtle p-4 mb-3">
+            <div class="text-muted" translate="SensorMeasurementValue.VALUE"></div>
+            <div class="display-4 fw-semibold">
+                {{ measurement.value ?? '—' }}
+                @if (measurement.unit) {
+                    <span class="fs-4">{{ measurement.unit }}</span>
+                }
+            </div>
+            @if (measurement.kind) {
+                <div>{{ measurement.kind }}</div>
+            }
+            @if (isLive()) {
+                <i
+                    class="bi bi-broadcast text-success"
+                    [attr.aria-label]="'SensorMeasurementValue.LIVE' | translate"
+                ></i>
+            }
+        </div>
+
+        <dl class="row">
+            @if (measurement.timestamp) {
+                <dt class="col-sm-4" translate="SensorMeasurementValue.TIMESTAMP"></dt>
+                <dd class="col-sm-8">{{ measurement.timestamp }}</dd>
+            }
+            @if (measurement.predefinedValue) {
+                <dt class="col-sm-4" translate="SensorMeasurementValue.PREDEFINED_VALUE"></dt>
+                <dd class="col-sm-8">{{ measurement.predefinedValue }}</dd>
+            }
+            @if (measurement.quality) {
+                <dt class="col-sm-4" translate="SensorMeasurementValue.QUALITY"></dt>
+                <dd class="col-sm-8">{{ measurement.quality }}</dd>
+            }
+            @if (measurement.range) {
+                <dt class="col-sm-4" translate="SensorMeasurementValue.RANGE"></dt>
+                <dd class="col-sm-8">{{ measurement.range }}</dd>
+            }
+            @if (measurement.scale) {
+                <dt class="col-sm-4" translate="SensorMeasurementValue.SCALE"></dt>
+                <dd class="col-sm-8">{{ measurement.scale }}</dd>
+            }
+            @if (measurement.tag) {
+                <dt class="col-sm-4" translate="SensorMeasurementValue.TAG"></dt>
+                <dd class="col-sm-8">{{ measurement.tag }}</dd>
+            }
+            @if (measurement.origin) {
+                <dt class="col-sm-4" translate="SensorMeasurementValue.ORIGIN"></dt>
+                <dd class="col-sm-8">{{ measurement.origin }}</dd>
+            }
+            @if (measurement.version) {
+                <dt class="col-sm-4" translate="SensorMeasurementValue.VERSION"></dt>
+                <dd class="col-sm-8">{{ measurement.version }}</dd>
+            }
+            @if (measurement.identifier) {
+                <dt class="col-sm-4" translate="SensorMeasurementValue.IDENTIFIER"></dt>
+                <dd class="col-sm-8">{{ measurement.identifier }}</dd>
+            }
+        </dl>
+
+        @if (measurement.extensions.length) {
+            <details>
+                <summary translate="SensorMeasurementValue.EXTENSIONS"></summary>
+                <ul class="mb-0">
+                    @for (extension of measurement.extensions; track extension.idShort) {
+                        <li>{{ extension.idShort }}</li>
+                    }
+                </ul>
+            </details>
+        }
+    } @else {
+        <div class="alert alert-warning" role="alert">
+            <h2 class="h5" translate="SensorMeasurementValue.INVALID_TEMPLATE"></h2>
+            <ul class="mb-0">
+                @for (error of errors(); track error) {
+                    <li>{{ error }}</li>
+                }
+            </ul>
+        </div>
+    }
+</div>

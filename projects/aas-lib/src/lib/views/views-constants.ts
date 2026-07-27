@@ -19,3 +19,4 @@ export const NAMEPLATE_3_0 = 'https://admin-shell.io/idta/nameplate/3/0/Nameplat
 export const NAMEPLATE_FHG = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:Nameplate';
 export const NAMEPLATE_HSU = 'https://www.hsu-hh.de/aut/aas/nameplate';
 export const TECHNICAL_DATA_1_2 = 'https://admin-shell.io/ZVEI/TechnicalData/Submodel/1/2';
+export const SENSOR_MEASUREMENT_VALUE_1_0 = 'https://admin-shell.io/idta/SubmodelTemplate/measurementValue/1/0';

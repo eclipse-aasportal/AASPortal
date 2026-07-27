@@ -9,7 +9,7 @@
         "TITLE": "AAS-Baum",
         "EMPTY": "Kein AAS-Document verfügbar."
     },
-     "AASTable": {
+    "AASTable": {
         "COLUMN_NAME": "Name",
         "COLUMN_ID": "ID",
         "COLUMN_ENDPOINT": "Endpunkt",
@@ -322,6 +322,22 @@
     "ServiceRequestNotification": {
         "TITLE": "Serviceanfrage"
     },
+    "SensorMeasurementValue": {
+        "TITLE": "Sensor-Messwert",
+        "VALUE": "Wert",
+        "TIMESTAMP": "Messzeitpunkt",
+        "PREDEFINED_VALUE": "Vordefinierter Wert",
+        "QUALITY": "Qualität",
+        "RANGE": "Bereich",
+        "SCALE": "Skalierung",
+        "TAG": "Kennzeichnung",
+        "ORIGIN": "Ursprung",
+        "VERSION": "Version",
+        "IDENTIFIER": "Bezeichner",
+        "LIVE": "Live-Wert",
+        "EXTENSIONS": "Zusätzliche Elemente",
+        "INVALID_TEMPLATE": "Das Messwert-Teilmodell entspricht nicht IDTA 02029-1 v1.0."
+    },
     "Settings": {
         "ADD_ENDPOINT": "Endpunkt hinzufügen",
         "EXTRAS": "Endpunkt ???",
@@ -346,6 +362,7 @@
         "OperationalData": "Operative Daten",
         "PLACEHOLDER_FILTER": "Filter",
         "ServiceRequestNotification": "Serviceanfrage",
+        "SensorMeasurementValue": "Sensor-Messwert",
         "TechnicalData": "Technische Daten",
         "VIEWS": "Sichten"
     },
