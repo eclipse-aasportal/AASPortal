@@ -8,7 +8,7 @@
 
 import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { HttpClient, HttpEvent } from '@angular/common/http';
-import { AASCursor, AASDocument, AASEndpoint, AASPagedResult, aas } from 'aas-core';
+import { AASCursor, AASDocument, AASEndpoint, AASPagedResult, aas, getDocumentStatus } from 'aas-core';
 import { first, map, mergeMap, Observable } from 'rxjs';
 import { encodeBase64Url } from '../../utilities';
 import { AuthService } from '../../core/auth/auth.service';
@@ -104,7 +104,7 @@ export class EndpointsApi {
      * @throws Error if the document content is null or undefined.
      */
     public putDocument(document: AASDocument): Observable<void> {
-        if (!document.content) {
+        if (getDocumentStatus(document) !== 'loaded') {
             throw new Error('Document content is null or undefined.');
         }
 

@@ -24,10 +24,10 @@ export class HttpSubscription extends SocketSubscription {
         env: aas.Environment,
     ) {
         super();
-
-        this.items = message.nodes.map(
-            node => new HttpSocketItem(node, api.resolveNodeId(env.assetAdministrationShells[0], node.nodeId)),
-        );
+        const aas = env.assetAdministrationShells?.at(0);
+        this.items = aas
+            ? message.nodes.map(node => new HttpSocketItem(node, api.resolveNodeId(aas, node.nodeId)))
+            : [];
     }
 
     public open(): void {

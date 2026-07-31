@@ -50,9 +50,7 @@ describe('ServiceRequestNotification', () => {
 
         document = {
             address: '',
-            crc32: 0,
             idShort: 'Kannegiesser_XFM',
-            readonly: false,
             timestamp: 0,
             id: 'https://www.smartfactory-owl.de/kannegiesser/xfm',
             endpoint: 'Test',

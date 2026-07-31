@@ -10,7 +10,6 @@ import net from 'net';
 import { Readable } from 'stream';
 import { inject, singleton } from 'tsyringe';
 import { ApplicationError } from 'aas-core';
-import { parseUrl } from './utilities.js';
 import { HttpCache } from './http-cache.js';
 
 /**
@@ -178,26 +177,30 @@ export class HttpClient {
      */
     public checkUrlExist(url: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            const temp = parseUrl(url);
-            const port = Number(temp.port ? temp.port : temp.protocol === 'http:' ? 80 : 443);
-            const socket = net.createConnection(port, temp.hostname);
-            socket.setTimeout(3000);
-            socket
-                .on('connect', () => {
-                    socket.end();
-                })
-                .on('end', () => {
-                    socket.destroy();
-                    resolve();
-                })
-                .on('timeout', () => {
-                    socket.destroy();
-                    reject(new Error(`${url} does not exist.`));
-                })
-                .on('error', () => {
-                    socket.destroy();
-                    reject(new Error(`${url} does not exist.`));
-                });
+            try {
+                const temp = new URL(url);
+                const port = Number(temp.port ? temp.port : temp.protocol === 'http:' ? 80 : 443);
+                const socket = net.createConnection(port, temp.hostname);
+                socket.setTimeout(3000);
+                socket
+                    .on('connect', () => {
+                        socket.end();
+                    })
+                    .on('end', () => {
+                        socket.destroy();
+                        resolve();
+                    })
+                    .on('timeout', () => {
+                        socket.destroy();
+                        reject(new Error(`${url} does not exist.`));
+                    })
+                    .on('error', () => {
+                        socket.destroy();
+                        reject(new Error(`${url} does not exist.`));
+                    });
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 }

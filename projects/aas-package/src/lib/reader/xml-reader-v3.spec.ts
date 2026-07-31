@@ -48,7 +48,7 @@ describe('XmlReaderV3', () => {
 
             it('reads an MultiLanguageProperty element', () => {
                 const env = reader.readEnvironment();
-                const mlp = env.submodels.at(0)?.submodelElements?.at(0) as aas.MultiLanguageProperty;
+                const mlp = env.submodels?.at(0)?.submodelElements?.at(0) as aas.MultiLanguageProperty;
                 expect(isMultiLanguageProperty(mlp)).toBe(true);
                 expect(mlp.idShort).toBe('nRdRe');
                 expect(mlp.category).toBe('something_d7cf2dff');

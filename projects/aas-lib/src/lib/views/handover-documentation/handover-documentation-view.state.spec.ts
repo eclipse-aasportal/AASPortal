@@ -26,16 +26,14 @@ describe('HandoverDocumentationViewState', () => {
     beforeEach(() => {
         document = {
             address: '',
-            crc32: 0,
             idShort: 'HandoverDocumentation',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/HandoverDocumentation/1/2',
             endpoint: 'Test',
             content: handoverDocumentation_1_2 as aas.Environment,
         };
 
-        submodel = document.content!.submodels[0];
+        submodel = document.content!.submodels![0];
 
         TestBed.configureTestingModule({
             providers: [

@@ -54,10 +54,11 @@ describe('EndpointsApi', () => {
     describe('getDocument', () => {
         it('/api/v1/endpoints/{name}/documents/{id}}', async () => {
             const promise = lastValueFrom(service.getDocument('AssetAdministrationShell', 'document1', 'Samples'));
+
             const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/documents/ZG9jdW1lbnQx');
             expect(req.request.method).toEqual('GET');
             req.flush(sample);
-            expect(await promise).toEqual(sample as AASDocument);
+            expect(await promise).toEqual(sample);
         });
     });
 
@@ -91,8 +92,11 @@ describe('EndpointsApi', () => {
             const document: AASDocument = {
                 id: 'doc42',
                 endpoint: 'endpoint7',
-                content: { some: 'data' },
-            } as unknown as AASDocument;
+                content: { assetAdministrationShells: [], submodels: [] },
+                address: 'http://localhost/aas',
+                idShort: 'Test',
+                timestamp: 0,
+            };
 
             const encodedEndpoint = 'ZW5kcG9pbnQ3'; // encodeBase64Url('endpoint7')
             const encodedId = 'ZG9jNDI'; // encodeBase64Url('doc42')

@@ -6,7 +6,8 @@
  *
  *****************************************************************************/
 
-import { AASEndpointType, ErrorData } from './types.js';
+import { Environment } from './aas.js';
+import { AASDocument, AASEndpointType, ErrorData } from './types.js';
 import {
     common,
     constants,
@@ -206,4 +207,40 @@ export function isErrorData(value: unknown): value is ErrorData {
     }
 
     return typeof (value as ErrorData).message === 'string' && typeof (value as ErrorData).name === 'string';
+}
+
+/**
+ * Retrieves the status of the specified document. The document is considered “loaded” if the content has been
+ * fully loaded from the AAS endpoint, “unloaded” if the content has not yet been loaded, and “not available”
+ * if the content could not be loaded from the AAS endpoint.
+ * @param document The document.
+ * @returns 'loaded', 'unloaded' or 'unavailable'.
+ */
+export function getDocumentStatus(document: AASDocument): 'loaded' | 'unloaded' | 'unavailable' {
+    const content = document.content;
+    if (content === undefined) {
+        return 'unavailable';
+    }
+
+    if (content === null || content.assetAdministrationShells === undefined || content.submodels === undefined) {
+        return 'unloaded';
+    }
+
+    return 'loaded';
+}
+
+/**
+ * Checks if the specified value is a loaded AAS environment.
+ * A loaded environment is defined as an object that is not null or undefined and
+ * has a defined `submodels` property.
+ * @param value The current value to check.
+ * @returns `true` if the value is a loaded AAS environment; otherwise, `false`.
+ */
+export function isLoadedEnvironment(value: Environment | null | undefined): value is Environment {
+    return (
+        value !== undefined &&
+        value !== null &&
+        value.assetAdministrationShells !== undefined &&
+        value.submodels !== undefined
+    );
 }

@@ -61,9 +61,7 @@ describe('HandoverDocumentationView', () => {
         start = createSpyObj<StartService>(['add', 'save']);
         document = {
             address: '',
-            crc32: 0,
             idShort: 'HandoverDocumentation',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/HandoverDocumentation/1/2',
             endpoint: 'Test',

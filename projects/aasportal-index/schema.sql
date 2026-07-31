@@ -12,8 +12,7 @@ CREATE TABLE endpoints (
 CREATE TABLE documents (
     uuid CHAR(21) PRIMARY KEY,
     address VARCHAR(255), 
-    crc32 INT UNSIGNED, 
-    endpoint VARCHAR(100), 
+    endpoint VARCHAR(32), 
     id VARCHAR(255), 
     idShort VARCHAR(100), 
     assetId VARCHAR(255),

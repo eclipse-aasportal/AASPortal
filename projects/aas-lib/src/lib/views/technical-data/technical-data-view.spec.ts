@@ -60,9 +60,7 @@ describe('TechnicalDataView', () => {
         start = createSpyObj<StartService>(['add', 'save']);
         document = {
             address: '',
-            crc32: 0,
             idShort: 'TechnicalDataAAS',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/aas/TechnicalData/1/2',
             endpoint: 'Test',

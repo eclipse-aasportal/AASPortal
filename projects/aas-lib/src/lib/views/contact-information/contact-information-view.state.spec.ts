@@ -26,16 +26,14 @@ describe('ContactInformationViewState', () => {
     beforeEach(() => {
         document = {
             address: '',
-            crc32: 0,
             idShort: 'ContactInformationAAS',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/ContactInformation/1/0',
             endpoint: 'Test',
             content: contactInformation as aas.Environment,
         };
 
-        submodel = document.content!.submodels[0];
+        submodel = document.content!.submodels![0];
 
         TestBed.configureTestingModule({
             providers: [

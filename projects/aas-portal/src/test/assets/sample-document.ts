@@ -2959,11 +2959,7 @@ export const sampleDocument: AASDocument = {
     assetId: 'http://customer.com/assets/KHBVZJSQKIY',
     endpoint: 'Samples',
     address: 'ExampleMotor.aasx',
-    modified: false,
-    readonly: false,
-    onlineReady: false,
     content: content as aas.Environment,
-    crc32: 0,
     timestamp: 0,
 };
 
@@ -2973,11 +2969,7 @@ export const aasNoTechnicalData: AASDocument = {
     assetId: 'http://customer.com/assets/KHBVZJSQKIY',
     endpoint: 'Samples',
     address: 'ExampleMotor.aasx',
-    modified: false,
-    readonly: false,
-    onlineReady: false,
     content: sampleNoTechnicalData as aas.Environment,
-    crc32: 0,
     timestamp: 0,
 };
 

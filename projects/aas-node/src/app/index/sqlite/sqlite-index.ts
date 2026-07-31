@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { DatabaseSync, SQLInputValue, SQLOutputValue, StatementSync } from 'node:sqlite';
-import { isMainThread } from 'worker_threads';
 import { nanoid } from 'nanoid';
 import { Logger } from 'aas-package';
 import {
@@ -49,7 +48,6 @@ CREATE TABLE IF NOT EXISTS endpoints (
 CREATE TABLE IF NOT EXISTS documents (
     uuid TEXT PRIMARY KEY,
     address TEXT, 
-    crc32 INTEGER UNSIGNED, 
     endpoint TEXT, 
     id TEXT, 
     idShort TEXT, 
@@ -105,7 +103,7 @@ export class SqliteIndex extends AASIndex {
     ) {
         super(keywords);
 
-        this.db = new DatabaseSync(file, { readOnly: !isMainThread, timeout: 5000 });
+        this.db = new DatabaseSync(file, { timeout: 5000 });
         this.db.exec(initDatabase);
         this.db.exec('PRAGMA journal_mode = WAL');
 
@@ -125,7 +123,7 @@ export class SqliteIndex extends AASIndex {
         this.deleteEndpointSql = this.db.prepare('DELETE FROM endpoints WHERE name = ?');
         this.selectDocumentSql = this.db.prepare('SELECT uuid FROM documents WHERE endpoint = ? AND id = ?');
         this.updateDocumentSql = this.db.prepare(
-            'UPDATE documents SET address = ?, crc32 = ?, idShort = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?',
+            'UPDATE documents SET address = ?, idShort = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?',
         );
 
         this.deleteElementsSql = this.db.prepare('DELETE FROM elements WHERE uuid = ?');
@@ -134,7 +132,7 @@ export class SqliteIndex extends AASIndex {
         );
 
         this.insertDocumentSql = this.db.prepare(
-            'INSERT INTO documents (uuid, address, crc32, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO documents (uuid, address, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         );
 
         this.getEndpointDocumentAASSql = this.db.prepare('SELECT * FROM documents WHERE endpoint = ? AND id = ?');
@@ -364,14 +362,13 @@ export class SqliteIndex extends AASIndex {
                 const uuid = String(value.uuid);
                 this.updateDocumentSql.run(
                     document.address,
-                    document.crc32,
                     document.idShort,
                     document.timestamp,
                     document.thumbnail ?? null,
                     uuid,
                 );
 
-                if (document.content) {
+                if (document.content && document.content.submodels) {
                     this.deleteElementsSql.run(uuid);
                     this.traverseEnvironment(uuid, document.content);
                 }
@@ -393,7 +390,6 @@ export class SqliteIndex extends AASIndex {
                 this.insertDocumentSql.run(
                     uuid,
                     document.address,
-                    document.crc32,
                     document.endpoint,
                     document.id,
                     document.idShort,
@@ -437,17 +433,17 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async delete(endpoint: string, id: string): Promise<boolean> {
-        return await new Promise((resolve, reject) => {
+    public override delete(endpoint: string, id: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
-                const value = this.selectUuidSql.get(endpoint, id);
-                if (!value) {
+                const uuid = this.getUuid(endpoint, id);
+                if (!uuid) {
+                    this.db.exec('COMMIT');
                     resolve(false);
                     return;
                 }
 
-                const uuid = String(value.uuid);
                 this.deleteElementsSql.run(uuid);
                 this.deleteDocumentSql.run(uuid);
                 this.db.exec('COMMIT');
@@ -459,16 +455,40 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async clear(endpoint?: string): Promise<void> {
+    public override create(endpoint: string, id: string, env: aas.Environment): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            try {
+                this.db.exec('BEGIN');
+                const uuid = this.getUuid(endpoint, id);
+                if (uuid) {
+                    this.traverseEnvironment(uuid, env);
+                }
+
+                this.db.exec('COMMIT');
+                resolve();
+            } catch (error) {
+                this.db.exec('ROLLBACK');
+                reject(error);
+            }
+        });
+    }
+
+    public override async clear(endpoint?: string, id?: string): Promise<void> {
         await new Promise<void>((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
                 if (endpoint === undefined) {
                     this.deleteAllElementsSql.run();
                     this.deleteAllDocumentsSql.run();
+                } else if (id) {
+                    const uuid = this.getUuid(endpoint, id);
+                    if (uuid) {
+                        this.deleteElementsSql.run(uuid);
+                    }
                 } else {
                     this.deleteDocuments(endpoint);
                 }
+
                 this.db.exec('COMMIT');
                 resolve();
             } catch (error) {
@@ -501,6 +521,15 @@ export class SqliteIndex extends AASIndex {
 
             resolve();
         });
+    }
+
+    private getUuid(endpoint: string, id: string): string | undefined {
+        const value = this.selectUuidSql.get(endpoint, id);
+        if (!value) {
+            return undefined;
+        }
+
+        return String(value.uuid);
     }
 
     private getFirstPage(limit: number, query?: SqliteQuery): AASPagedResult {
@@ -638,6 +667,10 @@ export class SqliteIndex extends AASIndex {
     }
 
     private traverseEnvironment(documentId: string, env: aas.Environment): void {
+        if (env.submodels === undefined) {
+            return;
+        }
+
         for (const submodel of env.submodels) {
             for (const referable of flat(submodel)) {
                 if (referable.idShort) {
@@ -770,14 +803,11 @@ export class SqliteIndex extends AASIndex {
     private toDocument(value: Record<string, SQLOutputValue>): AASDocument {
         const document: AASDocument = {
             address: String(value.address),
-            crc32: Number(value.crc32),
             endpoint: String(value.endpoint),
             id: String(value.id),
             idShort: String(value.idShort),
             timestamp: Number(value.timestamp),
             content: null,
-            onlineReady: true,
-            readonly: false,
         };
 
         if (value.assetId) {

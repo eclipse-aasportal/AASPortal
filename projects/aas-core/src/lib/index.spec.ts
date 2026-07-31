@@ -8,11 +8,14 @@
 
 import { describe, it, expect } from 'vitest';
 
-import { Reference } from './aas.js';
+import { Environment, Reference } from './aas.js';
+import { AASDocument } from './types.js';
 import {
     equalUrls,
+    getDocumentStatus,
     getEndpointName,
     getEndpointType,
+    isLoadedEnvironment,
     isReference,
     isUrlSafeBase64,
     isValidEMail,
@@ -212,6 +215,58 @@ describe('index', () => {
 
         it('indicates that "null" is not of type Reference', () => {
             expect(isReference(null)).toBeFalsy();
+        });
+    });
+
+    describe('getDocumentStatus', () => {
+        it('indicates that a document is unavailable', () => {
+            const document = {
+                content: undefined,
+            } as AASDocument;
+
+            expect(getDocumentStatus(document)).toEqual('unavailable');
+        });
+
+        it('indicates that a document is loaded', () => {
+            const document = {
+                content: { assetAdministrationShells: [], submodels: [] } as Environment,
+            } as AASDocument;
+
+            expect(getDocumentStatus(document)).toEqual('loaded');
+        });
+
+        it('indicates that a document is unloaded', () => {
+            const document = {
+                content: null,
+            } as AASDocument;
+
+            expect(getDocumentStatus(document)).toEqual('unloaded');
+        });
+
+        it('indicates that a document is unloaded', () => {
+            const document = {
+                content: {} as Environment,
+            } as AASDocument;
+
+            expect(getDocumentStatus(document)).toEqual('unloaded');
+        });
+    });
+
+    describe('isLoadedEnvironment', () => {
+        it('indicates that a document is loaded', () => {
+            const document = {
+                content: { assetAdministrationShells: [], submodels: [] } as Environment,
+            } as AASDocument;
+
+            expect(isLoadedEnvironment(document.content)).toBe(true);
+        });
+
+        it('indicates that a document is unloaded', () => {
+            const document = {
+                content: null,
+            } as AASDocument;
+
+            expect(isLoadedEnvironment(document.content)).toBe(false);
         });
     });
 });

@@ -28,7 +28,16 @@ export class JsonReaderV2 extends AASReader {
         const conceptDescriptions = this.readConceptDescriptions();
         const assetAdministrationShells = this.readAssetAdministrationShells();
         const submodels = this.readSubmodels();
-        return { assetAdministrationShells, submodels, conceptDescriptions };
+        const env: aas.Environment = { assetAdministrationShells };
+        if (conceptDescriptions.length > 0) {
+            env.conceptDescriptions = conceptDescriptions;
+        }
+
+        if (submodels.length > 0) {
+            env.submodels = submodels;
+        }
+
+        return env;
     }
 
     public read(data: string | object): aas.Referable {

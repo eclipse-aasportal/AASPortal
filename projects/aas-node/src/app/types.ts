@@ -78,6 +78,7 @@ export const EndpointScanMessageKind = {
     Remove: 2,
     Update: 3,
     End: 4,
+    Progress: 5,
 } as const;
 
 export type EndpointScanMessageKind = (typeof EndpointScanMessageKind)[keyof typeof EndpointScanMessageKind];
@@ -96,6 +97,12 @@ export type EndpointScanMessage = {
     | {
           kind: 'Added' | 'Updated' | 'Removed';
           document: AASDocument;
+      }
+    | {
+          kind: 'Progress';
+          shellCount: number;
+          submodelCount: number;
+          progress: number;
       }
 );
 

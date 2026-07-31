@@ -31,7 +31,16 @@ export class JsonReaderV3 extends AASReader {
         const conceptDescriptions = this.readConceptDescriptions();
         const assetAdministrationShells = this.readAssetAdministrationShells();
         const submodels = this.readSubmodels();
-        return { assetAdministrationShells, submodels, conceptDescriptions };
+        const env: aas.Environment = { assetAdministrationShells };
+        if (conceptDescriptions.length > 0) {
+            env.conceptDescriptions = conceptDescriptions;
+        }
+
+        if (submodels.length > 0) {
+            env.submodels = submodels;
+        }
+
+        return env;
     }
 
     /**
@@ -128,16 +137,17 @@ export class JsonReaderV3 extends AASReader {
             throw new Error('SpecificAssetId.value');
         }
 
-        if (!source.externalSubjectId) {
-            throw new Error('SpecificAssetId.externalSubjectId');
-        }
-
-        return {
+        const value: aas.SpecificAssetId = {
             ...this.readHasSemantics,
             name: source.name,
             value: source.value,
-            externalSubjectId: this.readReference(source.externalSubjectId),
         };
+
+        if (source.externalSubjectId) {
+            value.externalSubjectId = this.readReference(source.externalSubjectId);
+        }
+
+        return value;
     }
 
     private readAdministrationInformation(source: aas.AdministrativeInformation): aas.AdministrativeInformation {

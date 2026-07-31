@@ -25,9 +25,7 @@ describe('CarbonFootprintState', () => {
     beforeEach(() => {
         document = {
             address: '',
-            crc32: 0,
             idShort: 'CarbonFootprint',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/CarbonFootprintAAS/1/0',
             endpoint: 'Test',

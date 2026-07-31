@@ -122,7 +122,6 @@ export class App {
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
         this.app.use(express.static(this.variable.WEB_ROOT));
-        this.app.use(errorHandler);
         this.app.use((req: Request, res: Response) => {
             if (req.method === 'GET' && req.accepts('html')) {
                 const file = path.join(this.variable.WEB_ROOT, 'index.html');
@@ -133,6 +132,8 @@ export class App {
 
             return res.status(404).send({ name: 'ApplicationError', message: 'Not Found' });
         });
+
+        this.app.use(errorHandler);
     }
 
     private async getSwaggerHtml(): Promise<string> {

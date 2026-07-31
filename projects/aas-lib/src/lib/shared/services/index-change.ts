@@ -29,10 +29,25 @@ export class IndexChange implements OnDestroy {
     private readonly _documentCount = httpResource<number>(() => '/api/v1/endpoints/document-count', {
         defaultValue: 0,
     });
+
     private readonly _endpointCount = httpResource<number>(() => '/api/v1/endpoints/endpoint-count', {
         defaultValue: 0,
     });
+
     private readonly _changedDocuments = signal(0);
+    private readonly _progress = signal<{
+        endpoint: string;
+        start: number;
+        progress: number;
+        shellCount: number;
+        submodelCount: number;
+    }>({
+        endpoint: '',
+        start: 0,
+        progress: 0,
+        shellCount: 0,
+        submodelCount: 0,
+    });
 
     public constructor() {
         this.subscription = this.webSocket.getMessages().subscribe({
@@ -84,7 +99,16 @@ export class IndexChange implements OnDestroy {
     public readonly endUpdate = new Subject<{ endpoint: string; start: number }>();
 
     /**
-     * Observable that emits when the index has been cleared, providing the name of the endpoint that was cleared.
+     * Signals progress updates for an ongoing endpoint scan.
+     * The emitted object has the shape: { progress: number; shellCount: number; submodelCount: number }
+     * where 'progress' is a number between 0 and 100 indicating the completion percentage of the scan,
+     * 'shellCount' is the number of shells processed, and 'submodelCount' is the number of submodels processed.
+     * This can be used to provide real-time feedback on the progress of endpoint scans.
+     */
+    public readonly progress = this._progress.asReadonly();
+
+    /**
+     * Signals when the index has been cleared, providing the name of the endpoint that was cleared.
      * If the index for all endpoints was cleared, the emitted value will be undefined.
      */
     public readonly cleared = new Subject<string | undefined>();
@@ -182,6 +206,15 @@ export class IndexChange implements OnDestroy {
                     this._changedDocuments.set(0);
                     this.cache.clear();
                     this.cleared.next(message.endpoint);
+                    break;
+                case 'Progress':
+                    this._progress.set({
+                        endpoint: message.endpoint,
+                        start: message.start,
+                        progress: message.progress,
+                        shellCount: message.shellCount,
+                        submodelCount: message.submodelCount,
+                    });
                     break;
                 case 'End': {
                     this.endUpdate.next({ endpoint: message.endpoint, start: message.start });

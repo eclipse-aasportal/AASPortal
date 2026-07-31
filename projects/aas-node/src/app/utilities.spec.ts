@@ -7,23 +7,40 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { decodeBase64Url, encodeBase64Url } from 'aas-package';
 import { describe, it, expect } from 'vitest';
+import { createReadStream } from 'fs';
+import { fileURLToPath } from 'url';
+import { thumbnailToObjectUrl, toUint8Array, urlToString } from './utilities';
 
 describe('utilities', () => {
-    describe('encodeBase64Url', () => {
-        it('converts ascii to base64', () => {
-            expect(encodeBase64Url('https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237')).toEqual(
-                'aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw',
-            );
+    describe('urlToString', () => {
+        it('should sanitize URL by removing username and password', () => {
+            const url = 'https://user:pass@example.com/path?query=1';
+            const result = urlToString(url);
+            expect(result).toBe('https://example.com/path?query=1');
         });
     });
 
-    describe('btoa', () => {
-        it('converts base64 to ascii', () => {
-            expect(
-                decodeBase64Url('aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw'),
-            ).toEqual('https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237');
+    describe('toUint8Array', () => {
+        it('should convert an object to a Uint8Array', () => {
+            const obj = { a: 1, b: 'test' };
+            const arr = toUint8Array(obj);
+            expect(arr).toBeInstanceOf(Uint8Array);
+            expect(Buffer.from(arr).toString()).toBe(JSON.stringify(obj));
+        });
+    });
+
+    describe('thumbnailToObjectUrl', () => {
+        it('should return undefined if readable is undefined', async () => {
+            const { thumbnailToObjectUrl } = await import('./utilities');
+            const result = await thumbnailToObjectUrl(undefined);
+            expect(result).toBeUndefined();
+        });
+
+        it('should return a string if readable is provided', async () => {
+            const readable = createReadStream(fileURLToPath(new URL('../test/assets/thumbnail.jpg', import.meta.url)));
+            const result = await thumbnailToObjectUrl(readable);
+            expect(result?.startsWith('data:image/png;base64,')).toBe(true);
         });
     });
 });

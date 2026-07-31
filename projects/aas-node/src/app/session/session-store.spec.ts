@@ -148,9 +148,11 @@ describe('SessionStore', () => {
                 });
             });
 
-            expect(modelConstructor).toHaveBeenCalledWith(expect.objectContaining({ _id: sessionId }));
-            const createdDoc = modelConstructor.mock.instances[0];
-            expect(createdDoc.save).toHaveBeenCalledOnce();
+            expect(model.findOneAndReplace).toHaveBeenCalledWith(
+                expect.objectContaining({ _id: sessionId }),
+                expect.objectContaining({ _id: sessionId, session: expect.objectContaining(sessionData) }),
+                { upsert: true },
+            );
         });
 
         it('should update existing session data', async () => {

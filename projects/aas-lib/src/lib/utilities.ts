@@ -621,7 +621,7 @@ export function findSubmodel(document: AASDocument, semanticIds: string[]): aas.
         return undefined;
     }
 
-    return env.submodels.find(submodel => {
+    return env.submodels?.find(submodel => {
         const semanticId = getSemanticId(submodel);
         if (!semanticId) {
             return false;
@@ -697,10 +697,12 @@ export function findRouteForShell(
         );
 
         const submodelSemanticIds = new Map<string, aas.Submodel>();
-        for (const submodel of env.submodels) {
-            const semanticId = getSemanticId(submodel);
-            if (semanticId) {
-                submodelSemanticIds.set(semanticId, submodel);
+        if (env.submodels) {
+            for (const submodel of env.submodels) {
+                const semanticId = getSemanticId(submodel);
+                if (semanticId) {
+                    submodelSemanticIds.set(semanticId, submodel);
+                }
             }
         }
 
@@ -733,7 +735,7 @@ export function findRouteForShell(
                 if (data.idShorts) {
                     let submodel: aas.Submodel | undefined;
                     for (const idShort of data.idShorts) {
-                        const submodel = env.submodels.find(submodel => submodel.idShort === idShort);
+                        const submodel = env.submodels?.find(submodel => submodel.idShort === idShort);
 
                         if (submodel) {
                             break;

@@ -77,7 +77,7 @@ export class PackageProvider {
             await client.insertPackage(aasxFile);
             const address = await client.determineAddress(aasxFile);
             if (address) {
-                const document = await client.createDocument(address);
+                const document = await client.getDocument(address);
                 await this.index.insert(document);
                 this.sender.send({ type: 'Added', document, start: Date.now() });
             }

@@ -343,20 +343,29 @@ export class EndpointProvider {
         this.parallel.execute(data);
     };
 
-    private parallelOnMessage = async (message: EndpointScanMessage): Promise<void> => {
+    private parallelOnMessage = (message: EndpointScanMessage): void => {
         try {
             switch (message.kind) {
                 case 'Start':
                     this.sender.send({ type: 'Start', endpoint: message.endpoint, start: message.start });
                     break;
                 case 'Updated':
-                    await this.onUpdate(message.document, message.start);
+                    this.onUpdate(message.document, message.start);
                     break;
                 case 'Added':
-                    await this.onAdded(message.document, message.start);
+                    this.onAdded(message.document, message.start);
                     break;
                 case 'Removed':
-                    await this.onRemoved(message.document, message.start);
+                    this.onRemoved(message.document, message.start);
+                    break;
+                case 'Progress':
+                    this.onProgress(
+                        message.endpoint,
+                        message.start,
+                        message.shellCount,
+                        message.submodelCount,
+                        message.progress,
+                    );
                     break;
             }
         } catch (error) {
@@ -389,21 +398,25 @@ export class EndpointProvider {
         }
     };
 
-    private async onUpdate(document: AASDocument, start: number): Promise<void> {
-        await this.index.update(document);
-        this.logger.info(`Updated: AAS ${document.idShort} [${document.id}] in ${document.endpoint}`);
+    private onUpdate(document: AASDocument, start: number): void {
         this.sender.send({ type: 'Updated', document: { ...document, content: null }, start });
     }
 
-    private async onAdded(document: AASDocument, start: number): Promise<void> {
-        await this.index.insert(document);
-        this.logger.info(`Added: AAS ${document.idShort} [${document.id}] in ${document.endpoint}`);
+    private onAdded(document: AASDocument, start: number): void {
         this.sender.send({ type: 'Added', document, start });
     }
 
-    private async onRemoved(document: AASDocument, start: number): Promise<void> {
-        await this.index.delete(document.endpoint, document.id);
-        this.logger.info(`Removed: AAS ${document.idShort} [${document.id}] in ${document.endpoint}`);
+    private onRemoved(document: AASDocument, start: number): void {
         this.sender.send({ type: 'Removed', document: { ...document, content: null }, start });
+    }
+
+    private onProgress(
+        endpoint: string,
+        start: number,
+        shellCount: number,
+        submodelCount: number,
+        progress: number,
+    ): void {
+        this.sender.send({ type: 'Progress', endpoint, start, shellCount, submodelCount, progress });
     }
 }

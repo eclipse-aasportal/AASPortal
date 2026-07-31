@@ -20,7 +20,9 @@ interface PropertyValue {
     value: string;
 }
 
-/** Provides access to an AASX-Server. */
+/**
+ * Provides access to an AAS API endpoint.
+ */
 export abstract class ApiClient extends EndpointClient {
     private reentry = 0;
 
@@ -39,25 +41,21 @@ export abstract class ApiClient extends EndpointClient {
         super(logger, endpoint, auth);
     }
 
-    /** Indicates whether a connection to an AAS endpoint exits. */
     public override get isOpen(): boolean {
         return this.reentry > 0;
     }
 
-    /** Tests the connection to the endpoint. */
     public override async test(): Promise<void> {
         if (this.reentry === 0) {
             await this.http.checkUrlExist(this.endpoint.url);
         }
     }
 
-    /** Opens a connection to the AAS endpoint. */
     public override open(): Promise<void> {
         ++this.reentry;
         return Promise.resolve();
     }
 
-    /** Closes the connection to the AAS endpoint. */
     public override close(): Promise<void> {
         return new Promise(resolve => {
             if (this.reentry > 0) {
@@ -71,16 +69,9 @@ export abstract class ApiClient extends EndpointClient {
     public override async determineAddress(aasxFile: string): Promise<string | undefined> {
         const aasxPackage = await AasxPackage.createFromFile(aasxFile);
         const env = await aasxPackage.getEnvironment();
-        return env.assetAdministrationShells.at(0)?.id;
+        return env.assetAdministrationShells?.at(0)?.id;
     }
 
-    /**
-     * Creates a subscription for live data from an AAS endpoint.
-     * @param client The socket.
-     * @param request The list of SubmodelElements to get live data.
-     * @param env The AAS.
-     * @returns A new `HttpSubscription` instance.
-     */
     public override createSubscription(
         client: SocketClient,
         request: LiveRequest,

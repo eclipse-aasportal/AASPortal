@@ -455,7 +455,7 @@ export function selectReferable<T extends aas.Referable = aas.Referable>(
     id: string,
     idShortPath?: string,
 ): T | undefined {
-    const submodel = env.submodels.find(sm => sm.id === id || sm.idShort === id);
+    const submodel = env.submodels?.find(sm => sm.id === id || sm.idShort === id);
     if (!submodel) {
         return undefined;
     }
@@ -671,7 +671,7 @@ export function splitIdShortPath(idShortPath: string): string[] {
  * @returns The concept description or `undefined`.
  */
 export function getConceptDescription(env: aas.Environment, id: string): aas.ConceptDescription | undefined {
-    return env.conceptDescriptions.find(item => item.id === id);
+    return env.conceptDescriptions?.find(item => item.id === id);
 }
 
 /**
@@ -688,13 +688,13 @@ export function getReferenced<T extends aas.Referable = aas.Referable>(
     for (const key of reference.keys) {
         switch (key.type) {
             case 'AssetAdministrationShell':
-                referable = env.assetAdministrationShells.find(item => item.id === key.value);
+                referable = env.assetAdministrationShells?.find(item => item.id === key.value);
                 break;
             case 'ConceptDescription':
-                referable = env.conceptDescriptions.find(item => item.id === key.value);
+                referable = env.conceptDescriptions?.find(item => item.id === key.value);
                 break;
             case 'Submodel':
-                referable = env.submodels.find(item => item.id === key.value);
+                referable = env.submodels?.find(item => item.id === key.value);
                 break;
             default:
                 referable = referable && getChildren(referable).find(item => item.idShort === key.value);

@@ -107,7 +107,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
         effect(() => {
             const document = this.document();
             const env = document?.content;
-            const shell = env?.assetAdministrationShells.at(0);
+            const shell = env?.assetAdministrationShells?.at(0);
             if (!document || !env || !shell) {
                 this.update({ tree: [], document: null });
                 return;

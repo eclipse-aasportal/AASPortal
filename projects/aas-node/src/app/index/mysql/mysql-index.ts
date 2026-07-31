@@ -233,11 +233,11 @@ export class MySqlIndex extends AASIndex {
 
             const uuid = result[0][0].uuid;
             await connection.query<ResultSetHeader>(
-                'UPDATE `documents` SET address = ?, crc32 = ?, idShort = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
-                [document.address, document.crc32, document.idShort, document.timestamp, document.thumbnail, uuid],
+                'UPDATE `documents` SET address = ?, idShort = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
+                [document.address, document.idShort, document.timestamp, document.thumbnail, uuid],
             );
 
-            if (document.content) {
+            if (document.content && document.content.submodels) {
                 await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
                 await this.traverseEnvironment(connection, uuid, document.content);
             }
@@ -255,11 +255,10 @@ export class MySqlIndex extends AASIndex {
             await connection.beginTransaction();
             const uuid = nanoid();
             await connection.query<ResultSetHeader>(
-                'INSERT INTO `documents` (uuid, address, crc32, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                'INSERT INTO `documents` (uuid, address, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
                 [
                     uuid,
                     document.address,
-                    document.crc32,
                     document.endpoint,
                     document.id,
                     document.idShort,
@@ -301,16 +300,11 @@ export class MySqlIndex extends AASIndex {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
-            const [results] = await connection.query<MySqlDocument[]>(
-                'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;',
-                [endpointName, id],
-            );
-
-            if (results.length === 0) {
+            const uuid = await this.getUuid(connection, endpointName, id);
+            if (!uuid) {
                 return false;
             }
 
-            const uuid = results[0].uuid;
             await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
             await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE uuid = ?;', [uuid]);
             await connection.commit();
@@ -321,13 +315,34 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async clear(endpoint?: string): Promise<void> {
+    public override async create(endpoint: string, id: string, env: aas.Environment): Promise<void> {
+        const connection = await this.getConnection();
+        try {
+            await connection.beginTransaction();
+            const uuid = await this.getUuid(connection, endpoint, id);
+            if (uuid) {
+                await this.traverseEnvironment(connection, uuid, env);
+            }
+
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        }
+    }
+
+    public override async clear(endpoint?: string, id?: string): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
             if (endpoint === undefined) {
                 await connection.query<ResultSetHeader>('DELETE FROM `elements`;');
                 await connection.query<ResultSetHeader>('DELETE FROM `documents`;');
+            } else if (id) {
+                const uuid = this.getUuid(connection, endpoint, id);
+                if (uuid) {
+                    await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
+                }
             } else {
                 let loop = true;
                 while (loop) {
@@ -386,6 +401,19 @@ export class MySqlIndex extends AASIndex {
         for (const document of documents) {
             await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [document.uuid]);
         }
+    }
+
+    private async getUuid(connection: Connection, endpointName: string, id: string): Promise<string | undefined> {
+        const [results] = await connection.query<MySqlDocument[]>(
+            'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;',
+            [endpointName, id],
+        );
+
+        if (results.length === 0) {
+            return undefined;
+        }
+
+        return results[0].uuid;
     }
 
     private async getFirstPage(connection: Connection, limit: number, query?: MySqlQuery): Promise<AASPagedResult> {
@@ -562,6 +590,10 @@ export class MySqlIndex extends AASIndex {
     }
 
     private async traverseEnvironment(connection: Connection, documentId: string, env: aas.Environment): Promise<void> {
+        if (env.submodels === undefined) {
+            return;
+        }
+
         for (const submodel of env.submodels) {
             for (const referable of flat(submodel)) {
                 if (referable.idShort) {
@@ -678,14 +710,11 @@ export class MySqlIndex extends AASIndex {
     private toDocument(result: MySqlDocument): AASDocument {
         const document: AASDocument = {
             address: result.address,
-            crc32: result.crc32,
             endpoint: result.endpoint,
             id: result.id,
             idShort: result.idShort,
             timestamp: Number(result.timestamp),
             content: null,
-            onlineReady: true,
-            readonly: false,
         };
 
         if (result.assetId) {

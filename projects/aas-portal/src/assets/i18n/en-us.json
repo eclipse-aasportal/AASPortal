@@ -170,7 +170,8 @@
         "CANCEL_SCAN_TOOL_TIP": "Cancel the endpoint index update.",
         "SHELLS": "Shells",
         "CLEAR_INDEX_PROMPT": "To clear the index, enter '{{name}}'.",
-        "CLEAR_INDEX_KEY": "Clear index"
+        "CLEAR_INDEX_KEY": "Clear index",
+        "CLEAR_INDEX_TOOLTIP": "Clear the entire index."
     },
     "Error": {
         "AAS_ALREADY_EXISTS": "An AAS with the identifier '{{id}}' already exists.",

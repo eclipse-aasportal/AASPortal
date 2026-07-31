@@ -60,9 +60,7 @@ describe.skip('ContactInformationsView', () => {
         start = createSpyObj<StartService>(['add', 'save']);
         document = {
             address: '',
-            crc32: 0,
             idShort: 'ContactInformationAAS',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/ContactInformation/1/0',
             endpoint: 'Test',

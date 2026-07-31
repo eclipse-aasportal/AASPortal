@@ -6,22 +6,14 @@
  *
  *****************************************************************************/
 
-import { ApplicationError } from 'aas-core';
 import { streamToObjectUrl } from 'aas-package';
-import { ERRORS } from './errors.js';
 import { ImageProcessing } from './image-processing.js';
 
-export function parseUrl(url: string): URL {
-    try {
-        return new URL(url);
-    } catch (error) {
-        throw new ApplicationError(ERRORS.INVALID_URL, {
-            url,
-            message: error?.message,
-        });
-    }
-}
-
+/**
+ * Converts a URL object or string to a sanitized string representation.
+ * @param url The URL
+ * @returns A sanitized URL string
+ */
 export function urlToString(url: URL | string | undefined): string {
     if (url === undefined) {
         return '';
@@ -30,40 +22,26 @@ export function urlToString(url: URL | string | undefined): string {
     const temp = new URL(url);
     temp.password = '';
     temp.username = '';
-    return temp.toString();
+    return temp.href;
 }
 
+/**
+ * Converts an object to a Uint8Array.
+ * Serializes the object to JSON and encodes it as a Uint8Array.
+ * @param data The data to convert.
+ * @returns A Uint8Array.
+ */
 export function toUint8Array<T extends object>(data: T): Uint8Array<ArrayBuffer> {
     return Uint8Array.from(Buffer.from(JSON.stringify(data)));
 }
 
-export function join(...args: string[]): string {
-    let path = '';
-    for (const arg of args.map(item => item.trim()).filter(item => item)) {
-        if (arg === '/') {
-            path += arg;
-        } else if (arg.endsWith('/')) {
-            path += arg.startsWith('/') ? arg.substring(1) : arg;
-        } else if (path) {
-            path += arg.startsWith('/') ? arg : '/' + arg;
-        } else {
-            path = arg;
-        }
-    }
-
-    return path;
-}
-
-export function slash(path: string): string {
-    const isExtendedLengthPath = path.startsWith('\\\\?\\');
-    if (isExtendedLengthPath) {
-        return path;
-    }
-
-    return path.replaceAll('\\', '/');
-}
-
-export async function createThumbnail(readable: NodeJS.ReadableStream | undefined): Promise<string | undefined> {
+/**
+ * Convert a readable stream containing image data to an object URL.
+ * The image data is resized to 40x40 pixels before conversion.
+ * @param readable The readable stream containing the image data
+ * @returns A string representing the object URL of the resized image, or undefined if conversion fails
+ */
+export async function thumbnailToObjectUrl(readable: NodeJS.ReadableStream | undefined): Promise<string | undefined> {
     try {
         if (!readable) {
             return undefined;

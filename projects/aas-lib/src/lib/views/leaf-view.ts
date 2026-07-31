@@ -11,7 +11,7 @@ import { Params } from '@angular/router';
 import { combineLatest, first, from, map, mergeMap, Observable, of, toArray } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { aas, AASDocument, getSemanticId, isEnvironment } from 'aas-core';
+import { aas, AASDocument, getDocumentStatus, getSemanticId, isEnvironment } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
 import { View } from './view';
 
@@ -110,7 +110,7 @@ export abstract class LeafView extends View {
 
     private *filter(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {
         for (const document of documents) {
-            if (!document.content) {
+            if (getDocumentStatus(document) !== 'loaded') {
                 continue;
             }
 
@@ -123,7 +123,7 @@ export abstract class LeafView extends View {
 
     private findSubmodel(document: AASDocument): aas.Submodel | undefined {
         const env = isEnvironment(document) ? document : document.content;
-        if (!env) {
+        if (!env || !env.submodels) {
             return undefined;
         }
 

@@ -210,6 +210,51 @@ describe('IndexChange', () => {
             await promise;
             await expect(endPromise).resolves.toEqual({ endpoint: 'test-endpoint', start: 1 });
         });
+
+        it('should emit cleared event on Cleared message', async () => {
+            const message = {
+                type: 'AASNodeMessage[]',
+                data: [
+                    {
+                        type: 'Cleared',
+                        endpoint: 'test-endpoint',
+                    },
+                ],
+            } satisfies WebSocketData;
+
+            const promise = firstValueFrom(subject);
+            const clearPromise = firstValueFrom(service.cleared);
+            subject.next(message);
+            await promise;
+            await expect(clearPromise).resolves.toBe('test-endpoint');
+        });
+
+        it('should emit progress event on Progress message', async () => {
+            const message = {
+                type: 'AASNodeMessage[]',
+                data: [
+                    {
+                        type: 'Progress',
+                        endpoint: 'test-endpoint',
+                        start: 1,
+                        progress: 50,
+                        shellCount: 10,
+                        submodelCount: 20,
+                    },
+                ],
+            } satisfies WebSocketData;
+
+            const promise = firstValueFrom(subject);
+            subject.next(message);
+            await promise;
+            expect(service.progress()).toEqual({
+                endpoint: 'test-endpoint',
+                start: 1,
+                progress: 50,
+                shellCount: 10,
+                submodelCount: 20,
+            });
+        });
     });
 
     describe('clearIndex', () => {

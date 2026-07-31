@@ -6,30 +6,29 @@
  *
  *****************************************************************************/
 
-import { Component, inject, linkedSignal } from '@angular/core';
+import { Component, effect, inject, linkedSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { NgbActiveModal, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { filter, from, interval, map, mergeMap, Observable, of, toArray, zip } from 'rxjs';
+import { filter, from, map, mergeMap, Observable, of, toArray, zip } from 'rxjs';
 import { AASEndpointScheduleType } from 'aas-core';
 import { IndexChange } from '../../../shared/services/index-change';
 import { EndpointsApi } from '../../../shared/services/endpoints-api';
-import { Duration } from '../../../shared/pipes/duration';
 import { PromptDialog } from '../../../core/prompt-dialog/prompt-dialog';
 
-export interface EndpointConsoleItem {
+export interface EndpointIndexItem {
     name: string;
-    aasCount: number;
+    count: number;
     schedule: AASEndpointScheduleType;
     status: 'idle' | 'scanning';
-    start: number;
-    duration: number;
+    progress: number;
+    submodelCount: number;
 }
 
 @Component({
     selector: 'fhg-endpoint-index-form',
-    imports: [FormsModule, TranslateDirective, TranslatePipe, NgbTooltipModule, Duration],
+    imports: [FormsModule, TranslateDirective, TranslatePipe, NgbTooltipModule, NgbProgressbarModule],
     providers: [],
     templateUrl: './endpoint-index-form.html',
     styleUrl: './endpoint-index-form.scss',
@@ -42,40 +41,33 @@ export class EndpointIndexForm {
     private readonly modal = inject(NgbModal);
 
     public constructor() {
-        this.indexChange.endUpdate
-            .pipe(
-                takeUntilDestroyed(),
-                mergeMap(event => zip(of(event), this.api.getDocumentCount(event.endpoint))),
-            )
-            .subscribe(([event, count]) => {
-                this.items.update(items => {
-                    return items.map(item => {
-                        if (item.name === event.endpoint) {
-                            return {
-                                ...item,
-                                aasCount: count,
-                                start: 0,
-                                duration: 0,
-                                status: 'idle',
-                            } satisfies EndpointConsoleItem;
-                        }
-
-                        return item;
-                    });
-                });
-            });
-
         this.indexChange.startUpdate.pipe(takeUntilDestroyed()).subscribe(event => {
             this.items.update(items => {
                 return items.map(item => {
                     if (item.name === event.endpoint) {
                         return {
                             ...item,
-                            aasCount: 0,
-                            start: event.start,
-                            duration: Date.now() - event.start,
+                            count: 0,
                             status: 'scanning',
-                        } satisfies EndpointConsoleItem;
+                            progress: -1,
+                            submodelCount: 0,
+                        } satisfies EndpointIndexItem;
+                    }
+
+                    return item;
+                });
+            });
+        });
+
+        this.indexChange.endUpdate.pipe(takeUntilDestroyed()).subscribe(event => {
+            this.items.update(items => {
+                return items.map(item => {
+                    if (item.name === event.endpoint) {
+                        return {
+                            ...item,
+                            status: 'idle',
+                            progress: -1,
+                        } satisfies EndpointIndexItem;
                     }
 
                     return item;
@@ -89,8 +81,9 @@ export class EndpointIndexForm {
                     if (!endpoint || item.name === endpoint) {
                         return {
                             ...item,
-                            aasCount: 0,
-                        } satisfies EndpointConsoleItem;
+                            count: 0,
+                            submodelCount: 0,
+                        } satisfies EndpointIndexItem;
                     }
 
                     return item;
@@ -98,22 +91,23 @@ export class EndpointIndexForm {
             });
         });
 
-        interval(1000)
-            .pipe(takeUntilDestroyed())
-            .subscribe(() => {
-                this.items.update(items => {
-                    return items.map(item => {
-                        if (item.status === 'scanning') {
-                            return {
-                                ...item,
-                                duration: Date.now() - item.start,
-                            } satisfies EndpointConsoleItem;
-                        }
+        effect(() => {
+            const progress = this.indexChange.progress();
+            this.items.update(items => {
+                return items.map(item => {
+                    if (item.name === progress.endpoint) {
+                        return {
+                            ...item,
+                            progress: progress.progress,
+                            count: progress.shellCount,
+                            submodelCount: progress.submodelCount,
+                        } satisfies EndpointIndexItem;
+                    }
 
-                        return item;
-                    });
+                    return item;
                 });
             });
+        });
     }
 
     public readonly items = linkedSignal(
@@ -133,16 +127,16 @@ export class EndpointIndexForm {
                     items.map(([status, count, schedule]) => {
                         return {
                             name: status.name,
-                            aasCount: count,
+                            count: count,
                             status: status.status,
                             schedule,
-                            start: status.status === 'idle' ? 0 : status.start,
-                            duration: status.status === 'idle' ? 0 : Date.now() - status.start,
-                        } satisfies EndpointConsoleItem;
+                            progress: -1,
+                            submodelCount: 0,
+                        } satisfies EndpointIndexItem;
                     }),
                 ),
             ),
-            { initialValue: [] as EndpointConsoleItem[] },
+            { initialValue: [] as EndpointIndexItem[] },
         ),
     );
 

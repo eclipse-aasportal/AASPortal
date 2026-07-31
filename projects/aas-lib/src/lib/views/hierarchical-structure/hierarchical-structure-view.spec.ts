@@ -58,9 +58,7 @@ describe('HierarchicalStructureView', () => {
         start = createSpyObj<StartService>(['add', 'save']);
         document = {
             address: '',
-            crc32: 0,
             idShort: 'BillofMaterialAAS',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/HierarchicalStructuresBoM/1/1',
             endpoint: 'Test',

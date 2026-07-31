@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
 import { TranslateDirective } from '@ngx-translate/core';
 import { Component, WritableSignal, computed, effect, inject, input, model, signal, untracked } from '@angular/core';
 
-import { AASDocument } from 'aas-core';
+import { AASDocument, getDocumentStatus } from 'aas-core';
 
 import { MaxLengthPipe } from '../../shared/pipes/max-length.pipe';
 import { AASTableFilter } from './aas-table.filter';
@@ -125,7 +125,7 @@ export class AASTable {
             id: document.id,
             endpoint: document.endpoint,
             document,
-            state: document.content ? 'loaded' : document.content === null ? 'unloaded' : 'unavailable',
+            state: getDocumentStatus(document),
             thumbnail: document.thumbnail ?? '/assets/resources/aas-idta.png',
             selected: signal(selected),
         };

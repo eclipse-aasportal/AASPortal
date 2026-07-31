@@ -42,8 +42,6 @@ describe('Document', () => {
                 address: 'a.json',
                 idShort: 'A',
                 assetId: 'http://customer.com/asset/a',
-                readonly: true,
-                crc32: 0,
                 timestamp: 0,
             };
 
@@ -53,8 +51,6 @@ describe('Document', () => {
                 address: 'b.json',
                 idShort: 'B',
                 assetId: 'http://customer.com/asset/b',
-                readonly: true,
-                crc32: 0,
                 timestamp: 0,
             };
         });
@@ -245,7 +241,7 @@ describe('Document', () => {
         });
 
         it('returns the submodels of an AssetAdministrationShell', () => {
-            expect(getChildren(aasEnvironment.assetAdministrationShells[0], aasEnvironment)).toEqual(
+            expect(getChildren(aasEnvironment.assetAdministrationShells![0], aasEnvironment)).toEqual(
                 aasEnvironment.submodels!,
             );
         });

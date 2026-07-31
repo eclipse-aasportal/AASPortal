@@ -26,16 +26,14 @@ describe('NameplateViewState', () => {
     beforeEach(() => {
         document = {
             address: '',
-            crc32: 0,
             idShort: 'DigitalNameplate',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/DigitalNameplate/3/0',
             endpoint: 'Test',
             content: nameplate_3_0 as aas.Environment,
         };
 
-        submodel = document.content!.submodels[0];
+        submodel = document.content!.submodels![0];
 
         TestBed.configureTestingModule({
             providers: [

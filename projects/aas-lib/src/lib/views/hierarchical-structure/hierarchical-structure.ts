@@ -221,7 +221,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
     }
 
     private updateNode(item: HierarchicalNode, document: AASDocument | null): HierarchicalNode {
-        const shell = document?.content?.assetAdministrationShells.at(0);
+        const shell = document?.content?.assetAdministrationShells?.at(0);
         if (!shell) {
             return { ...item, options: { ...item.options, document } } satisfies HierarchicalNode;
         }
@@ -371,7 +371,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
     }
 
     private findHierarchicalStructure(content: aas.Environment): aas.Submodel | undefined {
-        return content.submodels.find(submodel => {
+        return content.submodels?.find(submodel => {
             const semanticId = getSemanticId(submodel);
             return semanticId === HIERARCHICAL_STRUCTURES_1_1 || semanticId === HIERARCHICAL_STRUCTURES_1_0;
         });

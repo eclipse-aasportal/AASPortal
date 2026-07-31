@@ -70,13 +70,10 @@ export class ApiClientV3 extends ApiClient {
 
     public static readonly version = '^3.0.0';
 
-    public readonly readOnly = false;
+    public override readonly readOnly = false;
 
-    public readonly providesLiveData = true;
+    public override readonly providesLiveData = true;
 
-    /**
-     * Tests the connection to the endpoint by requesting a page of Asset Administration Shells.
-     */
     public override async test(): Promise<void> {
         await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
             this.resolve('shells', { limit: 10 }),
@@ -84,18 +81,27 @@ export class ApiClientV3 extends ApiClient {
         );
     }
 
-    /**
-     * Gets a page of Asset Administration Shells IDs from the endpoint.
-     * @param cursor The cursor for pagination. If undefined, the first page will be returned.
-     * @returns A page of Asset Administration Shells IDs.
-     */
-    public override async getDocuments(
-        cursor: string | undefined,
-        limit: number = 100,
-    ): Promise<PagedResult<AASDocument>> {
-        const searchParams: Record<string, string | number> = { limit };
+    public override async hasDocument(address: string): Promise<boolean> {
+        try {
+            const result = await this.http.get<aas.AssetAdministrationShell>(
+                this.resolve(`shells/${encodeBase64Url(address)}`),
+                this.auth,
+            );
+
+            return !!result;
+        } catch {
+            return false;
+        }
+    }
+
+    public override async getDocuments(cursor: string | undefined, limit?: number): Promise<PagedResult<AASDocument>> {
+        const searchParams: Record<string, string | number> = {};
         if (cursor) {
             searchParams.cursor = cursor;
+        }
+
+        if (limit) {
+            searchParams.limit = limit;
         }
 
         const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
@@ -109,11 +115,27 @@ export class ApiClientV3 extends ApiClient {
         };
     }
 
-    /**
-     * Gets a readable stream for the thumbnail of the AAS with the given ID.
-     * @param id The ID of the AAS.
-     * @returns A readable stream.
-     */
+    public override async getSubmodels(cursor: string | undefined, limit?: number): Promise<PagedResult<aas.Submodel>> {
+        const searchParams: Record<string, string | number> = {};
+        if (cursor) {
+            searchParams.cursor = cursor;
+        }
+
+        if (limit) {
+            searchParams.limit = limit;
+        }
+
+        const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
+            this.resolve('submodels', searchParams),
+            this.auth,
+        );
+
+        return {
+            result: result.result,
+            paging_metadata: { cursor: result.paging_metadata.cursor },
+        };
+    }
+
     public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
         return this.http.getReadable(
             this.resolve(`shells/${encodeBase64Url(id)}/asset-information/thumbnail`),
@@ -121,11 +143,6 @@ export class ApiClientV3 extends ApiClient {
         );
     }
 
-    /**
-     * Gets the environment of the AAS with the given ID.
-     * @param id The ID of the AAS.
-     * @returns The environment of the AAS.
-     */
     public override async getEnvironment(id: string): Promise<aas.Environment> {
         const shell = await this.http.get<aas.AssetAdministrationShell>(
             this.resolve(`shells/${encodeBase64Url(id)}`),
@@ -143,32 +160,34 @@ export class ApiClientV3 extends ApiClient {
         return new JsonReaderV3(env, true).readEnvironment();
     }
 
-    /**
-     * Creates or updates the AAS, Submodels and Concept Descriptions contained in the given environment.
-     * @param env The environment to set for the AAS. The environment must contain the AAS with the given ID.
-     */
     public override async setEnvironment(_: string, env: aas.Environment): Promise<void> {
-        for (const conceptDescription of env.conceptDescriptions) {
-            if (await this.hasConceptDescription(conceptDescription)) {
-                await this.putConceptDescription(conceptDescription);
-            } else {
-                await this.postConceptDescription(conceptDescription);
+        if (env.conceptDescriptions) {
+            for (const conceptDescription of env.conceptDescriptions) {
+                if (await this.hasConceptDescription(conceptDescription)) {
+                    await this.putConceptDescription(conceptDescription);
+                } else {
+                    await this.postConceptDescription(conceptDescription);
+                }
             }
         }
 
-        for (const submodel of env.submodels) {
-            if (await this.hasSubmodel(submodel)) {
-                await this.putSubmodel(submodel);
-            } else {
-                await this.postSubmodel(submodel);
+        if (env.submodels) {
+            for (const submodel of env.submodels) {
+                if (await this.hasSubmodel(submodel)) {
+                    await this.putSubmodel(submodel);
+                } else {
+                    await this.postSubmodel(submodel);
+                }
             }
         }
 
-        for (const aas of env.assetAdministrationShells) {
-            if (await this.hasShell(aas)) {
-                await this.putShell(aas);
-            } else {
-                await this.postShell(aas);
+        if (env.assetAdministrationShells) {
+            for (const aas of env.assetAdministrationShells) {
+                if (await this.hasShell(aas)) {
+                    await this.putShell(aas);
+                } else {
+                    await this.postShell(aas);
+                }
             }
         }
     }
@@ -273,19 +292,18 @@ export class ApiClientV3 extends ApiClient {
     }
 
     private toDocument(shell: aas.AssetAdministrationShell): AASDocument {
-        return {
+        const document: AASDocument = {
             address: shell.id,
             assetId: shell.assetInformation.globalAssetId,
-            content: null,
-            crc32: 0,
+            content: { assetAdministrationShells: [shell] },
             endpoint: this.endpoint.name,
             id: shell.id,
             idShort: shell.idShort,
-            readonly: false,
-            onlineReady: true,
             timestamp: Date.now(),
             thumbnail: null,
         };
+
+        return document;
     }
 
     private async readSubmodels(submodelRefs: aas.Reference[] | undefined): Promise<aas.Submodel[]> {

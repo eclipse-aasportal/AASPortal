@@ -40,7 +40,7 @@ export class ContactInformationState extends ChildState {
             return undefined;
         }
 
-        return env.submodels.find(submodel => getSemanticId(submodel) === CONTACT_INFORMATION_1_0);
+        return env.submodels?.find(submodel => getSemanticId(submodel) === CONTACT_INFORMATION_1_0);
     });
 
     /**

@@ -9,7 +9,7 @@
 import { basename } from 'path';
 import * as posix from 'path/posix';
 import { readFile } from 'fs/promises';
-import { aas, AASDocument, AASEndpoint, ApplicationError, noop, normalize, PagedResult } from 'aas-core';
+import { aas, AASDocument, AASEndpoint, ApplicationError, normalize, PagedResult, PagingMetadata } from 'aas-core';
 import { Logger } from 'aas-package';
 import { ERRORS } from '../../errors.js';
 import { FileStorage } from '../../file-storage/file-storage.js';
@@ -73,21 +73,53 @@ export class AasxDirectory extends EndpointClient {
         });
     }
 
-    public override async getDocuments(
-        cursor: string | undefined,
-        limit: number = 100,
-    ): Promise<PagedResult<AASDocument>> {
-        noop(cursor);
+    public override async hasDocument(filename: string): Promise<boolean> {
+        return this.fileStorage.exists(posix.join(this.root, filename));
+    }
+
+    public override async getDocuments(cursor: string | undefined, limit?: number): Promise<PagedResult<AASDocument>> {
         const files: string[] = [];
         await this.readDir(this.root, '', files);
         const index = cursor ? Number(JSON.parse(cursor)) : 0;
-        const end = index + limit;
-        const result = await Promise.allSettled(files.slice(index, end).map(file => this.createDocument(file)));
+        const end = limit ? index + index : files.length;
+        const result = await Promise.allSettled(files.slice(index, end).map(file => this.getDocument(file)));
 
         return {
             result: result.filter(item => item.status === 'fulfilled').map(item => item.value),
             paging_metadata: end < files.length ? { cursor: JSON.stringify(end) } : {},
         };
+    }
+
+    public override async getSubmodels(cursor: string | undefined, limit?: number): Promise<PagedResult<aas.Submodel>> {
+        const files: string[] = [];
+        await this.readDir(this.root, '', files);
+        const submodels: aas.Submodel[] = [];
+        const index = cursor ? Number(JSON.parse(cursor)) : 0;
+        let i = 0;
+        const paging_metadata: PagingMetadata = {};
+        for (const file of files) {
+            const env = await this.getEnvironment(file);
+            if (!env.submodels) {
+                continue;
+            }
+
+            for (let j = 0, n = env.submodels.length; j < n; j++) {
+                if (i >= index) {
+                    submodels.push(env.submodels[j]);
+                    if (limit !== undefined && submodels.length >= limit) {
+                        if (j + 1 < n) {
+                            paging_metadata.cursor = JSON.stringify(i + 1);
+                        }
+
+                        break;
+                    }
+                }
+
+                ++i;
+            }
+        }
+
+        return { result: submodels, paging_metadata };
     }
 
     public override async getThumbnail(filename: string): Promise<NodeJS.ReadableStream | undefined> {

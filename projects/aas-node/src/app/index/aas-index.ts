@@ -130,6 +130,14 @@ export abstract class AASIndex {
     public abstract insert(document: AASDocument): Promise<void>;
 
     /**
+     *
+     * @param endpoint The AAS endpoint name.
+     * @param id The AAS identifier.
+     * @param env The environment.
+     */
+    public abstract create(endpoint: string, id: string, env: aas.Environment): Promise<void>;
+
+    /**
      * Finds and retrieves an AASDocument from the database based on the provided parameters.
      *
      * @param endpoint - The AAS endpoint name (optional).
@@ -174,11 +182,12 @@ export abstract class AASIndex {
 
     /**
      * Clears the content of the AAS index. If an endpoint is specified only the content that belongs to that endpoint
-     * will be cleaned.
+     * will be cleaned. If an AAS identifier is specified only the content that belongs to that AAS will be cleaned.
      *
      * @param endpoint Optional the name of the AAS endpoint.
+     * @param id Optional the AAS identifier.
      */
-    public abstract clear(endpoint?: string): Promise<void>;
+    public abstract clear(endpoint?: string, id?: string): Promise<void>;
 
     /**
      * Destroys the AAS index.

@@ -55,6 +55,10 @@ export class AASTableFilter {
     }
 
     private *traverseEnvironment(env: aas.Environment): Iterable<aas.Referable> {
+        if (!env.submodels) {
+            return;
+        }
+
         for (const submodel of env.submodels) {
             for (const referable of flat(submodel)) {
                 yield referable;
