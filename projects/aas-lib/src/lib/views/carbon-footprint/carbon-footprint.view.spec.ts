@@ -60,9 +60,7 @@ describe('CarbonFootprintView', () => {
         start = createSpyObj<StartService>(['add', 'save']);
         document = {
             address: '',
-            crc32: 0,
             idShort: 'CarbonFootprint',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/CarbonFootprint/0/9',
             endpoint: 'Test',

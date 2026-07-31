@@ -6,3 +6,21 @@
  *
  *****************************************************************************/
 
+:host {
+    --endpoint-action-column-width: 3.5rem;
+}
+
+.endpoint-index-grid {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) var(--endpoint-action-column-width) var(
+            --endpoint-action-column-width
+        );
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0.25rem;
+}
+
+/* Flatten each list item so all row cells share one common grid definition. */
+.endpoint-index-row {
+    display: contents;
+}

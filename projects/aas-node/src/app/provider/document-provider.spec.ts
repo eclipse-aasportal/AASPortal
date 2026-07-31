@@ -23,7 +23,7 @@ describe('DocumentProvider', function () {
 
     beforeEach(function () {
         clientFactory.testAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
-        index = createSpyObj<AASIndex>(['get', 'find', 'getEndpoint', 'getEndpoints']);
+        index = createSpyObj<AASIndex>(['get', 'find', 'getEndpoint', 'getEndpoints', 'insert']);
         aasProvider = new DocumentProvider(clientFactory, index);
     });
 
@@ -38,9 +38,7 @@ describe('DocumentProvider', function () {
                 endpoint: 'Samples',
                 address: 'file:///endpoints/samples/TestAAS.json',
                 assetId: 'TestAsset',
-                crc32: 0,
                 idShort: '',
-                readonly: false,
                 timestamp: 0,
             };
 
@@ -62,7 +60,7 @@ describe('DocumentProvider', function () {
 
             client = createSpyObj<EndpointClient>([
                 'close',
-                'createDocument',
+                'getDocument',
                 'getEnvironment',
                 'getAllAssetAdministrationShellIdsByAssetLink',
                 'open',
@@ -74,7 +72,7 @@ describe('DocumentProvider', function () {
         it('gets a document by AAS ID (contained in index)', async () => {
             index.find.mockResolvedValue(document);
             client.getEnvironment.mockResolvedValue(content);
-            client.createDocument.mockResolvedValue(document);
+            client.getDocument.mockResolvedValue(document);
             await expect(aasProvider.getDocument('Samples', 'AssetAdministrationShell', 'TestAAS')).resolves.toEqual(
                 document,
             );
@@ -90,7 +88,7 @@ describe('DocumentProvider', function () {
             });
 
             client.getEnvironment.mockResolvedValue(content);
-            client.createDocument.mockResolvedValue(document);
+            client.getDocument.mockResolvedValue(document);
             await expect(aasProvider.getDocument('Samples', 'Asset', 'TestAsset')).resolves.toEqual(document);
             expect(index.find).toHaveBeenCalledWith('Samples', 'Asset', 'TestAsset');
             expect(client.getAllAssetAdministrationShellIdsByAssetLink).toHaveBeenCalledWith('TestAsset');

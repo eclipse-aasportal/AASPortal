@@ -28,9 +28,7 @@ describe('FavoritesService', () => {
     const user = signal<User | null>(null);
     const favorite: AASDocument = {
         address: 'http://localhost/aas',
-        crc32: 0,
         idShort: 'AAS',
-        readonly: false,
         timestamp: 0,
         id: 'http://localhost/aas',
         endpoint: 'endpoint',

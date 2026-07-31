@@ -140,6 +140,7 @@ export class OicdClient extends IdentityProviderClient {
 
             if (!response.ok) {
                 const message = await response.text().catch(() => 'Token endpoint error');
+                this.destroySession(req.session);
                 return res.status(response.status).json({
                     name: 'ApplicationError',
                     message,
@@ -163,7 +164,7 @@ export class OicdClient extends IdentityProviderClient {
     public override async logout(req: express.Request, res: express.Response): Promise<express.Response> {
         try {
             const end_session_endpoint = (await this.getConfiguration()).end_session_endpoint;
-            const refresh_token = req.cookies?.refresh_token;
+            const refresh_token = req.session.refresh_token;
             if (!refresh_token) {
                 return res.status(400).json({
                     message: ERRORS.BAD_REQUEST,

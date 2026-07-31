@@ -6,10 +6,11 @@
  *
  *****************************************************************************/
 
-import { AASDocument, PagedResult } from 'aas-core';
+import { aas, AASDocument, PagedResult } from 'aas-core';
 import { OpcuaClient } from '../client/opcua/opcua-client.js';
 import { EndpointScanner } from './endpoint-scanner.js';
 import { ScannerController } from './scanner-controller.js';
+import { thumbnailToObjectUrl } from '../utilities.js';
 
 export class OpcuaServerScanner extends EndpointScanner {
     public constructor(
@@ -27,15 +28,19 @@ export class OpcuaServerScanner extends EndpointScanner {
         return this.client.close();
     }
 
-    protected override async getDocuments(cursor: string | undefined): Promise<PagedResult<AASDocument>> {
-        return await this.client.getDocuments(cursor);
+    protected override async getDocuments(): Promise<PagedResult<AASDocument>> {
+        return await this.client.getDocuments();
     }
 
-    protected override async getDocument(address: string): Promise<AASDocument | undefined> {
-        try {
-            return await this.client.createDocument(address);
-        } catch {
-            return undefined;
-        }
+    protected override async hasDocument(address: string): Promise<boolean> {
+        return await this.client.hasDocument(address);
+    }
+
+    protected override async getThumbnail(address: string): Promise<string | undefined> {
+        return thumbnailToObjectUrl(await this.client.getThumbnail(address));
+    }
+
+    protected override getSubmodels(): Promise<PagedResult<aas.Submodel>> {
+        return this.client.getSubmodels();
     }
 }

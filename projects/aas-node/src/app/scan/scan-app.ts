@@ -12,12 +12,12 @@ import { LOGGER, Logger } from 'aas-package';
 
 import { AASDocument, AASEndpoint } from 'aas-core';
 
-import { toUint8Array } from './utilities.js';
-import { AAS_INDEX, AASIndex } from './index/aas-index.js';
-import { EndpointScannerFactory } from './scan/endpoint-scanner-factory.js';
-import { Variable } from './variable.js';
-import { isCancelEndpointScanData, isEndpointScanData, EndpointScanMessage, WorkerData } from './types.js';
-import { ScannerController } from './scan/scanner-controller.js';
+import { toUint8Array } from '../utilities.js';
+import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
+import { EndpointScannerFactory } from './endpoint-scanner-factory.js';
+import { Variable } from '../variable.js';
+import { isCancelEndpointScanData, isEndpointScanData, EndpointScanMessage, WorkerData } from '../types.js';
+import { ScannerController } from './scanner-controller.js';
 
 @singleton()
 export class ScanApp {
@@ -60,9 +60,10 @@ export class ScanApp {
     private async scan(endpoint: AASEndpoint): Promise<void> {
         const scanner = this.factory.create(endpoint, this.controller);
         try {
-            scanner.on('compare', this.compare);
+            scanner.on('update', this.postUpdate);
             scanner.on('remove', this.postRemove);
             scanner.on('add', this.postAdd);
+            scanner.on('progress', this.postProgress);
             scanner.on('error', this.onError);
             this.logger.info(`Start scanning endpoint ${endpoint.name}.`);
             this.start = Date.now();
@@ -72,10 +73,12 @@ export class ScanApp {
             this.logger.info(`Finished scanning endpoint ${endpoint.name} in ${duration} s.`);
         } finally {
             this.controller.end();
-            scanner.off('compare', this.compare);
+            scanner.off('update', this.postUpdate);
             scanner.off('remove', this.postRemove);
             scanner.off('add', this.postAdd);
+            scanner.off('progress', this.postProgress);
             scanner.off('error', this.onError);
+            scanner.destroy();
             this.postEnd();
         }
     }
@@ -83,16 +86,6 @@ export class ScanApp {
     private cancel(): Promise<void> {
         return this.controller.cancel();
     }
-
-    private compare = (a: AASDocument, b: AASDocument): void => {
-        if (
-            a.crc32 !== b.crc32 ||
-            a.thumbnail !== b.thumbnail ||
-            (b.timestamp && Date.now() - b.timestamp > this.variable.AAS_EXPIRES_IN)
-        ) {
-            this.postUpdate(b);
-        }
-    };
 
     private onError = (error: Error): void => {
         this.logger.error(error);
@@ -143,6 +136,21 @@ export class ScanApp {
             kind: 'Added',
             endpoint: this.endpoint,
             document: document,
+            start: this.start,
+        } satisfies EndpointScanMessage);
+
+        parentPort?.postMessage(array, [array.buffer]);
+    };
+
+    private readonly postProgress = (progress: number, shellCount: number, submodelCount: number): void => {
+        const array = toUint8Array({
+            type: 'EndpointScanMessage',
+            taskId: this.taskId,
+            kind: 'Progress',
+            endpoint: this.endpoint,
+            shellCount: shellCount,
+            submodelCount: submodelCount,
+            progress: progress,
             start: this.start,
         } satisfies EndpointScanMessage);
 

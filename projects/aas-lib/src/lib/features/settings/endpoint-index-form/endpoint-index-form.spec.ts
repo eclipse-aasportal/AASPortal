@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -27,6 +27,19 @@ describe('EndpointIndexForm', () => {
     let api: Mocked<EndpointsApi>;
     let activeModal: Mocked<NgbActiveModal>;
     let modal: Mocked<NgbModal>;
+    const progress = signal<{
+        endpoint: string;
+        start: number;
+        progress: number;
+        shellCount: number;
+        submodelCount: number;
+    }>({
+        endpoint: '',
+        start: 0,
+        progress: 0,
+        shellCount: 0,
+        submodelCount: 0,
+    });
 
     beforeEach(async () => {
         indexChange = createSpyObj<IndexChange>(
@@ -35,6 +48,7 @@ describe('EndpointIndexForm', () => {
                 startUpdate: new Subject<{ endpoint: string; start: number }>(),
                 endUpdate: new Subject<{ endpoint: string; start: number }>(),
                 cleared: new Subject<string | undefined>(),
+                progress: progress.asReadonly(),
             },
         );
 
@@ -43,7 +57,9 @@ describe('EndpointIndexForm', () => {
                 return of({
                     name: 'endpoint1',
                     status: 'idle',
-                    start: 0,
+                    count: 42,
+                    progress: -1,
+                    submodelCount: 0,
                 });
             }
 
@@ -127,17 +143,19 @@ describe('EndpointIndexForm', () => {
             expect.arrayContaining([
                 expect.objectContaining({
                     name: 'endpoint1',
-                    aasCount: 42,
+                    count: 42,
                     status: 'idle',
                     schedule: 'manual',
-                    start: 0,
+                    progress: -1,
+                    submodelCount: 0,
                 }),
                 expect.objectContaining({
                     name: 'endpoint2',
-                    aasCount: 100,
+                    count: 100,
                     status: 'scanning',
                     schedule: 'manual',
-                    start: 123456789,
+                    progress: -1,
+                    submodelCount: 0,
                 }),
             ]),
         );
@@ -159,7 +177,7 @@ describe('EndpointIndexForm', () => {
             expect.arrayContaining([
                 expect.objectContaining({
                     name: 'endpoint1',
-                    aasCount: 0,
+                    count: 0,
                 }),
             ]),
         );
@@ -176,11 +194,11 @@ describe('EndpointIndexForm', () => {
             expect.arrayContaining([
                 expect.objectContaining({
                     name: 'endpoint1',
-                    aasCount: 0,
+                    count: 0,
                 }),
                 expect.objectContaining({
                     name: 'endpoint2',
-                    aasCount: 0,
+                    count: 0,
                 }),
             ]),
         );

@@ -25,7 +25,7 @@ export type FavoriteDetail = {
 })
 export class FavoriteComponent {
     private readonly document$ = signal<AASDocument | undefined>(undefined);
-    private readonly aas$ = computed(() => this.document$()?.content?.assetAdministrationShells.at(0));
+    private readonly aas$ = computed(() => this.document$()?.content?.assetAdministrationShells?.at(0));
     private readonly detailItems$ = signal<FavoriteDetail[]>([]);
     private readonly noteItems$ = signal<string[]>([]);
 
@@ -131,7 +131,7 @@ export class FavoriteComponent {
 
     private getFavoriteDetails(document: AASDocument): FavoriteDetail[] {
         const details: FavoriteDetail[] = [];
-        const aas = document.content?.assetAdministrationShells.at(0);
+        const aas = document.content?.assetAdministrationShells?.at(0);
         if (aas === undefined) {
             return details;
         }
@@ -159,7 +159,7 @@ export class FavoriteComponent {
     private getFavoriteNotes(document: AASDocument): string[] {
         const notes: string[] = [];
 
-        const aas = document.content?.assetAdministrationShells.at(0);
+        const aas = document.content?.assetAdministrationShells?.at(0);
         if (aas === undefined) {
             return notes;
         }

@@ -8,13 +8,13 @@
 
 import { Component, computed } from '@angular/core';
 import { Params } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, first, from, mergeMap, of, toArray, map, Observable } from 'rxjs';
 
-import { aas, AASDocument, getReferable, getSemanticId } from 'aas-core';
+import { aas, AASDocument, getDocumentStatus, getReferable, getSemanticId } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
 import { ViewRoute, ViewRouteMap } from '../types';
 import { View } from './view';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 /**
  * Provides a view for an Asset Asset Administration with a set of specific submodels.
@@ -48,7 +48,7 @@ export abstract class CompositeView extends View {
             return undefined;
         }
 
-        const administration = tuple[0].content?.assetAdministrationShells.at(0)?.administration;
+        const administration = tuple[0].content?.assetAdministrationShells?.at(0)?.administration;
         if (!administration) {
             return undefined;
         }
@@ -98,7 +98,7 @@ export abstract class CompositeView extends View {
 
     private *filter(documents: AASDocument[]): Generator<[AASDocument, ViewRouteMap]> {
         for (const document of documents) {
-            if (!document.content) {
+            if (getDocumentStatus(document) !== 'loaded') {
                 continue;
             }
 
@@ -126,10 +126,12 @@ export abstract class CompositeView extends View {
         );
 
         const submodelSemanticIds = new Map<string, aas.Submodel>();
-        for (const submodel of env.submodels) {
-            const semanticId = getSemanticId(submodel);
-            if (semanticId) {
-                submodelSemanticIds.set(semanticId, submodel);
+        if (env.submodels) {
+            for (const submodel of env.submodels) {
+                const semanticId = getSemanticId(submodel);
+                if (semanticId) {
+                    submodelSemanticIds.set(semanticId, submodel);
+                }
             }
         }
 
@@ -162,7 +164,7 @@ export abstract class CompositeView extends View {
             if (data.idShorts) {
                 let submodel: aas.Submodel | undefined;
                 for (const idShortPath of data.idShorts) {
-                    const submodel = env.submodels.find(submodel => getReferable(submodel, idShortPath) !== undefined);
+                    const submodel = env.submodels?.find(submodel => getReferable(submodel, idShortPath) !== undefined);
 
                     if (submodel) {
                         break;

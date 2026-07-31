@@ -22,7 +22,16 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas, isProperty, isNumberType, isSubmodel, toJsonValue, jsonization, equalArray } from 'aas-core';
+import {
+    aas,
+    isProperty,
+    isNumberType,
+    isSubmodel,
+    toJsonValue,
+    jsonization,
+    equalArray,
+    isLoadedEnvironment,
+} from 'aas-core';
 
 import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
 import { NotifyService } from '../../core/notify/notify.service';
@@ -100,13 +109,11 @@ export class DocumentContent extends CompositeView implements OnDestroy {
     public readonly selectedElements = this.selectedElements$.asReadonly();
 
     public readonly canPlay = computed(() => {
-        const live = this.live();
-        return (this.document()?.onlineReady ?? false) && live === 'offline';
+        return this.live() === 'offline';
     });
 
     public readonly canStop = computed(() => {
-        const live = this.live();
-        return (this.document()?.onlineReady ?? false) && live === 'online';
+        return this.live() === 'online';
     });
 
     /**
@@ -183,7 +190,7 @@ export class DocumentContent extends CompositeView implements OnDestroy {
     public download(): void {
         try {
             const document = this.document();
-            if (!document || !document.content) {
+            if (!isLoadedEnvironment(document?.content)) {
                 return;
             }
 

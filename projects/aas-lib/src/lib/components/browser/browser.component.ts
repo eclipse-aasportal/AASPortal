@@ -60,7 +60,7 @@ export class BrowserComponent extends ChildComponent {
         effect(() => {
             const env = this.env();
             if (env) {
-                const aas = env.assetAdministrationShells.at(0);
+                const aas = env.assetAdministrationShells?.at(0);
                 const current = aas ? this.createElement(aas, aas.idShort, env) : null;
                 this.state().update({ env, current, path: [] });
             } else {
@@ -209,7 +209,11 @@ export class BrowserComponent extends ChildComponent {
         name = upperFirst(name);
         if (typeof value === 'string') {
             if (isFile(referable) && name === 'Value') {
-                const aas = this.env()!.assetAdministrationShells[0];
+                const aas = this.env()?.assetAdministrationShells?.at(0);
+                if (!aas) {
+                    return [];
+                }
+
                 const submodel = isSubmodel(referable) ? referable : (this.state().path()[1].referable as aas.Submodel);
                 const idShortPath = this.getIdShortPath(referable);
                 return [
@@ -230,7 +234,7 @@ export class BrowserComponent extends ChildComponent {
             const id = referenceToString(value);
             if (name === 'SemanticId') {
                 const env = untracked(this.state().env);
-                if (env.conceptDescriptions.some(cd => cd.id === id)) {
+                if (env.conceptDescriptions?.some(cd => cd.id === id)) {
                     kind = 'link';
                 }
             }

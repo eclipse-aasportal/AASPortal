@@ -184,11 +184,11 @@ describe('DocumentContent', () => {
         expect(component.version()).toBeUndefined();
     });
 
-    it('indicates that "play" is disabled while sample AAS is not online ready', () => {
-        expect(component.canPlay()).toBe(false);
+    it('indicates that "play" is enabled while "offline"', () => {
+        expect(component.canPlay()).toBe(true);
     });
 
-    it('indicates that "stop" is disabled while sample AAS is not online ready', () => {
+    it('indicates that "stop" is disabled while "offline"', () => {
         expect(component.canStop()).toBe(false);
     });
 
@@ -271,7 +271,7 @@ describe('DocumentContent', () => {
             const createObjectSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob://1');
             const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
 
-            const submodel = sampleDocument.content!.submodels[0];
+            const submodel = sampleDocument.content!.submodels![0];
             component.setSelectedElements([submodel]);
             component.download();
 

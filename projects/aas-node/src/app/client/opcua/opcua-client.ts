@@ -68,9 +68,9 @@ export class OpcuaClient extends EndpointClient {
         }
     }
 
-    public readonly readOnly = true;
+    public override readonly readOnly = true;
 
-    public readonly providesLiveData = true;
+    public override readonly providesLiveData = true;
 
     public get isOpen(): boolean {
         return this.reentry > 0;
@@ -124,15 +124,23 @@ export class OpcuaClient extends EndpointClient {
         }
     }
 
-    public override async getDocuments(cursor: string | undefined): Promise<PagedResult<AASDocument>> {
-        noop(cursor);
+    public override async hasDocument(nodeId: string): Promise<boolean> {
+        try {
+            const component = await this.crawlAsync(nodeId);
+            return !!component;
+        } catch {
+            return false;
+        }
+    }
+
+    public override async getDocuments(): Promise<PagedResult<AASDocument>> {
         const documents: AASDocument[] = [];
         const dataTypes = new OpcuaDataTypeDictionary();
         await dataTypes.initializeAsync(this.getSession());
         for (const description of await this.browseAsync('ObjectsFolder')) {
             const nodeId = description.nodeId.toString();
             try {
-                const document = await this.createDocument(nodeId);
+                const document = await this.getDocument(nodeId);
                 documents.push(document);
             } catch (error) {
                 noop(error);
@@ -140,6 +148,25 @@ export class OpcuaClient extends EndpointClient {
         }
 
         return { result: documents, paging_metadata: {} };
+    }
+
+    public override async getSubmodels(): Promise<PagedResult<aas.Submodel>> {
+        const submodels: aas.Submodel[] = [];
+        for (const description of await this.browseAsync('ObjectsFolder')) {
+            const nodeId = description.nodeId.toString();
+            try {
+                const env = await this.getEnvironment(nodeId);
+                if (!env.submodels) {
+                    continue;
+                }
+
+                submodels.push(...env.submodels);
+            } catch (error) {
+                noop(error);
+            }
+        }
+
+        return { result: submodels, paging_metadata: {} };
     }
 
     public override createSubscription(client: SocketClient, message: LiveRequest): SocketSubscription {

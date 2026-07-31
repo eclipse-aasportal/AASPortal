@@ -119,17 +119,16 @@ export class XmlReaderV3 extends AASReader {
             return undefined;
         }
 
-        const externalSubjectId = this.readReference(this.selectNode('./aas:externalSubjectId', node));
-        if (!externalSubjectId) {
-            throw new Error('SpecificAssetId.externalSubjectId');
-        }
-
         const value: aas.SpecificAssetId = {
             ...this.readHasSemantics(node),
             name: this.getTextContent('./aas:name', node),
             value: this.getTextContent('./aas:value', node),
-            externalSubjectId,
         };
+
+        const externalSubjectId = this.readReference(this.selectNode('./aas:externalSubjectId', node));
+        if (externalSubjectId) {
+            value.externalSubjectId = externalSubjectId;
+        }
 
         return value;
     }

@@ -101,7 +101,6 @@ export abstract class IdentityProviderClient {
     public middleware(): express.RequestHandler {
         return async (req, res, next) => {
             delete req.user;
-            res.setHeader('Access-Control-Allow-Credentials', 'true');
             const { access_token, refresh_token } = req.session;
             if (access_token) {
                 try {

@@ -31,9 +31,7 @@ describe('HierarchicalStructure', () => {
         window = createSpyObj<WindowService>(['addEventListener', 'removeEventListener']);
         document = {
             address: '',
-            crc32: 0,
             idShort: 'HierarchicalStructuresBoM',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/HierarchicalStructuresBoM/1/1',
             endpoint: 'Test',

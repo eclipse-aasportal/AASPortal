@@ -15,20 +15,20 @@
         <button type="button" class="btn-close" (click)="close()"></button>
     </div>
     <div class="modal-body">
-        <ul class="list-group">
+        <div class="endpoint-index-grid">
             @for (item of items(); track item.name; let i = $index) {
-                <li class="list-goup-item d-flex align-items-center justify-content-between">
-                    <div class="flex-grow-1">{{ item.name }}</div>
+                <div class="endpoint-index-row">
+                    <div class="fw-medium">{{ item.name }}</div>
                     @if (item.status === 'idle') {
-                        <div class="me-2">
-                            <span>{{ item.aasCount }}</span
+                        <div class="text-end">
+                            <span>{{ item.count }}</span
                             ><span class="ms-2">{{ 'EndpointIndexForm.SHELLS' | translate }}</span>
                         </div>
                         @if (item.schedule === 'manual' || item.schedule === 'once') {
-                            <div>
+                            <div class="endpoint-index-action">
                                 <button
                                     type="button"
-                                    class="btn btn-lg btn-outline-primary border-0"
+                                    class="btn btn-lg btn-outline-primary border-0 endpoint-index-icon-btn"
                                     [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
                                     [openDelay]="300"
                                     placement="top"
@@ -38,11 +38,13 @@
                                     <i class="bi bi-caret-right-square"></i>
                                 </button>
                             </div>
+                        } @else {
+                            <div class="endpoint-index-action endpoint-index-action-placeholder"></div>
                         }
-                        <div>
+                        <div class="endpoint-index-action">
                             <button
                                 type="button"
-                                class="btn btn-lg btn-outline-danger border-0"
+                                class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
                                 [ngbTooltip]="'EndpointIndexForm.CLEAR_ENDPOINT_INDEX_TOOL_TIP' | translate"
                                 [openDelay]="300"
                                 placement="top"
@@ -53,14 +55,23 @@
                             </button>
                         </div>
                     } @else {
-                        <div class="spinner-border spinner-border-sm text-info me-2" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <div class="">{{ item.duration | duration }}</div>
-                        <div>
+                        @if (item.progress < 0) {
+                            <div class="spinner-border spinner-border-sm text-info" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        } @else {
+                            <ngb-progressbar
+                                class="endpoint-index-state endpoint-index-state-progress"
+                                [showValue]="true"
+                                type="info"
+                                [value]="item.progress"
+                            />
+                        }
+                        <div class="endpoint-index-action endpoint-index-action-placeholder"></div>
+                        <div class="endpoint-index-action">
                             <button
                                 type="button"
-                                class="btn btn-lg btn-outline-danger border-0"
+                                class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
                                 [ngbTooltip]="'EndpointIndexForm.CANCEL_SCAN_TOOL_TIP' | translate"
                                 [openDelay]="300"
                                 placement="top"
@@ -71,18 +82,23 @@
                             </button>
                         </div>
                     }
-                </li>
+                </div>
             }
-        </ul>
+        </div>
     </div>
     <div class="modal-footer">
         <button
             type="button"
             id="AID_CLEAR_INDEX"
-            class="btn btn-danger me-auto"
+            class="btn btn-lg btn-outline-danger border-0 me-auto"
+            [ngbTooltip]="'EndpointIndexForm.CLEAR_INDEX_TOOLTIP' | translate"
+            [openDelay]="300"
+            placement="top"
+            container="body"
             (click)="clearIndex()"
-            translate="EndpointIndexForm.CLEAR"
-        ></button>
+        >
+            <i class="bi bi-eraser-fill"></i>
+        </button>
         <button type="submit" class="btn btn-primary" translate="EndpointIndexForm.CLOSE"></button>
     </div>
 </form>

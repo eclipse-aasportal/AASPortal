@@ -24,9 +24,7 @@ describe('TechnicalDataViewState', () => {
     beforeEach(() => {
         document = {
             address: '',
-            crc32: 0,
             idShort: 'TechnicalDataAAS',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/aas/TechnicalData/1/2',
             endpoint: 'Test',
@@ -47,7 +45,7 @@ describe('TechnicalDataViewState', () => {
         });
 
         service = TestBed.inject(TechnicalDataViewState);
-        service.update({ tuples: [[document, document.content!.submodels[0]]] });
+        service.update({ tuples: [[document, document.content!.submodels![0]]] });
     });
 
     it('should be created', () => {

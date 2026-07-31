@@ -31,11 +31,11 @@ describe('JsonWriterV2', function () {
         });
 
         it('does not support writing an AAS', () => {
-            expect(() => writer.convert(aasEnvironment.assetAdministrationShells[0])).toThrow();
+            expect(() => writer.convert(aasEnvironment.assetAdministrationShells![0])).toThrow();
         });
 
         it('writes a submodel', () => {
-            expect(writer.convert(aasEnvironment.submodels[0])).toBeDefined();
+            expect(writer.convert(aasEnvironment.submodels![0])).toBeDefined();
         });
     });
 });

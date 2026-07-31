@@ -13,7 +13,6 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { Cookie } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
-import { slash } from '../utilities.js';
 import { CookieStorage } from './cookie-storage.js';
 import { Variable } from '../variable.js';
 
@@ -30,7 +29,7 @@ export class LocalCookieStorage extends CookieStorage {
     ) {
         super();
 
-        this.cookiesDirectory = slash(
+        this.cookiesDirectory = this.normalize(
             resolve(
                 variable.COOKIE_STORE
                     ? new URL(variable.COOKIE_STORE).pathname
@@ -98,5 +97,14 @@ export class LocalCookieStorage extends CookieStorage {
             this.logger.error(`Reading cookies failed: ${error?.message}`);
             return [];
         }
+    }
+
+    private normalize(path: string): string {
+        const isExtendedLengthPath = path.startsWith('\\\\?\\');
+        if (isExtendedLengthPath) {
+            return path;
+        }
+
+        return path.replaceAll('\\', '/');
     }
 }

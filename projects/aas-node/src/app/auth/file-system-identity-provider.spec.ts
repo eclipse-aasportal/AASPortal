@@ -249,7 +249,6 @@ describe('FileSystemIdentityProvider', () => {
             const middleware = identityProvider.middleware();
             await middleware(req, res, next);
             expect(next).toHaveBeenCalled();
-            expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Credentials', 'true');
             expect(identityProvider['verifyAccessToken']).toHaveBeenCalledWith('test-access-token');
             expect(req.user).toEqual({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor', endpoints: [] });
         });
@@ -276,7 +275,6 @@ describe('FileSystemIdentityProvider', () => {
             await middleware(req, res, next);
             expect(identityProvider['verifyAccessToken']).toHaveBeenCalledWith('expired-access-token');
             expect(identityProvider['refreshToken']).toHaveBeenCalledWith('test-refresh-token');
-            expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Credentials', 'true');
             expect(req.user).toEqual({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
             expect(next).toHaveBeenCalled();
         });
@@ -302,7 +300,6 @@ describe('FileSystemIdentityProvider', () => {
             const middleware = identityProvider.middleware();
             await middleware(req, res, next);
             expect(identityProvider['refreshToken']).toHaveBeenCalledWith('test-refresh-token');
-            expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Credentials', 'true');
             expect(req.user).toEqual({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
             expect(next).toHaveBeenCalled();
         });

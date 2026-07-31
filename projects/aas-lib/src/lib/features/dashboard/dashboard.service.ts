@@ -323,20 +323,18 @@ export class DashboardService {
 
     private getNodes(page: DashboardPage, document: AASDocument): LiveNode[] | null {
         let nodes: LiveNode[] | null = null;
-        if (document.onlineReady) {
-            const index = this.indexOfRequest(page, document);
-            if (index >= 0) {
-                const request = page.requests[index];
-                nodes = [...request.nodes];
-                page.requests[index] = { ...request, nodes };
-            } else {
-                nodes = [];
-                page.requests.push({
-                    endpoint: document.endpoint,
-                    id: document.id,
-                    nodes: nodes,
-                });
-            }
+        const index = this.indexOfRequest(page, document);
+        if (index >= 0) {
+            const request = page.requests[index];
+            nodes = [...request.nodes];
+            page.requests[index] = { ...request, nodes };
+        } else {
+            nodes = [];
+            page.requests.push({
+                endpoint: document.endpoint,
+                id: document.id,
+                nodes: nodes,
+            });
         }
 
         return nodes;

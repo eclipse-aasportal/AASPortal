@@ -166,9 +166,7 @@ export class SessionStore extends session.Store {
             return;
         }
 
-        const doc = new this.model({ _id, session: { ...data, cookie } });
-        await this.model.findOneAndReplace({ _id }, doc, { upsert: true }).exec();
-        await doc.save();
+        await this.model.findOneAndReplace({ _id }, { _id, session: { ...data, cookie } }, { upsert: true }).exec();
     }
 
     private getTTL(data: SessionData): number {

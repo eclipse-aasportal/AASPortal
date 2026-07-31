@@ -39,9 +39,7 @@ describe.skip('CustomerFeedbackView', () => {
         api.getDocument.mockReturnValue(
             of({
                 address: '',
-                crc32: 0,
                 idShort: '',
-                readonly: false,
                 timestamp: 0,
                 id: 'http://localhost/aas',
                 endpoint: 'endpoint',

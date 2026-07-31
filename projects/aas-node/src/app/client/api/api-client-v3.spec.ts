@@ -54,7 +54,7 @@ describe('ApiClientV3', () => {
 
     describe('writeEnvironment', () => {
         it('updates an AssetAdministrationShell', async () => {
-            const aas = env.assetAdministrationShells[0];
+            const aas = env.assetAdministrationShells![0];
             const content: aas.Environment = {
                 assetAdministrationShells: [aas],
                 submodels: [],
@@ -70,7 +70,7 @@ describe('ApiClientV3', () => {
         });
 
         it('adds a new AssetAdministrationShell', async () => {
-            const aas = env.assetAdministrationShells[0];
+            const aas = env.assetAdministrationShells![0];
             const content: aas.Environment = {
                 assetAdministrationShells: [aas],
                 submodels: [],

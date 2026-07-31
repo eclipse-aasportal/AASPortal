@@ -157,17 +157,17 @@ describe('OicdClient', () => {
 
     describe('logout', () => {
         it('should log out the current user', async () => {
-            const res = createSpyObj<express.Response>(['redirect', 'clearCookie', 'sendStatus']);
+            const res = createSpyObj<express.Response>(['redirect', 'clearCookie', 'sendStatus', 'status']);
             const session = createSpyObj<Session & SessionData>([], {
                 state: 'test-state',
                 code_verifier: 'test-code-verifier',
+                refresh_token: 'test-refresh-token',
             });
 
             const req = createSpyObj<express.Request>([], {
                 protocol: 'https',
                 host: 'localhost',
                 session,
-                cookies: { refresh_token: 'test-refresh-token' },
             });
 
             const configurationResponse = createSpyObj<Response>(['json'], {

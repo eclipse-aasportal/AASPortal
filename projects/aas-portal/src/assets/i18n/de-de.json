@@ -169,7 +169,8 @@
         "CANCEL_SCAN_TOOL_TIP": "Aktualisierung des Endpunkt-Index abbrechen.",
         "SHELLS": "Verwaltungsschalen",
         "CLEAR_INDEX_PROMPT": "Um den Index zu löschen, geben Sie '{{name}}' ein.",
-        "CLEAR_INDEX_KEY": "Index löschen"
+        "CLEAR_INDEX_KEY": "Index löschen",
+        "CLEAR_INDEX_TOOLTIP": "Gesamten Index löschen."
     },
     "Error": {
         "AAS_ALREADY_EXISTS": "Eine Verwaltungsschale mit der Kennung '{{id}}' existiert bereits.",

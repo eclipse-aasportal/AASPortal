@@ -226,9 +226,9 @@ export interface Entity extends SubmodelElement {
 }
 
 export type Environment = {
-    assetAdministrationShells: AssetAdministrationShell[];
-    conceptDescriptions: ConceptDescription[];
-    submodels: Submodel[];
+    assetAdministrationShells?: AssetAdministrationShell[];
+    conceptDescriptions?: ConceptDescription[];
+    submodels?: Submodel[];
 };
 
 export type EventElement = SubmodelElement;

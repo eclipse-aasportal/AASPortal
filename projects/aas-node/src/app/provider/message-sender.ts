@@ -19,27 +19,24 @@ export class MessageSender {
     public constructor(
         private readonly wsServer: WSNode,
         private readonly delay: number = 1000,
-    ) {}
+    ) {
+        this.handle = setInterval(() => {
+            if (this.messages.length === 0) {
+                return;
+            }
+
+            const messagesToSend = this.messages;
+            this.messages = [];
+
+            this.wsServer.notify('IndexChange', {
+                type: 'AASNodeMessage[]',
+                data: messagesToSend,
+            });
+        }, this.delay);
+    }
 
     public send(message: AASNodeMessage): void {
         this.messages.push(message);
-        if (!this.handle) {
-            this.handle = setInterval(() => {
-                if (this.messages.length === 0) {
-                    clearInterval(this.handle!);
-                    this.handle = null;
-                    return;
-                }
-
-                const messagesToSend = this.messages;
-                this.messages = [];
-
-                this.wsServer.notify('IndexChange', {
-                    type: 'AASNodeMessage[]',
-                    data: messagesToSend,
-                });
-            }, this.delay);
-        }
     }
 
     public destroy(): void {

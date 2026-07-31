@@ -114,16 +114,17 @@ export class JsonWriterV3 extends AASWriter {
             throw new Error('SpecificAssetId.value');
         }
 
-        if (!source.externalSubjectId) {
-            throw new Error('SpecificAssetId.externalSubjectId');
-        }
-
-        return {
+        const value: aas.SpecificAssetId = {
             ...this.writeHasSemantic,
             name: source.name,
             value: source.value,
-            externalSubjectId: this.writeReference(source.externalSubjectId),
         };
+
+        if (source.externalSubjectId) {
+            value.externalSubjectId = this.writeReference(source.externalSubjectId);
+        }
+
+        return value;
     }
 
     private writeAdministrationInformation(source: aas.AdministrativeInformation): aas.AdministrativeInformation {

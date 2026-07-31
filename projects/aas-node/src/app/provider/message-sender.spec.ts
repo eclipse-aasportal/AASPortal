@@ -21,8 +21,8 @@ describe('MessageSender', () => {
     });
 
     it('should batch messages and send them at the specified interval', async () => {
-        messageSender.send({ type: 'Added', document: createDocument('Message 1') });
-        messageSender.send({ type: 'Added', document: createDocument('Message 2') });
+        messageSender.send({ type: 'Added', document: createDocument('Message 1'), start: 0 });
+        messageSender.send({ type: 'Added', document: createDocument('Message 2'), start: 0 });
 
         expect(wsServer.notify).not.toHaveBeenCalled();
 
@@ -31,8 +31,8 @@ describe('MessageSender', () => {
         expect(wsServer.notify).toHaveBeenCalledWith('IndexChange', {
             type: 'AASNodeMessage[]',
             data: [
-                { type: 'Added', document: createDocument('Message 1') },
-                { type: 'Added', document: createDocument('Message 2') },
+                { type: 'Added', document: createDocument('Message 1'), start: 0 },
+                { type: 'Added', document: createDocument('Message 2'), start: 0 },
             ],
         });
     });

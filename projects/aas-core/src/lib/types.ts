@@ -101,23 +101,15 @@ export interface AASDocumentId {
 
 /** Represents an Asset Administration Shell */
 export interface AASDocument extends AASDocumentId {
-    /** The address of the AAS in the endpoint. */
+    /** The address of the AAS at the endpoint. */
     address: string;
+    /** The Asset identifier */
+    assetId?: string;
     /** The document content of type `Environment`, `null` if the content is not loaded or
      * `undefined` if the content is not available. */
     content?: aas.Environment | null;
-    /** Checksum to detect changes. */
-    crc32: number;
     /** The name of the AAS. */
     idShort: string;
-    /** The Asset identifier */
-    assetId?: string;
-    /** Indicates whether the document is modified. */
-    modified?: boolean;
-    /** Indicates whether communication can be established with the system represented by the AAS. */
-    onlineReady?: boolean;
-    /** Indicates whether the document can be edited. */
-    readonly: boolean;
     /** A thumbnail. */
     thumbnail?: string | null;
     /** The time at which the document was created. */
@@ -247,6 +239,14 @@ export type AASNodeMessage =
     | {
           type: 'EndpointAdded' | 'EndpointRemoved' | 'EndpointUpdate';
           endpoint: AASEndpoint;
+      }
+    | {
+          type: 'Progress';
+          start: number;
+          endpoint: string;
+          progress: number;
+          shellCount: number;
+          submodelCount: number;
       }
     | {
           type: 'Start' | 'End';

@@ -6,13 +6,15 @@
  *
  *****************************************************************************/
 
-import { aas, AASDocument, AASEndpoint, LiveRequest, PagedResult } from 'aas-core';
-import { computeCrc32, Logger } from 'aas-package';
+import { aas, AASDocument, AASEndpoint, ApplicationError, LiveRequest, PagedResult } from 'aas-core';
+import { Logger } from 'aas-package';
 import { SocketClient } from '../live/socket-client.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
-import { createThumbnail } from '../utilities.js';
+import { thumbnailToObjectUrl } from '../utilities.js';
 
-/** Represents a client of a server that provides Asset Administration Shells. */
+/**
+ * Represents a client of an endpoint or server that provides Asset Administration Shells.
+ */
 export abstract class EndpointClient {
     protected constructor(
         protected readonly logger: Logger,
@@ -26,11 +28,13 @@ export abstract class EndpointClient {
     public abstract readonly isOpen: boolean;
 
     /**
+     * @deprecated
      * Indicates whether the AAS source is read-only.
      */
     public abstract readonly readOnly: boolean;
 
     /**
+     * @deprecated
      * Indicates whether the AAS source provides real-time data.
      */
     public abstract readonly providesLiveData: boolean;
@@ -44,24 +48,32 @@ export abstract class EndpointClient {
     public abstract getDocuments(cursor: string | undefined, limit?: number): Promise<PagedResult<AASDocument>>;
 
     /**
-     * Creates a document for the given address.
-     * @param address The address of the document to create.
+     * Determines whether the document with the specified address exists in the endpoint.
+     * @param address The address of the document in the endpoint.
+     * @returns True if the document exists, false otherwise.
+     */
+    public abstract hasDocument(address: string): Promise<boolean>;
+
+    /**
+     * Creates an AAS document.
+     * @param address The address of the AAS at the endpoint.
      * @returns The created document.
      */
-    public async createDocument(address: string): Promise<AASDocument> {
+    public async getDocument(address: string): Promise<AASDocument> {
         const environment = await this.getEnvironment(address);
-        const aas = environment.assetAdministrationShells[0];
+        const aas = environment.assetAdministrationShells?.at(0);
+        if (!aas) {
+            throw new ApplicationError('Environment contains no AAS.');
+        }
+
         const document: AASDocument = {
             id: aas.id,
             endpoint: this.endpoint.name,
             address: address,
             idShort: aas.idShort,
             assetId: aas.assetInformation.globalAssetId,
-            readonly: this.readOnly,
-            onlineReady: true,
             content: environment,
             timestamp: Date.now(),
-            crc32: computeCrc32(environment),
         };
 
         const thumbnail = await this.createThumbnail(address);
@@ -105,6 +117,13 @@ export abstract class EndpointClient {
      * @param env The AAS environment.
      */
     public abstract setEnvironment(address: string, env: aas.Environment): Promise<void>;
+
+    /**
+     * Gets the submodels of the current endpoint.
+     * @param cursor The position for the next page.
+     * @param limit The maximum number of submodels of a page.
+     */
+    public abstract getSubmodels(cursor: string | undefined, limit?: number): Promise<PagedResult<aas.Submodel>>;
 
     /**
      * Opens a readable stream.
@@ -189,9 +208,14 @@ export abstract class EndpointClient {
         return resolvedUrl;
     }
 
+    /**
+     * Creates a thumbnail as Base64URL.
+     * @param address The thumbnail address.
+     * @returns A Base64URL string or `undefined` if the thumbnail does not exists.
+     */
     protected async createThumbnail(address: string): Promise<string | undefined> {
         try {
-            return await createThumbnail(await this.getThumbnail(address));
+            return await thumbnailToObjectUrl(await this.getThumbnail(address));
         } catch {
             return undefined;
         }

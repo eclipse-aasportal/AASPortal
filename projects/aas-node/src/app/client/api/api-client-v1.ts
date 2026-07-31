@@ -63,6 +63,19 @@ export class ApiClientV1 extends ApiClient {
 
     public override readonly providesLiveData = true;
 
+    public override async hasDocument(address: string): Promise<boolean> {
+        try {
+            const shell = await this.http.get<aasV2.AssetAdministrationShell>(
+                this.resolve(`shells/${encodeBase64Url(address)}`),
+                this.auth,
+            );
+
+            return !!shell;
+        } catch {
+            return false;
+        }
+    }
+
     public async getDocuments(cursor?: string): Promise<PagedResult<AASDocument>> {
         noop(cursor);
         const result = await this.http.get<aasV2.AssetAdministrationShell[]>(this.resolve('shells'), this.auth);
@@ -71,6 +84,11 @@ export class ApiClientV1 extends ApiClient {
             result: result.map(shell => this.toDocument(shell)),
             paging_metadata: {},
         };
+    }
+
+    public getSubmodels(cursor: string | undefined): Promise<PagedResult<aas.Submodel>> {
+        noop(cursor);
+        throw new Error('Method not implemented.');
     }
 
     public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
@@ -240,18 +258,25 @@ export class ApiClientV1 extends ApiClient {
     }
 
     private toDocument(shell: aasV2.AssetAdministrationShell): AASDocument {
-        return {
+        const document: AASDocument = {
             address: shell.identification.id,
             assetId: shell.asset.keys.at(0)?.value,
-            content: null,
-            crc32: 0,
+            content: {
+                assetAdministrationShells: [this.toAssetAdministration(shell)],
+                submodels: [],
+                conceptDescriptions: [],
+            },
             endpoint: this.endpoint.name,
             id: shell.identification.id,
             idShort: shell.idShort,
-            readonly: false,
-            onlineReady: true,
             timestamp: Date.now(),
         };
+
+        return document;
+    }
+
+    private toAssetAdministration(source: aasV2.AssetAdministrationShell): aas.AssetAdministrationShell {
+        return new JsonReaderV2().read(source) as aas.AssetAdministrationShell;
     }
 
     private async readConceptDescriptions(submodels: aasV2.Submodel[]): Promise<aasV2.ConceptDescription[]> {

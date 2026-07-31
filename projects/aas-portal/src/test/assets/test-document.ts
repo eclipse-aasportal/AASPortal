@@ -15,12 +15,8 @@ export function createDocument(name: string, endpoint = 'http://localhost/contai
         assetId: 'http://localhost/asset/${name}',
         endpoint: endpoint,
         address: '',
-        modified: false,
-        readonly: false,
-        onlineReady: false,
         content: { assetAdministrationShells: [], submodels: [], conceptDescriptions: [] },
         timestamp: 123456,
-        crc32: 0,
     };
 
     return document;
@@ -33,12 +29,8 @@ export function createDocumentHeader(name: string, endpoint: string): AASDocumen
         assetId: 'http://localhost/asset/${name}',
         endpoint: endpoint,
         address: '',
-        modified: false,
-        readonly: false,
-        onlineReady: false,
         content: null,
         timestamp: 123456,
-        crc32: 0,
     };
 
     return document;

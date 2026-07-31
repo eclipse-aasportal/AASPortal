@@ -21,21 +21,22 @@ import carbon_footprint_1_0 from '../../../test/assets/carbon-footprint-1-0.json
 describe('CarbonFootprintViewState', () => {
     let service: CarbonFootprintViewState;
     let document: AASDocument;
-    let submodel: aas.Submodel;
+    let submodel: aas.Submodel | undefined;
 
     beforeEach(() => {
         document = {
             address: '',
-            crc32: 0,
             idShort: 'CarbonFootprint',
-            readonly: false,
             timestamp: 0,
             id: 'https://admin-shell.io/idta/aas/CarbonFootprintAAS/1/0',
             endpoint: 'Test',
             content: carbon_footprint_1_0 as aas.Environment,
         };
 
-        submodel = document.content!.submodels[0];
+        submodel = document.content?.submodels?.at(0);
+        if (!submodel) {
+            throw new Error('Submodel not found');
+        }
 
         TestBed.configureTestingModule({
             providers: [

@@ -20,7 +20,11 @@ describe('ConceptDescriptionRepository', () => {
     beforeEach(() => {
         variable = createSpyObj<Variable>(
             {},
-            { DATA: fileURLToPath(new URL('../test/assets/tmp/data', import.meta.url)), PAGE_SIZE: 100, CACHE_SIZE: 100 },
+            {
+                DATA: fileURLToPath(new URL('../test/assets/tmp/data', import.meta.url)),
+                PAGE_SIZE: 100,
+                CACHE_SIZE: 100,
+            },
         );
     });
 

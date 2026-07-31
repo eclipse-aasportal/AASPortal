@@ -10,7 +10,7 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { LOGGER, LoggerFactory } from 'aas-package';
-import { ScanApp } from './scan-app.js';
+import { ScanApp } from './scan/scan-app.js';
 import { AASIndexFactory } from './index/aas-index-factory.js';
 import { Variable } from './variable.js';
 import { AAS_INDEX } from './index/aas-index.js';

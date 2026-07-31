@@ -9,13 +9,22 @@
 import { inject, singleton } from 'tsyringe';
 import path from 'path';
 import { Readable } from 'stream';
-import { AASDocument, aas, ApplicationError, isFile, isBlob, selectReferable, EndpointAuth } from 'aas-core';
+import {
+    AASDocument,
+    aas,
+    ApplicationError,
+    isFile,
+    isBlob,
+    selectReferable,
+    EndpointAuth,
+    isLoadedEnvironment,
+} from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
 import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { ERRORS } from '../errors.js';
-import { createThumbnail } from '../utilities.js';
+import { thumbnailToObjectUrl } from '../utilities.js';
 
 @singleton()
 export class DocumentProvider {
@@ -29,23 +38,24 @@ export class DocumentProvider {
      * @param endpoint The AAS endpoint name (optional).
      * @param modelType The model type to which `id` belongs.
      * @param id Depending on the model type the AAS or Asset identifier.
+     * @param auth The user specific endpoint authorization.
      * @returns The AAS document with the specified identifier.
      */
     public async getDocument(
         endpoint: string | undefined,
         modelType: 'AssetAdministrationShell' | 'Asset',
         id: string,
-        endpoints: EndpointAuth[] = [],
+        auth: EndpointAuth[] = [],
     ): Promise<AASDocument> {
         const document = await this.index.find(endpoint, modelType, id);
         if (document) {
-            const auth = endpoints.find(item => item.name === document.endpoint)?.headers;
-            const client = this.clientFactory.create(await this.index.getEndpoint(document.endpoint), auth);
+            const headers = auth.find(item => item.name === document.endpoint)?.headers;
+            const client = this.clientFactory.create(await this.index.getEndpoint(document.endpoint), headers);
             try {
                 await client.open();
                 document.content = await client.getEnvironment(document.address);
                 if (document.thumbnail === null) {
-                    document.thumbnail = await createThumbnail(await client.getThumbnail(document.address));
+                    document.thumbnail = await thumbnailToObjectUrl(await client.getThumbnail(document.address));
                 }
 
                 return document;
@@ -55,13 +65,13 @@ export class DocumentProvider {
         }
 
         if (endpoint) {
-            const headers = endpoints.find(item => item.name === endpoint)?.headers ?? {};
+            const headers = auth.find(item => item.name === endpoint)?.headers ?? {};
             return await this.getDocumentById(endpoint, modelType, id, headers);
         }
 
         for (const item of await this.index.getEndpoints()) {
             try {
-                const headers = endpoints.find(item => item.name === endpoint)?.headers ?? {};
+                const headers = auth.find(item => item.name === endpoint)?.headers ?? {};
                 return await this.getDocumentById(item.name, modelType, id, headers);
             } catch {
                 continue;
@@ -135,7 +145,7 @@ export class DocumentProvider {
         const client = this.clientFactory.create(await this.index.getEndpoint(endpoint), auth);
         try {
             await client.open();
-            if (!document.content) {
+            if (!isLoadedEnvironment(document.content)) {
                 document.content = await client.getEnvironment(document.address);
             }
 
@@ -252,7 +262,9 @@ export class DocumentProvider {
                 address = result.result[0];
             }
 
-            return await client.createDocument(address);
+            const document = await client.getDocument(address);
+            await this.index.insert(document);
+            return document;
         } finally {
             await client.close();
         }

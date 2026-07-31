@@ -31,7 +31,7 @@ describe('JsonWriter', function () {
         });
 
         it.skip('does not support writing an AAS', () => {
-            expect(() => writer.convert(aasEnvironment.assetAdministrationShells[0])).toThrow();
+            expect(() => writer.convert(aasEnvironment.assetAdministrationShells![0])).toThrow();
         });
     });
 });

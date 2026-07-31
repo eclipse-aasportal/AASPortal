@@ -23,6 +23,7 @@ import { ApiClientV1 } from '../client/api/api-client-v1.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { HttpClient } from '../http-client.js';
 import { ScannerController } from './scanner-controller.js';
+import { Variable } from '../variable.js';
 
 @singleton()
 export class EndpointScannerFactory {
@@ -30,6 +31,7 @@ export class EndpointScannerFactory {
         @inject(LOGGER) private readonly logger: Logger,
         @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
         @inject(HttpClient) private readonly http: HttpClient,
+        @inject(Variable) private readonly variable: Variable,
     ) {}
 
     public create(endpoint: AASEndpoint, controller: ScannerController): EndpointScanner {

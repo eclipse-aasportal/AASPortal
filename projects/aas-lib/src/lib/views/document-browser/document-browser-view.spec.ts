@@ -68,9 +68,7 @@ describe('DocumentBrowserView', () => {
 
         document = {
             address: '',
-            crc32: 0,
             idShort: 'ExampleMotor',
-            readonly: false,
             timestamp: 0,
             id: 'http://customer.com/aas/9175_7013_7091_9168',
             endpoint: 'endpoint',
