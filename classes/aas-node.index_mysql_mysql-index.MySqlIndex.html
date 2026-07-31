@@ -15,14 +15,14 @@
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>Represents an index of Asset Administration Shells.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="26812">
+<section class="tsd-panel tsd-hierarchy" data-refl="27055">
 <h4>Hierarchy (<a href="../hierarchy.html#aas-node.index/mysql/mysql-index.MySqlIndex">View Summary</a>)</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="aas-node.index_aas-index.AASIndex.html" class="tsd-signature-type tsd-kind-class">AASIndex</a>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">MySqlIndex</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L39">projects/aas-node/src/app/index/mysql/mysql-index.ts:39</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L39">projects/aas-node/src/app/index/mysql/mysql-index.ts:39</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -35,6 +35,7 @@
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#clear" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>clear</span></a>
+<a href="#create" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create</span></a>
 <a href="#delete" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete</span></a>
 <a href="#deleteendpoint" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete<wbr/>Endpoint</span></a>
 <a href="#destroy" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a>
@@ -74,7 +75,7 @@
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">MySqlIndex</a></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L42">projects/aas-node/src/app/index/mysql/mysql-index.ts:42</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L42">projects/aas-node/src/app/index/mysql/mysql-index.ts:42</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -82,21 +83,46 @@
 <h3 class="tsd-anchor-link" id="clear"><span>clear</span><a href="#clear" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="clear-1"><span class="tsd-kind-call-signature">clear</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">endpoint</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#clear-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="clear-1"><span class="tsd-kind-call-signature">clear</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">endpoint</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#clear-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Clears the content of the AAS index. If an endpoint is specified only the content that belongs to that endpoint
-will be cleaned.</p>
+will be cleaned. If an AAS identifier is specified only the content that belongs to that AAS will be cleaned.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">endpoint</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>Optional the name of the AAS endpoint.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">id</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>Optional the AAS identifier.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#clear">clear</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L324">projects/aas-node/src/app/index/mysql/mysql-index.ts:324</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L334">projects/aas-node/src/app/index/mysql/mysql-index.ts:334</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="create"><span>create</span><a href="#create" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="create-1"><span class="tsd-kind-call-signature">create</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">endpoint</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">env</span><span class="tsd-signature-symbol">:</span> <a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../types/aas-core.aas.Environment.html" class="tsd-signature-type tsd-kind-type-alias">Environment</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#create-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">endpoint</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The AAS endpoint name.</p>
+</div></li>
+<li><span><span class="tsd-kind-parameter">id</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The AAS identifier.</p>
+</div></li>
+<li><span><span class="tsd-kind-parameter">env</span>: <a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../types/aas-core.aas.Environment.html" class="tsd-signature-type tsd-kind-type-alias">Environment</a></span>
+<div class="tsd-comment tsd-typography"><p>The environment.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#create">create</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L318">projects/aas-node/src/app/index/mysql/mysql-index.ts:318</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="delete"><span>delete</span><a href="#delete" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -117,7 +143,7 @@ will be cleaned.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#delete">delete</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L300">projects/aas-node/src/app/index/mysql/mysql-index.ts:300</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L299">projects/aas-node/src/app/index/mysql/mysql-index.ts:299</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="deleteendpoint"><span>delete<wbr/>Endpoint</span><a href="#deleteendpoint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -136,7 +162,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#deleteendpoint">deleteEndpoint</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L152">projects/aas-node/src/app/index/mysql/mysql-index.ts:152</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L152">projects/aas-node/src/app/index/mysql/mysql-index.ts:152</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="destroy"><span>destroy</span><a href="#destroy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -148,7 +174,7 @@ will be cleaned.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#destroy">destroy</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L55">projects/aas-node/src/app/index/mysql/mysql-index.ts:55</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L55">projects/aas-node/src/app/index/mysql/mysql-index.ts:55</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="find"><span>find</span><a href="#find" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -173,7 +199,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#find">find</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L283">projects/aas-node/src/app/index/mysql/mysql-index.ts:283</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L282">projects/aas-node/src/app/index/mysql/mysql-index.ts:282</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="findendpoint"><span>find<wbr/>Endpoint</span><a href="#findendpoint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -192,7 +218,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#findendpoint">findEndpoint</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L96">projects/aas-node/src/app/index/mysql/mysql-index.ts:96</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L96">projects/aas-node/src/app/index/mysql/mysql-index.ts:96</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="get"><span>get</span><a href="#get" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -217,7 +243,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#get">get</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/aas-index.ts#L154">projects/aas-node/src/app/index/aas-index.ts:154</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/aas-index.ts#L162">projects/aas-node/src/app/index/aas-index.ts:162</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getdocumentcount"><span>get<wbr/>Document<wbr/>Count</span><a href="#getdocumentcount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -236,7 +262,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#getdocumentcount">getDocumentCount</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L60">projects/aas-node/src/app/index/mysql/mysql-index.ts:60</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L60">projects/aas-node/src/app/index/mysql/mysql-index.ts:60</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getdocuments"><span>get<wbr/>Documents</span><a href="#getdocuments" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -260,7 +286,7 @@ will be cleaned.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASPagedResult.html" class="tsd-signature-type tsd-kind-interface">AASPagedResult</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#getdocuments">getDocuments</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L169">projects/aas-node/src/app/index/mysql/mysql-index.ts:169</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L169">projects/aas-node/src/app/index/mysql/mysql-index.ts:169</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getendpoint"><span>get<wbr/>Endpoint</span><a href="#getendpoint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -279,7 +305,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#getendpoint">getEndpoint</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L86">projects/aas-node/src/app/index/mysql/mysql-index.ts:86</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L86">projects/aas-node/src/app/index/mysql/mysql-index.ts:86</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getendpointcount"><span>get<wbr/>Endpoint<wbr/>Count</span><a href="#getendpointcount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -292,7 +318,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#getendpointcount">getEndpointCount</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L74">projects/aas-node/src/app/index/mysql/mysql-index.ts:74</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L74">projects/aas-node/src/app/index/mysql/mysql-index.ts:74</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getendpointdocuments"><span>get<wbr/>Endpoint<wbr/>Documents</span><a href="#getendpointdocuments" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -317,7 +343,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#getendpointdocuments">getEndpointDocuments</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L195">projects/aas-node/src/app/index/mysql/mysql-index.ts:195</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L195">projects/aas-node/src/app/index/mysql/mysql-index.ts:195</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getendpoints"><span>get<wbr/>Endpoints</span><a href="#getendpoints" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -330,7 +356,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#getendpoints">getEndpoints</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L80">projects/aas-node/src/app/index/mysql/mysql-index.ts:80</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L80">projects/aas-node/src/app/index/mysql/mysql-index.ts:80</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="insert"><span>insert</span><a href="#insert" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -348,7 +374,7 @@ will be cleaned.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#insert">insert</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L252">projects/aas-node/src/app/index/mysql/mysql-index.ts:252</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L252">projects/aas-node/src/app/index/mysql/mysql-index.ts:252</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="insertendpoint"><span>insert<wbr/>Endpoint</span><a href="#insertendpoint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -366,7 +392,7 @@ will be cleaned.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#insertendpoint">insertEndpoint</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L106">projects/aas-node/src/app/index/mysql/mysql-index.ts:106</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L106">projects/aas-node/src/app/index/mysql/mysql-index.ts:106</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="preprocessstring"><code class="tsd-tag">Protected</code><span>preprocess<wbr/>String</span><a href="#preprocessstring" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
@@ -381,7 +407,7 @@ will be cleaned.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#preprocessstring">preprocessString</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/aas-index.ts#L196">projects/aas-node/src/app/index/aas-index.ts:196</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/aas-index.ts#L205">projects/aas-node/src/app/index/aas-index.ts:205</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="toabbreviation"><code class="tsd-tag">Protected</code><span>to<wbr/>Abbreviation</span><a href="#toabbreviation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
@@ -395,7 +421,7 @@ will be cleaned.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#toabbreviation">toAbbreviation</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/aas-index.ts#L188">projects/aas-node/src/app/index/aas-index.ts:188</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/aas-index.ts#L197">projects/aas-node/src/app/index/aas-index.ts:197</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="todocumentid"><code class="tsd-tag">Protected</code><span>to<wbr/>Document<wbr/>Id</span><a href="#todocumentid" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
@@ -409,7 +435,7 @@ will be cleaned.</p>
 <h4 class="tsd-returns-title">Returns <a href="../interfaces/aas-core.AASDocumentId.html" class="tsd-signature-type tsd-kind-interface">AASDocumentId</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#todocumentid">toDocumentId</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/aas-index.ts#L192">projects/aas-node/src/app/index/aas-index.ts:192</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/aas-index.ts#L201">projects/aas-node/src/app/index/aas-index.ts:201</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="update"><span>update</span><a href="#update" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -427,7 +453,7 @@ will be cleaned.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#update">update</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L221">projects/aas-node/src/app/index/mysql/mysql-index.ts:221</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L221">projects/aas-node/src/app/index/mysql/mysql-index.ts:221</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="updateendpoint"><span>update<wbr/>Endpoint</span><a href="#updateendpoint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -446,7 +472,7 @@ will be cleaned.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.index_aas-index.AASIndex.html">AASIndex</a>.<a href="aas-node.index_aas-index.AASIndex.html#updateendpoint">updateEndpoint</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/index/mysql/mysql-index.ts#L121">projects/aas-node/src/app/index/mysql/mysql-index.ts:121</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/index/mysql/mysql-index.ts#L121">projects/aas-node/src/app/index/mysql/mysql-index.ts:121</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -465,7 +491,7 @@ will be cleaned.</p>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#clear"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>clear</span></a><a href="#delete"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete</span></a><a href="#deleteendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete<wbr/>Endpoint</span></a><a href="#destroy"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a><a href="#find"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>find</span></a><a href="#findendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>find<wbr/>Endpoint</span></a><a href="#get" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get</span></a><a href="#getdocumentcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Document<wbr/>Count</span></a><a href="#getdocuments"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Documents</span></a><a href="#getendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint</span></a><a href="#getendpointcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Count</span></a><a href="#getendpointdocuments"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Documents</span></a><a href="#getendpoints"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoints</span></a><a href="#insert"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>insert</span></a><a href="#insertendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>insert<wbr/>Endpoint</span></a><a href="#preprocessstring" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>preprocess<wbr/>String</span></a><a href="#toabbreviation" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>to<wbr/>Abbreviation</span></a><a href="#todocumentid" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>to<wbr/>Document<wbr/>Id</span></a><a href="#update"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>update</span></a><a href="#updateendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>update<wbr/>Endpoint</span></a></div></details></div></details></div>
+<div><a href="#clear"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>clear</span></a><a href="#create"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create</span></a><a href="#delete"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete</span></a><a href="#deleteendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete<wbr/>Endpoint</span></a><a href="#destroy"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a><a href="#find"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>find</span></a><a href="#findendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>find<wbr/>Endpoint</span></a><a href="#get" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get</span></a><a href="#getdocumentcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Document<wbr/>Count</span></a><a href="#getdocuments"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Documents</span></a><a href="#getendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint</span></a><a href="#getendpointcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Count</span></a><a href="#getendpointdocuments"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Documents</span></a><a href="#getendpoints"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoints</span></a><a href="#insert"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>insert</span></a><a href="#insertendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>insert<wbr/>Endpoint</span></a><a href="#preprocessstring" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>preprocess<wbr/>String</span></a><a href="#toabbreviation" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>to<wbr/>Abbreviation</span></a><a href="#todocumentid" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>to<wbr/>Document<wbr/>Id</span></a><a href="#update"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>update</span></a><a href="#updateendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>update<wbr/>Endpoint</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">AASPortal</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

@@ -13,16 +13,16 @@
 <li><a href="" aria-current="page">ApiClientV3</a></li></ul>
 <h1>Class ApiClientV3</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Provides access to an AASX-Server.</p>
+<div class="tsd-comment tsd-typography"><p>Provides access to an AAS API endpoint.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="25448">
+<section class="tsd-panel tsd-hierarchy" data-refl="25660">
 <h4>Hierarchy (<a href="../hierarchy.html#aas-node.client/api/api-client-v3.ApiClientV3">View Summary</a>)</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="aas-node.client_api_api-client.ApiClient.html" class="tsd-signature-type tsd-kind-class">ApiClient</a>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">ApiClientV3</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L59">projects/aas-node/src/app/client/api/api-client-v3.ts:59</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L59">projects/aas-node/src/app/client/api/api-client-v3.ts:59</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -38,8 +38,8 @@
 <a href="#endpoint" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>endpoint</span></a>
 <a href="#http" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>http</span></a>
 <a href="#logger" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>logger</span></a>
-<a href="#provideslivedata" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>provides<wbr/>Live<wbr/>Data</span></a>
-<a href="#readonly" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>read<wbr/>Only</span></a>
+<a href="#provideslivedata" class="tsd-index-link deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>provides<wbr/>Live<wbr/>Data</span></a>
+<a href="#readonly" class="tsd-index-link deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>read<wbr/>Only</span></a>
 <a href="#version" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>version</span></a>
 </div></section>
 <section class="tsd-index-section">
@@ -49,7 +49,6 @@
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="methods">Methods<a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#close" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>close</span></a>
-<a href="#createdocument" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Document</span></a>
 <a href="#createsubscription" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Subscription</span></a>
 <a href="#createthumbnail" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Thumbnail</span></a>
 <a href="#deletepackage" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete<wbr/>Package</span></a>
@@ -57,11 +56,14 @@
 <a href="#getallassetadministrationshellidsbyassetlink" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>All<wbr/>Asset<wbr/>Administration<wbr/>Shell<wbr/>Ids<wbr/>By<wbr/>Asset<wbr/>Link</span></a>
 <a href="#getblobvalue" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Blob<wbr/>Value</span></a>
 <a href="#getconceptdescriptionids" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Concept<wbr/>Description<wbr/>Ids</span></a>
+<a href="#getdocument" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Document</span></a>
 <a href="#getdocuments" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Documents</span></a>
 <a href="#getenvironment" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Environment</span></a>
 <a href="#getfile" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>File</span></a>
 <a href="#getpackage" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Package</span></a>
+<a href="#getsubmodels" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Submodels</span></a>
 <a href="#getthumbnail" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Thumbnail</span></a>
+<a href="#hasdocument" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>has<wbr/>Document</span></a>
 <a href="#insertpackage" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>insert<wbr/>Package</span></a>
 <a href="#invoke" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>invoke</span></a>
 <a href="#open" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>open</span></a>
@@ -90,7 +92,7 @@
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">ApiClientV3</a></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L62">projects/aas-node/src/app/client/api/api-client-v3.ts:62</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L62">projects/aas-node/src/app/client/api/api-client-v3.ts:62</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -99,13 +101,13 @@
 <div class="tsd-signature"><span class="tsd-kind-property">auth</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#auth">auth</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/endpoint-client.ts#L20">projects/aas-node/src/app/client/endpoint-client.ts:20</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/endpoint-client.ts#L22">projects/aas-node/src/app/client/endpoint-client.ts:22</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="endpoint"><code class="tsd-tag">Readonly</code><span>endpoint</span><a href="#endpoint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">endpoint</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/aas-core.AASEndpoint.html" class="tsd-signature-type tsd-kind-interface">AASEndpoint</a></div><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#endpoint">endpoint</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/endpoint-client.ts#L19">projects/aas-node/src/app/client/endpoint-client.ts:19</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/endpoint-client.ts#L21">projects/aas-node/src/app/client/endpoint-client.ts:21</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="http"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Readonly</code><span>http</span><a href="#http" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">http</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.http-client.HttpClient.html" class="tsd-signature-type tsd-kind-class">HttpClient</a></div>
@@ -113,34 +115,38 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#http">http</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client.ts#L37">projects/aas-node/src/app/client/api/api-client.ts:37</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client.ts#L39">projects/aas-node/src/app/client/api/api-client.ts:39</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="logger"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Readonly</code><span>logger</span><a href="#logger" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">logger</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Logger</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#logger">logger</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/endpoint-client.ts#L18">projects/aas-node/src/app/client/endpoint-client.ts:18</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/endpoint-client.ts#L20">projects/aas-node/src/app/client/endpoint-client.ts:20</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
-<h3 class="tsd-anchor-link" id="provideslivedata"><code class="tsd-tag">Readonly</code><span>provides<wbr/>Live<wbr/>Data</span><a href="#provideslivedata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<h3 class="tsd-anchor-link" id="provideslivedata"><code class="tsd-tag">Readonly</code><span class="deprecated">provides<wbr/>Live<wbr/>Data</span><a href="#provideslivedata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">providesLiveData</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">true</span></div>
-<div class="tsd-comment tsd-typography"><p>Indicates whether the AAS source provides real-time data.</p>
-</div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-deprecated">
+<h4 class="tsd-anchor-link" id="deprecated">Deprecated<a href="#deprecated" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Indicates whether the AAS source provides real-time data.</p>
+</div></div><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#provideslivedata">providesLiveData</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L75">projects/aas-node/src/app/client/api/api-client-v3.ts:75</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L75">projects/aas-node/src/app/client/api/api-client-v3.ts:75</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
-<h3 class="tsd-anchor-link" id="readonly"><code class="tsd-tag">Readonly</code><span>read<wbr/>Only</span><a href="#readonly" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<h3 class="tsd-anchor-link" id="readonly"><code class="tsd-tag">Readonly</code><span class="deprecated">read<wbr/>Only</span><a href="#readonly" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">readOnly</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">false</span></div>
-<div class="tsd-comment tsd-typography"><p>Indicates whether the AAS source is read-only.</p>
-</div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-deprecated">
+<h4 class="tsd-anchor-link" id="deprecated-1">Deprecated<a href="#deprecated-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Indicates whether the AAS source is read-only.</p>
+</div></div><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#readonly">readOnly</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L73">projects/aas-node/src/app/client/api/api-client-v3.ts:73</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L73">projects/aas-node/src/app/client/api/api-client-v3.ts:73</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="version"><code class="tsd-tag">Static</code> <code class="tsd-tag">Readonly</code><span>version</span><a href="#version" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">version</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;^3.0.0&quot;</span><span class="tsd-signature-symbol"> = &#39;^3.0.0&#39;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L71">projects/aas-node/src/app/client/api/api-client-v3.ts:71</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L71">projects/aas-node/src/app/client/api/api-client-v3.ts:71</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Accessors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="accessors-1">Accessors<a href="#accessors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -150,12 +156,12 @@
 <li>
 <div class="tsd-signature" id="isopenisopen"><span class="tsd-signature-keyword">get</span> <span class="tsd-kind-get-signature">isOpen</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Indicates whether a connection to an AAS endpoint exits.</p>
+<div class="tsd-comment tsd-typography"><p>Indicates whether an active connection is established.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <p>Inherited from ApiClient.isOpen</p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client.ts#L43">projects/aas-node/src/app/client/api/api-client.ts:43</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client.ts#L44">projects/aas-node/src/app/client/api/api-client.ts:44</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -170,65 +176,50 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#close">close</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client.ts#L61">projects/aas-node/src/app/client/api/api-client.ts:61</a></li></ul></aside></div></li></ul></section>
-<section class="tsd-panel tsd-member tsd-is-inherited">
-<h3 class="tsd-anchor-link" id="createdocument"><span>create<wbr/>Document</span><a href="#createdocument" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures tsd-is-inherited">
-<li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="createdocument-1"><span class="tsd-kind-call-signature">createDocument</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">address</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span><a href="#createdocument-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
-<div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Creates a document for the given address.</p>
-</div>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">address</span>: <span class="tsd-signature-type">string</span></span>
-<div class="tsd-comment tsd-typography"><p>The address of the document to create.</p>
-</div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The created document.</p>
-<aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#createdocument">createDocument</a></p>
-<ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/endpoint-client.ts#L51">projects/aas-node/src/app/client/endpoint-client.ts:51</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client.ts#L59">projects/aas-node/src/app/client/api/api-client.ts:59</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="createsubscription"><span>create<wbr/>Subscription</span><a href="#createsubscription" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
 <div class="tsd-signature tsd-anchor-link" id="createsubscription-1"><span class="tsd-kind-call-signature">createSubscription</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">client</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.live_socket-client.SocketClient.html" class="tsd-signature-type tsd-kind-class">SocketClient</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">request</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/aas-core.LiveRequest.html" class="tsd-signature-type tsd-kind-interface">LiveRequest</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">env</span><span class="tsd-signature-symbol">:</span> <a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../types/aas-core.aas.Environment.html" class="tsd-signature-type tsd-kind-type-alias">Environment</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.live_socket-subscription.SocketSubscription.html" class="tsd-signature-type tsd-kind-class">SocketSubscription</a><a href="#createsubscription-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Creates a subscription for live data from an AAS endpoint.</p>
+<div class="tsd-comment tsd-typography"><p>Creates a WebSocket subscription.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">client</span>: <a href="aas-node.live_socket-client.SocketClient.html" class="tsd-signature-type tsd-kind-class">SocketClient</a></span>
-<div class="tsd-comment tsd-typography"><p>The socket.</p>
+<div class="tsd-comment tsd-typography"><p>The client.</p>
 </div></li>
 <li><span><span class="tsd-kind-parameter">request</span>: <a href="../interfaces/aas-core.LiveRequest.html" class="tsd-signature-type tsd-kind-interface">LiveRequest</a></span>
-<div class="tsd-comment tsd-typography"><p>The list of SubmodelElements to get live data.</p>
+<div class="tsd-comment tsd-typography"><p>The request.</p>
 </div></li>
 <li><span><span class="tsd-kind-parameter">env</span>: <a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../types/aas-core.aas.Environment.html" class="tsd-signature-type tsd-kind-type-alias">Environment</a></span>
-<div class="tsd-comment tsd-typography"><p>The AAS.</p>
+<div class="tsd-comment tsd-typography"><p>The AAS environment.</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="aas-node.live_socket-subscription.SocketSubscription.html" class="tsd-signature-type tsd-kind-class">SocketSubscription</a></h4><p>A new <code>HttpSubscription</code> instance.</p>
-<aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <a href="aas-node.live_socket-subscription.SocketSubscription.html" class="tsd-signature-type tsd-kind-class">SocketSubscription</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#createsubscription">createSubscription</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client.ts#L84">projects/aas-node/src/app/client/api/api-client.ts:84</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client.ts#L75">projects/aas-node/src/app/client/api/api-client.ts:75</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="createthumbnail"><code class="tsd-tag">Protected</code><span>create<wbr/>Thumbnail</span><a href="#createthumbnail" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
 <li class="tsd-is-inherited">
 <div class="tsd-signature tsd-anchor-link" id="createthumbnail-1"><span class="tsd-kind-call-signature">createThumbnail</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">address</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><a href="#createthumbnail-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Creates a thumbnail as Base64URL.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">address</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<li><span><span class="tsd-kind-parameter">address</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The thumbnail address.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A Base64URL string or <code>undefined</code> if the thumbnail does not exists.</p>
+<aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#createthumbnail">createThumbnail</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/endpoint-client.ts#L192">projects/aas-node/src/app/client/endpoint-client.ts:192</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/endpoint-client.ts#L216">projects/aas-node/src/app/client/endpoint-client.ts:216</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="deletepackage"><span>delete<wbr/>Package</span><a href="#deletepackage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -246,7 +237,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#deletepackage">deletePackage</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L213">projects/aas-node/src/app/client/api/api-client-v3.ts:213</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L232">projects/aas-node/src/app/client/api/api-client-v3.ts:232</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="determineaddress"><span>determine<wbr/>Address</span><a href="#determineaddress" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -264,7 +255,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#determineaddress">determineAddress</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client.ts#L71">projects/aas-node/src/app/client/api/api-client.ts:71</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client.ts#L69">projects/aas-node/src/app/client/api/api-client.ts:69</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getallassetadministrationshellidsbyassetlink"><span>get<wbr/>All<wbr/>Asset<wbr/>Administration<wbr/>Shell<wbr/>Ids<wbr/>By<wbr/>Asset<wbr/>Link</span><a href="#getallassetadministrationshellidsbyassetlink" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -282,7 +273,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getallassetadministrationshellidsbyassetlink">getAllAssetAdministrationShellIdsByAssetLink</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L271">projects/aas-node/src/app/client/api/api-client-v3.ts:271</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L290">projects/aas-node/src/app/client/api/api-client-v3.ts:290</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getblobvalue"><span>get<wbr/>Blob<wbr/>Value</span><a href="#getblobvalue" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -304,7 +295,7 @@
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getblobvalue">getBlobValue</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L258">projects/aas-node/src/app/client/api/api-client-v3.ts:258</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L277">projects/aas-node/src/app/client/api/api-client-v3.ts:277</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="getconceptdescriptionids"><code class="tsd-tag">Protected</code><span>get<wbr/>Concept<wbr/>Description<wbr/>Ids</span><a href="#getconceptdescriptionids" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
@@ -323,46 +314,66 @@
 <aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getconceptdescriptionids">getConceptDescriptionIds</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client.ts#L115">projects/aas-node/src/app/client/api/api-client.ts:115</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client.ts#L106">projects/aas-node/src/app/client/api/api-client.ts:106</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited">
+<h3 class="tsd-anchor-link" id="getdocument"><span>get<wbr/>Document</span><a href="#getdocument" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-is-inherited">
+<div class="tsd-signature tsd-anchor-link" id="getdocument-1"><span class="tsd-kind-call-signature">getDocument</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">address</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span><a href="#getdocument-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Creates an AAS document.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">address</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The address of the AAS at the endpoint.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The created document.</p>
+<aside class="tsd-sources">
+<p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getdocument">getDocument</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/endpoint-client.ts#L62">projects/aas-node/src/app/client/endpoint-client.ts:62</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getdocuments"><span>get<wbr/>Documents</span><a href="#getdocuments" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="getdocuments-1"><span class="tsd-kind-call-signature">getDocuments</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">cursor</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">limit</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#getdocuments-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Gets a page of Asset Administration Shells IDs from the endpoint.</p>
+<div class="tsd-comment tsd-typography"><p>Gets the documents of the current endpoint.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">cursor</span>: <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></span>
-<div class="tsd-comment tsd-typography"><p>The cursor for pagination. If undefined, the first page will be returned.</p>
+<div class="tsd-comment tsd-typography"><p>The cursor for the next page or undefined for the first page.</p>
 </div></li>
-<li><span><span class="tsd-kind-parameter">limit</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 100</span></span></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A page of Asset Administration Shells IDs.</p>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">limit</span>: <span class="tsd-signature-type">number</span></span>
+<div class="tsd-comment tsd-typography"><p>The maximum number of items per page.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The documents of the current endpoint.</p>
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getdocuments">getDocuments</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L92">projects/aas-node/src/app/client/api/api-client-v3.ts:92</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L97">projects/aas-node/src/app/client/api/api-client-v3.ts:97</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getenvironment"><span>get<wbr/>Environment</span><a href="#getenvironment" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="getenvironment-1"><span class="tsd-kind-call-signature">getEnvironment</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../types/aas-core.aas.Environment.html" class="tsd-signature-type tsd-kind-type-alias">Environment</a><span class="tsd-signature-symbol">&gt;</span><a href="#getenvironment-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Gets the environment of the AAS with the given ID.</p>
+<div class="tsd-comment tsd-typography"><p>Gets the AAS environment contained in the package with the specified address.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">id</span>: <span class="tsd-signature-type">string</span></span>
-<div class="tsd-comment tsd-typography"><p>The ID of the AAS.</p>
+<div class="tsd-comment tsd-typography"><p>The address of the package in the AAS endpoint.</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../types/aas-core.aas.Environment.html" class="tsd-signature-type tsd-kind-type-alias">Environment</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The environment of the AAS.</p>
-<aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../types/aas-core.aas.Environment.html" class="tsd-signature-type tsd-kind-type-alias">Environment</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getenvironment">getEnvironment</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L129">projects/aas-node/src/app/client/api/api-client-v3.ts:129</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L146">projects/aas-node/src/app/client/api/api-client-v3.ts:146</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getfile"><span>get<wbr/>File</span><a href="#getfile" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -383,7 +394,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getfile">getFile</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L176">projects/aas-node/src/app/client/api/api-client-v3.ts:176</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L195">projects/aas-node/src/app/client/api/api-client-v3.ts:195</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getpackage"><span>get<wbr/>Package</span><a href="#getpackage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -402,26 +413,65 @@
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getpackage">getPackage</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L194">projects/aas-node/src/app/client/api/api-client-v3.ts:194</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L213">projects/aas-node/src/app/client/api/api-client-v3.ts:213</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="getsubmodels"><span>get<wbr/>Submodels</span><a href="#getsubmodels" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getsubmodels-1"><span class="tsd-kind-call-signature">getSubmodels</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">cursor</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">limit</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../interfaces/aas-core.aas.Submodel.html" class="tsd-signature-type tsd-kind-interface">Submodel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#getsubmodels-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Gets the submodels of the current endpoint.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">cursor</span>: <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></span>
+<div class="tsd-comment tsd-typography"><p>The position for the next page.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">limit</span>: <span class="tsd-signature-type">number</span></span>
+<div class="tsd-comment tsd-typography"><p>The maximum number of submodels of a page.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../interfaces/aas-core.aas.Submodel.html" class="tsd-signature-type tsd-kind-interface">Submodel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
+<p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getsubmodels">getSubmodels</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L118">projects/aas-node/src/app/client/api/api-client-v3.ts:118</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getthumbnail"><span>get<wbr/>Thumbnail</span><a href="#getthumbnail" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="getthumbnail-1"><span class="tsd-kind-call-signature">getThumbnail</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&gt;</span><a href="#getthumbnail-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Gets a readable stream for the thumbnail of the AAS with the given ID.</p>
+<div class="tsd-comment tsd-typography"><p>Gets the thumbnail of the AAS package with the specified address.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">id</span>: <span class="tsd-signature-type">string</span></span>
-<div class="tsd-comment tsd-typography"><p>The ID of the AAS.</p>
+<div class="tsd-comment tsd-typography"><p>The address of the package in the AAS endpoint.</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A readable stream.</p>
-<aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#getthumbnail">getThumbnail</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L117">projects/aas-node/src/app/client/api/api-client-v3.ts:117</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L139">projects/aas-node/src/app/client/api/api-client-v3.ts:139</a></li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="hasdocument"><span>has<wbr/>Document</span><a href="#hasdocument" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="hasdocument-1"><span class="tsd-kind-call-signature">hasDocument</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">address</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span><a href="#hasdocument-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Determines whether the document with the specified address exists in the endpoint.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">address</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The address of the document in the endpoint.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4><p>True if the document exists, false otherwise.</p>
+<aside class="tsd-sources">
+<p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#hasdocument">hasDocument</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L84">projects/aas-node/src/app/client/api/api-client-v3.ts:84</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="insertpackage"><span>insert<wbr/>Package</span><a href="#insertpackage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -439,7 +489,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#insertpackage">insertPackage</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L204">projects/aas-node/src/app/client/api/api-client-v3.ts:204</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L223">projects/aas-node/src/app/client/api/api-client-v3.ts:223</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="invoke"><span>invoke</span><a href="#invoke" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -458,7 +508,7 @@
 <aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#invoke">invoke</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L223">projects/aas-node/src/app/client/api/api-client-v3.ts:223</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L242">projects/aas-node/src/app/client/api/api-client-v3.ts:242</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="open"><span>open</span><a href="#open" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -470,7 +520,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#open">open</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client.ts#L55">projects/aas-node/src/app/client/api/api-client.ts:55</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client.ts#L54">projects/aas-node/src/app/client/api/api-client.ts:54</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="readvalue"><span>read<wbr/>Value</span><a href="#readvalue" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -492,7 +542,7 @@
 <aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#readvalue">readValue</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client.ts#L98">projects/aas-node/src/app/client/api/api-client.ts:98</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client.ts#L89">projects/aas-node/src/app/client/api/api-client.ts:89</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="resolve"><code class="tsd-tag">Protected</code><span>resolve</span><a href="#resolve" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected tsd-is-inherited">
@@ -512,7 +562,7 @@
 <aside class="tsd-sources">
 <p>Inherited from <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#resolve">resolve</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/endpoint-client.ts#L181">projects/aas-node/src/app/client/endpoint-client.ts:181</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/endpoint-client.ts#L200">projects/aas-node/src/app/client/endpoint-client.ts:200</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="resolvenodeid"><span>resolve<wbr/>Node<wbr/>Id</span><a href="#resolvenodeid" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -533,38 +583,40 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#resolvenodeid">resolveNodeId</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L187">projects/aas-node/src/app/client/api/api-client-v3.ts:187</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L206">projects/aas-node/src/app/client/api/api-client-v3.ts:206</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setenvironment"><span>set<wbr/>Environment</span><a href="#setenvironment" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="setenvironment-1"><span class="tsd-kind-call-signature">setEnvironment</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">_</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">env</span><span class="tsd-signature-symbol">:</span> <a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../types/aas-core.aas.Environment.html" class="tsd-signature-type tsd-kind-type-alias">Environment</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#setenvironment-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Creates or updates the AAS, Submodels and Concept Descriptions contained in the given environment.</p>
+<div class="tsd-comment tsd-typography"><p>Sets a new AAS environment in the package with the specified address.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">_</span>: <span class="tsd-signature-type">string</span></span></li>
+<li><span><span class="tsd-kind-parameter">_</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>The address of the package in the AAS endpoint.</p>
+</div></li>
 <li><span><span class="tsd-kind-parameter">env</span>: <a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../types/aas-core.aas.Environment.html" class="tsd-signature-type tsd-kind-type-alias">Environment</a></span>
-<div class="tsd-comment tsd-typography"><p>The environment to set for the AAS. The environment must contain the AAS with the given ID.</p>
+<div class="tsd-comment tsd-typography"><p>The AAS environment.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#setenvironment">setEnvironment</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L150">projects/aas-node/src/app/client/api/api-client-v3.ts:150</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L163">projects/aas-node/src/app/client/api/api-client-v3.ts:163</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="test"><span>test</span><a href="#test" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="test-1"><span class="tsd-kind-call-signature">test</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#test-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Tests the connection to the endpoint by requesting a page of Asset Administration Shells.</p>
+<div class="tsd-comment tsd-typography"><p>Tests the connection to the AAS endpoint.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="aas-node.client_api_api-client.ApiClient.html">ApiClient</a>.<a href="aas-node.client_api_api-client.ApiClient.html#test">test</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/93b6c80da616891ebfe19869a2e2494f2437326a/projects/aas-node/src/app/client/api/api-client-v3.ts#L80">projects/aas-node/src/app/client/api/api-client-v3.ts:80</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/5c4a82c060f1ca1e408c8c5027bc3fb09f41c305/projects/aas-node/src/app/client/api/api-client-v3.ts#L77">projects/aas-node/src/app/client/api/api-client-v3.ts:77</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -587,7 +639,7 @@
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Accessors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Accessors</summary>
 <div><a href="#isopen" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Accessor"><use href="../assets/icons.svg#icon-262144"></use></svg><span>is<wbr/>Open</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#close" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>close</span></a><a href="#createdocument" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Document</span></a><a href="#createsubscription" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Subscription</span></a><a href="#createthumbnail" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Thumbnail</span></a><a href="#deletepackage"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete<wbr/>Package</span></a><a href="#determineaddress" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>determine<wbr/>Address</span></a><a href="#getallassetadministrationshellidsbyassetlink"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>All<wbr/>Asset<wbr/>Administration<wbr/>Shell<wbr/>Ids<wbr/>By<wbr/>Asset<wbr/>Link</span></a><a href="#getblobvalue"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Blob<wbr/>Value</span></a><a href="#getconceptdescriptionids" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Concept<wbr/>Description<wbr/>Ids</span></a><a href="#getdocuments"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Documents</span></a><a href="#getenvironment"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Environment</span></a><a href="#getfile"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>File</span></a><a href="#getpackage"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Package</span></a><a href="#getthumbnail"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Thumbnail</span></a><a href="#insertpackage"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>insert<wbr/>Package</span></a><a href="#invoke"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>invoke</span></a><a href="#open" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>open</span></a><a href="#readvalue" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>read<wbr/>Value</span></a><a href="#resolve" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>resolve</span></a><a href="#resolvenodeid"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>resolve<wbr/>Node<wbr/>Id</span></a><a href="#setenvironment"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Environment</span></a><a href="#test"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>test</span></a></div></details></div></details></div>
+<div><a href="#close" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>close</span></a><a href="#createsubscription" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Subscription</span></a><a href="#createthumbnail" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>create<wbr/>Thumbnail</span></a><a href="#deletepackage"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>delete<wbr/>Package</span></a><a href="#determineaddress" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>determine<wbr/>Address</span></a><a href="#getallassetadministrationshellidsbyassetlink"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>All<wbr/>Asset<wbr/>Administration<wbr/>Shell<wbr/>Ids<wbr/>By<wbr/>Asset<wbr/>Link</span></a><a href="#getblobvalue"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Blob<wbr/>Value</span></a><a href="#getconceptdescriptionids" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Concept<wbr/>Description<wbr/>Ids</span></a><a href="#getdocument" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Document</span></a><a href="#getdocuments"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Documents</span></a><a href="#getenvironment"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Environment</span></a><a href="#getfile"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>File</span></a><a href="#getpackage"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Package</span></a><a href="#getsubmodels"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Submodels</span></a><a href="#getthumbnail"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Thumbnail</span></a><a href="#hasdocument"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>has<wbr/>Document</span></a><a href="#insertpackage"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>insert<wbr/>Package</span></a><a href="#invoke"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>invoke</span></a><a href="#open" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>open</span></a><a href="#readvalue" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>read<wbr/>Value</span></a><a href="#resolve" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>resolve</span></a><a href="#resolvenodeid"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>resolve<wbr/>Node<wbr/>Id</span></a><a href="#setenvironment"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Environment</span></a><a href="#test"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>test</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">AASPortal</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
