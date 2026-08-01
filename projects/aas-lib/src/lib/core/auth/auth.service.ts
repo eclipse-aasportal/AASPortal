@@ -22,16 +22,16 @@ export class AuthService {
     private readonly cache = inject(HttpCache);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly document = inject(DOCUMENT);
-    private readonly user$ = signal<User | null | undefined>(undefined);
+    private readonly _user = signal<User | null | undefined>(undefined);
 
     public constructor() {
         this.http.get<User | null>('/api/me').subscribe({
             next: user => {
-                this.user$.set(user);
+                this._user.set(user);
                 this.cache.clear();
             },
             error: error => {
-                this.user$.set(null);
+                this._user.set(null);
                 this.cache.clear();
                 console.error(error);
             },
@@ -39,22 +39,22 @@ export class AuthService {
     }
 
     /** Signals that an authentication was performed. */
-    public readonly ready = toObservable(computed(() => this.user$() !== undefined));
+    public readonly ready = toObservable(computed(() => this._user() !== undefined));
 
     /** The e-mail of the current user. */
-    public readonly email = computed(() => this.user$()?.id);
+    public readonly email = computed(() => this._user()?.id);
 
     /** The name or alias of the current user. */
-    public readonly name = computed(() => this.user$()?.name);
+    public readonly name = computed(() => this._user()?.name);
 
     /** The current user role. */
-    public readonly role = computed(() => this.user$()?.role);
+    public readonly role = computed(() => this._user()?.role);
 
     /** Indicates whether the current user is authenticated. */
-    public readonly isAuthenticated = computed(() => this.user$() != null);
+    public readonly isAuthenticated = computed(() => this._user() != null);
 
     /** The current active user. */
-    public readonly user = this.user$.asReadonly();
+    public readonly user = this._user.asReadonly();
 
     /**
      * Ensures that the current user has the expected rights.
@@ -106,7 +106,7 @@ export class AuthService {
 
                 return this.http
                     .post<User>(callback, credentials, { params: queryParams })
-                    .pipe(map(user => this.user$.set(user)));
+                    .pipe(map(user => this._user.set(user)));
             }),
         );
     }
@@ -122,7 +122,7 @@ export class AuthService {
             return of(void 0);
         }
 
-        return this.http.post('/api/logout', null, { responseType: 'text' }).pipe(map(() => this.user$.set(null)));
+        return this.http.post('/api/logout', null, { responseType: 'text' }).pipe(map(() => this._user.set(null)));
     }
 
     /**
@@ -138,14 +138,14 @@ export class AuthService {
      * @param profile The updated user profile.
      */
     public updateAccount(profile: UserProfile): Observable<void> {
-        return this.http.patch<User>('/api/accounts', profile).pipe(map(user => this.user$.set(user)));
+        return this.http.patch<User>('/api/accounts', profile).pipe(map(user => this._user.set(user)));
     }
 
     /**
      * Deletes the account of the current authenticated user.
      */
     public deleteAccount(): Observable<void> {
-        return this.http.delete('/api/accounts', { responseType: 'text' }).pipe(map(() => this.user$.set(null)));
+        return this.http.delete('/api/accounts', { responseType: 'text' }).pipe(map(() => this._user.set(null)));
     }
 
     /**

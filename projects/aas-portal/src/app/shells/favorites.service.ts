@@ -6,11 +6,10 @@
  *
  *****************************************************************************/
 
-import { computed, inject, Injectable, linkedSignal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { lastValueFrom, Observable } from 'rxjs';
 import { AASDocument } from 'aas-core';
 import { AuthService, CookieService } from 'aas-lib';
-import { httpResource } from '@angular/common/http';
 
 export type FavoritesList = {
     name: string;
@@ -25,21 +24,22 @@ const cookieName = 'v2.Favorites';
 export class FavoritesService {
     private readonly auth = inject(AuthService);
     private readonly cookies = inject(CookieService);
+    private readonly state = signal<FavoritesState>({ active: '', items: [] });
 
-    private readonly cookie = httpResource<FavoritesState>(
-        () => {
+    public constructor() {
+        effect(async () => {
             this.auth.user();
-            return `/api/v1/cookies/${cookieName}`;
-        },
-        {
-            defaultValue: { active: '', items: [] } satisfies FavoritesState,
-            parse: value => (typeof value === 'string' ? JSON.parse(value) : { active: '', items: [] }),
-        },
-    );
-
-    private readonly state = linkedSignal(() =>
-        this.cookie.hasValue() ? this.cookie.value() : { active: '', items: [] },
-    );
+            const value = await lastValueFrom(this.cookies.getCookie(cookieName));
+            if (value) {
+                try {
+                    const state = JSON.parse(value) as FavoritesState;
+                    this.state.set(state);
+                } catch (error) {
+                    console.error(`Failed to parse favorites cookie: ${error}`);
+                }
+            }
+        });
+    }
 
     public readonly items = computed(() => this.state().items);
 

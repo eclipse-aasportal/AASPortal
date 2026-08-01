@@ -69,10 +69,10 @@ export class App {
                 resave: false,
                 store: this.sessionStore,
                 cookie: {
-                    secure: false,
+                    secure: 'auto',
                     httpOnly: true,
-                    sameSite: 'strict',
-                    maxAge: 86400000,
+                    sameSite: 'lax',
+                    maxAge: this.variable.SESSION_TTL * 1000,
                 },
             }),
         );

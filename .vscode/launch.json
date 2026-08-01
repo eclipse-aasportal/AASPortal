@@ -91,6 +91,7 @@
                 "REDIRECT_URI": "http://localhost:4200/api/callback",
                 "COOKIE_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
+                "HOST_URL": "http://localhost:4200",
             }
         },
         {

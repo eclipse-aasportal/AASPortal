@@ -24,11 +24,12 @@ export class SessionStoreFactory {
     public static getInstance(c: DependencyContainer): SessionStore | undefined {
         if (!SessionStoreFactory.instance) {
             const url = c.resolve(Variable).SESSION_STORE;
+            const variable = c.resolve(Variable);
             if (!url) {
                 SessionStoreFactory.instance = undefined;
             } else if (url.startsWith('mongodb:')) {
                 const connection = c.resolve(MongoDBConnectionProvider).getConnection(url);
-                SessionStoreFactory.instance = new SessionStore(c.resolve(LOGGER), connection);
+                SessionStoreFactory.instance = new SessionStore(c.resolve(LOGGER), connection, variable);
             } else {
                 throw new ApplicationError(`Unknown session store: ${url}`);
             }
