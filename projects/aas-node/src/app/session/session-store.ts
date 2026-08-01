@@ -10,6 +10,7 @@ import session, { Cookie, SessionData } from 'express-session';
 import mongoose from 'mongoose';
 import { InjectionToken } from 'tsyringe';
 import { Logger } from 'aas-package';
+import { Variable } from '../variable';
 
 interface ToJson {
     toJSON(value: unknown): Cookie;
@@ -22,6 +23,7 @@ function isToJson(value: unknown): value is ToJson {
 export interface SessionDataDocument extends mongoose.Document<string> {
     _id: string;
     session: SessionData;
+    lastAccessAt: Date;
 }
 
 export const SESSION_STORE = Symbol('SESSION_STORE') as InjectionToken<session.Store | undefined>;
@@ -33,21 +35,20 @@ export const SESSION_STORE = Symbol('SESSION_STORE') as InjectionToken<session.S
  */
 export class SessionStore extends session.Store {
     private readonly model: mongoose.Model<SessionDataDocument>;
-    private ttl: number = 86400;
-    private readonly schema = new mongoose.Schema<SessionDataDocument>(
-        {
-            _id: { type: String, required: true },
-            session: { type: mongoose.Schema.Types.Mixed, required: false },
-        },
-        { expires: this.ttl },
-    );
+    private readonly schema = new mongoose.Schema<SessionDataDocument>({
+        _id: { type: String, required: true },
+        session: { type: mongoose.Schema.Types.Mixed, required: false },
+        lastAccessAt: { type: Date, default: Date.now },
+    });
 
     public constructor(
         private readonly logger: Logger,
         private readonly connection: mongoose.Connection,
+        private readonly variable: Variable,
     ) {
         super();
 
+        this.schema.index({ lastAccessAt: 1 }, { expireAfterSeconds: this.variable.SESSION_TTL });
         this.model = this.connection.model<SessionDataDocument>('SessionData', this.schema);
         this.logger.info('Using MongoDB session store');
     }
@@ -85,6 +86,20 @@ export class SessionStore extends session.Store {
 
     public override destroy(sessionId: string, callback?: (err?: unknown) => void): void {
         this.deleteSessionData(sessionId)
+            .then(() => {
+                if (callback) {
+                    callback();
+                }
+            })
+            .catch(error => {
+                if (callback) {
+                    callback(error);
+                }
+            });
+    }
+
+    public override touch(sessionId: string, session: session.SessionData, callback?: (err?: unknown) => void): void {
+        this.touchSessionData(sessionId, session)
             .then(() => {
                 if (callback) {
                     callback();
@@ -166,7 +181,21 @@ export class SessionStore extends session.Store {
             return;
         }
 
-        await this.model.findOneAndReplace({ _id }, { _id, session: { ...data, cookie } }, { upsert: true }).exec();
+        await this.model
+            .findOneAndUpdate(
+                { _id },
+                { _id, session: { ...data, cookie }, lastAccessAt: new Date() },
+                { upsert: true },
+            )
+            .exec();
+    }
+
+    private async touchSessionData(_id: string, data: SessionData): Promise<void> {
+        const cookie = isToJson(data.cookie) ? data.cookie.toJSON(data.cookie) : data.cookie;
+
+        await this.model
+            .findOneAndUpdate({ _id }, { _id, session: { ...data, cookie }, lastAccessAt: new Date() }, { new: true })
+            .exec();
     }
 
     private getTTL(data: SessionData): number {
@@ -175,7 +204,7 @@ export class SessionStore extends session.Store {
             const ms = Number(new Date(data.cookie.expires)) - Date.now();
             ttl = Math.ceil(ms / 1000);
         } else {
-            ttl = this.ttl;
+            ttl = this.variable.SESSION_TTL;
         }
 
         return ttl;

@@ -87,6 +87,9 @@ export class Variable {
     /** The session store. */
     public readonly SESSION_STORE?: string = process.env.SESSION_STORE;
 
+    /** The session time-to-live in seconds. */
+    public readonly SESSION_TTL: number = process.env.SESSION_TTL ? Number(process.env.SESSION_TTL) : 86400;
+
     /** The root directory for static files. */
     public readonly WEB_ROOT: string = path.resolve(process.env.WEB_ROOT ?? './wwwroot');
 }

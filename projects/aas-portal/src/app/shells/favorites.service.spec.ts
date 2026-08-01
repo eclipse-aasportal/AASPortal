@@ -7,23 +7,19 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { ApplicationRef, provideZonelessChangeDetection, signal } from '@angular/core';
+import { ApplicationRef, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { lastValueFrom, of } from 'rxjs';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AuthService, CookieService } from 'aas-lib';
 import { AASDocument, User } from 'aas-core';
 import { FavoritesList, FavoritesService, FavoritesState } from './favorites.service';
-import { createSpyObj, FakeLoader } from '../../test/mocks';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { createSpyObj } from '../../test/mocks';
 
 describe('FavoritesService', () => {
     let service: FavoritesService;
     let cookies: Mocked<CookieService>;
     let auth: Mocked<AuthService>;
     let app: ApplicationRef;
-    let httpController: HttpTestingController;
 
     const user = signal<User | null>(null);
     const favorite: AASDocument = {
@@ -51,7 +47,7 @@ describe('FavoritesService', () => {
         cookies.getCookie.mockReturnValue(of(JSON.stringify(state)));
         cookies.setCookie.mockReturnValue(of(void 0));
         cookies.deleteCookie.mockReturnValue(of(void 0));
-        auth = createSpyObj<AuthService>([], { ready: of(true), user });
+        auth = createSpyObj<AuthService>([], { user });
 
         TestBed.configureTestingModule({
             providers: [
@@ -64,40 +60,24 @@ describe('FavoritesService', () => {
                     provide: CookieService,
                     useValue: cookies,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-                provideHttpClient(),
-                provideHttpClientTesting(),
             ],
         });
 
         app = TestBed.inject(ApplicationRef);
-        httpController = TestBed.inject(HttpTestingController);
         service = TestBed.inject(FavoritesService);
-
         app.tick();
-        httpController.expectOne('/api/v1/cookies/v2.Favorites').flush(JSON.stringify(state));
     });
 
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
 
-    describe('items', () => {
-        it('provides all favorites lists', () => {
-            expect(service.items()).toEqual(favorites);
-        });
+    it('provides all favorites lists', () => {
+        expect(service.items()).toEqual(favorites);
     });
 
-    describe('active', () => {
-        it('provides an active favorite list', () => {
-            expect(service.active()).toEqual('');
-        });
+    it('provides an active favorite list', () => {
+        expect(service.active()).toEqual('');
     });
 
     describe('has', () => {

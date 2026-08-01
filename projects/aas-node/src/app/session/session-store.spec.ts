@@ -13,6 +13,7 @@ import { Logger } from 'aas-package';
 import { SessionDataDocument, SessionStore } from './session-store';
 import { createSpyObj } from '../../test/mocks';
 import { SessionData } from 'express-session';
+import { Variable } from '../variable';
 
 vi.mock(import('mongoose'), () => {
     return {
@@ -22,6 +23,8 @@ vi.mock(import('mongoose'), () => {
                 public static Types = {
                     Mixed: class {},
                 };
+
+                public index = vi.fn();
             },
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,12 +35,14 @@ describe('SessionStore', () => {
     let store: SessionStore;
     let logger: Mocked<Logger>;
     let connection: Mocked<mongoose.Connection>;
+    let variable: Mocked<Variable>;
     let model: Mocked<mongoose.Model<SessionDataDocument>>;
     let modelConstructor: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['info', 'warning', 'error']);
         connection = createSpyObj<mongoose.Connection>(['model', 'close']);
+        variable = createSpyObj<Variable>([], { SESSION_TTL: 86400 });
         modelConstructor = vi.fn(function (this: SessionDataDocument, data: Partial<SessionDataDocument>) {
             Object.assign(this, data);
             this.save = vi.fn().mockResolvedValue(this);
@@ -50,14 +55,14 @@ describe('SessionStore', () => {
                 'findOne',
                 'deleteMany',
                 'findOneAndDelete',
-                'findOneAndReplace',
+                'findOneAndUpdate',
                 'countDocuments',
             ]),
         );
 
         model = modelConstructor as unknown as Mocked<mongoose.Model<SessionDataDocument>>;
         connection.model.mockReturnValue(model as unknown as mongoose.Model<unknown>);
-        store = new SessionStore(logger, connection);
+        store = new SessionStore(logger, connection, variable);
     });
 
     afterEach(() => {
@@ -136,7 +141,7 @@ describe('SessionStore', () => {
 
             const query = createSpyObj<mongoose.Query<SessionDataDocument | null, SessionDataDocument>>(['exec'], {});
             query.exec.mockResolvedValue(null);
-            model.findOneAndReplace.mockReturnValue(query as unknown as ReturnType<typeof model.findOneAndReplace>);
+            model.findOneAndUpdate.mockReturnValue(query as unknown as ReturnType<typeof model.findOneAndReplace>);
 
             await new Promise<void>((resolve, reject) => {
                 store.set(sessionId, sessionData, err => {
@@ -148,7 +153,7 @@ describe('SessionStore', () => {
                 });
             });
 
-            expect(model.findOneAndReplace).toHaveBeenCalledWith(
+            expect(model.findOneAndUpdate).toHaveBeenCalledWith(
                 expect.objectContaining({ _id: sessionId }),
                 expect.objectContaining({ _id: sessionId, session: expect.objectContaining(sessionData) }),
                 { upsert: true },
@@ -193,7 +198,7 @@ describe('SessionStore', () => {
             store['getTTL'] = vi.fn().mockReturnValue(1000);
             const query = createSpyObj<mongoose.Query<SessionDataDocument | null, SessionDataDocument>>(['exec'], {});
             query.exec.mockResolvedValue(existingDoc);
-            model.findOneAndReplace.mockReturnValue(query as unknown as ReturnType<typeof model.findOneAndReplace>);
+            model.findOneAndUpdate.mockReturnValue(query as unknown as ReturnType<typeof model.findOneAndUpdate>);
 
             await new Promise<void>((resolve, reject) => {
                 store.set(sessionId, sessionData, err => {
@@ -204,6 +209,44 @@ describe('SessionStore', () => {
                     }
                 });
             });
+        });
+    });
+
+    describe('touch', () => {
+        it('should update lastAccessAt for existing session data', async () => {
+            const sessionId = 'session-id';
+            const sessionData: SessionData = {
+                cookie: {
+                    originalMaxAge: 1000,
+                    expires: new Date(),
+                    secure: false,
+                    httpOnly: true,
+                    domain: 'example.com',
+                },
+                state: 'state',
+                code_verifier: 'code_verifier',
+                endpoints: [],
+            };
+
+            const query = createSpyObj<mongoose.Query<SessionDataDocument | null, SessionDataDocument>>(['exec'], {});
+            query.exec.mockResolvedValue(null);
+            model.findOneAndUpdate.mockReturnValue(query as unknown as ReturnType<typeof model.findOneAndUpdate>);
+
+            await new Promise<void>((resolve, reject) => {
+                store.touch(sessionId, sessionData, err => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+
+            expect(model.findOneAndUpdate).toHaveBeenCalledWith(
+                expect.objectContaining({ _id: sessionId }),
+                expect.objectContaining({ _id: sessionId, session: expect.objectContaining(sessionData) }),
+                { new: true },
+            );
         });
     });
 
