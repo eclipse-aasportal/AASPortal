@@ -194,7 +194,11 @@ export class SessionStore extends session.Store {
         const cookie = isToJson(data.cookie) ? data.cookie.toJSON(data.cookie) : data.cookie;
 
         await this.model
-            .findOneAndUpdate({ _id }, { _id, session: { ...data, cookie }, lastAccessAt: new Date() }, { new: true })
+            .findOneAndUpdate(
+                { _id },
+                { _id, session: { ...data, cookie }, lastAccessAt: new Date() },
+                { returnDocument: 'after' },
+            )
             .exec();
     }
 
