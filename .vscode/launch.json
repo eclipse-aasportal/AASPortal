@@ -95,6 +95,19 @@
             }
         },
         {
+            "name": "Attache to aas-node ",
+            "type": "node",
+            "request": "attach",
+            "address": "http://172.16.160.172:1337",
+            "port": 9229,
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/usr/src/app",
+            "restart": false,
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "Launch aas-server",
             "type": "node",
             "args": [],

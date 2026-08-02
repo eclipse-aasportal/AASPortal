@@ -1,0 +1,29 @@
+# Dockerfile to build aas-node app
+ARG NODE_IMAGE=node:24.18.0-alpine
+
+FROM $NODE_IMAGE AS build
+ARG GITHUB_RUN_NUMBER=520
+ARG GITHUB_REF_NAME=development
+WORKDIR /usr/src/app
+COPY . .
+RUN npm ci
+RUN npm run set-version $GITHUB_RUN_NUMBER $GITHUB_REF_NAME
+RUN npm run create-app-info
+RUN npm run build:debug -w=aas-core -w=aas-package -w=aas-node
+
+FROM $NODE_IMAGE AS aas-node
+RUN apk upgrade --update-cache --available && apk add openssl && rm -rf /var/cache/apk/*
+WORKDIR /usr/src/app
+COPY --from=build /usr/src/app/projects/aas-node/package.json package.json
+RUN npm install --omit=dev
+COPY --from=build /usr/src/app/projects/aas-node/src/assets assets/
+COPY --from=build /usr/src/app/projects/aas-node/dist/ .
+COPY --from=build /usr/src/app/projects/aas-core/dist/ node_modules/aas-core/dist/
+COPY --from=build /usr/src/app/projects/aas-core/package.json node_modules/aas-core/package.json
+COPY --from=build /usr/src/app/projects/aas-package/dist/ node_modules/aas-package/dist/
+COPY --from=build /usr/src/app/projects/aas-package/package.json node_modules/aas-package/package.json
+
+EXPOSE 1337
+EXPOSE 9229
+CMD ["node", "--inspect=0.0.0.0:9229", "-e", "NODE_ENV=development", "aas-node.js" ]
+    
