@@ -25,5 +25,5 @@ COPY --from=build /usr/src/app/projects/aas-package/package.json node_modules/aa
 
 EXPOSE 1337
 EXPOSE 9229
-CMD ["node", "--inspect=0.0.0.0:9229", "-e", "NODE_ENV=development", "aas-node.js" ]
+CMD ["node", "--inspect=0.0.0.0:9229", "aas-node.js" ]
     
