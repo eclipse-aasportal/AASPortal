@@ -245,7 +245,7 @@ describe('SessionStore', () => {
             expect(model.findOneAndUpdate).toHaveBeenCalledWith(
                 expect.objectContaining({ _id: sessionId }),
                 expect.objectContaining({ _id: sessionId, session: expect.objectContaining(sessionData) }),
-                { new: true },
+                { returnDocument: 'after' },
             );
         });
     });
