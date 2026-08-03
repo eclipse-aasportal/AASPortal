@@ -95,14 +95,14 @@
             }
         },
         {
-            "name": "Attache to aas-node ",
+            "name": "Attach aas-node (Docker 172.16.160.172)",
             "type": "node",
             "request": "attach",
-            "address": "http://172.16.160.172:1337",
+            "address": "172.16.160.172",
             "port": 9229,
-            "localRoot": "${workspaceFolder}",
+            "localRoot": "${workspaceFolder}/projects/aas-node",
             "remoteRoot": "/usr/src/app",
-            "restart": false,
+            "restart": true,
             "skipFiles": [
                 "<node_internals>/**"
             ]
