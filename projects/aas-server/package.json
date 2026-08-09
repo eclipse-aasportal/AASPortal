@@ -32,7 +32,7 @@
         "lodash-es": "^4.17.23",
         "morgan": "^1.10.1",
         "multer": "^2.1.1",
-        "nanoid": "^5.1.7",
+        "nanoid": "^5.1.16",
         "reflect-metadata": "^0.2.2",
         "swagger-ui-express": "^5.0.1",
         "tslib": "^2.8.1",
