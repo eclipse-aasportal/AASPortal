@@ -7,8 +7,9 @@
  !---------------------------------------------------------------------------->
 
 @if (items().length > 0) {
-    <div class="table-responsive">
-        <table class="table table-sm table-hover table-striped">
+     <!-- Desktop View -->
+    <div class="d-none d-sm-block table-responsive border border-black border-opacity-25 rounded-2 pb-0">
+        <table class="table table-hover">
             <thead>
                 <tr>
                     <th class="th-w-checkbox">
@@ -16,13 +17,13 @@
                             id="aas-table-checkbox"
                             type="checkbox"
                             class="form-check-input"
+                            style="font-size: 16px;"
                             [indeterminate]="someSelected()"
                             [ngModel]="everySelected()"
                             (ngModelChange)="toggleSelected($event)"
                         />
                     </th>
                     <th scope="col" class="th-w-icon">
-                        <i class="bi bi-tag"></i>
                     </th>
                     <th scope="col">
                         <div class="me-1" translate="AASTable.COLUMN_NAME"></div>
@@ -53,8 +54,8 @@
                                     <div class="position-relative">
                                         <img
                                             class="object-fit-contain opacity-50"
-                                            width="40"
-                                            height="40"
+                                            width="30"
+                                            height="30"
                                             [src]="item.thumbnail"
                                             [alt]="item.name"
                                             (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
@@ -70,8 +71,8 @@
                                     <div class="position-relative">
                                         <img
                                             class="object-fit-contain opacity-50"
-                                            width="40"
-                                            height="40"
+                                            width="30"
+                                            height="30"
                                             [src]="item.thumbnail"
                                             [alt]="item.name"
                                             (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
@@ -87,8 +88,8 @@
                                     <div>
                                         <img
                                             class="object-fit-contain"
-                                            width="40"
-                                            height="40"
+                                            width="30"
+                                            height="30"
                                             [src]="item.thumbnail"
                                             [alt]="item.name"
                                             (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
@@ -98,13 +99,13 @@
                             }
                         </td>
                         <td>
-                            <a [routerLink]="getRouterLink(item)">{{ item.name | max: 60 }}</a>
+                            <a class="fs-6 text-primary fw-semibold text-nowrap" [routerLink]="getRouterLink(item)">{{ item.name | max: 60 }}</a>
                         </td>
                         <td>
                             <div class="text-nowrap">{{ item.endpoint }}</div>
                         </td>
                         <td>
-                            <div class="text-nowrap" placement="top">
+                            <div class="text-nowrap id-text fs-7 text-body-secondary fw-lighter " placement="top">
                                 {{ item.id | max: 80 }}
                             </div>
                         </td>
@@ -112,6 +113,79 @@
                 }
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile View -->
+    <div class="d-block d-sm-none">
+        @for (item of items(); track getTrackId(item)) {
+            <a
+                [routerLink]="getRouterLink(item)"
+                class="fhg-mobile-row py-2 d-flex flex-row align-items-center border-bottom border-black border-opacity-25 text-decoration-none text-body"
+            >
+                <div class="me-3">
+                @switch (item.state) {
+                    @case ('unloaded') {
+                        <div class="position-relative">
+                            <img
+                                class="object-fit-contain opacity-50"
+                                width="30"
+                                height="30"
+                                [src]="item.thumbnail"
+                                [alt]="item.name"
+                                (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                            />
+                            <div
+                                class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info"
+                            >
+                                <i class="bi bi-cloud-arrow-down"></i>
+                            </div>
+                        </div>
+                    }
+                    @case ('unavailable') {
+                        <div class="position-relative">
+                            <img
+                                class="object-fit-contain opacity-50"
+                                width="30"
+                                height="30"
+                                [src]="item.thumbnail"
+                                [alt]="item.name"
+                                (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                            />
+                            <div
+                                class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger"
+                            >
+                                <i class="bi bi-cone-striped"></i>
+                            </div>
+                        </div>
+                    }
+                    @default {
+                        <div>
+                            <img
+                                class="object-fit-contain"
+                                width="30"
+                                height="30"
+                                [src]="item.thumbnail"
+                                [alt]="item.name"
+                                (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                            />
+                        </div>
+                    }
+                }
+                </div>
+
+                <div class="d-flex flex-column">
+                    <span class="fs-6 text-primary fw-semibold text-nowrap">{{ item.name | max: 30 }}</span>
+                    <div class="text-nowrap id-text fs-7 text-body-secondary fw-lighter " placement="top">
+                        {{ item.id | max: 35 }}
+                    </div>
+                </div>
+
+                <div class="ms-auto">
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+
+            </a>
+        }
     </div>
 } @else {
     <div class="alert alert-info text-center mt-2" role="alert" translate="AASTable.INFO_NO_SHELLS_AVAILABLE"></div>

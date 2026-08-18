@@ -14,22 +14,57 @@
     left: 0;
     right: 0;
     grid-template-columns: auto;
-    grid-template-rows: min-content min-content 1fr min-content;
+    grid-template-rows: min-content min-content minmax(0, 1fr) min-content;
     grid-template-areas: "navbar" "toolbar" "content" "statusbar";
+    width: 100%;
+    margin:auto;
  }
+
+ @media (min-width: 992px) { 
+    .fhg-main-page {
+        width: 75%;
+    }
+  }
+
+
  
 .fhg-main-navbar {
     grid-area: navbar;
     overflow: visible;
 }
 
+/* .fhg-main-navbar .navbar {
+    background-color: var(--bs-secondary);
+    color: var(--bs-secondary-subtle);
+} */
+
 .fhg-main-toolbar {
     grid-area: toolbar;
     overflow: visible;
+    width: 95%;
+    margin:auto;
 }
 
 .fhg-main-content {
     grid-area: content;
+    overflow: hidden;
+    height: 100%;
+    min-height: 0;
+    width: 95%;
+    margin:auto;
+    display: flex;
+    flex-direction: column;
+}
+
+// The routed component's host element (e.g. <fhg-shells>) has no display set by
+// Angular, so it defaults to `display: inline` and can't be stretched/clipped like
+// a normal block box. It also doesn't carry this component's view-encapsulation
+// attribute (it's a separate component's host), so a plain selector here can never
+// match it — ::ng-deep is required to reach across that boundary from this stylesheet.
+::ng-deep .fhg-main-content > router-outlet + * {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow: hidden;
 }
 
@@ -43,4 +78,9 @@
 
 .fhg-pointer {
     cursor: pointer;
+}
+
+.nav-link.active {
+    text-decoration: underline;
+    text-underline-offset: 5px;
 }

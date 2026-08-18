@@ -7,7 +7,7 @@
         "VERSION": "Version",
         "AAS_ID": "AAS ID",
         "ASSET_ID": "Asset ID",
-        "OVERVIEW": "AAS-Übersicht"
+        "OVERVIEW": "AAS-Übersicht",
     },
     "AASContent": {
         "TITLE": "AAS-Baum",

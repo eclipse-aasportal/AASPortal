@@ -18,3 +18,35 @@ div.wh-4 {
     width: 16px;
     height: 16px;
 }
+
+.table thead {
+    // --bs-gray-100/600 are Bootstrap's raw, fixed color-swatch scale — never redefined
+    // under [data-bs-theme="dark"], so they stayed visually identical in both themes.
+    // --bs-secondary-color/-bg are the theme-aware equivalents (same "muted gray" look
+    // in light mode) and actually do have separate dark-mode values.
+    --bs-table-color: var(--bs-secondary-color);
+    --bs-table-bg: var(--bs-secondary-bg);
+    font-size: small;
+}
+
+.table {
+    --bs-table-hover-bg: var(--bs-primary-bg-subtle); // or any color/theme variable
+}
+
+.id-text {
+    font-family: ui-monospace, monospace;
+}
+
+a {
+    text-decoration: none;
+}
+
+.fhg-mobile-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+
+    &:hover,
+    &:focus-visible {
+        background-color: var(--bs-primary-bg-subtle);
+    }
+}
