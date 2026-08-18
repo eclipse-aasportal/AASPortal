@@ -28,6 +28,7 @@ import {
     convertToString,
     getChildren,
     getLocaleValue,
+    getUnit,
     isFile,
     isMultiLanguageProperty,
     isProperty,
@@ -44,25 +45,33 @@ import { WebSocketService } from '../../shared/services/web-socket.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { LeafView } from '../leaf-view';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
+import { NgTemplateOutlet } from '@angular/common';
 
 export type GroupItem = {
     idShort: string;
     name: string;
     value: WritableSignal<string | undefined>;
+    unit: string | undefined;
     type: 'text' | 'link';
     element: aas.SubmodelElement;
     url?: string;
     isOnline?: boolean;
 };
 
-export type Group = { idShort: string; name: string; items: GroupItem[] };
+export type Group = { 
+    idShort: string; 
+    name: string; 
+    items: GroupItem[];
+    path: string;     // 'OperationalData/Machine/Motor'
+    level: number;    // 0, 1, 2 ...
+};
 
 @Component({
     selector: 'fhg-operational-data-view',
     templateUrl: './operational-data-view.html',
     styleUrl: './operational-data-view.scss',
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'OperationalData' }],
-    imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective, RouterLink],
+    imports: [NgbAccordionModule, ThumbnailQRCode, TranslateDirective, RouterLink, NgTemplateOutlet],
 })
 export class OperationalDataView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GroupItem>();
@@ -70,6 +79,8 @@ export class OperationalDataView extends LeafView implements OnDestroy {
     private readonly webSocket = inject(WebSocketService);
     private liveNodes: LiveNode[] = [];
     private webSocketSubscription?: Subscription;
+    public readonly expanded = signal<ReadonlySet<string>>(new Set());
+    public readonly query = signal('');
 
     public constructor() {
         super();
@@ -88,6 +99,11 @@ export class OperationalDataView extends LeafView implements OnDestroy {
                 this.play();
             }
         });
+
+        effect(() => {
+            const all = this.groups().map(g => g.path);
+            this.expanded.set(new Set(all));
+        });
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
@@ -102,20 +118,43 @@ export class OperationalDataView extends LeafView implements OnDestroy {
         }
 
         const groups: Group[] = [];
-        const stack: aas.Referable[] = [];
-        stack.push(operationalData);
-        while (stack.length > 0) {
-            const referable = stack.pop()!;
-            groups.push(this.createGroup(referable, getChildren(referable)));
-            for (const child of getChildren(referable)) {
-                if ((isSubmodelElementCollection(child) || isSubmodelElementList(child)) && child.value) {
-                    stack.push(child);
-                }
+        this.collect(operationalData, 0, '', groups);
+        return groups;
+
+    });
+
+    public rootGroup = computed(() => this.groups()[0]);
+
+    public childGroups(path: string): Group[] {
+        const visible = this.filtered().visible;
+        return this.groups().filter(g =>
+            g.path.startsWith(path + '/') &&
+            !g.path.slice(path.length + 1).includes('/') &&
+            visible.has(g.path));
+    }
+
+    public isExpanded(path: string): boolean {
+        return this.query().trim().length > 0 || this.expanded().has(path);
+    }
+
+    public toggle(path: string): void {
+        const next = new Set(this.expanded());
+        next.has(path) ? next.delete(path) : next.add(path);
+        this.expanded.set(next);   // new Set, so the signal actually fires
+    }
+
+    private collect(referable: aas.Referable, level: number, parentPath: string, out: Group[]): void {
+        const path = parentPath ? `${parentPath}/${referable.idShort}` : referable.idShort;
+        const children = getChildren(referable);
+
+        out.push({ ...this.createGroup(referable, children), path, level });
+
+        for (const child of children) {
+            if ((isSubmodelElementCollection(child) || isSubmodelElementList(child)) && child.value) {
+                this.collect(child, level + 1, path, out);
             }
         }
-
-        return groups;
-    });
+    }
 
     public ngOnDestroy(): void {
         this.webSocketSubscription?.unsubscribe();
@@ -126,7 +165,38 @@ export class OperationalDataView extends LeafView implements OnDestroy {
         return EMPTY;
     }
 
-    private createGroup(parent: aas.Referable, children: aas.Referable[]): Group {
+    public itemsOf(path: string): GroupItem[] {
+        return this.filtered().itemsByPath.get(path) ?? [];
+    }
+
+    public matchCount = computed(() =>
+        [...this.filtered().itemsByPath.values()].reduce((n, items) => n + items.length, 0));
+
+    private readonly filtered = computed(() => {
+        const q = this.query().trim().toLowerCase();
+        const visible = new Set<string>();
+        const itemsByPath = new Map<string, GroupItem[]>();
+
+        for (const group of this.groups()) {
+            const nameHit = q.length > 0 && group.name.toLowerCase().includes(q);
+            const items = !q || nameHit
+                ? group.items
+                : group.items.filter(i => i.name.toLowerCase().includes(q));
+
+            itemsByPath.set(group.path, items);
+
+            if (!q || items.length > 0 || nameHit) {
+                const parts = group.path.split('/');
+                for (let i = 1; i <= parts.length; i++) {
+                    visible.add(parts.slice(0, i).join('/'));
+                }
+            }
+        }
+
+        return { visible, itemsByPath };
+    });
+
+    private createGroup(parent: aas.Referable, children: aas.Referable[]): Omit<Group, 'path' | 'level'> {
         const currentLang = this.currentLang();
         const env = this.document()?.content;
         const items: GroupItem[] = [];
@@ -138,6 +208,7 @@ export class OperationalDataView extends LeafView implements OnDestroy {
                     value: signal(child.value),
                     type: 'text',
                     element: child,
+                    unit: env ? getUnit(env, child) : undefined
                 };
 
                 items.push(item);
@@ -162,6 +233,7 @@ export class OperationalDataView extends LeafView implements OnDestroy {
                     value: signal(getLocaleValue(child.value, currentLang)),
                     type: 'text',
                     element: child,
+                    unit: env ? getUnit(env, child) : undefined
                 });
             } else if (isFile(child)) {
                 if (!child.value) {
@@ -175,6 +247,7 @@ export class OperationalDataView extends LeafView implements OnDestroy {
                     type: 'link',
                     element: child,
                     url: getUrl(this.document()!, child),
+                    unit: env ? getUnit(env, child) : undefined
                 });
             }
         }
