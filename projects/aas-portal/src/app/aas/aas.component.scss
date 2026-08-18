@@ -16,12 +16,38 @@
  }
 
 .label {
-    font-size: 10px;
-    font-weight: bold;
+    font-size: 14px;
+    color: var(--bs-gray-600)
+ }
+
+// Matches fhg-thumbnail-qrcode's thumbnail-img (aas-lib): a fixed inline max-height never
+// responds to viewport size, so on narrow windows the image stayed the same size instead of
+// shrinking. Same responsive cap here so both components behave identically.
+.thumbnail-img {
+    max-height: min(150px, 30vw);
  }
 
 .w-md-40 {
    width: 45%;
+}
+
+.fhg-submodel-card {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+
+    &:hover,
+    &:focus-visible {
+        background-color: var(--bs-primary-bg-subtle);
+        border-color: var(--bs-primary) !important;
+    }
+}
+
+.left-side {
+   /* flex: 1 1 0; */
+}
+
+.right-side {
+   /* flex: 1 1 0; */
 }
 
 @media (max-width: 767.98px) {

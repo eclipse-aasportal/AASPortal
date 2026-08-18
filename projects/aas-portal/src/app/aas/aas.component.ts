@@ -37,6 +37,7 @@ import {
     findRouteForSubmodel,
     VIEW_ROUTES,
     DashboardService,
+    MaxLengthPipe,
 } from 'aas-lib';
 
 import { AASState } from './aas.state';
@@ -45,7 +46,7 @@ import { AASState } from './aas.state';
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    imports: [TranslateDirective, FormsModule, NgClass, RouterModule, NgbNavModule],
+    imports: [TranslateDirective, FormsModule, NgClass, RouterModule, NgbNavModule, MaxLengthPipe],
 })
 /**
  * Component responsible for managing and displaying Asset Administration Shell (AAS) functionality.
