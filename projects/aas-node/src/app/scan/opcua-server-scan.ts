@@ -8,13 +8,13 @@
 
 import { aas, AASDocument, PagedResult } from 'aas-core';
 import { OpcuaClient } from '../client/opcua/opcua-client.js';
-import { EndpointScanner } from './endpoint-scanner.js';
-import { ScannerController } from './scanner-controller.js';
+import { EndpointScan } from './endpoint-scan.js';
+import { ScanController } from './scan-controller.js';
 import { thumbnailToObjectUrl } from '../utilities.js';
 
-export class OpcuaServerScanner extends EndpointScanner {
+export class OpcuaServerScan extends EndpointScan {
     public constructor(
-        controller: ScannerController,
+        controller: ScanController,
         private readonly client: OpcuaClient,
     ) {
         super(controller);
@@ -42,5 +42,9 @@ export class OpcuaServerScanner extends EndpointScanner {
 
     protected override getSubmodels(): Promise<PagedResult<aas.Submodel>> {
         return this.client.getSubmodels();
+    }
+
+    protected override getConceptDescriptions(): Promise<PagedResult<aas.ConceptDescription>> {
+        return this.client.getConceptDescriptions();
     }
 }

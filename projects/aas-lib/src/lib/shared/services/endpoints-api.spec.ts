@@ -79,11 +79,12 @@ describe('EndpointsApi', () => {
     describe('getContent', () => {
         it('/api/v1/endpoints/:name/documents/:id/content}', async () => {
             const promise = lastValueFrom(service.getContent('document1', 'Samples'));
-            const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/documents/ZG9jdW1lbnQx/content');
+            const req = httpTestingController.expectOne('/api/v1/endpoints/U2FtcGxlcw/documents/ZG9jdW1lbnQx');
             expect(req.request.method).toEqual('GET');
-            req.flush(sample.content);
+            req.flush(sample);
 
-            expect(await promise).toEqual((sample as AASDocument).content!);
+            const content = await promise;
+            expect(content).toEqual((sample as AASDocument).content);
         });
     });
 

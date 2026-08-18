@@ -99,7 +99,8 @@ export class OicdClient extends IdentityProviderClient {
 
     public override async callback(req: express.Request, res: express.Response): Promise<express.Response | void> {
         try {
-            const token_endpoint = (await this.getConfiguration()).token_endpoint;
+            const configuration = await this.getConfiguration();
+            const token_endpoint = configuration.token_endpoint;
             const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/api/callback`;
             const code = req.query.code as string | undefined;
             const session_state = req.query.session_state as string | undefined;
@@ -148,8 +149,9 @@ export class OicdClient extends IdentityProviderClient {
                 } satisfies ErrorData);
             }
 
-            if (session_state) {
+            if (session_state && configuration.check_session_iframe) {
                 req.session.session_state = session_state;
+                req.session.check_session_iframe = configuration.check_session_iframe;
             }
 
             const tokenData = (await response.json()) as TokenEndpointResponse;

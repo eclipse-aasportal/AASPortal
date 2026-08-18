@@ -13,18 +13,19 @@ import { Logger } from 'aas-package';
 
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { createSpyObj } from '../../test/mocks.js';
-import { AASIndex } from '../index/aas-index.js';
 import { EndpointProvider } from './endpoint-provider.js';
-import { Parallel } from './parallel.js';
+import { EndpointScanWorkerPool } from '../scan/endpoint-scan-worker-pool.js';
 import { TaskHandler } from './task-handler.js';
 import { Variable } from '../variable.js';
 import { MessageSender } from './message-sender.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
+import { CommandData } from '../types.js';
 
 describe('EndpointController', () => {
     let provider: EndpointProvider;
-    let index: Mocked<AASIndex>;
+    let index: Mocked<AASIndexClient>;
     let logger: Mocked<Logger>;
-    let parallel: Mocked<Parallel>;
+    let workerPool: Mocked<EndpointScanWorkerPool>;
     let sender: Mocked<MessageSender>;
     let clientFactory: Mocked<EndpointClientFactory>;
     let variable: Mocked<Variable>;
@@ -40,13 +41,13 @@ describe('EndpointController', () => {
         vi.useFakeTimers();
 
         logger = createSpyObj<Logger>(['info', 'error']);
-        parallel = createSpyObj<Parallel>(['on', 'off', 'execute', 'cancel', 'terminate']);
-        parallel.terminate.mockResolvedValue();
+        workerPool = createSpyObj<EndpointScanWorkerPool>(['on', 'off', 'execute', 'cancel', 'dispose']);
+        workerPool.dispose.mockResolvedValue();
 
         clientFactory = createSpyObj<EndpointClientFactory>(['create', 'testAsync']);
         clientFactory.testAsync.mockResolvedValue();
 
-        index = createSpyObj<AASIndex>([
+        index = createSpyObj<AASIndexClient>([
             'insertEndpoint',
             'updateEndpoint',
             'clear',
@@ -67,7 +68,7 @@ describe('EndpointController', () => {
 
         taskHandler = new TaskHandler();
 
-        provider = new EndpointProvider(variable, logger, parallel, clientFactory, index, taskHandler);
+        provider = new EndpointProvider(variable, logger, workerPool, clientFactory, index, taskHandler);
         sender = createSpyObj<MessageSender>(['send', 'destroy']);
         (provider as unknown as { sender: MessageSender }).sender = sender;
     });
@@ -98,11 +99,12 @@ describe('EndpointController', () => {
 
             vi.runOnlyPendingTimers();
 
-            expect(parallel.execute).toHaveBeenCalledWith({
-                type: 'EndpointScanData',
-                taskId: task?.id,
-                endpoint: configuredEndpoint,
-            });
+            expect(workerPool.execute).toHaveBeenCalledWith({
+                type: 'command',
+                name: 'ScanEndpoint',
+                args: { endpoint: configuredEndpoint, taskId: task?.id },
+                application: 'ScanApp',
+            } satisfies CommandData);
         });
 
         it('does not schedule scan for manual endpoints', async () => {
@@ -114,7 +116,7 @@ describe('EndpointController', () => {
             await provider.addEndpoint(manualEndpoint);
 
             expect(taskHandler.find(manualEndpoint.name, 'ScanEndpoint')).toBeUndefined();
-            expect(parallel.execute).not.toHaveBeenCalled();
+            expect(workerPool.execute).not.toHaveBeenCalled();
         });
     });
 
@@ -133,7 +135,7 @@ describe('EndpointController', () => {
             index.updateEndpoint.mockResolvedValue(oldEndpoint);
             await provider.updateEndpoint(disabledEndpoint);
             vi.runOnlyPendingTimers();
-            expect(parallel.execute).not.toHaveBeenCalled();
+            expect(workerPool.execute).not.toHaveBeenCalled();
         });
 
         it('schedules a scan for non-manual and non-disabled endpoints', async () => {
@@ -156,11 +158,12 @@ describe('EndpointController', () => {
 
             vi.runOnlyPendingTimers();
 
-            expect(parallel.execute).toHaveBeenCalledWith({
-                type: 'EndpointScanData',
-                taskId: task?.id,
-                endpoint: recurringEndpoint,
-            });
+            expect(workerPool.execute).toHaveBeenCalledWith({
+                type: 'command',
+                name: 'ScanEndpoint',
+                args: { endpoint: recurringEndpoint, taskId: task?.id },
+                application: 'ScanApp',
+            } satisfies CommandData);
         });
     });
 
@@ -221,14 +224,12 @@ describe('EndpointController', () => {
 
             vi.runOnlyPendingTimers();
 
-            expect(parallel.execute).toHaveBeenCalledWith({
-                type: 'EndpointScanData',
-                taskId: task?.id,
-                endpoint: {
-                    ...endpoint,
-                    schedule: { type: 'manual' },
-                },
-            });
+            expect(workerPool.execute).toHaveBeenCalledWith({
+                type: 'command',
+                name: 'ScanEndpoint',
+                args: { endpoint: { ...endpoint, schedule: { type: 'manual' } }, taskId: task?.id },
+                application: 'ScanApp',
+            } satisfies CommandData);
         });
     });
 
@@ -243,12 +244,7 @@ describe('EndpointController', () => {
             task.state = 'inProgress';
 
             await provider.cancelEndpointScan(endpoint.name);
-
-            expect(parallel.cancel).toHaveBeenCalledWith({
-                endpoint: 'Samples',
-                taskId: task.id,
-                type: 'CancelEndpointScanData',
-            });
+            expect(workerPool.cancel).toHaveBeenCalledWith(task.id, endpoint.name);
         });
     });
 

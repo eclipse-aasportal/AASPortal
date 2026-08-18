@@ -11,10 +11,10 @@ import fs from 'fs';
 import path from 'path';
 import { ApplicationError } from 'aas-core';
 
-import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { ERRORS } from '../errors.js';
 import { MessageSender } from './message-sender.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 @singleton()
 export class PackageProvider {
@@ -22,7 +22,7 @@ export class PackageProvider {
 
     public constructor(
         @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
+        @inject(AASIndexClient) private readonly index: AASIndexClient,
     ) {}
 
     /**

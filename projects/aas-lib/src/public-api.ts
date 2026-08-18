@@ -60,7 +60,6 @@ export * from './lib/shared/components/form-error/form-error';
 export * from './lib/shared/directives/sortable-header.directive';
 export * from './lib/shared/pipes/duration';
 export * from './lib/shared/pipes/max-length.pipe';
-export * from './lib/shared/services/cache.interceptor';
 export * from './lib/shared/services/command-handler';
 export * from './lib/shared/services/command';
 export * from './lib/shared/services/cookie.service';

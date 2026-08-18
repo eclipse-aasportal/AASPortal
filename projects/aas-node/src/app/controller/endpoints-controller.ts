@@ -27,10 +27,10 @@ import express from 'express';
 import { UpdateIndexStatus, ApplicationError, EndpointAuth, type AASEndpoint } from 'aas-core';
 import { decodeBase64Url } from 'aas-package';
 
-import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 import { EndpointProvider } from '../provider/endpoint-provider.js';
 import { ERRORS } from '../errors.js';
 import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
@@ -39,7 +39,7 @@ export class EndpointsController extends Controller {
     public constructor(
         @inject(EndpointProvider) private readonly provider: EndpointProvider,
         @inject(COOKIE_STORE) private readonly cookieStorage: CookieStorage,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
+        @inject(AASIndexClient) private readonly index: AASIndexClient,
     ) {
         super();
     }

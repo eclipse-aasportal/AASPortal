@@ -24,7 +24,7 @@ export class JsonReaderV2 extends AASReader {
         }
     }
 
-    public readEnvironment(): aas.Environment {
+    public override readEnvironment(): aas.Environment {
         const conceptDescriptions = this.readConceptDescriptions();
         const assetAdministrationShells = this.readAssetAdministrationShells();
         const submodels = this.readSubmodels();
@@ -40,14 +40,17 @@ export class JsonReaderV2 extends AASReader {
         return env;
     }
 
-    public read(data: string | object): aas.Referable {
+    public override read(data: string | object): aas.Referable {
         const source: aasv2.Referable = typeof data === 'string' ? JSON.parse(data) : data;
         switch (source.modelType.name) {
             case 'Asset':
-            case 'AssetAdministrationShell':
                 throw new Error('Invalid operation.');
+            case 'AssetAdministrationShell':
+                return this.readAssetAdministrationShell(source as aasv2.AssetAdministrationShell);
             case 'Submodel':
                 return this.readSubmodel(source as aasv2.Submodel);
+            case 'ConceptDescription':
+                return this.readConceptDescription(source as aasv2.ConceptDescription);
             default:
                 return this.readSubmodelElement(source as aasv2.SubmodelElement);
         }
@@ -83,7 +86,7 @@ export class JsonReaderV2 extends AASReader {
         const shell: aas.AssetAdministrationShell = {
             ...this.readIdentifiable(source),
             ...this.readHasDataSpecification(source),
-            assetInformation: this.readAssetInformation(this.origin.assets[0]),
+            assetInformation: this.readAssetInformation(source.asset),
         };
 
         if (source.derivedFrom) {
@@ -127,13 +130,24 @@ export class JsonReaderV2 extends AASReader {
         return conceptDescription;
     }
 
-    private readAssetInformation(source: aasv2.Asset): aas.AssetInformation {
-        const asset: aas.AssetInformation = {
-            assetKind: source.kind ?? 'Instance',
-            globalAssetId: source.identification.id,
-        };
+    private readAssetInformation(assetRef: aasv2.Reference): aas.AssetInformation {
+        const assetId = assetRef.keys.at(0)?.value;
+        if (!assetId) {
+            throw new Error('AssetAdministrationShell.asset.keys[0].value');
+        }
 
-        return asset;
+        const asset = this.origin.assets.find(asset => asset.identification.id === assetId);
+        if (!asset) {
+            return {
+                assetKind: 'NotApplicable',
+                globalAssetId: assetId,
+            };
+        }
+
+        return {
+            assetKind: asset.kind ?? 'Instance',
+            globalAssetId: asset.identification.id,
+        };
     }
 
     private readSubmodels(): aas.Submodel[] {

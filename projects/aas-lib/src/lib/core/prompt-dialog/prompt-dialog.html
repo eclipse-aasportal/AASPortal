@@ -15,18 +15,30 @@
         <button type="button" class="btn-close" (click)="cancel()"></button>
     </div>
     <div class="modal-body">
-        <label for="AID_PROMPT_TEXT">{{ label() }}</label>
-        <input type="text" class="form-control" id="AID_PROMPT_TEXT" [formField]="text" />
-        @if (text().touched() && text().invalid()) {
+        <label for="AID_PROMPT_TEXT">{{ text() }}</label>
+        <input type="text" class="form-control" id="AID_PROMPT_TEXT" [formField]="value" />
+        @if (value().touched() && value().invalid()) {
             <ul class="text-danger fs-7">
-                @for (error of text().errors(); track error) {
+                @for (error of value().errors(); track error) {
                     <li>{{ error.message }}</li>
                 }
             </ul>
         }
     </div>
     <div class="modal-footer">
-        <button type="button" id="AID_PROMPT_CANCEL" class="btn btn-secondary" (click)="cancel()" translate="PromptDialog.CANCEL"></button>
-        <button type="submit" id="AID_PROMPT_OK" class="btn btn-primary" [disabled]="form().invalid()" translate="PromptDialog.OK"></button>
+        <button
+            type="button"
+            id="AID_PROMPT_CANCEL"
+            class="btn btn-secondary"
+            (click)="cancel()"
+            translate="PromptDialog.CANCEL"
+        ></button>
+        <button
+            type="submit"
+            id="AID_PROMPT_OK"
+            class="btn btn-primary"
+            [disabled]="form().invalid()"
+            translate="PromptDialog.OK"
+        ></button>
     </div>
 </form>

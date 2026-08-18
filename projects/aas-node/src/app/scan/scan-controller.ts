@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-export class ScannerController {
+export class ScanController {
     private cancelResolve?: () => void;
 
     public get cancelRequested(): boolean {

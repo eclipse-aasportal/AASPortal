@@ -22,34 +22,26 @@ import { Variable } from '../variable.js';
 import { RegisterRoutes } from '../routes/routes.js';
 import { Authentication } from './authentication.js';
 import { errorHandler } from '../../test/assets/error-handler.js';
-import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 describe('DocumentsController', () => {
     let app: Express;
     let logger: Logger;
     let provider: Mocked<DocumentProvider>;
-    let index: Mocked<AASIndex>;
+    let index: Mocked<AASIndexClient>;
     let variable: Mocked<Variable>;
     let authentication: Mocked<Authentication>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, {});
-        index = createSpyObj<AASIndex>(['getDocuments', 'getEndpoints', 'getEndpoint', 'find', 'getCount'], {});
-
-        provider = createSpyObj<DocumentProvider>([
-            'updateDocument',
-            'getContent',
-            'getDocument',
-            'getDataElementValue',
-            'invoke',
-        ]);
-
+        index = createSpyObj<AASIndexClient>(['getDocuments', 'getEndpoints', 'getEndpoint', 'find', 'getCount'], {});
+        provider = createSpyObj<DocumentProvider>(['updateDocument', 'getDocument', 'getDataElementValue', 'invoke']);
         authentication = createSpyObj<Authentication>(['authentication']);
         authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
 
         container.registerInstance(LOGGER, logger);
-        container.registerInstance(AAS_INDEX, index);
+        container.registerInstance(AASIndexClient, index);
         container.registerInstance(Variable, variable);
         container.registerInstance(DocumentProvider, provider);
         container.registerInstance(Authentication, authentication);
@@ -114,18 +106,6 @@ describe('DocumentsController', () => {
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(sampleDocument);
         expect(provider.getDocument).toHaveBeenCalled();
-    });
-
-    it('GET: /api/v1/endpoints/{name}/documents/{id}/content', async () => {
-        provider.getContent.mockReturnValue(
-            new Promise<aas.Environment>(resolve => {
-                resolve({ assetAdministrationShells: [], submodels: [], conceptDescriptions: [] });
-            }),
-        );
-
-        const response = await request(app).get('/api/v1/endpoints/Y29udGFpbmVy/documents/ZG9jdW1lbnQ/content');
-        expect(response.statusCode).toBe(200);
-        expect(provider.getContent).toHaveBeenCalled();
     });
 
     describe('getDataElementValue: /api/v1/endpoints/{name}/documents/{id}/submodels/:smId/submodel-elements/{path}/value', () => {

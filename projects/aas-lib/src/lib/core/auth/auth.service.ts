@@ -12,14 +12,14 @@ import { ActivatedRoute } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { map, Observable, of, switchMap, take, throwError } from 'rxjs';
 import { UserProfile, UserRole, User, Credentials, EndpointAuth } from 'aas-core';
-import { HttpCache } from '../../shared/services/http-cache';
+import { DocumentCache } from '../../shared/services/document-cache';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AuthService {
     private readonly http = inject(HttpClient);
-    private readonly cache = inject(HttpCache);
+    private readonly cache = inject(DocumentCache);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly document = inject(DOCUMENT);
     private readonly _user = signal<User | null | undefined>(undefined);

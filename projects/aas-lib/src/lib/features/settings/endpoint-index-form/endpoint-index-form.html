@@ -25,23 +25,21 @@
                             ><span class="ms-2">{{ 'EndpointIndexForm.SHELLS' | translate }}</span>
                         </div>
                         @if (item.schedule === 'manual' || item.schedule === 'once') {
-                            <div class="endpoint-index-action">
-                                <button
-                                    type="button"
-                                    class="btn btn-lg btn-outline-primary border-0 endpoint-index-icon-btn"
-                                    [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
-                                    [openDelay]="300"
-                                    placement="top"
-                                    container="body"
-                                    (click)="startScan(item.name).subscribe()"
-                                >
-                                    <i class="bi bi-caret-right-square"></i>
-                                </button>
-                            </div>
+                            <button
+                                type="button"
+                                class="btn btn-lg btn-outline-primary border-0 endpoint-index-icon-btn"
+                                [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
+                                [openDelay]="300"
+                                placement="top"
+                                container="body"
+                                (click)="startScan(item.name).subscribe()"
+                            >
+                                <i class="bi bi-caret-right-square"></i>
+                            </button>
                         } @else {
-                            <div class="endpoint-index-action endpoint-index-action-placeholder"></div>
+                            <div class=""></div>
                         }
-                        <div class="endpoint-index-action">
+                        <div class="">
                             <button
                                 type="button"
                                 class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
@@ -56,31 +54,26 @@
                         </div>
                     } @else {
                         @if (item.progress < 0) {
-                            <div class="spinner-border spinner-border-sm text-info" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                            <div class="text-center">
+                                <div class="spinner-border spinner-border-sm text-info" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
                             </div>
                         } @else {
-                            <ngb-progressbar
-                                class="endpoint-index-state endpoint-index-state-progress"
-                                [showValue]="true"
-                                type="info"
-                                [value]="item.progress"
-                            />
+                            <ngb-progressbar class="" [showValue]="true" type="info" [value]="item.progress" />
                         }
-                        <div class="endpoint-index-action endpoint-index-action-placeholder"></div>
-                        <div class="endpoint-index-action">
-                            <button
-                                type="button"
-                                class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
-                                [ngbTooltip]="'EndpointIndexForm.CANCEL_SCAN_TOOL_TIP' | translate"
-                                [openDelay]="300"
-                                placement="top"
-                                container="body"
-                                (click)="cancelScan(item.name).subscribe()"
-                            >
-                                <i class="bi bi-stop-circle"></i>
-                            </button>
-                        </div>
+                        <div class=""></div>
+                        <button
+                            type="button"
+                            class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
+                            [ngbTooltip]="'EndpointIndexForm.CANCEL_SCAN_TOOL_TIP' | translate"
+                            [openDelay]="300"
+                            placement="top"
+                            container="body"
+                            (click)="cancelScan(item.name).subscribe()"
+                        >
+                            <i class="bi bi-stop-circle"></i>
+                        </button>
                     }
                 </div>
             }

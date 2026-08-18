@@ -15,17 +15,21 @@ import { createSpyObj } from '../../../test/mocks.js';
 import { aasEnvironment as env } from '../../../test/assets/aas-environment.js';
 import { ApiClientV3, OperationResult } from './api-client-v3.js';
 import { HttpClient } from '../../http-client.js';
+import { AASIndexClient } from '../../index/aas-index-client.js';
 
 describe('ApiClientV3', () => {
-    let logger: Logger;
+    let logger: Mocked<Logger>;
     let client: ApiClientV3;
     let http: Mocked<HttpClient>;
+    let index: Mocked<AASIndexClient>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
+        index = createSpyObj<AASIndexClient>(['getConceptDescriptionRefs']);
         http = createSpyObj<HttpClient>(['get', 'getLiveData', 'getReadable', 'post', 'postFormData', 'put', 'delete']);
         client = new ApiClientV3(
             logger,
+            index,
             {
                 name: 'AASX Server',
                 type: 'AAS_API',
@@ -52,7 +56,7 @@ describe('ApiClientV3', () => {
         });
     });
 
-    describe('writeEnvironment', () => {
+    describe('setEnvironment', () => {
         it('updates an AssetAdministrationShell', async () => {
             const aas = env.assetAdministrationShells![0];
             const content: aas.Environment = {
@@ -125,6 +129,44 @@ describe('ApiClientV3', () => {
             };
 
             await expect(client.invoke(operation)).rejects.toThrow();
+        });
+    });
+
+    describe('getSubmodels', () => {
+        it('returns a paged result of submodels', async () => {
+            const submodel: aas.Submodel = {
+                idShort: 'submodel1',
+                modelType: 'Submodel',
+                id: 'http://localhost/test/submodel1',
+            };
+
+            const pagedResult = {
+                items: [submodel],
+                cursor: undefined,
+            };
+
+            http.get.mockResolvedValue(pagedResult);
+
+            await expect(client.getSubmodels(undefined)).resolves.toEqual(pagedResult);
+        });
+    });
+
+    describe('getConceptDescriptions', () => {
+        it('returns a paged result of concept descriptions', async () => {
+            const conceptDescription: aas.ConceptDescription = {
+                idShort: 'conceptDescription1',
+                modelType: 'ConceptDescription',
+                id: 'http://localhost/test/conceptDescription1',
+            };
+
+            const pagedResult = {
+                items: [conceptDescription],
+                cursor: undefined,
+            };
+
+            http.get.mockResolvedValue(pagedResult);
+
+            await expect(client.getConceptDescriptions(undefined)).resolves.toEqual(pagedResult);
         });
     });
 });

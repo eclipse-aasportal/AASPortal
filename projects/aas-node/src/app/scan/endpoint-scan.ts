@@ -11,16 +11,16 @@ import { nanoid } from 'nanoid';
 import { rmSync } from 'node:fs';
 import path from 'path/posix';
 import { container } from 'tsyringe';
-import { aas, AASDocument, AASEndpoint, convertToString, PagedResult } from 'aas-core';
-import { AASIndex } from '../index/aas-index.js';
-import { ScannerController } from './scanner-controller.js';
+import { aas, AASDocument, AASEndpoint, convertToString, getSemanticId, PagedResult, traverse } from 'aas-core';
+import { ScanController } from './scan-controller.js';
 import { Variable } from '../variable.js';
 import { EndpointScanDatabase } from './endpoint-scan-database.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 /**
  * Defines an automate to scan an AAS endpoint for new, deleted or updated Asset Administration Shells.
  */
-export abstract class EndpointScanner extends EventEmitter {
+export abstract class EndpointScan extends EventEmitter {
     private readonly variable = container.resolve(Variable);
     private readonly scanDbFile = path.join(this.variable.CONTENT_ROOT, `endpoint-scan-${nanoid()}.db`);
     private readonly scanDb: EndpointScanDatabase;
@@ -30,7 +30,7 @@ export abstract class EndpointScanner extends EventEmitter {
     private done = 0;
     private progress = 0;
 
-    protected constructor(protected readonly controller: ScannerController) {
+    protected constructor(protected readonly controller: ScanController) {
         super();
 
         this.scanDb = new EndpointScanDatabase(this.scanDbFile);
@@ -41,7 +41,7 @@ export abstract class EndpointScanner extends EventEmitter {
      * @param index The AAS index.
      * @param endpoint The endpoint.
      */
-    public async scan(index: AASIndex, endpoint: AASEndpoint): Promise<void> {
+    public async scan(index: AASIndexClient, endpoint: AASEndpoint): Promise<void> {
         this.scanDb.clear();
         this.shellCount = this.submodelCount = 0;
         this.done = 0;
@@ -49,10 +49,14 @@ export abstract class EndpointScanner extends EventEmitter {
 
         try {
             await this.open();
-            await this.scanForNewAndUpdatedShells(index, endpoint.name);
-            await Promise.all([
+            await Promise.allSettled([
+                this.scanForNewAndUpdatedShells(index, endpoint.name),
+                this.scanConceptDescriptions(),
+            ]);
+
+            await Promise.allSettled([
                 this.scanForDeletedShellsAndUpdateThumbnail(index, endpoint.name),
-                this.createIndex(index, endpoint.name),
+                this.createOrUpdateSearchIndex(index, endpoint.name),
             ]);
         } catch (error) {
             this.emit('error', `Scanning endpoint "${endpoint.name}" failed: ${convertToString(error)}`);
@@ -103,14 +107,22 @@ export abstract class EndpointScanner extends EventEmitter {
     /**
      * Gets a page of submodels from the endpoint.
      * @param cursor The cursor to get the next page of submodels. If undefined, the first page will be returned.
+     * @returns A promise that resolves to a page of submodels.
      */
     protected abstract getSubmodels(cursor: string | undefined): Promise<PagedResult<aas.Submodel>>;
+
+    /**
+     * Gets a page of concept descriptions from the endpoint.
+     * @param cursor The cursor to get the next page of concept descriptions. If undefined, the first page will be returned.
+     * @returns A promise that resolves to a page of concept descriptions.
+     */
+    protected abstract getConceptDescriptions(cursor: string | undefined): Promise<PagedResult<aas.ConceptDescription>>;
 
     private registerSubmodels(submodelRefs: aas.Reference[], b: AASDocument): void {
         this.scanDb.registerSubmodels(submodelRefs, b.id);
     }
 
-    private async scanForNewAndUpdatedShells(index: AASIndex, endpoint: string): Promise<void> {
+    private async scanForNewAndUpdatedShells(index: AASIndexClient, endpoint: string): Promise<void> {
         let cursor: string | undefined;
         do {
             const result = await this.getDocuments(cursor);
@@ -152,7 +164,7 @@ export abstract class EndpointScanner extends EventEmitter {
         } while (cursor && !this.controller.cancelRequested);
     }
 
-    private async scanForDeletedShellsAndUpdateThumbnail(index: AASIndex, endpoint: string): Promise<void> {
+    private async scanForDeletedShellsAndUpdateThumbnail(index: AASIndexClient, endpoint: string): Promise<void> {
         let cursor: string | undefined;
         do {
             const result = await index.getEndpointDocuments(endpoint, cursor);
@@ -184,7 +196,23 @@ export abstract class EndpointScanner extends EventEmitter {
         } while (cursor && !this.controller.cancelRequested);
     }
 
-    private async createIndex(index: AASIndex, endpoint: string): Promise<void> {
+    private async scanConceptDescriptions(): Promise<void> {
+        let cursor: string | undefined;
+        do {
+            const result = await this.getConceptDescriptions(cursor);
+            for (const conceptDescription of result.result) {
+                if (this.controller.cancelRequested) {
+                    return;
+                }
+
+                this.scanDb.registerConceptDescription(conceptDescription);
+            }
+
+            cursor = result.paging_metadata.cursor;
+        } while (cursor && !this.controller.cancelRequested);
+    }
+
+    private async createOrUpdateSearchIndex(index: AASIndexClient, endpoint: string): Promise<void> {
         let cursor: string | undefined;
         do {
             const result = await this.getSubmodels(cursor);
@@ -195,7 +223,7 @@ export abstract class EndpointScanner extends EventEmitter {
 
                 this.computeProgress();
 
-                const shellIds = this.scanDb.getShellIds(submodel.id);
+                const shellIds = this.scanDb.getSubmodelShellIds(submodel.id);
                 if (shellIds.length === 0) {
                     continue;
                 }
@@ -210,6 +238,12 @@ export abstract class EndpointScanner extends EventEmitter {
                     }
                 }
 
+                await index.setSubmodelConceptDescriptionIds(
+                    endpoint,
+                    submodel.id,
+                    this.getConceptDescriptionIds(submodel),
+                );
+
                 ++this.done;
             }
 
@@ -223,5 +257,21 @@ export abstract class EndpointScanner extends EventEmitter {
             this.progress = value;
             this.emit('progress', this.progress, this.shellCount, this.submodelCount);
         }
+    }
+
+    private getConceptDescriptionIds(submodel: aas.Submodel): string[] {
+        const map = new Map<string, boolean>();
+        for (const referable of traverse(submodel)) {
+            const semanticId = getSemanticId(referable);
+            if (!semanticId || map.has(semanticId)) {
+                continue;
+            }
+
+            map.set(semanticId, this.scanDb.hasConceptDescription(semanticId));
+        }
+
+        return Array.from(map)
+            .filter(([, value]) => value)
+            .map(([key]) => key);
     }
 }

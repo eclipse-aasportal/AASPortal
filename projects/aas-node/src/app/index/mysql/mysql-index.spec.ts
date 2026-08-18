@@ -8,14 +8,14 @@
 
 import 'reflect-metadata';
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { Connection } from 'mysql2/promise';
-import { AASEndpoint } from 'aas-core';
+import { Connection, ResultSetHeader } from 'mysql2/promise';
+import { AASDocument, AASEndpoint } from 'aas-core';
 import { Logger } from 'aas-package';
 
 import { MySqlIndex } from './mysql-index.js';
 import { Variable } from '../../variable.js';
 import { KeywordDirectory } from '../keyword-directory.js';
-import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
+import { DocumentCount, MySqlDocument, MySqlEndpoint, MySqlConceptDescriptionIds } from './mysql-types.js';
 import { createSpyObj } from '../../../test/mocks.js';
 
 describe('MySqlIndex', () => {
@@ -214,41 +214,36 @@ describe('MySqlIndex', () => {
         });
     });
 
-    describe('removeEndpoint', () => {
+    describe('deleteEndpoint', () => {
         it('removes the specified endpoint', async () => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const impl: any = (sql: string): Promise<any> => {
-                if (sql === 'DELETE FROM `endpoints` WHERE name = ?;') {
-                    return Promise.resolve([
-                        {
-                            constructor: { name: 'ResultSetHeader' },
-                            affectedRows: 1,
-                            fieldCount: 0,
-                            info: '',
-                            insertId: 0,
-                            serverStatus: 0,
-                            warningStatus: 0,
-                            changedRows: 0,
-                        },
-                    ]);
-                }
+            connection.query.mockImplementation(
+                (sql: string | object) =>
+                    new Promise((resolve, reject) => {
+                        if (sql === 'DELETE FROM `endpoints` WHERE name = ?;') {
+                            return resolve([
+                                {
+                                    affectedRows: 1,
+                                } as ResultSetHeader,
+                                [],
+                            ]);
+                        }
 
-                if (sql === 'SELECT * FROM `documents` WHERE endpoint = ?;') {
-                    return Promise.resolve([[{ uuid: 'uuid1' }]]);
-                }
+                        if (sql === 'SELECT uuid FROM `documents` WHERE endpoint = ?;') {
+                            return resolve([[{ uuid: 'uuid1' } as MySqlDocument], []]);
+                        }
 
-                if (sql === 'DELETE FROM `documents` WHERE endpoint = ?;') {
-                    return Promise.resolve();
-                }
+                        if (sql === 'DELETE FROM `documents` WHERE endpoint = ?;') {
+                            return resolve([[], []]);
+                        }
 
-                if (sql === 'DELETE FROM `elements` WHERE uuid = ?;') {
-                    return Promise.resolve();
-                }
+                        if (sql === 'DELETE FROM `elements` WHERE uuid = ?;') {
+                            return resolve([[], []]);
+                        }
 
-                return Promise.reject(new Error(`Unexpected sql: ${sql}`));
-            };
+                        reject(new Error(`Unexpected sql: ${sql}`));
+                    }),
+            );
 
-            connection.query.mockImplementation(impl);
             await expect(index.deleteEndpoint('Endpoint 1')).resolves.toEqual(true);
             expect(connection.query).toHaveBeenCalledTimes(4);
         });
@@ -275,64 +270,99 @@ describe('MySqlIndex', () => {
     });
 
     describe('update', () => {
-        it.todo('update');
+        it('updates a document in the index', async () => {
+            connection.query.mockImplementation(
+                (sql: string | object) =>
+                    new Promise(resolve => {
+                        const query = String(sql);
+                        if (query === 'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;') {
+                            return resolve([[{ uuid: '1' } as MySqlDocument], []]);
+                        }
+
+                        return resolve([[], []]);
+                    }),
+            );
+
+            await expect(
+                index.update({
+                    endpoint: 'Endpoint 1',
+                    id: 'http://document/aas',
+                    address: 'address',
+                    idShort: 'idShort',
+                    timestamp: 123,
+                } satisfies AASDocument),
+            ).resolves.toEqual(void 0);
+
+            expect(connection.beginTransaction).toHaveBeenCalled();
+            expect(connection.query).toHaveBeenCalledTimes(2);
+            expect(connection.commit).toHaveBeenCalled();
+        });
     });
 
-    describe('add', () => {
-        it.todo('add');
+    describe('insert', () => {
+        it('inserts a document into the index', async () => {
+            connection.query.mockResolvedValue([[], []]);
+            await expect(
+                index.insert({
+                    endpoint: 'Endpoint 1',
+                    id: 'http://document/aas',
+                    address: 'address',
+                    idShort: 'idShort',
+                    timestamp: 123,
+                } satisfies AASDocument),
+            ).resolves.toEqual(void 0);
+
+            expect(connection.beginTransaction).toHaveBeenCalled();
+            expect(connection.query).toHaveBeenCalled();
+            expect(connection.commit).toHaveBeenCalled();
+        });
     });
 
     describe('find', () => {
-        it.todo('find');
-    });
-
-    describe('remove', () => {
-        it('removes a document from the index', async () => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const impl: any = (sql: string): Promise<any> => {
-                if (sql === 'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;') {
-                    const results: MySqlDocument[] = [
-                        {
-                            constructor: { name: 'RowDataPacket' },
-                            uuid: '1',
-                            address: '',
-                            crc32: 0,
-                            idShort: 'Shell 1',
-                            assetId: null,
-                            thumbnail: null,
-                            timestamp: 0,
-                            id: 'http://document1/aas',
-                            endpoint: 'Endpoint 1',
-                        },
-                        {
-                            constructor: { name: 'RowDataPacket' },
-                            uuid: '2',
-                            address: '',
-                            crc32: 0,
-                            idShort: 'Shell 2',
-                            assetId: null,
-                            thumbnail: null,
-                            timestamp: 0,
-                            id: 'http://document2/aas',
-                            endpoint: 'Endpoint 1',
-                        },
-                    ];
-
-                    return Promise.resolve([results]);
-                }
-
-                if (sql === 'DELETE FROM `elements` WHERE uuid = ?;') {
-                    return Promise.resolve();
-                }
-
-                if (sql === 'DELETE FROM `documents` WHERE uuid = ?;') {
-                    return Promise.resolve();
-                }
-
-                return Promise.reject(new Error(`Unexpected sql: ${sql}`));
+        it('finds a document in the index', async () => {
+            const result: MySqlDocument = {
+                constructor: { name: 'RowDataPacket' },
+                uuid: '1',
+                id: 'http://document/aas',
+                endpoint: 'Endpoint 1',
+                address: 'address',
+                idShort: 'idShort',
+                assetId: 'assetId',
+                thumbnail: null,
+                timestamp: 123,
             };
 
-            connection.query.mockImplementation(impl);
+            connection.query.mockResolvedValue([[result], []]);
+            await expect(index.find('Endpoint 1', 'AssetAdministrationShell', 'http://document/aas')).resolves.toEqual({
+                endpoint: 'Endpoint 1',
+                id: 'http://document/aas',
+                address: 'address',
+                idShort: 'idShort',
+                assetId: 'assetId',
+                content: null,
+                timestamp: 123,
+            } satisfies AASDocument);
+        });
+    });
+
+    describe('delete', () => {
+        it('deletes a document from the index', async () => {
+            connection.query.mockImplementation(
+                (sql: string | object) =>
+                    new Promise(resolve => {
+                        const query = String(sql);
+                        if (query === 'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;') {
+                            return resolve([[{ uuid: '1' } as MySqlDocument], []]);
+                        }
+
+                        if (query === 'DELETE FROM `elements` WHERE uuid = ?;') {
+                            return resolve([[], []]);
+                        }
+
+                        resolve([[], []]);
+                    }),
+            );
+
             await expect(index.delete('Endpoint 1', 'http://document/aas')).resolves.toEqual(true);
             expect(connection.beginTransaction).toHaveBeenCalled();
             expect(connection.commit).toHaveBeenCalled();
@@ -347,6 +377,44 @@ describe('MySqlIndex', () => {
             expect(connection.query).toHaveBeenNthCalledWith(1, 'DELETE FROM `elements`;');
             expect(connection.query).toHaveBeenNthCalledWith(2, 'DELETE FROM `documents`;');
             expect(connection.commit).toHaveBeenCalled();
+        });
+    });
+
+    describe('getSubmodelConceptDescriptionIds', () => {
+        it('gets the identifiers of the concept descriptions that belongs to a submodel', async () => {
+            const result = {
+                conceptDescriptionIds: JSON.stringify(['concept-description-1', 'concept-description-2']),
+            } as MySqlConceptDescriptionIds;
+
+            connection.query.mockResolvedValue([[result], []]);
+            await expect(index.getSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1')).resolves.toEqual([
+                'concept-description-1',
+                'concept-description-2',
+            ]);
+        });
+    });
+
+    describe('setSubmodelConceptDescriptionIds', () => {
+        it('inserts the identifiers of the concept descriptions that belongs to a submodel', async () => {
+            connection.query.mockResolvedValue([[], []]);
+            await index.setSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1', ['concept-description-1']);
+            expect(connection.query).toHaveBeenLastCalledWith(
+                'INSERT INTO `submodelConceptDescriptions` (endpoint, id, conceptDescriptionRefs) VALUES (?, ?, ?);',
+                ['Endpoint 1', 'submodel-1', JSON.stringify(['concept-description-1'])],
+            );
+        });
+
+        it('updates the identifiers of the concept descriptions that belongs to a submodel', async () => {
+            const result = {
+                conceptDescriptionIds: JSON.stringify(['concept-description-1']),
+            } as MySqlConceptDescriptionIds;
+
+            connection.query.mockResolvedValue([[result], []]);
+            await index.setSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1', ['concept-description-2']);
+            expect(connection.query).toHaveBeenLastCalledWith(
+                'UPDATE `submodelConceptDescriptions` SET conceptDescriptionRefs = ? WHERE endpoint = ? AND id = ?;',
+                [JSON.stringify(['concept-description-2']), 'Endpoint 1', 'submodel-1'],
+            );
         });
     });
 });

@@ -167,10 +167,10 @@ describe('EndpointIndexForm', () => {
     });
 
     it('should clear the index for a specific endpoint', async () => {
-        vi.spyOn(PromptDialog, 'open').mockResolvedValue('endpoint1');
+        vi.spyOn(PromptDialog, 'confirm').mockResolvedValue('endpoint1');
         indexChange.clearIndex.mockReturnValue(of(void 0));
         await lastValueFrom(component.clearIndex('endpoint1'));
-        expect(PromptDialog.open).toHaveBeenCalled();
+        expect(PromptDialog.confirm).toHaveBeenCalled();
 
         indexChange.cleared.next('endpoint1');
         expect(component.items()).toEqual(
@@ -184,10 +184,10 @@ describe('EndpointIndexForm', () => {
     });
 
     it('should clear the index for all endpoints', async () => {
-        vi.spyOn(PromptDialog, 'open').mockResolvedValue('EndpointIndexForm.CLEAR_INDEX_KEY');
+        vi.spyOn(PromptDialog, 'confirm').mockResolvedValue('EndpointIndexForm.CLEAR_INDEX_KEY');
         indexChange.clearIndex.mockReturnValue(of(void 0));
         await lastValueFrom(component.clearIndex());
-        expect(PromptDialog.open).toHaveBeenCalled();
+        expect(PromptDialog.confirm).toHaveBeenCalled();
 
         indexChange.cleared.next(undefined);
         expect(component.items()).toEqual(

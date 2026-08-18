@@ -30,7 +30,7 @@ import {
 import { AASIndex } from '../aas-index.js';
 import { Variable } from '../../variable.js';
 import { MySqlQuery } from './mysql-query.js';
-import { DocumentCount, MySqlDocument, MySqlEndpoint } from './mysql-types.js';
+import { DocumentCount, MySqlDocument, MySqlEndpoint, MySqlConceptDescriptionIds } from './mysql-types.js';
 import { KeywordDirectory } from '../keyword-directory.js';
 import { urlToString } from '../../utilities.js';
 
@@ -52,7 +52,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async destroy(): Promise<void> {
+    public override async dispose(): Promise<void> {
         const connection = await this.getConnection();
         await connection.end();
     }
@@ -157,7 +157,7 @@ export class MySqlIndex extends AASIndex {
                 endpointName,
             ]);
 
-            this.removeDocuments(connection, endpointName);
+            this.deleteDocuments(connection, endpointName);
             await connection.commit();
             return result[0].affectedRows > 0;
         } catch (error) {
@@ -234,7 +234,7 @@ export class MySqlIndex extends AASIndex {
             const uuid = result[0][0].uuid;
             await connection.query<ResultSetHeader>(
                 'UPDATE `documents` SET address = ?, idShort = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
-                [document.address, document.idShort, document.timestamp, document.thumbnail, uuid],
+                [document.address, document.idShort, document.timestamp, document.thumbnail ?? null, uuid],
             );
 
             if (document.content && document.content.submodels) {
@@ -262,8 +262,8 @@ export class MySqlIndex extends AASIndex {
                     document.endpoint,
                     document.id,
                     document.idShort,
-                    document.assetId || null,
-                    document.thumbnail || null,
+                    document.assetId ?? null,
+                    document.thumbnail ?? null,
                     BigInt(Math.floor(document.timestamp)),
                 ],
             );
@@ -338,6 +338,7 @@ export class MySqlIndex extends AASIndex {
             if (endpoint === undefined) {
                 await connection.query<ResultSetHeader>('DELETE FROM `elements`;');
                 await connection.query<ResultSetHeader>('DELETE FROM `documents`;');
+                await connection.query<ResultSetHeader>('DELETE FROM `submodelConceptDescriptions`;');
             } else if (id) {
                 const uuid = this.getUuid(connection, endpoint, id);
                 if (uuid) {
@@ -358,6 +359,11 @@ export class MySqlIndex extends AASIndex {
                         await connection.query<ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [
                             document.uuid,
                         ]);
+
+                        await connection.query<ResultSetHeader>(
+                            'DELETE FROM `submodelConceptDescriptions` WHERE endpoint = ?;',
+                            [endpoint],
+                        );
                     }
 
                     if (documents.length < LIMIT) {
@@ -369,6 +375,44 @@ export class MySqlIndex extends AASIndex {
         } catch (error) {
             await connection.rollback();
             throw error;
+        }
+    }
+
+    public override async getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]> {
+        const connection = await this.getConnection();
+        const [results] = await connection.query<MySqlConceptDescriptionIds[]>(
+            'SELECT conceptDescriptionRefs FROM `documents` WHERE endpoint = ? AND id = ?;',
+            [endpoint, id],
+        );
+
+        if (results.length === 0) {
+            return [];
+        }
+
+        return JSON.parse(results[0].conceptDescriptionIds) as string[];
+    }
+
+    public override async setSubmodelConceptDescriptionIds(
+        endpoint: string,
+        id: string,
+        conceptDescriptionIds: string[],
+    ): Promise<void> {
+        const connection = await this.getConnection();
+        const result = await connection.query<MySqlConceptDescriptionIds[]>(
+            'SELECT id FROM `submodelConceptDescriptions` WHERE endpoint = ? AND id = ?;',
+            [endpoint, id],
+        );
+
+        if (result[0].length === 0) {
+            await connection.query<ResultSetHeader>(
+                'INSERT INTO `submodelConceptDescriptions` (endpoint, id, conceptDescriptionRefs) VALUES (?, ?, ?);',
+                [endpoint, id, JSON.stringify(conceptDescriptionIds)],
+            );
+        } else {
+            await connection.query<ResultSetHeader>(
+                'UPDATE `submodelConceptDescriptions` SET conceptDescriptionRefs = ? WHERE endpoint = ? AND id = ?;',
+                [JSON.stringify(conceptDescriptionIds), endpoint, id],
+            );
         }
     }
 
@@ -391,9 +435,9 @@ export class MySqlIndex extends AASIndex {
         return this._connection;
     }
 
-    private async removeDocuments(connection: Connection, endpointName: string): Promise<void> {
+    private async deleteDocuments(connection: Connection, endpointName: string): Promise<void> {
         const documents = (
-            await connection.query<MySqlDocument[]>('SELECT * FROM `documents` WHERE endpoint = ?;', [endpointName])
+            await connection.query<MySqlDocument[]>('SELECT uuid FROM `documents` WHERE endpoint = ?;', [endpointName])
         )[0];
 
         await connection.query<ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?;', [endpointName]);

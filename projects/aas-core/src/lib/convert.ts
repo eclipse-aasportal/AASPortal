@@ -261,7 +261,7 @@ export function convertToString(value: unknown, localeId?: string): string {
     }
 
     if (value instanceof Error) {
-        return value.message;
+        return value.stack ?? value.message;
     }
 
     if (typeof value === 'object') {

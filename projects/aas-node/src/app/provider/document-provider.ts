@@ -21,16 +21,16 @@ import {
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
-import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { ERRORS } from '../errors.js';
 import { thumbnailToObjectUrl } from '../utilities.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 @singleton()
 export class DocumentProvider {
     public constructor(
         @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
+        @inject(AASIndexClient) private readonly index: AASIndexClient,
     ) {}
 
     /**
@@ -56,6 +56,9 @@ export class DocumentProvider {
                 document.content = await client.getEnvironment(document.address);
                 if (document.thumbnail === null) {
                     document.thumbnail = await thumbnailToObjectUrl(await client.getThumbnail(document.address));
+                    if (document.thumbnail) {
+                        await this.index.update(document);
+                    }
                 }
 
                 return document;
@@ -79,27 +82,6 @@ export class DocumentProvider {
         }
 
         throw new ApplicationError(ERRORS.AAS_NOT_FOUND, { id }, 404);
-    }
-
-    /**
-     * Gets the AAS environment for the specified AAS document.
-     * @param endpoint The endpoint name.
-     * @param id The AAS identifier.
-     * @returns The AAS environment.
-     */
-    public async getContent(
-        endpoint: string,
-        id: string,
-        auth: Record<string, string> | undefined,
-    ): Promise<aas.Environment> {
-        const document = await this.index.get(endpoint, 'AssetAdministrationShell', id);
-        const client = this.clientFactory.create(await this.index.getEndpoint(endpoint), auth);
-        try {
-            await client.open();
-            return await client.getEnvironment(document.address);
-        } finally {
-            await client.close();
-        }
     }
 
     /**

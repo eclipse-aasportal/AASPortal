@@ -9,9 +9,10 @@
 import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { AASCursor, AASDocument, AASEndpoint, AASPagedResult, aas, getDocumentStatus } from 'aas-core';
-import { first, map, mergeMap, Observable } from 'rxjs';
+import { first, map, mergeMap, Observable, of, tap } from 'rxjs';
 import { encodeBase64Url } from '../../utilities';
 import { AuthService } from '../../core/auth/auth.service';
+import { DocumentCache } from './document-cache';
 
 /**
  * This service provides methods to interact with the AAS endpoints API,
@@ -24,6 +25,7 @@ export class EndpointsApi {
     private readonly document = inject(DOCUMENT);
     private readonly http = inject(HttpClient);
     private readonly auth = inject(AuthService);
+    private readonly cache = inject(DocumentCache);
 
     /**
      * Returns all configured AAS endpoints.
@@ -69,6 +71,11 @@ export class EndpointsApi {
         id: string,
         endpoint?: string,
     ): Observable<AASDocument> {
+        const document = this.cache.get(`${endpoint ?? ''}:${id}`);
+        if (document) {
+            return of(document);
+        }
+
         return this.auth.ready.pipe(
             first(ready => ready === true),
             mergeMap(() => {
@@ -82,6 +89,9 @@ export class EndpointsApi {
 
                 return this.http.get<AASDocument>(url);
             }),
+            tap(document => {
+                this.cache.set(`${endpoint ?? ''}:${id}`, document);
+            }),
         );
     }
 
@@ -92,8 +102,11 @@ export class EndpointsApi {
      * @returns The root of the element structure.
      */
     public getContent(id: string, endpoint: string): Observable<aas.Environment> {
-        const url = `/api/v1/endpoints/${encodeBase64Url(endpoint)}/documents/${encodeBase64Url(id)}/content`;
-        return this.http.get<aas.Environment>(url);
+        return this.getDocument('AssetAdministrationShell', id, endpoint).pipe(
+            map(document => {
+                return document.content!;
+            }),
+        );
     }
 
     /**

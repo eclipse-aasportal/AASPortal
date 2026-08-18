@@ -17,13 +17,13 @@ import { UpdateIndexStatus, WebSocketData } from 'aas-core';
 import { createSpyObj } from '../../../test/mocks';
 import { WebSocketService } from './web-socket.service';
 import { IndexChange } from './index-change';
-import { HttpCache } from './http-cache';
+import { DocumentCache } from './document-cache';
 import { encodeBase64Url } from '../../utilities';
 
 describe('IndexChange', () => {
     let service: IndexChange;
     let webSocket: Mocked<WebSocketService>;
-    let cache: Mocked<HttpCache>;
+    let cache: Mocked<DocumentCache>;
     let controller: HttpTestingController;
     let app: ApplicationRef;
     const subject = new Subject<WebSocketData>();
@@ -31,7 +31,7 @@ describe('IndexChange', () => {
     beforeEach(async () => {
         webSocket = createSpyObj<WebSocketService>(['sendMessage', 'getMessages']);
         webSocket.getMessages.mockReturnValue(subject.asObservable());
-        cache = createSpyObj<HttpCache>(['clear']);
+        cache = createSpyObj<DocumentCache>(['clear']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -40,7 +40,7 @@ describe('IndexChange', () => {
                     useValue: webSocket,
                 },
                 {
-                    provide: HttpCache,
+                    provide: DocumentCache,
                     useValue: cache,
                 },
                 provideHttpClient(),

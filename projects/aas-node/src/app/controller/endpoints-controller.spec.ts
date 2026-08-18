@@ -19,15 +19,15 @@ import { createSpyObj } from '../../test/mocks.js';
 import { RegisterRoutes } from '../routes/routes.js';
 import { Authentication } from './authentication.js';
 import { errorHandler } from '../../test/assets/error-handler.js';
-import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 import { EndpointProvider } from '../provider/endpoint-provider.js';
 import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 describe('EndpointsController', () => {
     let app: Express;
     let provider: Mocked<EndpointProvider>;
     let authentication: Mocked<Authentication>;
-    let index: Mocked<AASIndex>;
+    let index: Mocked<AASIndexClient>;
     let cookieStorage: Mocked<CookieStorage>;
 
     beforeEach(() => {
@@ -40,14 +40,14 @@ describe('EndpointsController', () => {
             'getUpdateStatus',
         ]);
 
-        index = createSpyObj<AASIndex>(['getEndpoints', 'getEndpointCount', 'getDocumentCount']);
+        index = createSpyObj<AASIndexClient>(['getEndpoints', 'getEndpointCount', 'getDocumentCount']);
         authentication = createSpyObj<Authentication>(['authentication']);
         authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
         cookieStorage = createSpyObj<CookieStorage>(['getEndpoints', 'updatesEndpoints']);
 
         container.registerInstance(EndpointProvider, provider);
         container.registerInstance(Authentication, authentication);
-        container.registerInstance(AAS_INDEX, index);
+        container.registerInstance(AASIndexClient, index);
         container.registerInstance(COOKIE_STORE, cookieStorage);
 
         app = express();
