@@ -90,6 +90,14 @@ export class SubmodelTree implements OnDestroy {
     /** The AAS document the submodel belongs to (needed to resolve File element URLs). */
     public readonly document = input<AASDocument | undefined>(undefined);
 
+    /**
+     * Whether properties with an OPC UA nodeId should subscribe to live WebSocket updates and
+     * show the broadcast icon. Defaults to true. Set to false for views (e.g. the generic
+     * fallback) that should never treat an arbitrary submodel as a live data source, regardless
+     * of whether its properties happen to carry a nodeId.
+     */
+    public readonly live = input<boolean>(true);
+
     public readonly expanded = signal<ReadonlySet<string>>(new Set());
     public readonly query = signal('');
 
@@ -193,7 +201,7 @@ export class SubmodelTree implements OnDestroy {
 
                 items.push(item);
 
-                if (child.nodeId) {
+                if (this.live() && child.nodeId) {
                     this.liveNodes.push({
                         nodeId: child.nodeId,
                         valueType: child.valueType ?? 'undefined',
