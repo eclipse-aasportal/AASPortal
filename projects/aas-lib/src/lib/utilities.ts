@@ -664,7 +664,10 @@ export function findRouteForSubmodel(
         }
     }
 
-    return defaultRoute ? viewRoutes.find(item => item.data.type === 'Default') : undefined;
+    // Submodel-level fallback is a distinct route type from the whole-shell 'Default' (used by
+    // findRouteForShell below) — an unmatched submodel opens the generic per-submodel view, not
+    // the whole-AAS tree browser.
+    return defaultRoute ? viewRoutes.find(item => item.data.type === 'DefaultSubmodel') : undefined;
 }
 
 /**

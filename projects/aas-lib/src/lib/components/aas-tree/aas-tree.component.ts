@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { FormsModule } from '@angular/forms';
-import { Route, RouterLinkWithHref } from '@angular/router';
+import { RouterLinkWithHref } from '@angular/router';
 import { Component, effect, inject, input, model, output, signal, untracked, WritableSignal } from '@angular/core';
 
 import {
@@ -42,7 +42,7 @@ import {
 
 import { AASTreeSearch } from './aas-tree-search';
 import { AASTreeApi } from './aas-tree-api';
-import { LiveState } from '../../types';
+import { LiveState, ViewRoute } from '../../types';
 import { basename, encodeBase64Url, findRouteForShell, findRouteForSubmodel } from '../../utilities';
 import { VIEW_ROUTES } from '../../views/views-routes';
 import { WebSocketService } from '../../shared/services/web-socket.service';
@@ -196,7 +196,7 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
             return undefined;
         }
 
-        let route: Route | undefined;
+        let route: ViewRoute | undefined;
         if (isSubmodel(identifiable)) {
             route = findRouteForSubmodel(this.viewRoutes, identifiable);
         } else if (isAssetAdministrationShell(identifiable)) {
@@ -208,10 +208,14 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
             return undefined;
         }
 
-        return [
-            `/views/${route.path}`,
-            { endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) },
-        ];
+        const params: Record<string, string> = { endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) };
+        if (route.data.type === 'DefaultSubmodel' && isSubmodel(identifiable) && identifiable.idShort) {
+            // The generic fallback view has no static semanticIds/idShorts of its own to match
+            // against, so tell it explicitly which submodel to show (see LeafView.findSubmodel).
+            params['submodel'] = identifiable.idShort;
+        }
+
+        return [`/views/${route.path}`, params];
     }
 
     protected override start(nodes: AASNode[], searchExpression: string | undefined): void {

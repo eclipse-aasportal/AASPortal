@@ -266,7 +266,7 @@ export class AASComponent implements OnInit, OnDestroy {
         return [`/views/Browser`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
     }
 
-    public openSubmodelView(submodel: aas.Submodel): (string | { endpoint: string; id: string })[] | undefined {
+    public openSubmodelView(submodel: aas.Submodel): (string | Record<string, string>)[] | undefined {
         const route = findRouteForSubmodel(this.viewRoutes, submodel);
 
         if (route === undefined) return undefined;
@@ -277,6 +277,13 @@ export class AASComponent implements OnInit, OnDestroy {
         const id = this.document()?.id;
         if (id === undefined) return undefined;
 
-        return [`/views/${route.path}`, { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) }];
+        const params: Record<string, string> = { endpoint: encodeBase64Url(endpoint), id: encodeBase64Url(id) };
+        if (route.data.type === 'DefaultSubmodel' && submodel.idShort) {
+            // The generic fallback view has no static semanticIds/idShorts of its own to match
+            // against, so tell it explicitly which submodel to show (see LeafView.findSubmodel).
+            params['submodel'] = submodel.idShort;
+        }
+
+        return [`/views/${route.path}`, params];
     }
 }
