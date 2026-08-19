@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-<div class="bg-light border border-black border-opacity-50 rounded-3 overflow-hidden d-grid diagram-card">
+<div class="border border-black border-opacity-50 rounded-3 overflow-hidden d-grid diagram-card">
     <div class="position-relative border-end bg-white">
         <svg
             [attr.viewBox]="viewBox()"
@@ -32,7 +32,7 @@
 
             <g [attr.transform]="transform()">
                 @for (link of layout()?.links() ?? []; track link.target.id) {
-                    <path [attr.d]="linkPath(link)" fill="none" stroke="#dde3e0" stroke-width="1"></path>
+                    <path [attr.d]="linkPath(link)" fill="none" stroke="#B8C0BD" stroke-width="1"></path>
                 }
                 @for (node of layout()?.descendants() ?? []; track node.id) {
                     <g
@@ -48,8 +48,8 @@
                             width="170"
                             height="56"
                             rx="9"
-                            fill="#ffffff"
-                            [attr.stroke]="node.data.selected ? '#00806d' : '#cdd6d2'"
+                            [attr.fill]="node.data.selected ? '#FAF9F6' : '#ffffff'"
+                            [attr.stroke]="node.data.selected ? '#00806d' : '#8F9593'"
                             [attr.stroke-width]="node.data.selected ? 1.6 : 1"
                             [attr.stroke-dasharray]="canExpand(node.data) ? '4 3' : null"
                             filter="url(#nodeShadow)"
@@ -93,37 +93,46 @@
             <button class="btn btn-sm btn-light border" (click)="fit()">
                 <i class="bi bi-arrows-angle-contract"></i>
             </button>
+            <button class="btn btn-sm btn-light border" (click)="toggleOrientation()">
+                @if(horizontal()){
+                    <i class="bi bi-caret-right"></i>
+                }
+                @else {
+                     <i class="bi bi-caret-down"></i>
+                }
+                
+            </button>
         </div>
     </div>
 
     <!-- panel column -->
-    <div class="d-none d-sm-flex bg-light p-3 flex-column">
+    <div class="d-none d-sm-flex bg-body-tertiary p-3 flex-column">
         @if (selectedNode(); as node) {
-            <p class="text-secondary mb-2" style="font-size: 10px; letter-spacing: 0.05em; font-weight: 600">
+            <p class="mb-2" style="font-size: 10px; letter-spacing: 0.05em; font-weight: 600">
                 SELECTED NODE
             </p>
 
             <div class="d-flex align-items-center gap-2 mb-3">
                 <div
-                    class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
-                    style="width: 38px; height: 38px; background: #f2f4f3"
+                    class="border  rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                    style="width: 38px; height: 38px;"
                 >
-                    <i class="bi bi-diagram-3 text-secondary"></i>
+                    <i class="bi bi-diagram-3"></i>
                 </div>
                 <div class="min-w-0">
                     <p class="fw-semibold mb-0" style="font-size: 14.5px">{{ node.name }}</p>
-                    <p class="text-secondary mb-0" style="font-size: 11px">{{ node.options.archeType }}</p>
+                    <p class="mb-0" style="font-size: 11px">{{ node.options.archeType }}</p>
                 </div>
             </div>
 
             <div class="py-2 border-bottom">
-                <p class="text-secondary mb-1" style="font-size: 10.5px">Asset ID</p>
+                <p class="label mb-1" style="font-size: 10.5px">Asset ID</p>
                 <p class="mb-0 font-monospace" style="font-size: 11.5px; word-break: break-all">
                     {{ node.id.globalAssetId }}
                 </p>
             </div>
             <div class="py-2">
-                <p class="text-secondary mb-1" style="font-size: 10.5px">Endpoint</p>
+                <p class="label mb-1" style="font-size: 10.5px">Endpoint</p>
                 <p class="mb-0" style="font-size: 12px">{{ node.options.document?.endpoint ?? '–' }}</p>
             </div>
 
@@ -136,7 +145,7 @@
                     <button class="btn btn-sm rounded-pill" disabled>Shell not available</button>
                 }
                 <button
-                    class="btn btn-sm btn-link text-secondary text-decoration-none"
+                    class="btn btn-sm btn-link text-decoration-none"
                     (click)="copy(node.id.globalAssetId)"
                 >
                     <i class="bi bi-copy me-1"></i>Copy asset ID

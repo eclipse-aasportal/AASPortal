@@ -11,6 +11,11 @@
     grid-template-columns: 1fr 270px;
 }
 
+.label {
+    font-size: 14px;
+    color: var(--bs-gray-600)
+ }
+
 @media (max-width: 900px) {
     .diagram-card {
         grid-template-columns: 1fr;
