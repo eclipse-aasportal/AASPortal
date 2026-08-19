@@ -9,13 +9,24 @@
 import { basename } from 'path';
 import * as posix from 'path/posix';
 import { readFile } from 'fs/promises';
-import { aas, AASDocument, AASEndpoint, ApplicationError, normalize, PagedResult, PagingMetadata } from 'aas-core';
+import {
+    aas,
+    AASDocument,
+    AASEndpoint,
+    ApplicationError,
+    convertToString,
+    normalize,
+    PagedResult,
+    PagingMetadata,
+} from 'aas-core';
+
 import { Logger } from 'aas-package';
 import { ERRORS } from '../../errors.js';
 import { FileStorage } from '../../file-storage/file-storage.js';
 import { EndpointClient } from '../endpoint-client.js';
 import { AasxPackage } from './aasx-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
+import { AASIndexClient } from '../../index/aas-index-client.js';
 
 /**
  * Provides a file system based endpoint.
@@ -26,11 +37,12 @@ export class AasxDirectory extends EndpointClient {
 
     public constructor(
         logger: Logger,
+        index: AASIndexClient,
         endpoint: AASEndpoint,
         private readonly fileStorage: FileStorage,
     ) {
         const url = new URL(endpoint.url);
-        super(logger, endpoint);
+        super(logger, index, endpoint);
 
         this.root = url.pathname;
     }
@@ -78,48 +90,86 @@ export class AasxDirectory extends EndpointClient {
     }
 
     public override async getDocuments(cursor: string | undefined, limit?: number): Promise<PagedResult<AASDocument>> {
-        const files: string[] = [];
-        await this.readDir(this.root, '', files);
         const index = cursor ? Number(JSON.parse(cursor)) : 0;
-        const end = limit ? index + index : files.length;
-        const result = await Promise.allSettled(files.slice(index, end).map(file => this.getDocument(file)));
+        const result: AASDocument[] = [];
+        let current = 0;
+        const paging_metadata: PagingMetadata = {};
+        for await (const file of this.readDir(this.root, '')) {
+            if (current++ < index) {
+                continue;
+            }
+
+            if (limit !== undefined && result.length >= limit) {
+                paging_metadata.cursor = JSON.stringify(current - 1);
+                break;
+            }
+
+            try {
+                result.push(await this.getDocument(file));
+            } catch (error) {
+                this.logger.warning(`Reading AAS document from file ${file} failed: ${convertToString(error)}`);
+            }
+        }
 
         return {
-            result: result.filter(item => item.status === 'fulfilled').map(item => item.value),
-            paging_metadata: end < files.length ? { cursor: JSON.stringify(end) } : {},
+            result,
+            paging_metadata,
         };
     }
 
     public override async getSubmodels(cursor: string | undefined, limit?: number): Promise<PagedResult<aas.Submodel>> {
-        const files: string[] = [];
-        await this.readDir(this.root, '', files);
-        const submodels: aas.Submodel[] = [];
+        const result: aas.Submodel[] = [];
         const index = cursor ? Number(JSON.parse(cursor)) : 0;
-        let i = 0;
         const paging_metadata: PagingMetadata = {};
-        for (const file of files) {
+        let current = 0;
+        for await (const file of this.readDir(this.root, '')) {
+            if (current++ < index) {
+                continue;
+            }
+
+            if (limit !== undefined && result.length >= limit) {
+                paging_metadata.cursor = JSON.stringify(current - 1);
+                break;
+            }
+
             const env = await this.getEnvironment(file);
             if (!env.submodels) {
                 continue;
             }
 
-            for (let j = 0, n = env.submodels.length; j < n; j++) {
-                if (i >= index) {
-                    submodels.push(env.submodels[j]);
-                    if (limit !== undefined && submodels.length >= limit) {
-                        if (j + 1 < n) {
-                            paging_metadata.cursor = JSON.stringify(i + 1);
-                        }
-
-                        break;
-                    }
-                }
-
-                ++i;
-            }
+            result.push(...env.submodels);
         }
 
-        return { result: submodels, paging_metadata };
+        return { result, paging_metadata };
+    }
+
+    public override async getConceptDescriptions(
+        cursor: string | undefined,
+        limit?: number,
+    ): Promise<PagedResult<aas.ConceptDescription>> {
+        const result: aas.ConceptDescription[] = [];
+        const index = cursor ? Number(JSON.parse(cursor)) : 0;
+        const paging_metadata: PagingMetadata = {};
+        let current = 0;
+        for await (const file of this.readDir(this.root, '')) {
+            if (current++ < index) {
+                continue;
+            }
+
+            if (limit !== undefined && result.length >= limit) {
+                paging_metadata.cursor = JSON.stringify(current - 1);
+                break;
+            }
+
+            const env = await this.getEnvironment(file);
+            if (!env.conceptDescriptions) {
+                continue;
+            }
+
+            result.push(...env.conceptDescriptions);
+        }
+
+        return { result, paging_metadata };
     }
 
     public override async getThumbnail(filename: string): Promise<NodeJS.ReadableStream | undefined> {
@@ -205,13 +255,13 @@ export class AasxDirectory extends EndpointClient {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    private async readDir(dir: string, path: string, files: string[]): Promise<void> {
+    private async *readDir(dir: string, path: string): AsyncIterable<string> {
         const entries = await this.fileStorage.readDir(dir);
         for (const entry of entries) {
             if (entry.type === 'directory') {
-                await this.readDir(posix.join(dir, entry.name), posix.join(path, entry.name), files);
+                yield* this.readDir(posix.join(dir, entry.name), posix.join(path, entry.name));
             } else if (posix.extname(entry.name) === '.aasx') {
-                files.push(posix.join(path, entry.name));
+                yield posix.join(path, entry.name);
             }
         }
     }

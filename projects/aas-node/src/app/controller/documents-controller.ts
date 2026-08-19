@@ -27,7 +27,7 @@ import {
 import { aas, AASDocument, AASPagedResult } from 'aas-core';
 import { decodeBase64Url } from 'aas-package';
 import { DocumentProvider } from '../provider/document-provider.js';
-import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 @injectable()
 @Route('/api/v1')
@@ -35,7 +35,7 @@ import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 export class DocumentsController extends Controller {
     public constructor(
         @inject(DocumentProvider) private readonly provider: DocumentProvider,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
+        @inject(AASIndexClient) private readonly index: AASIndexClient,
     ) {
         super();
     }
@@ -149,27 +149,6 @@ export class DocumentsController extends Controller {
             'Asset',
             decodeBase64Url(id),
             req.user?.endpoints ?? [],
-        );
-    }
-
-    /**
-     * @summary Gets the content of the specified AAS document.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The AAS identifier (Base64-URL encoded).
-     * @returns The AAS environment or `undefined`.
-     */
-    @Get('endpoints/{endpoint}/documents/{id}/content')
-    @OperationId('getDocumentContent')
-    public async getDocumentContent(
-        @Path() endpoint: string,
-        @Path() id: string,
-        @Request() req: express.Request,
-    ): Promise<aas.Environment | undefined> {
-        endpoint = decodeBase64Url(endpoint);
-        return await this.provider.getContent(
-            endpoint,
-            decodeBase64Url(id),
-            req.user?.endpoints?.find(item => item.name === endpoint)?.headers,
         );
     }
 

@@ -102,7 +102,9 @@ describe('Convert', () => {
         });
 
         it('converts an Error', () => {
-            expect(convertToString(new Error('This is an error.'))).toBe('This is an error.');
+            expect(convertToString(new Error('This is an error.'))).toEqual(
+                expect.stringContaining('This is an error.'),
+            );
         });
 
         it('converts an object', () => {

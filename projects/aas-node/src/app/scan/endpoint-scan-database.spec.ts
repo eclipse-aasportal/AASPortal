@@ -47,27 +47,36 @@ describe('EndpointScanDatabase', () => {
         db.registerSubmodels([referenceTo('submodel-1'), referenceTo('submodel-2')], 'shell-1');
         db.registerSubmodels([referenceTo('submodel-1')], 'shell-2');
 
-        expect(db.getShellIds('submodel-1')).toEqual(['shell-1', 'shell-2']);
-        expect(db.getShellIds('submodel-2')).toEqual(['shell-1']);
-        expect(db.getShellIds('unknown-submodel')).toEqual([]);
+        expect(db.getSubmodelShellIds('submodel-1')).toEqual(['shell-1', 'shell-2']);
+        expect(db.getSubmodelShellIds('submodel-2')).toEqual(['shell-1']);
+        expect(db.getSubmodelShellIds('unknown-submodel')).toEqual([]);
     });
 
     it('should ignore submodel references without an id', () => {
         db.registerSubmodels([referenceWithoutKeys(), referenceTo('')], 'shell-1');
 
-        expect(db.getShellIds('')).toEqual([]);
-        expect(db.getShellIds('shell-1')).toEqual([]);
+        expect(db.getSubmodelShellIds('')).toEqual([]);
+        expect(db.getSubmodelShellIds('shell-1')).toEqual([]);
+    });
+
+    it('should register concept descriptions for shells and return the matching shell ids', () => {
+        db.registerConceptDescription(createConceptDescription('concept-description-1'));
+        db.registerConceptDescription(createConceptDescription('concept-description-2'));
+        expect(db.hasConceptDescription('concept-description-1')).toBe(true);
+        expect(db.hasConceptDescription('unknown-concept-description')).toBe(false);
     });
 
     it('should clear all tracked shells and submodel registrations', () => {
         db.setShellChanged('shell-1', true);
         db.registerSubmodels([referenceTo('submodel-1')], 'shell-1');
+        db.registerConceptDescription(createConceptDescription('concept-description-1'));
 
         db.clear();
 
         expect(db.hasShell('shell-1')).toBe(false);
         expect(db.isShellChanged('shell-1')).toBe(false);
-        expect(db.getShellIds('submodel-1')).toEqual([]);
+        expect(db.getSubmodelShellIds('submodel-1')).toEqual([]);
+        expect(db.hasConceptDescription('concept-description-1')).toBe(false);
     });
 });
 
@@ -88,4 +97,15 @@ function referenceWithoutKeys(): aas.Reference {
         type: 'ModelReference',
         keys: [],
     } satisfies aas.Reference;
+}
+
+function createConceptDescription(id: string): aas.ConceptDescription {
+    return {
+        id,
+        idShort: 'idShort',
+        category: 'CONSTANT',
+        description: [],
+        isCaseOf: [],
+        modelType: 'ConceptDescription',
+    } satisfies aas.ConceptDescription;
 }

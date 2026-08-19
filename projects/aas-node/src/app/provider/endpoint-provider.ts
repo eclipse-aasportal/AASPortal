@@ -19,9 +19,8 @@ import {
     UpdateIndexStatus,
 } from 'aas-core';
 
-import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
-import { EndpointScanMessage, EndpointScanData, CancelEndpointScanData } from '../types.js';
-import { Parallel } from './parallel.js';
+import { CommandData, EventData, WorkerData } from '../types.js';
+import { EndpointScanWorkerPool } from '../scan/endpoint-scan-worker-pool.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
@@ -31,6 +30,7 @@ import { WSNode } from '../ws-node.js';
 import { Task, TaskHandler } from './task-handler.js';
 import { urlToEndpoint } from '../configuration.js';
 import { MessageSender } from './message-sender.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 @singleton()
 export class EndpointProvider {
@@ -40,13 +40,13 @@ export class EndpointProvider {
     public constructor(
         @inject(Variable) private readonly variable: Variable,
         @inject(LOGGER) private readonly logger: Logger,
-        @inject(Parallel) private readonly parallel: Parallel,
+        @inject(EndpointScanWorkerPool) private readonly workerPool: EndpointScanWorkerPool,
         @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
+        @inject(AASIndexClient) private readonly index: AASIndexClient,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
-        this.parallel.on('message', this.parallelOnMessage);
-        this.parallel.on('end', this.parallelOnEnd);
+        this.workerPool.on('message', this.workerPoolOnMessage);
+        this.workerPool.on('end', this.workerPoolOnEnd);
     }
 
     /**
@@ -141,13 +141,7 @@ export class EndpointProvider {
         if (endpoint) {
             const task = this.taskHandler.find(endpoint, 'ScanEndpoint');
             if (task) {
-                const data: CancelEndpointScanData = {
-                    taskId: task.id,
-                    type: 'CancelEndpointScanData',
-                    endpoint: endpoint,
-                };
-
-                await this.parallel.cancel(data);
+                await this.workerPool.cancel(task.id, endpoint);
             }
 
             await this.index.clear(endpoint);
@@ -160,13 +154,7 @@ export class EndpointProvider {
             for (const endpoint of endpoints) {
                 const task = this.taskHandler.find(endpoint, 'ScanEndpoint');
                 if (task) {
-                    const data: CancelEndpointScanData = {
-                        taskId: task.id,
-                        type: 'CancelEndpointScanData',
-                        endpoint: endpoint,
-                    };
-
-                    promises.push(this.parallel.cancel(data));
+                    promises.push(this.workerPool.cancel(task.id, endpoint));
                 }
             }
 
@@ -216,12 +204,7 @@ export class EndpointProvider {
             return;
         }
 
-        const data: CancelEndpointScanData = {
-            taskId: task.id,
-            type: 'CancelEndpointScanData',
-            endpoint: name,
-        };
-        await this.parallel.cancel(data);
+        await this.workerPool.cancel(task.id, name);
     }
 
     public getUpdateStatus(name: string): UpdateIndexStatus {
@@ -234,8 +217,8 @@ export class EndpointProvider {
     }
 
     public destroy(): void {
-        this.parallel.off('message', this.parallelOnMessage);
-        this.parallel.off('end', this.parallelOnEnd);
+        this.workerPool.off('message', this.workerPoolOnMessage);
+        this.workerPool.off('end', this.workerPoolOnEnd);
         this.sender.destroy();
     }
 
@@ -332,39 +315,45 @@ export class EndpointProvider {
     }
 
     private scanEndpoint = (task: Task, endpoint: AASEndpoint): void => {
-        const data: EndpointScanData = {
-            type: 'EndpointScanData',
-            taskId: task.id,
-            endpoint,
+        const data: CommandData = {
+            application: 'ScanApp',
+            type: 'command',
+            name: 'ScanEndpoint',
+            args: { taskId: task.id, endpoint },
         };
 
         task.state = 'inProgress';
         task.start = Date.now();
-        this.parallel.execute(data);
+        this.workerPool.execute(data);
     };
 
-    private parallelOnMessage = (message: EndpointScanMessage): void => {
+    private workerPoolOnMessage = (data: WorkerData): void => {
         try {
-            switch (message.kind) {
+            const event = data as EventData;
+            switch (event.name) {
                 case 'Start':
-                    this.sender.send({ type: 'Start', endpoint: message.endpoint, start: message.start });
+                    this.sender.send({
+                        type: 'Start',
+                        endpoint: String(event.args.endpoint),
+                        start: Number(event.args.start),
+                    });
                     break;
                 case 'Updated':
-                    this.onUpdate(message.document, message.start);
+                    this.onUpdate(event.args.document as AASDocument, Number(event.args.start));
                     break;
                 case 'Added':
-                    this.onAdded(message.document, message.start);
+                    this.onAdded(event.args.document as AASDocument, Number(event.args.start));
                     break;
                 case 'Removed':
-                    this.onRemoved(message.document, message.start);
+                    this.onRemoved(event.args.document as AASDocument, Number(event.args.start));
                     break;
                 case 'Progress':
                     this.onProgress(
-                        message.endpoint,
-                        message.start,
-                        message.shellCount,
-                        message.submodelCount,
-                        message.progress,
+                        String(event.args.endpoint),
+                        Number(event.args.start),
+                        Number(event.args.shellCount),
+                        Number(event.args.submodelCount),
+                        Number(event.args.progress),
                     );
                     break;
             }
@@ -373,8 +362,8 @@ export class EndpointProvider {
         }
     };
 
-    private parallelOnEnd = async (message: EndpointScanMessage): Promise<void> => {
-        const task = this.taskHandler.get(message.taskId);
+    private workerPoolOnEnd = async (data: EventData): Promise<void> => {
+        const task = this.taskHandler.get(Number(data.args.taskId));
         if (task === undefined || task.owner !== this) {
             return;
         }
@@ -383,7 +372,7 @@ export class EndpointProvider {
         if (endpoint !== undefined) {
             task.state = 'idle';
             task.end = Date.now();
-            this.sender.send({ type: 'End', endpoint: endpoint.name, start: message.start });
+            this.sender.send({ type: 'End', endpoint: endpoint.name, start: Number(data.args.start) });
             const type = endpoint.schedule?.type;
             if (type === 'once' || type === 'manual' || type === 'disabled') {
                 return;

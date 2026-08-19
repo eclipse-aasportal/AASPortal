@@ -1,8 +1,10 @@
 {
     "name": "aas-lib",
-    "version": "3.9",
+    "version": "3.0.0",
     "sideEffects": false,
     "type": "module",
+    "module": "./dist/fesm2022/aas-lib.mjs",
+    "typings": "./dist/types/aas-lib.d.ts",
     "scripts": {
         "ng": "ng",
         "test": "ng test aas-lib --no-watch",

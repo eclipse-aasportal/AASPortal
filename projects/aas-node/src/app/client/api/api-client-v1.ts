@@ -15,6 +15,7 @@ import { aasV2, encodeBase64Url, JsonReaderV2, JsonReaderV3, JsonWriterV2, Logge
 import { ApiClient } from './api-client.js';
 import { ERRORS } from '../../errors.js';
 import { HttpClient } from '../../http-client.js';
+import { AASIndexClient } from '../../index/aas-index-client.js';
 
 interface PackageDescriptor {
     aasIds: string[];
@@ -50,11 +51,12 @@ interface OperationResult {
 export class ApiClientV1 extends ApiClient {
     public constructor(
         logger: Logger,
+        index: AASIndexClient,
         endpoint: AASEndpoint,
         auth: Record<string, string> | undefined,
         http: HttpClient,
     ) {
-        super(logger, endpoint, auth, http);
+        super(logger, index, endpoint, auth, http);
     }
 
     public static readonly version = '^1.0.0';
@@ -86,7 +88,12 @@ export class ApiClientV1 extends ApiClient {
         };
     }
 
-    public getSubmodels(cursor: string | undefined): Promise<PagedResult<aas.Submodel>> {
+    public override getSubmodels(cursor: string | undefined): Promise<PagedResult<aas.Submodel>> {
+        noop(cursor);
+        throw new Error('Method not implemented.');
+    }
+
+    public override getConceptDescriptions(cursor: string | undefined): Promise<PagedResult<aas.ConceptDescription>> {
         noop(cursor);
         throw new Error('Method not implemented.');
     }
@@ -104,8 +111,7 @@ export class ApiClientV1 extends ApiClient {
             this.auth,
         );
 
-        const submodels = await this.readSubmodels(shell);
-        const conceptDescriptions = await this.readConceptDescriptions(submodels);
+        const submodels = await this.getShellSubmodels(shell);
 
         const asset: aasV2.Asset = {
             kind: 'Instance',
@@ -118,10 +124,12 @@ export class ApiClientV1 extends ApiClient {
             assetAdministrationShells: [shell],
             assets: [asset],
             submodels,
-            conceptDescriptions,
+            conceptDescriptions: [],
         };
 
-        return new JsonReaderV2(sourceEnv, true).readEnvironment();
+        const env = new JsonReaderV2(sourceEnv, true).readEnvironment();
+        env.conceptDescriptions = await this.getShellConceptDescriptions(env.assetAdministrationShells![0]);
+        return env;
     }
 
     public override setEnvironment(id: string, env: aas.Environment): Promise<void> {
@@ -236,7 +244,16 @@ export class ApiClientV1 extends ApiClient {
         return Promise.reject(new Error('Not implemented.'));
     }
 
-    private async readSubmodels(shell: aasV2.AssetAdministrationShell): Promise<aasV2.Submodel[]> {
+    protected override async getConceptDescription(id: string): Promise<aas.ConceptDescription> {
+        const cd = await this.http.get<aasV2.Submodel>(
+            this.resolve(`concept-descriptions/${id}/concept-description`),
+            this.auth,
+        );
+
+        return new JsonReaderV2().read(cd) as aas.ConceptDescription;
+    }
+
+    private async getShellSubmodels(shell: aasV2.AssetAdministrationShell): Promise<aasV2.Submodel[]> {
         const submodels: aasV2.Submodel[] = [];
         if (shell.submodels) {
             for (const reference of shell.submodels) {
@@ -277,86 +294,5 @@ export class ApiClientV1 extends ApiClient {
 
     private toAssetAdministration(source: aasV2.AssetAdministrationShell): aas.AssetAdministrationShell {
         return new JsonReaderV2().read(source) as aas.AssetAdministrationShell;
-    }
-
-    private async readConceptDescriptions(submodels: aasV2.Submodel[]): Promise<aasV2.ConceptDescription[]> {
-        const conceptDescriptions: aasV2.ConceptDescription[] = [];
-        for (const submodel of submodels) {
-            for (const referable of this.traverse(submodel)) {
-                const semanticId = this.getSemanticId(referable);
-                if (!semanticId) {
-                    continue;
-                }
-
-                try {
-                    const conceptDescription = await this.http.get<aas.ConceptDescription>(
-                        this.resolve(`concept-descriptions/${encodeBase64Url(semanticId)}`),
-                        this.auth,
-                    );
-
-                    if (this.isConceptDescription(conceptDescription)) {
-                        conceptDescriptions.push(conceptDescription);
-                    }
-                } catch {
-                    noop();
-                }
-            }
-        }
-
-        return conceptDescriptions;
-    }
-
-    private *traverse(root: aasV2.Referable): Generator<aasV2.Referable> {
-        const stack: aasV2.Referable[][] = [];
-        yield root;
-
-        let children = this.getChildren(root);
-        if (children.length > 0) {
-            stack.push(children);
-        }
-
-        while (stack.length) {
-            for (const child of stack.pop()!) {
-                yield child;
-
-                children = this.getChildren(child);
-                if (children.length > 0) {
-                    stack.push(children);
-                }
-            }
-        }
-    }
-
-    private getSemanticId(value: aasV2.Referable): string | undefined {
-        return (value as aasV2.HasSemantic)?.semanticId?.keys.at(0)?.value;
-    }
-
-    private isConceptDescription(referable: unknown): referable is aasV2.ConceptDescription {
-        return (referable as aasV2.Referable)?.modelType.name === 'ConceptDescription';
-    }
-
-    private getChildren(parent: aasV2.Referable, env?: aasV2.AssetAdministrationShellEnvironment): aasV2.Referable[] {
-        if (parent) {
-            switch (parent.modelType.name) {
-                case 'SubmodelElementCollection':
-                    return (parent as aasV2.SubmodelElementCollection).value ?? [];
-                case 'Submodel':
-                    return (parent as aasV2.Submodel).submodelElements ?? [];
-                case 'AssetAdministrationShell':
-                    return env && env.submodels ? env.submodels : [];
-                case 'Entity':
-                    return (parent as aasV2.Entity).statements ?? [];
-                case 'AnnotatedRelationshipElement':
-                    return (parent as aasV2.AnnotatedRelationshipElement).annotation ?? [];
-                case 'Operation':
-                    return [
-                        ...((parent as aasV2.Operation).inputVariable?.map(variable => variable.value) ?? []),
-                        ...((parent as aasV2.Operation).inoutputVariable?.map(variable => variable.value) ?? []),
-                        ...((parent as aasV2.Operation).outputVariable?.map(variable => variable.value) ?? []),
-                    ];
-            }
-        }
-
-        return [];
     }
 }

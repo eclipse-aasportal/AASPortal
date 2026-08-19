@@ -8,16 +8,16 @@
 
 import { aas, AASDocument, PagedResult } from 'aas-core';
 import { ApiClient } from '../client/api/api-client.js';
-import { EndpointScanner } from './endpoint-scanner.js';
-import { ScannerController } from './scanner-controller.js';
+import { EndpointScan } from './endpoint-scan.js';
+import { ScanController } from './scan-controller.js';
 import { thumbnailToObjectUrl } from '../utilities.js';
 
 /**
  * Implements an automate to scan an AAS server for new, deleted or updated Asset Administration Shells.
  */
-export class AASServerScanner extends EndpointScanner {
+export class AASServerScan extends EndpointScan {
     public constructor(
-        controller: ScannerController,
+        controller: ScanController,
         private readonly client: ApiClient,
     ) {
         super(controller);
@@ -60,5 +60,11 @@ export class AASServerScanner extends EndpointScanner {
 
     protected override getSubmodels(cursor: string | undefined): Promise<PagedResult<aas.Submodel>> {
         return this.client.getSubmodels(cursor);
+    }
+
+    protected override getConceptDescriptions(
+        cursor: string | undefined,
+    ): Promise<PagedResult<aas.ConceptDescription>> {
+        return this.client.getConceptDescriptions(cursor);
     }
 }

@@ -52,7 +52,7 @@ export class JsonReaderV3 extends AASReader {
         const source: aas.Referable = typeof data === 'string' ? JSON.parse(data) : data;
         switch (source.modelType) {
             case 'AssetAdministrationShell':
-                throw new Error('Invalid operation.');
+                return this.readAssetAdministrationShell(source as aas.AssetAdministrationShell);
             case 'Submodel':
                 return this.readSubmodel(source as aas.Submodel);
             case 'ConceptDescription':

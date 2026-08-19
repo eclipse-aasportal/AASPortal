@@ -13,17 +13,17 @@ import { aas, AASDocument } from 'aas-core';
 import { DocumentProvider } from './document-provider.js';
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { createSpyObj } from '../../test/mocks.js';
-import { AASIndex } from '../index/aas-index.js';
 import { EndpointClient } from '../client/endpoint-client.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 describe('DocumentProvider', function () {
     let aasProvider: DocumentProvider;
-    let index: Mocked<AASIndex>;
+    let index: Mocked<AASIndexClient>;
     const clientFactory = createSpyObj<EndpointClientFactory>(['create', 'testAsync']);
 
     beforeEach(function () {
         clientFactory.testAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
-        index = createSpyObj<AASIndex>(['get', 'find', 'getEndpoint', 'getEndpoints', 'insert']);
+        index = createSpyObj<AASIndexClient>(['get', 'find', 'getEndpoint', 'getEndpoints', 'insert']);
         aasProvider = new DocumentProvider(clientFactory, index);
     });
 

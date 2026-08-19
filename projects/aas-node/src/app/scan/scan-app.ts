@@ -12,24 +12,23 @@ import { LOGGER, Logger } from 'aas-package';
 
 import { AASDocument, AASEndpoint } from 'aas-core';
 
-import { toUint8Array } from '../utilities.js';
-import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
-import { EndpointScannerFactory } from './endpoint-scanner-factory.js';
+import { EndpointScanFactory } from './endpoint-scan-factory.js';
 import { Variable } from '../variable.js';
-import { isCancelEndpointScanData, isEndpointScanData, EndpointScanMessage, WorkerData } from '../types.js';
-import { ScannerController } from './scanner-controller.js';
+import { CommandData, EventData } from '../types.js';
+import { ScanController } from './scan-controller.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 @singleton()
 export class ScanApp {
     private endpoint = '';
     private taskId = 0;
     private start = 0;
-    private readonly controller: ScannerController = new ScannerController();
+    private readonly controller: ScanController = new ScanController();
 
     public constructor(
         @inject(LOGGER) private readonly logger: Logger,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
-        @inject(EndpointScannerFactory) private readonly factory: EndpointScannerFactory,
+        @inject(AASIndexClient) private readonly index: AASIndexClient,
+        @inject(EndpointScanFactory) private readonly factory: EndpointScanFactory,
         @inject(Variable) private readonly variable: Variable,
     ) {}
 
@@ -37,19 +36,20 @@ export class ScanApp {
         parentPort?.on('message', this.parentPortOnMessage);
     }
 
-    private readonly parentPortOnMessage = async (data: WorkerData): Promise<void> => {
+    private readonly parentPortOnMessage = async (data: CommandData): Promise<void> => {
         if (parentPort === null) {
             return;
         }
 
         try {
-            if (isEndpointScanData(data)) {
-                this.endpoint = data.endpoint.name;
-                this.taskId = data.taskId;
-                await this.scan(data.endpoint);
-            } else if (isCancelEndpointScanData(data)) {
-                this.taskId = data.taskId;
-                this.endpoint = data.endpoint;
+            if (data.name === 'ScanEndpoint') {
+                const endpoint = data.args.endpoint as AASEndpoint;
+                this.endpoint = endpoint.name;
+                this.taskId = Number(data.args.taskId);
+                await this.scan(endpoint);
+            } else if (data.name === 'CancelScan') {
+                this.taskId = Number(data.args.taskId);
+                this.endpoint = String(data.args.endpoint);
                 await this.cancel();
             }
         } catch (error) {
@@ -92,80 +92,75 @@ export class ScanApp {
     };
 
     private postStart(): void {
-        const array = toUint8Array({
-            type: 'EndpointScanMessage',
-            taskId: this.taskId,
-            kind: 'Start',
-            endpoint: this.endpoint,
-            start: this.start,
-        } satisfies EndpointScanMessage);
+        const data: EventData = {
+            application: 'ScanApp',
+            type: 'event',
+            name: 'Start',
+            args: { taskId: this.taskId, endpoint: this.endpoint, start: this.start },
+        };
 
-        parentPort?.postMessage(array, [array.buffer]);
+        parentPort?.postMessage(data);
     }
 
     private postUpdate(document: AASDocument): void {
-        const array = toUint8Array({
-            type: 'EndpointScanMessage',
-            taskId: this.taskId,
-            kind: 'Updated',
-            endpoint: this.endpoint,
-            document: document,
-            start: this.start,
-        } satisfies EndpointScanMessage);
+        const data: EventData = {
+            application: 'ScanApp',
+            type: 'event',
+            name: 'Updated',
+            args: { taskId: this.taskId, endpoint: this.endpoint, document: document, start: this.start },
+        };
 
-        parentPort?.postMessage(array, [array.buffer]);
+        parentPort?.postMessage(data);
     }
 
-    private postRemove = (document: AASDocument): void => {
-        const array = toUint8Array({
-            type: 'EndpointScanMessage',
-            taskId: this.taskId,
-            kind: 'Removed',
-            endpoint: this.endpoint,
-            document: document,
-            start: this.start,
-        } satisfies EndpointScanMessage);
+    private readonly postRemove = (document: AASDocument): void => {
+        const data: EventData = {
+            application: 'ScanApp',
+            type: 'event',
+            name: 'Removed',
+            args: { taskId: this.taskId, endpoint: this.endpoint, document: document, start: this.start },
+        };
 
-        parentPort?.postMessage(array, [array.buffer]);
+        parentPort?.postMessage(data);
     };
 
-    private postAdd = (document: AASDocument): void => {
-        const array = toUint8Array({
-            type: 'EndpointScanMessage',
-            taskId: this.taskId,
-            kind: 'Added',
-            endpoint: this.endpoint,
-            document: document,
-            start: this.start,
-        } satisfies EndpointScanMessage);
+    private readonly postAdd = (document: AASDocument): void => {
+        const data: EventData = {
+            application: 'ScanApp',
+            type: 'event',
+            name: 'Added',
+            args: { taskId: this.taskId, endpoint: this.endpoint, document: document, start: this.start },
+        };
 
-        parentPort?.postMessage(array, [array.buffer]);
+        parentPort?.postMessage(data);
     };
 
     private readonly postProgress = (progress: number, shellCount: number, submodelCount: number): void => {
-        const array = toUint8Array({
-            type: 'EndpointScanMessage',
-            taskId: this.taskId,
-            kind: 'Progress',
-            endpoint: this.endpoint,
-            shellCount: shellCount,
-            submodelCount: submodelCount,
-            progress: progress,
-            start: this.start,
-        } satisfies EndpointScanMessage);
+        const data: EventData = {
+            application: 'ScanApp',
+            type: 'event',
+            name: 'Progress',
+            args: {
+                taskId: this.taskId,
+                endpoint: this.endpoint,
+                shellCount: shellCount,
+                submodelCount: submodelCount,
+                progress: progress,
+                start: this.start,
+            },
+        };
 
-        parentPort?.postMessage(array, [array.buffer]);
+        parentPort?.postMessage(data);
     };
 
     private postEnd(): void {
-        const array = toUint8Array({
-            type: 'EndpointScanMessage',
-            taskId: this.taskId,
-            endpoint: this.endpoint,
-            start: this.start,
-            kind: 'End',
-        } satisfies EndpointScanMessage);
+        const data: EventData = {
+            application: 'ScanApp',
+            type: 'event',
+            name: 'End',
+            args: { taskId: this.taskId, endpoint: this.endpoint, start: this.start },
+        };
 
-        parentPort?.postMessage(array, [array.buffer]);
+        parentPort?.postMessage(data);
     }
 }

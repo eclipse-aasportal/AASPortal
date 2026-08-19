@@ -21,11 +21,14 @@ export interface MySqlEndpoint extends RowDataPacket {
 export interface MySqlDocument extends RowDataPacket {
     uuid: string;
     address: string;
-    crc32: number;
     idShort: string;
     assetId: string | null;
     thumbnail: string | null;
     timestamp: number;
+}
+
+export interface MySqlConceptDescriptionIds extends RowDataPacket {
+    conceptDescriptionIds: string;
 }
 
 export interface MySqlElement extends RowDataPacket {

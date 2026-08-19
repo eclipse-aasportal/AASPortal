@@ -11,6 +11,7 @@ import { Logger } from 'aas-package';
 import { SocketClient } from '../live/socket-client.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
 import { thumbnailToObjectUrl } from '../utilities.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 /**
  * Represents a client of an endpoint or server that provides Asset Administration Shells.
@@ -18,6 +19,7 @@ import { thumbnailToObjectUrl } from '../utilities.js';
 export abstract class EndpointClient {
     protected constructor(
         protected readonly logger: Logger,
+        protected readonly index: AASIndexClient,
         public readonly endpoint: AASEndpoint,
         protected readonly auth?: Record<string, string>,
     ) {}
@@ -122,8 +124,20 @@ export abstract class EndpointClient {
      * Gets the submodels of the current endpoint.
      * @param cursor The position for the next page.
      * @param limit The maximum number of submodels of a page.
+     * @returns The submodels of the current endpoint.
      */
     public abstract getSubmodels(cursor: string | undefined, limit?: number): Promise<PagedResult<aas.Submodel>>;
+
+    /**
+     * Gets the concept descriptions of the current endpoint.
+     * @param cursor The position for the next page.
+     * @param limit The maximum number of submodels of a page.
+     * @returns The concept descriptions of the current endpoint.
+     */
+    public abstract getConceptDescriptions(
+        cursor: string | undefined,
+        limit?: number,
+    ): Promise<PagedResult<aas.ConceptDescription>>;
 
     /**
      * Opens a readable stream.

@@ -11,7 +11,7 @@ import { UpdateIndexStatus, AASNodeMessage, WebSocketData } from 'aas-core';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { mergeMap, Observable, of, Subject, Subscription } from 'rxjs';
 import { WebSocketService } from './web-socket.service';
-import { HttpCache } from './http-cache';
+import { DocumentCache } from './document-cache';
 import { encodeBase64Url } from '../../utilities';
 
 /**
@@ -22,7 +22,7 @@ import { encodeBase64Url } from '../../utilities';
     providedIn: 'root',
 })
 export class IndexChange implements OnDestroy {
-    private readonly cache = inject(HttpCache);
+    private readonly cache = inject(DocumentCache);
     private readonly http = inject(HttpClient);
     private readonly webSocket = inject(WebSocketService);
     private readonly subscription: Subscription;

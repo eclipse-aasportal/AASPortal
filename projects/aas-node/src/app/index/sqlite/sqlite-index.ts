@@ -68,6 +68,13 @@ CREATE TABLE IF NOT EXISTS elements (
     dateValue TEXT,
     booleanValue INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS submodelConceptDescriptions (
+    endpoint TEXT NOT NULL,
+    id TEXT NOT NULL,
+    conceptDescriptionIds TEXT NOT NULL,
+    UNIQUE (id, endpoint)
+);
 `;
 
 export class SqliteIndex extends AASIndex {
@@ -95,6 +102,11 @@ export class SqliteIndex extends AASIndex {
     private readonly deleteEndpointDocumentsSql: StatementSync;
     private readonly deleteAllElementsSql: StatementSync;
     private readonly deleteAllDocumentsSql: StatementSync;
+    private readonly getConceptDescriptionIdsSql: StatementSync;
+    private readonly insertConceptDescriptionIdsSql: StatementSync;
+    private readonly updateConceptDescriptionIdsSql: StatementSync;
+    private readonly deleteConceptDescriptionIdsSql: StatementSync;
+    private readonly deleteEndpointConceptDescriptionIdsSql: StatementSync;
 
     public constructor(
         private readonly logger: Logger,
@@ -146,14 +158,30 @@ export class SqliteIndex extends AASIndex {
         this.selectUuidSql = this.db.prepare('SELECT uuid FROM documents WHERE endpoint = ? AND id = ?');
         this.deleteAllElementsSql = this.db.prepare('DELETE FROM elements');
         this.deleteAllDocumentsSql = this.db.prepare('DELETE FROM documents');
-        this.selectEndpointDocumentsSql = this.db.prepare('SELECT * FROM documents WHERE endpoint = ? LIMIT ?');
+        this.selectEndpointDocumentsSql = this.db.prepare('SELECT uuid FROM documents WHERE endpoint = ? LIMIT ?');
         this.deleteEndpointDocumentsSql = this.db.prepare('DELETE FROM documents WHERE endpoint = ?');
+        this.getConceptDescriptionIdsSql = this.db.prepare(
+            'SELECT conceptDescriptionIds FROM submodelConceptDescriptions WHERE endpoint = ? AND id = ?',
+        );
+
+        this.insertConceptDescriptionIdsSql = this.db.prepare(
+            'INSERT INTO submodelConceptDescriptions (endpoint, id, conceptDescriptionIds) VALUES (?, ?, ?)',
+        );
+
+        this.updateConceptDescriptionIdsSql = this.db.prepare(
+            'UPDATE submodelConceptDescriptions SET conceptDescriptionIds = ? WHERE endpoint = ? AND id = ?',
+        );
+
+        this.deleteConceptDescriptionIdsSql = this.db.prepare('DELETE FROM submodelConceptDescriptions');
+        this.deleteEndpointConceptDescriptionIdsSql = this.db.prepare(
+            'DELETE FROM submodelConceptDescriptions WHERE endpoint = ?',
+        );
 
         this.logger.info(`AAS index connected to ${file} (SQLite).`);
     }
 
-    public override async getDocumentCount(endpoint?: string): Promise<number> {
-        return await new Promise((resolve, reject) => {
+    public override getDocumentCount(endpoint?: string): Promise<number> {
+        return new Promise((resolve, reject) => {
             try {
                 const value = endpoint ? this.getCountEndpoint.get(endpoint) : this.getCountAll.get();
                 if (value === undefined) {
@@ -168,8 +196,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async getEndpoints(): Promise<AASEndpoint[]> {
-        return await new Promise((resolve, reject) => {
+    public override getEndpoints(): Promise<AASEndpoint[]> {
+        return new Promise((resolve, reject) => {
             try {
                 const values = this.getEndpointsSql.all();
                 resolve(values.map(value => this.toEndpoint(value)));
@@ -179,8 +207,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async getEndpointCount(): Promise<number> {
-        return await new Promise((resolve, reject) => {
+    public override getEndpointCount(): Promise<number> {
+        return new Promise((resolve, reject) => {
             try {
                 const value = this.getEndpointCountSql.get();
                 if (value) {
@@ -194,8 +222,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async getEndpoint(name: string): Promise<AASEndpoint> {
-        return await new Promise((resolve, reject) => {
+    public override getEndpoint(name: string): Promise<AASEndpoint> {
+        return new Promise((resolve, reject) => {
             try {
                 const value = this.getEndpointSql.get(name);
                 if (value) {
@@ -209,8 +237,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async findEndpoint(name: string): Promise<AASEndpoint | undefined> {
-        return await new Promise((resolve, reject) => {
+    public override findEndpoint(name: string): Promise<AASEndpoint | undefined> {
+        return new Promise((resolve, reject) => {
             try {
                 const value = this.getEndpointSql.get(name);
                 if (value) {
@@ -224,8 +252,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async insertEndpoint(endpoint: AASEndpoint): Promise<void> {
-        await new Promise<void>((resolve, reject) => {
+    public override insertEndpoint(endpoint: AASEndpoint): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             try {
                 this.insertEndpointSql.run(
                     endpoint.name,
@@ -243,8 +271,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
-        return await new Promise((resolve, reject) => {
+    public override updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
+        return new Promise((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
                 const value = this.getEndpointSql.get(endpoint.name);
@@ -271,8 +299,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async deleteEndpoint(endpoint: string): Promise<boolean> {
-        return await new Promise((resolve, reject) => {
+    public override deleteEndpoint(endpoint: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
                 this.deleteDocuments(endpoint);
@@ -286,12 +314,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async getDocuments(
-        cursor: AASCursor,
-        expression?: string,
-        language?: string,
-    ): Promise<AASPagedResult> {
-        return await new Promise((resolve, reject) => {
+    public override getDocuments(cursor: AASCursor, expression?: string, language?: string): Promise<AASPagedResult> {
+        return new Promise((resolve, reject) => {
             try {
                 let query: SqliteQuery | undefined;
                 if (expression) {
@@ -316,12 +340,12 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async getEndpointDocuments(
+    public override getEndpointDocuments(
         endpoint: string,
         cursor: string | undefined,
         limit: number = LIMIT,
     ): Promise<PagedResult<AASDocument>> {
-        return await new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             try {
                 let sql: StatementSync;
                 const params: SQLInputValue[] = [endpoint];
@@ -349,8 +373,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async update(document: AASDocument): Promise<void> {
-        await new Promise<void>((resolve, reject) => {
+    public override update(document: AASDocument): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
                 const value = this.selectDocumentSql.get(document.endpoint, document.id);
@@ -382,8 +406,8 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async insert(document: AASDocument): Promise<void> {
-        await new Promise<void>((resolve, reject) => {
+    public override insert(document: AASDocument): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
                 const uuid = nanoid();
@@ -411,12 +435,12 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async find(
+    public override find(
         endpoint: string | undefined,
         modelType: 'AssetAdministrationShell' | 'Asset',
         id: string,
     ): Promise<AASDocument | undefined> {
-        return await new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             try {
                 const document = endpoint
                     ? this.selectEndpointDocument(endpoint, modelType, id)
@@ -473,13 +497,14 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override async clear(endpoint?: string, id?: string): Promise<void> {
-        await new Promise<void>((resolve, reject) => {
+    public override clear(endpoint?: string, id?: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
                 if (endpoint === undefined) {
                     this.deleteAllElementsSql.run();
                     this.deleteAllDocumentsSql.run();
+                    this.deleteConceptDescriptionIdsSql.run();
                 } else if (id) {
                     const uuid = this.getUuid(endpoint, id);
                     if (uuid) {
@@ -498,6 +523,42 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
+    public override getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]> {
+        return new Promise<string[]>((resolve, reject) => {
+            try {
+                const value = this.getConceptDescriptionIdsSql.get(endpoint, id);
+                if (!value || !value.conceptDescriptionRefs) {
+                    return resolve([]);
+                }
+
+                resolve(JSON.parse(String(value.id)) as string[]);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    public override setSubmodelConceptDescriptionIds(
+        endpoint: string,
+        id: string,
+        conceptDescriptionIds: string[],
+    ): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            try {
+                const value = this.getConceptDescriptionIdsSql.get(endpoint, id);
+                if (value) {
+                    this.updateConceptDescriptionIdsSql.run(JSON.stringify(conceptDescriptionIds), endpoint, id);
+                } else {
+                    this.insertConceptDescriptionIdsSql.run(endpoint, id, JSON.stringify(conceptDescriptionIds));
+                }
+
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
     private deleteDocuments(endpoint: string): void {
         let loop = true;
         while (loop) {
@@ -505,6 +566,7 @@ export class SqliteIndex extends AASIndex {
             this.deleteEndpointDocumentsSql.run(endpoint);
             for (const value of values) {
                 this.deleteElementsSql.run(String(value.uuid));
+                this.deleteEndpointConceptDescriptionIdsSql.run(endpoint);
             }
 
             if (values.length < LIMIT) {
@@ -513,14 +575,10 @@ export class SqliteIndex extends AASIndex {
         }
     }
 
-    public override async destroy(): Promise<void> {
-        await new Promise<void>(resolve => {
-            if (this.db.isOpen) {
-                this.db.close();
-            }
-
-            resolve();
-        });
+    public override dispose(): void {
+        if (this.db.isOpen) {
+            this.db.close();
+        }
     }
 
     private getUuid(endpoint: string, id: string): string | undefined {
@@ -814,8 +872,8 @@ export class SqliteIndex extends AASIndex {
             document.assetId = String(value.assetId);
         }
 
-        if (value.thumbnail) {
-            document.thumbnail = String(value.thumbnail);
+        if (value.thumbnail !== '') {
+            document.thumbnail = value.thumbnail === null ? null : String(value.thumbnail);
         }
 
         return document;

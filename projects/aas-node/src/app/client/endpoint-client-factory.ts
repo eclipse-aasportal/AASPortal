@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import { AASEndpoint, ApplicationError } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
 import semver from 'semver';
@@ -18,14 +18,14 @@ import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { ApiClientV1 } from './api/api-client-v1.js';
 import { HttpClient } from '../http-client.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
 @singleton()
 export class EndpointClientFactory {
-    public constructor(
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
-        @inject(HttpClient) private readonly http: HttpClient,
-    ) {}
+    private readonly logger = container.resolve<Logger>(LOGGER);
+    private readonly index = container.resolve(AASIndexClient);
+    private readonly fileStorageProvider = container.resolve(FileStorageProvider);
+    private readonly http = container.resolve(HttpClient);
 
     /**
      * Creates a concrete realization of an endpoint client.
@@ -37,18 +37,18 @@ export class EndpointClientFactory {
             case 'AAS_API': {
                 const version = semver.coerce(endpoint.version) ?? '3.0.0';
                 if (semver.satisfies(version, ApiClientV3.version)) {
-                    return new ApiClientV3(this.logger, endpoint, auth, this.http);
+                    return new ApiClientV3(this.logger, this.index, endpoint, auth, this.http);
                 } else if (semver.satisfies(version, ApiClientV1.version)) {
-                    return new ApiClientV1(this.logger, endpoint, auth, this.http);
+                    return new ApiClientV1(this.logger, this.index, endpoint, auth, this.http);
                 }
 
                 throw new ApplicationError(`AAS server version ${version} is not supported.`, {}, 500);
             }
             case 'OPC_UA':
-                return new OpcuaClient(this.logger, endpoint);
+                return new OpcuaClient(this.logger, this.index, endpoint);
             case 'WebDAV':
             case 'FileSystem': {
-                return new AasxDirectory(this.logger, endpoint, this.fileStorageProvider.get(endpoint.url));
+                return new AasxDirectory(this.logger, this.index, endpoint, this.fileStorageProvider.get(endpoint.url));
             }
             default:
                 throw new Error('Not implemented.');
@@ -65,10 +65,10 @@ export class EndpointClientFactory {
                 case 'AAS_API': {
                     switch (endpoint.version) {
                         case 'v3':
-                            await new ApiClientV3(this.logger, endpoint, auth, this.http).test();
+                            await new ApiClientV3(this.logger, this.index, endpoint, auth, this.http).test();
                             break;
                         case 'v1':
-                            await new ApiClientV1(this.logger, endpoint, auth, this.http).test();
+                            await new ApiClientV1(this.logger, this.index, endpoint, auth, this.http).test();
                             break;
                         default:
                             throw new ApplicationError(
@@ -81,13 +81,14 @@ export class EndpointClientFactory {
                     break;
                 }
                 case 'OPC_UA':
-                    await new OpcuaClient(this.logger, endpoint).test();
+                    await new OpcuaClient(this.logger, this.index, endpoint).test();
                     break;
                 case 'WebDAV':
                 case 'FileSystem':
                     {
                         await new AasxDirectory(
                             this.logger,
+                            this.index,
                             endpoint,
                             this.fileStorageProvider.get(endpoint.url),
                         ).test();

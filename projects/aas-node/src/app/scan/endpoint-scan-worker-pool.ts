@@ -6,28 +6,31 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
+import { container, singleton, Disposable } from 'tsyringe';
 import { EventEmitter } from 'events';
 import { Worker, SHARE_ENV } from 'worker_threads';
 import fs from 'fs';
 import path from 'path/posix';
 import { noop } from 'aas-core';
-import { LOGGER, Logger } from 'aas-package';
+import { LOGGER } from 'aas-package';
 
-import { EndpointScanMessage, WorkerData } from '../types.js';
+import { CommandData, EventData, isEventData, ResponseData } from '../types.js';
 import { Variable } from '../variable.js';
+import { AASIndexClient } from '../index/aas-index-client.js';
 
-/** Represents a worker task for scanning an endpoint. */
-class WorkerTask extends EventEmitter {
+/**
+ * Represents a worker for scanning an endpoint.
+ */
+class EndpointScanWorker extends EventEmitter {
     private _worker?: Worker;
 
-    public constructor(data: WorkerData) {
+    public constructor(data: CommandData) {
         super();
 
         this.data = data;
     }
 
-    public readonly data: WorkerData;
+    public readonly data: CommandData;
 
     public get worker(): Worker | undefined {
         return this._worker;
@@ -35,13 +38,13 @@ class WorkerTask extends EventEmitter {
 
     public execute(worker: Worker): void {
         this._worker = worker;
-        worker.on('message', this.workerOnMessage);
-        worker.on('error', this.workerOnError);
-        worker.on('exit', this.workerOnExit);
-        worker.postMessage(this.data);
+        this._worker.on('message', this.workerOnMessage);
+        this._worker.on('error', this.workerOnError);
+        this._worker.on('exit', this.workerOnExit);
+        this._worker.postMessage(this.data);
     }
 
-    public destroy(): void {
+    public dispose(): void {
         if (this._worker) {
             this._worker.off('message', this.workerOnMessage);
             this._worker.off('exit', this.workerOnExit);
@@ -50,15 +53,11 @@ class WorkerTask extends EventEmitter {
         }
     }
 
-    private workerOnMessage = (value: Uint8Array): void => {
-        const message: EndpointScanMessage = JSON.parse(Buffer.from(value).toString());
-        switch (message.kind) {
-            case 'End':
-                this.emit('end', message, this);
-                break;
-            default:
-                this.emit('message', message);
-                break;
+    private workerOnMessage = (data: EventData | ResponseData): void => {
+        if (isEventData(data) && data.name === 'End') {
+            this.emit('end', data, this);
+        } else {
+            this.emit('message', data);
         }
     };
 
@@ -75,15 +74,15 @@ class WorkerTask extends EventEmitter {
  * Provides a pool of worker threads.
  */
 @singleton()
-export class Parallel extends EventEmitter {
+export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly variable = container.resolve(Variable);
+    private readonly index = container.resolve(AASIndexClient);
     private readonly script: string;
-    private readonly waiting = new Array<WorkerTask>();
-    private readonly pool = new Map<Worker, WorkerTask | null>();
+    private readonly waiting = new Array<EndpointScanWorker>();
+    private readonly pool = new Map<Worker, EndpointScanWorker | null>();
 
-    public constructor(
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(Variable) private readonly variable: Variable,
-    ) {
+    public constructor() {
         super();
 
         this.script = path.resolve(this.variable.CONTENT_ROOT, 'aas-scan.js');
@@ -93,11 +92,11 @@ export class Parallel extends EventEmitter {
     }
 
     /**
-     * Executes a new task in parallel.
+     * Executes a new endpoint scan.
      * @param data The task data.
      */
-    public execute(data: WorkerData): void {
-        const task = new WorkerTask(data);
+    public execute(data: CommandData): void {
+        const task = new EndpointScanWorker(data);
         task.on('message', this.taskOnMessage);
         task.on('end', this.taskOnEnd);
         task.on('exit', this.taskOnExit);
@@ -116,9 +115,9 @@ export class Parallel extends EventEmitter {
      * @param data The message to cancel the corresponding task.
      * @returns A promise that resolves when the task is canceled or if the task was not found.
      */
-    public cancel(data: WorkerData): Promise<void> {
+    public cancel(taskId: number, endpoint: string): Promise<void> {
         return new Promise<void>(resolve => {
-            const index = this.waiting.findIndex(item => item.data.taskId === data.taskId);
+            const index = this.waiting.findIndex(item => item.data.args.taskId === taskId);
             if (index >= 0) {
                 const task = this.waiting[index];
                 this.waiting.splice(index, 1);
@@ -126,60 +125,75 @@ export class Parallel extends EventEmitter {
                 return resolve();
             }
 
-            const task = [...this.pool.values()].find(item => item?.data.taskId === data.taskId);
+            const task = [...this.pool.values()].find(item => item?.data.args.taskId === taskId);
             if (!task?.worker) {
                 return resolve();
             }
 
-            task.worker.postMessage(data);
-            task.once('end', () => resolve());
+            task.once('end', () => {
+                resolve();
+            });
+
+            task.worker.postMessage({
+                application: 'ScanApp',
+                type: 'command',
+                name: 'CancelScan',
+                args: { taskId, endpoint },
+            } satisfies CommandData);
         });
     }
 
     /**
-     * Terminates all worker threads and clears the pool.
+     * Disposes all worker threads and clears the pool.
      * @returns A promise that resolves when all workers have been terminated.
      */
-    public async terminate(): Promise<void> {
+    public async dispose(): Promise<void> {
         await Promise.allSettled(
             [...this.pool].filter(([, task]) => task !== null).map(([worker]) => worker.terminate()),
         );
     }
 
-    private nextWorker(task: WorkerTask): Worker | undefined {
-        for (const [worker, t] of this.pool) {
-            if (t === null) {
+    private nextWorker(task: EndpointScanWorker): Worker | undefined {
+        for (const [worker, data] of this.pool) {
+            if (data === null) {
                 this.pool.set(worker, task);
                 return worker;
             }
         }
 
         if (this.pool.size < this.variable.MAX_WORKERS) {
-            const worker = new Worker(this.script, { env: SHARE_ENV });
+            const workerName = `ScanApp Worker ${this.pool.size + 1}`;
+            const worker = new Worker(this.script, { env: SHARE_ENV, name: workerName });
             this.pool.set(worker, task);
+            const { port1, port2 } = new MessageChannel();
+            this.index.connect(port1);
+            worker.postMessage(
+                {
+                    application: 'ScanApp',
+                    type: 'command',
+                    name: 'connect',
+                    args: { port: port2, name: workerName },
+                } satisfies CommandData,
+                [port2],
+            );
+
             return worker;
         }
 
         return undefined;
     }
 
-    private taskOnMessage = (result: EndpointScanMessage): void => {
-        this.emit('message', result);
+    private taskOnMessage = (data: ResponseData): void => {
+        this.emit('message', data);
     };
 
-    private taskOnEnd = (result: EndpointScanMessage, task: WorkerTask): void => {
-        this.emit('end', result);
-
-        if (!task) {
-            return;
-        }
-
+    private taskOnEnd = (data: EventData, task: EndpointScanWorker): void => {
         const worker = task.worker;
         task.off('message', this.taskOnMessage);
         task.off('end', this.taskOnEnd);
         task.off('exit', this.taskOnExit);
         task.off('error', this.taskOnError);
-        task.destroy();
+        task.dispose();
         if (worker) {
             if (this.waiting.length > 0) {
                 const nextTask = this.waiting.shift();
@@ -190,10 +204,12 @@ export class Parallel extends EventEmitter {
                 this.pool.set(worker, null);
             }
         }
+
+        this.emit('end', data);
     };
 
-    private readonly taskOnExit = (code: number, task: WorkerTask): void => {
-        this.logger.info(`Task ${task.data.taskId} exited with code ${code}.`);
+    private readonly taskOnExit = (code: number, task: EndpointScanWorker): void => {
+        this.logger.info(`Task ${task.data.args.taskId} exited with code ${code}.`);
         if (!task) {
             return;
         }
@@ -201,7 +217,7 @@ export class Parallel extends EventEmitter {
         this.destroyTask(task);
     };
 
-    private readonly taskOnError = (error: Error, task: WorkerTask): void => {
+    private readonly taskOnError = (error: Error, task: EndpointScanWorker): void => {
         this.logger.error(error);
         if (!task) {
             return;
@@ -210,13 +226,13 @@ export class Parallel extends EventEmitter {
         this.destroyTask(task);
     };
 
-    private destroyTask(task: WorkerTask): void {
+    private destroyTask(task: EndpointScanWorker): void {
         try {
             task.off('message', this.taskOnMessage);
             task.off('end', this.taskOnEnd);
             task.off('exit', this.taskOnExit);
             task.off('error', this.taskOnError);
-            task.destroy();
+            task.dispose();
             if (task.worker) {
                 this.pool.delete(task.worker);
             }

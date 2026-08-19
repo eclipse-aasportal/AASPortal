@@ -152,11 +152,12 @@ export class EndpointIndexForm {
     public clearIndex(endpoint?: string): Observable<void> {
         const name = endpoint ?? this.translate.instant('EndpointIndexForm.CLEAR_INDEX_KEY');
         return from(
-            PromptDialog.open(
+            PromptDialog.confirm(
                 this.modal,
                 this.translate.instant('EndpointIndexForm.CLEAR_INDEX_PROMPT', {
                     name,
                 }),
+                name,
             ),
         ).pipe(
             mergeMap(value => {

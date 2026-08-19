@@ -10,7 +10,7 @@ import { DependencyContainer } from 'tsyringe';
 import path from 'path/posix';
 import { LOGGER, Logger } from 'aas-package';
 
-import { AASIndex } from './aas-index.js';
+import { IAASIndex } from './aas-index.js';
 import { Variable } from '../variable.js';
 import { MySqlIndex } from './mysql/mysql-index.js';
 import { urlToString } from '../utilities.js';
@@ -18,9 +18,9 @@ import { KeywordDirectory } from './keyword-directory.js';
 import { SqliteIndex } from './sqlite/sqlite-index.js';
 
 export class AASIndexFactory {
-    private static instance?: AASIndex;
+    private static instance?: IAASIndex;
 
-    public static getInstance(container: DependencyContainer): AASIndex {
+    public static getInstance(container: DependencyContainer): IAASIndex {
         if (!AASIndexFactory.instance) {
             const variable = container.resolve(Variable);
             const logger = container.resolve<Logger>(LOGGER);

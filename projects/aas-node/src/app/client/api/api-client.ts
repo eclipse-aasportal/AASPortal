@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, AASEndpoint, convertFromString, DefaultType, getSemanticId, LiveRequest, traverse } from 'aas-core';
+import { aas, AASEndpoint, convertFromString, DefaultType, LiveRequest } from 'aas-core';
 import { Logger } from 'aas-package';
 
 import { HttpClient } from '../../http-client.js';
@@ -15,6 +15,7 @@ import { SocketClient } from '../../live/socket-client.js';
 import { EndpointClient } from '../endpoint-client.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
 import { AasxPackage } from '../fs/aasx-package.js';
+import { AASIndexClient } from '../../index/aas-index-client.js';
 
 interface PropertyValue {
     value: string;
@@ -34,11 +35,12 @@ export abstract class ApiClient extends EndpointClient {
      */
     public constructor(
         logger: Logger,
+        index: AASIndexClient,
         endpoint: AASEndpoint,
         auth: Record<string, string> | undefined,
         protected readonly http: HttpClient,
     ) {
-        super(logger, endpoint, auth);
+        super(logger, index, endpoint, auth);
     }
 
     public override get isOpen(): boolean {
@@ -99,19 +101,47 @@ export abstract class ApiClient extends EndpointClient {
     public abstract resolveNodeId(aas: aas.AssetAdministrationShell, nodeId: string): string;
 
     /**
-     * Gets all concept description identifiers that are available in the specified referable and its descendants.
-     * @param referable The current referable.
-     * @returns The available semantic identifiers.
+     * Gets the ConceptDescription with the specified identifier.
+     * @param id The identifier of the ConceptDescription.
      */
-    protected getConceptDescriptionIds(referable: aas.Referable): Set<string> {
-        const result = new Set<string>();
-        for (const element of traverse(referable)) {
-            const id = getSemanticId(element);
-            if (id) {
-                result.add(id);
-            }
+    protected abstract getConceptDescription(id: string): Promise<aas.ConceptDescription>;
+
+    /**
+     * Gets the ConceptDescriptions referenced by all submodels of the given shell.
+     * @param shell The AssetAdministrationShell
+     * @returns A promise resolving to an array of ConceptDescriptions
+     */
+    protected async getShellConceptDescriptions(
+        shell: aas.AssetAdministrationShell,
+    ): Promise<aas.ConceptDescription[]> {
+        if (!shell.submodels) {
+            return [];
         }
 
-        return result;
+        const set = new Set<string>();
+        await Promise.all(
+            shell.submodels.map(async submodelRef => {
+                (
+                    await this.index.getSubmodelConceptDescriptionIds(this.endpoint.name, submodelRef.keys[0].value)
+                ).forEach(id => set.add(id));
+            }),
+        );
+
+        const result = await Promise.allSettled(
+            Array.from(set.values()).map(id => {
+                return this.getConceptDescription(id);
+            }),
+        );
+
+        const conceptDescriptions: aas.ConceptDescription[] = [];
+        result.forEach(item => {
+            if (item.status === 'fulfilled') {
+                conceptDescriptions.push(item.value);
+            } else {
+                this.logger.warning(`Failed to retrieve concept description: ${item.reason}`);
+            }
+        });
+
+        return conceptDescriptions;
     }
 }

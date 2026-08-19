@@ -113,9 +113,9 @@ describe('UpdateEndpointForm', () => {
     });
 
     it('should remove Endpoint A', async () => {
-        vi.spyOn(PromptDialog, 'open').mockResolvedValue('Endpoint A');
+        vi.spyOn(PromptDialog, 'confirm').mockResolvedValue('Endpoint A');
         await component.deleteEndpoint();
-        expect(PromptDialog.open).toHaveBeenCalled();
+        expect(PromptDialog.confirm).toHaveBeenCalled();
         expect(component.form.items.length).toBe(1);
         expect(component.form.endpoint().value()).toBe('Endpoint B');
         expect(component.index()).toBe(0);

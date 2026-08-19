@@ -16,7 +16,7 @@ CREATE TABLE documents (
     id VARCHAR(255), 
     idShort VARCHAR(100), 
     assetId VARCHAR(255),
-    thumbnail VARCHAR(7167), 
+    thumbnail TEXT, 
     timestamp LONG,
     UNIQUE (id, endpoint)
 );
@@ -31,4 +31,11 @@ CREATE TABLE elements (
     bigintValue LONG,
     dateValue DATETIME,
     booleanValue BOOLEAN
+);
+
+CREATE TABLE submodelConceptDescriptions (
+    endpoint VARCHAR(32), 
+    id VARCHAR(255),
+    conceptDescriptionIds TEXT,
+    UNIQUE (id, endpoint)
 );

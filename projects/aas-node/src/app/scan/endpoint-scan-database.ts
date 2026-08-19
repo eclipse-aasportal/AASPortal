@@ -21,29 +21,41 @@ CREATE TABLE IF NOT EXISTS submodels (
 );
 
 CREATE INDEX IF NOT EXISTS idx_submodels_submodelId ON submodels (submodelId);
+
+CREATE TABLE IF NOT EXISTS conceptDescriptions (
+    id TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_conceptDescriptions_id ON conceptDescriptions (id);
 `;
 
 export class EndpointScanDatabase {
     private readonly db: DatabaseSync;
     private readonly deleteShellsSql: StatementSync;
     private readonly deleteSubmodelsSql: StatementSync;
+    private readonly deleteConceptDescriptionsSql: StatementSync;
     private readonly insertSubmodelSql: StatementSync;
+    private readonly insertConceptDescriptionSql: StatementSync;
     private readonly upsertShellSql: StatementSync;
     private readonly selectShellSql: StatementSync;
     private readonly selectSubmodelShellsSql: StatementSync;
+    private readonly selectConceptDescriptionSql: StatementSync;
 
     public constructor(file?: string) {
         this.db = new DatabaseSync(file ?? ':memory:', { timeout: 5000 });
         this.db.exec(initScanDatabase);
         this.deleteShellsSql = this.db.prepare('DELETE FROM shells');
         this.deleteSubmodelsSql = this.db.prepare('DELETE FROM submodels');
+        this.deleteConceptDescriptionsSql = this.db.prepare('DELETE FROM conceptDescriptions');
         this.insertSubmodelSql = this.db.prepare('INSERT INTO submodels (submodelId, shellId) VALUES (?, ?)');
+        this.insertConceptDescriptionSql = this.db.prepare('INSERT INTO conceptDescriptions (id) VALUES (?)');
         this.upsertShellSql = this.db.prepare(
             'INSERT INTO shells (id, changed) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET changed = excluded.changed',
         );
 
         this.selectShellSql = this.db.prepare('SELECT changed FROM shells WHERE id = ?');
         this.selectSubmodelShellsSql = this.db.prepare('SELECT shellId FROM submodels WHERE submodelId = ?');
+        this.selectConceptDescriptionSql = this.db.prepare('SELECT id FROM conceptDescriptions WHERE id = ?');
     }
 
     public clear(): void {
@@ -51,6 +63,7 @@ export class EndpointScanDatabase {
         try {
             this.deleteShellsSql.run();
             this.deleteSubmodelsSql.run();
+            this.deleteConceptDescriptionsSql.run();
             this.db.exec('COMMIT');
         } catch (error) {
             this.db.exec('ROLLBACK');
@@ -73,6 +86,10 @@ export class EndpointScanDatabase {
         }
     }
 
+    public registerConceptDescription(conceptDescription: aas.ConceptDescription): void {
+        this.insertConceptDescriptionSql.run(conceptDescription.id);
+    }
+
     public setShellChanged(shellId: string, changed: boolean): void {
         this.upsertShellSql.run(shellId, changed ? 1 : 0);
     }
@@ -86,7 +103,11 @@ export class EndpointScanDatabase {
         return value !== undefined && Number(value.changed) !== 0;
     }
 
-    public getShellIds(submodelId: string): string[] {
+    public getSubmodelShellIds(submodelId: string): string[] {
         return this.selectSubmodelShellsSql.all(submodelId).map(value => String(value.shellId));
+    }
+
+    public hasConceptDescription(conceptDescriptionId: string): boolean {
+        return this.selectConceptDescriptionSql.get(conceptDescriptionId) !== undefined;
     }
 }

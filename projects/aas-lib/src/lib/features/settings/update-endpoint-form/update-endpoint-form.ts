@@ -188,11 +188,12 @@ export class UpdateEndpointForm {
 
     public async deleteEndpoint(): Promise<void> {
         const name = this.form.endpoint().value();
-        const value = await PromptDialog.open(
+        const value = await PromptDialog.confirm(
             this.modal,
             this.translate.instant('UpdateEndpointForm.DELETE_ENDPOINT_PROMPT', {
                 name,
             }),
+            name,
         );
 
         if (value !== name) {

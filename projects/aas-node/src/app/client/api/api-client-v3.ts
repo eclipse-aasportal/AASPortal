@@ -9,11 +9,12 @@
 import fs from 'fs';
 import { basename } from 'path';
 import { encodeBase64Url, JsonReaderV3, JsonWriterV3, Logger } from 'aas-package';
-import { aas, AASEndpoint, ApplicationError, traverse, getSemanticId, PagedResult, AASDocument, Cache } from 'aas-core';
+import { aas, AASEndpoint, ApplicationError, PagedResult, AASDocument } from 'aas-core';
 
 import { ApiClient } from './api-client.js';
 import { ERRORS } from '../../errors.js';
 import { HttpClient } from '../../http-client.js';
+import { AASIndexClient } from '../../index/aas-index-client.js';
 
 interface PackageDescriptor {
     aasIds: string[];
@@ -24,20 +25,6 @@ interface OperationRequest {
     inputVariables?: aas.OperationVariable[];
     inoutputVariables?: aas.OperationVariable[];
     clientTimeoutDuration?: string;
-}
-
-class ConceptDescriptionCache extends Cache<string, aas.ConceptDescription | null> {
-    public constructor() {
-        super(250);
-    }
-
-    public set(id: string, conceptDescription: aas.ConceptDescription | null): void {
-        this.setItem(id, conceptDescription);
-    }
-
-    public get(id: string): aas.ConceptDescription | null | undefined {
-        return this.getItem(id);
-    }
 }
 
 export interface Message {
@@ -57,15 +44,14 @@ export interface OperationResult {
 }
 
 export class ApiClientV3 extends ApiClient {
-    private readonly cdCache = new ConceptDescriptionCache();
-
     public constructor(
         logger: Logger,
+        index: AASIndexClient,
         endpoint: AASEndpoint,
         auth: Record<string, string> | undefined,
         http: HttpClient,
     ) {
-        super(logger, endpoint, auth, http);
+        super(logger, index, endpoint, auth, http);
     }
 
     public static readonly version = '^3.0.0';
@@ -125,15 +111,26 @@ export class ApiClientV3 extends ApiClient {
             searchParams.limit = limit;
         }
 
-        const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
-            this.resolve('submodels', searchParams),
+        return await this.http.get<PagedResult<aas.Submodel>>(this.resolve('submodels', searchParams), this.auth);
+    }
+
+    public override async getConceptDescriptions(
+        cursor: string | undefined,
+        limit?: number,
+    ): Promise<PagedResult<aas.ConceptDescription>> {
+        const searchParams: Record<string, string | number> = {};
+        if (cursor) {
+            searchParams.cursor = cursor;
+        }
+
+        if (limit) {
+            searchParams.limit = limit;
+        }
+
+        return await this.http.get<PagedResult<aas.ConceptDescription>>(
+            this.resolve('concept-descriptions', searchParams),
             this.auth,
         );
-
-        return {
-            result: result.result,
-            paging_metadata: { cursor: result.paging_metadata.cursor },
-        };
     }
 
     public override getThumbnail(id: string): Promise<NodeJS.ReadableStream> {
@@ -149,8 +146,8 @@ export class ApiClientV3 extends ApiClient {
             this.auth,
         );
 
-        const submodels = await this.readSubmodels(shell.submodels);
-        const conceptDescriptions = await this.readConceptDescriptions(submodels);
+        const submodels = await this.getShellSubmodels(shell);
+        const conceptDescriptions = await this.getShellConceptDescriptions(shell);
         const env: aas.Environment = {
             assetAdministrationShells: [shell],
             submodels,
@@ -291,6 +288,10 @@ export class ApiClientV3 extends ApiClient {
         return this.http.get(this.resolve(`lookup/shells?assetIds=${encodeBase64Url(assetId)}`), this.auth);
     }
 
+    protected override getConceptDescription(id: string): Promise<aas.ConceptDescription> {
+        return this.http.get<aas.ConceptDescription>(this.resolve(`concept-descriptions/${id}`), this.auth);
+    }
+
     private toDocument(shell: aas.AssetAdministrationShell): AASDocument {
         const document: AASDocument = {
             address: shell.id,
@@ -306,13 +307,13 @@ export class ApiClientV3 extends ApiClient {
         return document;
     }
 
-    private async readSubmodels(submodelRefs: aas.Reference[] | undefined): Promise<aas.Submodel[]> {
-        if (submodelRefs === undefined) {
+    private async getShellSubmodels(shell: aas.AssetAdministrationShell): Promise<aas.Submodel[]> {
+        if (!shell.submodels) {
             return [];
         }
 
         const result = await Promise.allSettled(
-            submodelRefs.map(async reference => {
+            shell.submodels.map(async reference => {
                 return this.http.get<aas.Submodel>(
                     this.resolve(`submodels/${encodeBase64Url(reference.keys[0].value)}`),
                     this.auth,
@@ -320,48 +321,7 @@ export class ApiClientV3 extends ApiClient {
             }),
         );
 
-        return result
-            .filter(item => item.status === 'fulfilled')
-            .map(item => item.value)
-            .sort((a, b) => a.id.localeCompare(b.id));
-    }
-
-    private async readConceptDescriptions(submodels: aas.Submodel[]): Promise<aas.ConceptDescription[]> {
-        const conceptDescriptions: aas.ConceptDescription[] = [];
-        const set = new Set<string>();
-        for (const submodel of submodels) {
-            for (const referable of traverse(submodel)) {
-                const semanticId = getSemanticId(referable);
-                if (!semanticId || set.has(semanticId)) {
-                    continue;
-                }
-
-                set.add(semanticId);
-                let conceptDescription = this.cdCache.get(semanticId);
-                if (conceptDescription) {
-                    conceptDescriptions.push(conceptDescription);
-                    continue;
-                }
-
-                if (conceptDescription === null) {
-                    continue;
-                }
-
-                try {
-                    conceptDescription = await this.http.get<aas.ConceptDescription>(
-                        this.resolve(`concept-descriptions/${encodeBase64Url(semanticId)}`),
-                        this.auth,
-                    );
-
-                    this.cdCache.set(semanticId, conceptDescription);
-                    conceptDescriptions.push(conceptDescription);
-                } catch {
-                    this.cdCache.set(semanticId, null);
-                }
-            }
-        }
-
-        return conceptDescriptions.sort((a, b) => a.id.localeCompare(b.id));
+        return result.filter(item => item.status === 'fulfilled').map(item => item.value);
     }
 
     private async hasShell(shell: aas.AssetAdministrationShell): Promise<boolean> {
