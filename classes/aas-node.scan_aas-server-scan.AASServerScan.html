@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>OpcuaServerScanner | AASPortal</title><meta name="description" content="Documentation for AASPortal"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>AASServerScan | AASPortal</title><meta name="description" content="Documentation for AASPortal"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container"><a href="../index.html" class="title">AASPortal</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
@@ -9,20 +9,20 @@
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb" aria-label="Breadcrumb">
 <li><a href="../modules/aas-node.html">aas-node</a></li>
-<li><a href="../modules/aas-node.scan_opcua-server-scanner.html">scan/opcua-server-scanner</a></li>
-<li><a href="" aria-current="page">OpcuaServerScanner</a></li></ul>
-<h1>Class OpcuaServerScanner</h1></div>
+<li><a href="../modules/aas-node.scan_aas-server-scan.html">scan/aas-server-scan</a></li>
+<li><a href="" aria-current="page">AASServerScan</a></li></ul>
+<h1>Class AASServerScan</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Defines an automate to scan an AAS endpoint for new, deleted or updated Asset Administration Shells.</p>
+<div class="tsd-comment tsd-typography"><p>Implements an automate to scan an AAS server for new, deleted or updated Asset Administration Shells.</p>
 </div></section>
-<section class="tsd-panel tsd-hierarchy" data-refl="28428">
-<h4>Hierarchy (<a href="../hierarchy.html#aas-node.scan/opcua-server-scanner.OpcuaServerScanner">View Summary</a>)</h4>
+<section class="tsd-panel tsd-hierarchy" data-refl="28278">
+<h4>Hierarchy (<a href="../hierarchy.html#aas-node.scan/aas-server-scan.AASServerScan">View Summary</a>)</h4>
 <ul class="tsd-hierarchy">
-<li class="tsd-hierarchy-item"><a href="aas-node.scan_endpoint-scanner.EndpointScanner.html" class="tsd-signature-type tsd-kind-class">EndpointScanner</a>
+<li class="tsd-hierarchy-item"><a href="aas-node.scan_endpoint-scan.EndpointScan.html" class="tsd-signature-type tsd-kind-class">EndpointScan</a>
 <ul class="tsd-hierarchy">
-<li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">OpcuaServerScanner</span></li></ul></li></ul></section><aside class="tsd-sources">
+<li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">AASServerScan</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/opcua-server-scanner.ts#L15">projects/aas-node/src/app/scan/opcua-server-scanner.ts:15</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/aas-server-scan.ts#L18">projects/aas-node/src/app/scan/aas-server-scan.ts:18</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -48,6 +48,7 @@
 <a href="#destroy" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a>
 <a href="#emit" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>emit</span></a>
 <a href="#eventnames" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>event<wbr/>Names</span></a>
+<a href="#getconceptdescriptions" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Concept<wbr/>Descriptions</span></a>
 <a href="#getdocuments" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Documents</span></a>
 <a href="#getmaxlisteners" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a>
 <a href="#getsubmodels" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Submodels</span></a>
@@ -81,26 +82,26 @@
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructoropcuaserverscanner"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">OpcuaServerScanner</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">controller</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.scan_scanner-controller.ScannerController.html" class="tsd-signature-type tsd-kind-class">ScannerController</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">client</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.client_opcua_opcua-client.OpcuaClient.html" class="tsd-signature-type tsd-kind-class">OpcuaClient</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">OpcuaServerScanner</a><a href="#constructoropcuaserverscanner" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructoraasserverscan"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">AASServerScan</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">controller</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.scan_scan-controller.ScanController.html" class="tsd-signature-type tsd-kind-class">ScanController</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">client</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.client_api_api-client.ApiClient.html" class="tsd-signature-type tsd-kind-class">ApiClient</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">AASServerScan</a><a href="#constructoraasserverscan" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">controller</span>: <a href="aas-node.scan_scanner-controller.ScannerController.html" class="tsd-signature-type tsd-kind-class">ScannerController</a></span></li>
-<li><span><span class="tsd-kind-parameter">client</span>: <a href="aas-node.client_opcua_opcua-client.OpcuaClient.html" class="tsd-signature-type tsd-kind-class">OpcuaClient</a></span></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">OpcuaServerScanner</a></h4><aside class="tsd-sources">
-<p>Overrides <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#constructor">constructor</a></p>
+<li><span><span class="tsd-kind-parameter">controller</span>: <a href="aas-node.scan_scan-controller.ScanController.html" class="tsd-signature-type tsd-kind-class">ScanController</a></span></li>
+<li><span><span class="tsd-kind-parameter">client</span>: <a href="aas-node.client_api_api-client.ApiClient.html" class="tsd-signature-type tsd-kind-class">ApiClient</a></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">AASServerScan</a></h4><aside class="tsd-sources">
+<p>Overrides <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/opcua-server-scanner.ts#L16">projects/aas-node/src/app/scan/opcua-server-scanner.ts:16</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/aas-server-scan.ts#L19">projects/aas-node/src/app/scan/aas-server-scan.ts:19</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="controller"><code class="tsd-tag">Protected</code> <code class="tsd-tag">Readonly</code><span>controller</span><a href="#controller" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">controller</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.scan_scanner-controller.ScannerController.html" class="tsd-signature-type tsd-kind-class">ScannerController</a></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#controller">controller</a></p>
+<div class="tsd-signature"><span class="tsd-kind-property">controller</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.scan_scan-controller.ScanController.html" class="tsd-signature-type tsd-kind-class">ScanController</a></div><aside class="tsd-sources">
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#controller">controller</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/endpoint-scanner.ts#L33">projects/aas-node/src/app/scan/endpoint-scanner.ts:33</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/endpoint-scan.ts#L33">projects/aas-node/src/app/scan/endpoint-scan.ts:33</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
 <h3 class="tsd-anchor-link" id="capturerejections"><code class="tsd-tag">Static</code><span>capture<wbr/>Rejections</span><a href="#capturerejections" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">captureRejections</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -111,7 +112,7 @@
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since">Since<a href="#since" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v13.4.0, v12.16.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#capturerejections">captureRejections</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#capturerejections">captureRejections</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:425</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -124,7 +125,7 @@
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-1">Since<a href="#since-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v13.4.0, v12.16.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#capturerejectionsymbol">captureRejectionSymbol</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#capturerejectionsymbol">captureRejectionSymbol</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:418</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -159,7 +160,7 @@ Its <code>name</code> property is set to <code>'MaxListenersExceededWarning'</co
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-2">Since<a href="#since-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v0.11.2</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#defaultmaxlisteners">defaultMaxListeners</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#defaultmaxlisteners">defaultMaxListeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:464</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -173,7 +174,7 @@ regular <code>'error'</code> listener is installed.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-3">Since<a href="#since-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v13.6.0, v12.17.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#errormonitor">errorMonitor</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#errormonitor">errorMonitor</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:411</li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -196,7 +197,7 @@ regular <code>'error'</code> listener is installed.</p>
 <li><span><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">symbol</span></span></li>
 <li><span><span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">AnyRest</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#capturerejectionsymbol-1">[captureRejectionSymbol]</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#capturerejectionsymbol-1">[captureRejectionSymbol]</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:103</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -221,7 +222,7 @@ regular <code>'error'</code> listener is installed.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-4">Since<a href="#since-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v0.1.26</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#addlistener">addListener</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#addlistener">addListener</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:642</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected">
@@ -230,12 +231,12 @@ regular <code>'error'</code> listener is installed.</p>
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="close-1"><span class="tsd-kind-call-signature">close</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#close-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Closes the endpoint and releases all resources.</p>
+<div class="tsd-comment tsd-typography"><p>Closes the connection to the AAS server.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<p>Overrides <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#close">close</a></p>
+<p>Overrides <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#close">close</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/opcua-server-scanner.ts#L27">projects/aas-node/src/app/scan/opcua-server-scanner.ts:27</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/aas-server-scan.ts#L36">projects/aas-node/src/app/scan/aas-server-scan.ts:36</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="destroy"><span>destroy</span><a href="#destroy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -243,9 +244,9 @@ regular <code>'error'</code> listener is installed.</p>
 <div class="tsd-signature tsd-anchor-link" id="destroy-1"><span class="tsd-kind-call-signature">destroy</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#destroy-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#destroy">destroy</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#destroy">destroy</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/endpoint-scanner.ts#L68">projects/aas-node/src/app/scan/endpoint-scanner.ts:68</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/endpoint-scan.ts#L72">projects/aas-node/src/app/scan/endpoint-scan.ts:72</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
 <h3 class="tsd-anchor-link" id="emit"><span>emit</span><a href="#emit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -273,7 +274,7 @@ to each.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-5">Since<a href="#since-5" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v0.1.26</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#emit">emit</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#emit">emit</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:904</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -293,21 +294,47 @@ listeners. The values in the array are strings or <code>Symbol</code>s.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-6">Since<a href="#since-6" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v6.0.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#eventnames">eventNames</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#eventnames">eventNames</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:967</li></ul></aside></div></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected">
+<h3 class="tsd-anchor-link" id="getconceptdescriptions"><code class="tsd-tag">Protected</code><span>get<wbr/>Concept<wbr/>Descriptions</span><a href="#getconceptdescriptions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="">
+<div class="tsd-signature tsd-anchor-link" id="getconceptdescriptions-1"><span class="tsd-kind-call-signature">getConceptDescriptions</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">cursor</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../interfaces/aas-core.aas.ConceptDescription.html" class="tsd-signature-type tsd-kind-interface">ConceptDescription</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#getconceptdescriptions-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Gets a page of concept descriptions from the endpoint.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">cursor</span>: <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></span>
+<div class="tsd-comment tsd-typography"><p>The cursor to get the next page of concept descriptions. If undefined, the first page will be returned.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../interfaces/aas-core.aas.ConceptDescription.html" class="tsd-signature-type tsd-kind-interface">ConceptDescription</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves to a page of concept descriptions.</p>
+<aside class="tsd-sources">
+<p>Overrides <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#getconceptdescriptions">getConceptDescriptions</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/aas-server-scan.ts#L65">projects/aas-node/src/app/scan/aas-server-scan.ts:65</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected">
 <h3 class="tsd-anchor-link" id="getdocuments"><code class="tsd-tag">Protected</code><span>get<wbr/>Documents</span><a href="#getdocuments" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="getdocuments-1"><span class="tsd-kind-call-signature">getDocuments</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#getdocuments-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getdocuments-1"><span class="tsd-kind-call-signature">getDocuments</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">cursor</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#getdocuments-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Gets a page of documents from the endpoint.</p>
+<div class="tsd-comment tsd-typography"><p>Returns a page of AAS identifiers from the endpoint.</p>
 </div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<p>Overrides <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#getdocuments">getDocuments</a></p>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">cursor</span>: <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></span>
+<div class="tsd-comment tsd-typography"><p>The cursor for pagination. If undefined, the first page will be returned.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASDocument.html" class="tsd-signature-type tsd-kind-interface">AASDocument</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A page of AAS identifiers.</p>
+<aside class="tsd-sources">
+<p>Overrides <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#getdocuments">getDocuments</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/opcua-server-scanner.ts#L31">projects/aas-node/src/app/scan/opcua-server-scanner.ts:31</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/aas-server-scan.ts#L45">projects/aas-node/src/app/scan/aas-server-scan.ts:45</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
 <h3 class="tsd-anchor-link" id="getmaxlisteners"><span>get<wbr/>Max<wbr/>Listeners</span><a href="#getmaxlisteners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -322,40 +349,47 @@ set by <code>emitter.setMaxListeners(n)</code> or defaults to <a href="aas-node.
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-7">Since<a href="#since-7" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v1.0.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#getmaxlisteners">getMaxListeners</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#getmaxlisteners">getMaxListeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:819</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected">
 <h3 class="tsd-anchor-link" id="getsubmodels"><code class="tsd-tag">Protected</code><span>get<wbr/>Submodels</span><a href="#getsubmodels" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="getsubmodels-1"><span class="tsd-kind-call-signature">getSubmodels</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../interfaces/aas-core.aas.Submodel.html" class="tsd-signature-type tsd-kind-interface">Submodel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#getsubmodels-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getsubmodels-1"><span class="tsd-kind-call-signature">getSubmodels</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">cursor</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../interfaces/aas-core.aas.Submodel.html" class="tsd-signature-type tsd-kind-interface">Submodel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><a href="#getsubmodels-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Gets a page of submodels from the endpoint.</p>
 </div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../interfaces/aas-core.aas.Submodel.html" class="tsd-signature-type tsd-kind-interface">Submodel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<p>Overrides <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#getsubmodels">getSubmodels</a></p>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li><span><span class="tsd-kind-parameter">cursor</span>: <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></span>
+<div class="tsd-comment tsd-typography"><p>The cursor to get the next page of submodels. If undefined, the first page will be returned.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.PagedResult.html" class="tsd-signature-type tsd-kind-interface">PagedResult</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/aas-core.aas.html" class="tsd-signature-type tsd-kind-namespace">aas</a><span class="tsd-signature-symbol">.</span><a href="../interfaces/aas-core.aas.Submodel.html" class="tsd-signature-type tsd-kind-interface">Submodel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves to a page of submodels.</p>
+<aside class="tsd-sources">
+<p>Overrides <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#getsubmodels">getSubmodels</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/opcua-server-scanner.ts#L43">projects/aas-node/src/app/scan/opcua-server-scanner.ts:43</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/aas-server-scan.ts#L61">projects/aas-node/src/app/scan/aas-server-scan.ts:61</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected">
 <h3 class="tsd-anchor-link" id="getthumbnail"><code class="tsd-tag">Protected</code><span>get<wbr/>Thumbnail</span><a href="#getthumbnail" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="getthumbnail-1"><span class="tsd-kind-call-signature">getThumbnail</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">address</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><a href="#getthumbnail-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getthumbnail-1"><span class="tsd-kind-call-signature">getThumbnail</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><a href="#getthumbnail-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Gets the thumbnail of the document with the specified address from the endpoint.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">address</span>: <span class="tsd-signature-type">string</span></span>
+<li><span><span class="tsd-kind-parameter">id</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>The address of the document in the endpoint.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The thumbnail of the document or undefined if the document has no thumbnail.</p>
 <aside class="tsd-sources">
-<p>Overrides <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#getthumbnail">getThumbnail</a></p>
+<p>Overrides <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#getthumbnail">getThumbnail</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/opcua-server-scanner.ts#L39">projects/aas-node/src/app/scan/opcua-server-scanner.ts:39</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/aas-server-scan.ts#L53">projects/aas-node/src/app/scan/aas-server-scan.ts:53</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected">
 <h3 class="tsd-anchor-link" id="hasdocument"><code class="tsd-tag">Protected</code><span>has<wbr/>Document</span><a href="#hasdocument" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
@@ -372,9 +406,9 @@ set by <code>emitter.setMaxListeners(n)</code> or defaults to <a href="aas-node.
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4><p>True if the document exists, false otherwise.</p>
 <aside class="tsd-sources">
-<p>Overrides <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#hasdocument">hasDocument</a></p>
+<p>Overrides <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#hasdocument">hasDocument</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/opcua-server-scanner.ts#L35">projects/aas-node/src/app/scan/opcua-server-scanner.ts:35</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/aas-server-scan.ts#L49">projects/aas-node/src/app/scan/aas-server-scan.ts:49</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
 <h3 class="tsd-anchor-link" id="listenercount"><span>listener<wbr/>Count</span><a href="#listenercount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -403,7 +437,7 @@ in the list of the listeners of the event.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-8">Since<a href="#since-8" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v3.2.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#listenercount">listenerCount</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#listenercount">listenerCount</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:913</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -430,7 +464,7 @@ in the list of the listeners of the event.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-9">Since<a href="#since-9" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v0.1.26</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#listeners">listeners</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#listeners">listeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:832</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -455,7 +489,7 @@ in the list of the listeners of the event.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-10">Since<a href="#since-10" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v10.0.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#off">off</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#off">off</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:792</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -496,7 +530,7 @@ event listener to the beginning of the listeners array.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-11">Since<a href="#since-11" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v0.1.101</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#on">on</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#on">on</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:674</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -535,7 +569,7 @@ event listener to the beginning of the listeners array.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-12">Since<a href="#since-12" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v0.3.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#once">once</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#once">once</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:704</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected">
@@ -544,12 +578,12 @@ event listener to the beginning of the listeners array.</p>
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="open-1"><span class="tsd-kind-call-signature">open</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#open-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Opens the endpoint and prepares it for scanning.</p>
+<div class="tsd-comment tsd-typography"><p>Opens the connection to the AAS server.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<p>Overrides <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#open">open</a></p>
+<p>Overrides <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#open">open</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/opcua-server-scanner.ts#L23">projects/aas-node/src/app/scan/opcua-server-scanner.ts:23</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/aas-server-scan.ts#L29">projects/aas-node/src/app/scan/aas-server-scan.ts:29</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
 <h3 class="tsd-anchor-link" id="prependlistener"><span>prepend<wbr/>Listener</span><a href="#prependlistener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -583,7 +617,7 @@ and <code>listener</code> will result in the <code>listener</code> being added, 
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-13">Since<a href="#since-13" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v6.0.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#prependlistener">prependListener</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#prependlistener">prependListener</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:931</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -617,7 +651,7 @@ listener is removed, and then invoked.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-14">Since<a href="#since-14" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v6.0.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#prependoncelistener">prependOnceListener</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#prependoncelistener">prependOnceListener</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:947</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -645,7 +679,7 @@ including any wrappers (such as those created by <code>.once()</code>).</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-15">Since<a href="#since-15" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v9.4.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#rawlisteners">rawListeners</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#rawlisteners">rawListeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:863</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -669,7 +703,7 @@ component or module (e.g. sockets or file streams).</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-16">Since<a href="#since-16" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v0.1.26</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#removealllisteners">removeAllListeners</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#removealllisteners">removeAllListeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:803</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -719,30 +753,30 @@ recently added instance. In the example the <code>once('ping')</code> listener i
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-17">Since<a href="#since-17" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v0.1.26</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#removelistener">removeListener</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#removelistener">removeListener</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:787</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="scan"><span>scan</span><a href="#scan" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-is-inherited">
-<div class="tsd-signature tsd-anchor-link" id="scan-1"><span class="tsd-kind-call-signature">scan</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">index</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.index_aas-index.AASIndex.html" class="tsd-signature-type tsd-kind-class">AASIndex</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">endpoint</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/aas-core.AASEndpoint.html" class="tsd-signature-type tsd-kind-interface">AASEndpoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#scan-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="scan-1"><span class="tsd-kind-call-signature">scan</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">index</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.index_aas-index-client.AASIndexClient.html" class="tsd-signature-type tsd-kind-class">AASIndexClient</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">endpoint</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/aas-core.AASEndpoint.html" class="tsd-signature-type tsd-kind-interface">AASEndpoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#scan-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Gets all documents of the current endpoint.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">index</span>: <a href="aas-node.index_aas-index.AASIndex.html" class="tsd-signature-type tsd-kind-class">AASIndex</a></span>
+<li><span><span class="tsd-kind-parameter">index</span>: <a href="aas-node.index_aas-index-client.AASIndexClient.html" class="tsd-signature-type tsd-kind-class">AASIndexClient</a></span>
 <div class="tsd-comment tsd-typography"><p>The AAS index.</p>
 </div></li>
 <li><span><span class="tsd-kind-parameter">endpoint</span>: <a href="../interfaces/aas-core.AASEndpoint.html" class="tsd-signature-type tsd-kind-interface">AASEndpoint</a></span>
 <div class="tsd-comment tsd-typography"><p>The endpoint.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#scan">scan</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#scan">scan</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/9c6cedbafe30b3da2b579afd76bbe1d61ec0a4d1/projects/aas-node/src/app/scan/endpoint-scanner.ts#L44">projects/aas-node/src/app/scan/endpoint-scanner.ts:44</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d3ac8c6b8744392402617b84e9ef269dfde53a92/projects/aas-node/src/app/scan/endpoint-scan.ts#L44">projects/aas-node/src/app/scan/endpoint-scan.ts:44</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
 <h3 class="tsd-anchor-link" id="setmaxlisteners"><span>set<wbr/>Max<wbr/>Listeners</span><a href="#setmaxlisteners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -764,7 +798,7 @@ modified for this specific <code>EventEmitter</code> instance. The value can be 
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-18">Since<a href="#since-18" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v0.3.5</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#setmaxlisteners">setMaxListeners</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#setmaxlisteners">setMaxListeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:813</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -798,7 +832,7 @@ not prevent the listener from running.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-19">Since<a href="#since-19" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v20.5.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#addabortlistener">addAbortListener</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#addabortlistener">addAbortListener</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:403</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -826,7 +860,7 @@ event target. This is useful for debugging and diagnostic purposes.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-20">Since<a href="#since-20" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v15.2.0, v14.17.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#geteventlisteners">getEventListeners</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#geteventlisteners">getEventListeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:325</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -854,7 +888,7 @@ the max set, the EventTarget will print a warning.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-21">Since<a href="#since-21" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v19.9.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#getmaxlisteners-2">getMaxListeners</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#getmaxlisteners-2">getMaxListeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:354</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -885,7 +919,7 @@ the max set, the EventTarget will print a warning.</p>
 <div class="tsd-tag-deprecated">
 <h4 class="tsd-anchor-link" id="deprecated">Deprecated<a href="#deprecated" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Since v3.2.0 - Use <code>listenerCount</code> instead.</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#listenercount-2">listenerCount</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#listenercount-2">listenerCount</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:297</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -922,7 +956,7 @@ composed of the emitted event arguments.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-23">Since<a href="#since-23" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v13.6.0, v12.16.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#on-2">on</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#on-2">on</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:270</li></ul></aside></div></li>
 <li class="tsd-is-inherited tsd-is-external">
@@ -956,7 +990,7 @@ composed of the emitted event arguments.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-24">Since<a href="#since-24" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v13.6.0, v12.16.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#on-2">on</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#on-2">on</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:275</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -996,7 +1030,7 @@ special handling:</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-25">Since<a href="#since-25" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v11.13.0, v10.16.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#once-2">once</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#once-2">once</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:184</li></ul></aside></div></li>
 <li class="tsd-is-inherited tsd-is-external">
@@ -1033,7 +1067,7 @@ special handling:</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-26">Since<a href="#since-26" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v11.13.0, v10.16.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#once-2">once</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#once-2">once</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:189</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
@@ -1061,7 +1095,7 @@ objects.</p>
 <div class="tsd-tag-since">
 <h4 class="tsd-anchor-link" id="since-27">Since<a href="#since-27" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>v15.4.0</p>
 </div></div><aside class="tsd-sources">
-<p>Inherited from <a href="aas-node.scan_endpoint-scanner.EndpointScanner.html">EndpointScanner</a>.<a href="aas-node.scan_endpoint-scanner.EndpointScanner.html#setmaxlisteners-2">setMaxListeners</a></p>
+<p>Inherited from <a href="aas-node.scan_endpoint-scan.EndpointScan.html">EndpointScan</a>.<a href="aas-node.scan_endpoint-scan.EndpointScan.html#setmaxlisteners-2">setMaxListeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:369</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
@@ -1084,7 +1118,7 @@ objects.</p>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
 <div><a href="#controller" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>controller</span></a><a href="#capturerejections" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>capture<wbr/>Rejections</span></a><a href="#capturerejectionsymbol" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>capture<wbr/>Rejection<wbr/>Symbol</span></a><a href="#defaultmaxlisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>default<wbr/>Max<wbr/>Listeners</span></a><a href="#errormonitor" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>error<wbr/>Monitor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#capturerejectionsymbol-1" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>[capture<wbr/>Rejection<wbr/>Symbol]</span></a><a href="#addlistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Listener</span></a><a href="#close" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>close</span></a><a href="#destroy" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a><a href="#emit" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>emit</span></a><a href="#eventnames" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>event<wbr/>Names</span></a><a href="#getdocuments" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Documents</span></a><a href="#getmaxlisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a><a href="#getsubmodels" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Submodels</span></a><a href="#getthumbnail" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Thumbnail</span></a><a href="#hasdocument" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>has<wbr/>Document</span></a><a href="#listenercount" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>listener<wbr/>Count</span></a><a href="#listeners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>listeners</span></a><a href="#off" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>off</span></a><a href="#on" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on</span></a><a href="#once" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>once</span></a><a href="#open" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>open</span></a><a href="#prependlistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>prepend<wbr/>Listener</span></a><a href="#prependoncelistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>prepend<wbr/>Once<wbr/>Listener</span></a><a href="#rawlisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>raw<wbr/>Listeners</span></a><a href="#removealllisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>All<wbr/>Listeners</span></a><a href="#removelistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Listener</span></a><a href="#scan" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>scan</span></a><a href="#setmaxlisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Max<wbr/>Listeners</span></a><a href="#addabortlistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Abort<wbr/>Listener</span></a><a href="#geteventlisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Event<wbr/>Listeners</span></a><a href="#getmaxlisteners-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a><a href="#listenercount-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>listener<wbr/>Count</span></a><a href="#on-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on</span></a><a href="#once-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>once</span></a><a href="#setmaxlisteners-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Max<wbr/>Listeners</span></a></div></details></div></details></div>
+<div><a href="#capturerejectionsymbol-1" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>[capture<wbr/>Rejection<wbr/>Symbol]</span></a><a href="#addlistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Listener</span></a><a href="#close" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>close</span></a><a href="#destroy" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a><a href="#emit" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>emit</span></a><a href="#eventnames" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>event<wbr/>Names</span></a><a href="#getconceptdescriptions" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Concept<wbr/>Descriptions</span></a><a href="#getdocuments" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Documents</span></a><a href="#getmaxlisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a><a href="#getsubmodels" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Submodels</span></a><a href="#getthumbnail" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Thumbnail</span></a><a href="#hasdocument" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>has<wbr/>Document</span></a><a href="#listenercount" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>listener<wbr/>Count</span></a><a href="#listeners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>listeners</span></a><a href="#off" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>off</span></a><a href="#on" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on</span></a><a href="#once" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>once</span></a><a href="#open" class="tsd-is-protected"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>open</span></a><a href="#prependlistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>prepend<wbr/>Listener</span></a><a href="#prependoncelistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>prepend<wbr/>Once<wbr/>Listener</span></a><a href="#rawlisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>raw<wbr/>Listeners</span></a><a href="#removealllisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>All<wbr/>Listeners</span></a><a href="#removelistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Listener</span></a><a href="#scan" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>scan</span></a><a href="#setmaxlisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Max<wbr/>Listeners</span></a><a href="#addabortlistener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Abort<wbr/>Listener</span></a><a href="#geteventlisteners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Event<wbr/>Listeners</span></a><a href="#getmaxlisteners-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a><a href="#listenercount-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>listener<wbr/>Count</span></a><a href="#on-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>on</span></a><a href="#once-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>once</span></a><a href="#setmaxlisteners-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>set<wbr/>Max<wbr/>Listeners</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">AASPortal</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
