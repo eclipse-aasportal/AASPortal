@@ -84,6 +84,7 @@ export class ContactInformationState extends ChildState {
                     'IPCommunication{00}',
                     'Street',
                     'Zipcode',
+                    'ZipCode',
                     'POBox',
                     'ZipCodeOfPOBox',
                     'StateCounty',

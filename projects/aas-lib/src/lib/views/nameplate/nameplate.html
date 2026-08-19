@@ -9,12 +9,12 @@
 <div class="container mt-4">
     <div class="d-flex flex-column flex-md-row justify-content-center">
       <div class="col-md-6 mx-2 p-3 border border-black border-opacity-25 rounded-2 bg-body-tertiary">
-        <div class="d-flex flex-row container">
+        <div class="container">
             <div>
                 <p class="label fw-semibold">Asset</p>
                 <div class="row">
                     @if (checkNameplateValue("ManufacturerProductDesignation")) {
-                    <div class="d-flex flex-column data-entry border-black border-bottom border-opacity-10">
+                    <div class="col-12 d-flex flex-column data-entry border-black border-bottom border-opacity-10">
                         <label class="label">Name</label>
                         <label>{{getNameplateValue("ManufacturerProductDesignation")}}</label>
                     </div>
@@ -54,7 +54,7 @@
 
                 <div class="row">
                     @if (checkNameplateValue("URIOfTheProduct")) {
-                    <div class="d-flex flex-column data-entry border-black border-bottom border-opacity-10">
+                    <div class="col-12 d-flex flex-column data-entry border-black border-bottom border-opacity-10">
                         <label class="label">URI</label>
                         <label class="text-break">{{getNameplateValue("URIOfTheProduct")}}</label>
                     </div>
@@ -63,7 +63,7 @@
                 
                 <div class="row">
                     @if (checkNameplateValue("DateOfManufacture")) {
-                    <div class="d-flex flex-column data-entry">
+                    <div class="col-12 d-flex flex-column data-entry">
                         <label class="label" translate="Nameplate.DATE_OF_MANUFACTURE"></label>
                         <label>{{getNameplateValue("DateOfManufacture")}}</label>
                     </div>
@@ -85,7 +85,7 @@
 
         <div class="row">
             @if (checkNameplateValue("ManufacturerName")) {
-            <div class="d-flex flex-column data-entry border-black border-bottom border-opacity-10">
+            <div class="col-12 d-flex flex-column data-entry border-black border-bottom border-opacity-10">
                 <label class="label" translate="Nameplate.MANUFACTURER"></label>
                 <label>{{getNameplateValue("ManufacturerName")}}</label>
             </div>  
@@ -94,7 +94,7 @@
         
         <div class="row">
             @if (checkNameplateValue(["AddressInformation", "PhysicalAddress"])) {
-            <div class="d-flex flex-column data-entry">
+            <div class="col-12 d-flex flex-column data-entry">
                 <label class="label" translate="Nameplate.MANUFACTURER_ADDRESS"></label>
                 <label>{{getNameplateValue(["AddressInformation", "PhysicalAddress"])}}</label>
             </div>  
