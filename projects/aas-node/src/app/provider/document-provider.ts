@@ -55,9 +55,16 @@ export class DocumentProvider {
                 await client.open();
                 document.content = await client.getEnvironment(document.address);
                 if (document.thumbnail === null) {
-                    document.thumbnail = await thumbnailToObjectUrl(await client.getThumbnail(document.address));
-                    if (document.thumbnail) {
-                        await this.index.update(document);
+                    // A missing or broken thumbnail (e.g. the endpoint has no thumbnail file stored for
+                    // this shell, even though its asset information still references one) must not prevent
+                    // the already successfully loaded document content from being returned.
+                    try {
+                        document.thumbnail = await thumbnailToObjectUrl(await client.getThumbnail(document.address));
+                        if (document.thumbnail) {
+                            await this.index.update(document);
+                        }
+                    } catch {
+                        document.thumbnail = undefined;
                     }
                 }
 
