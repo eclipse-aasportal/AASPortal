@@ -14,11 +14,11 @@
             <div class="me-0 me-md-5">
                 <p class="fw-semibold">Contact</p>
 
-                <div class="col-sm d-flex flex-column data-entry border-black border-bottom border-opacity-10">
-                    <label>{{getContactInformationValue(i, "RoleOfContactPerson")}}</label>
-                    <label>{{getContactInformationValue(i, "ContactInformation")}}</label>
+                <div class="col-sm d-flex flex-column data-entry">
+                    <label class="label">{{getContactInformationValue(i, "RoleOfContactPerson")}}</label>
+                    <label >{{getContactInformationValue(i, "ContactInformation")}}</label>
                 </div>
-                <div class="col-sm d-flex flex-column data-entry border-black border-bottom border-opacity-10">
+                <div class="col-sm d-flex flex-column data-entry">
                     <label class="label" translate="Nameplate.SERIAL_NUMBER">Phone</label>
                     <label>{{getContactInformationValue(i, "Phone")}}</label>
                 </div>
@@ -32,9 +32,8 @@
                 <div class="col-sm d-flex flex-column data-entry">
                     <label class="fw-semibold">{{getContactInformationValue(i, "Company")}}</label>
                     <label>{{getContactInformationValue(i, "Street")}}</label>
-                    <label>{{getContactInformationValue(i, "CityTown")}}</label>
+                    <label>{{getContactInformationValue(i, "CityTown")}} {{getContactInformationValue(i, "NationalCode")}}</label>
                     <label>{{getContactInformationValue(i, "Zipcode")}}</label>
-                    <label>{{getContactInformationValue(i, "NationalCode")}}</label>
                 </div>
             </div>
 
