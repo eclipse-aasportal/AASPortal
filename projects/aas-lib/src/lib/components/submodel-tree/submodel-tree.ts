@@ -15,12 +15,19 @@ import {
     aas,
     AASDocument,
     convertToString,
+    getAbbreviation,
     getChildren,
     getLocaleValue,
     getUnit,
+    isAnnotatedRelationshipElement,
+    isBasicEventElement,
+    isEntity,
     isFile,
     isMultiLanguageProperty,
     isProperty,
+    isRange,
+    isReferenceElement,
+    isRelationshipElement,
     isSubmodelElementCollection,
     isSubmodelElementList,
     LiveNode,
@@ -28,23 +35,31 @@ import {
     WebSocketData,
 } from 'aas-core';
 
-import { getDisplayName, getUrl } from '../../utilities';
+import { getDisplayName, getElementDescription, getUrl, referenceToString } from '../../utilities';
 import { WebSocketService } from '../../shared/services/web-socket.service';
 
 export type SubmodelTreeItem = {
     idShort: string;
     name: string;
+    /** Short element-type abbreviation, e.g. 'Prop', 'MLP', 'Rel' — same as AasTree's node.symbol. */
+    typeAbbreviation: string | undefined;
+    /** A short, type-specific description (value type, item count, content type, ...). */
+    description: string;
     value: WritableSignal<string | undefined>;
     unit: string | undefined;
-    type: 'text' | 'link';
+    /** 'none' for element types with no single meaningful value to display inline (e.g. Blob, Operation, Capability). */
+    type: 'text' | 'link' | 'none';
     element: aas.SubmodelElement;
     url?: string;
     isOnline?: boolean;
+    isProse?: boolean;
 };
 
 export type SubmodelTreeGroup = {
     idShort: string;
     name: string;
+    /** Short element-type abbreviation, e.g. 'SMC', 'SML'. */
+    typeAbbreviation: string | undefined;
     items: SubmodelTreeItem[];
     path: string; // '<submodel idShort>/Machine/Motor'
     level: number; // 0, 1, 2 ...
@@ -126,6 +141,15 @@ export class SubmodelTree implements OnDestroy {
         );
     }
 
+    public fileName(fileName: string | undefined): string | undefined {
+        if (!fileName) return undefined;
+        // Some backends store File.value as a base64url-encoded reference joined with '-'
+        // rather than a conventional '/'-separated path (base64url never contains '/', so
+        // splitting on '/' alone left the whole encoded string untouched) — split on both.
+        const cutName = fileName.split(/[/-]/);
+        return cutName[cutName.length - 1];
+    }
+
     public isExpanded(path: string): boolean {
         return this.query().trim().length > 0 || this.expanded().has(path);
     }
@@ -188,25 +212,42 @@ export class SubmodelTree implements OnDestroy {
         const document = this.document();
         const env = document?.content;
         const items: SubmodelTreeItem[] = [];
+
+        const push = (
+            child: aas.SubmodelElement,
+            type: SubmodelTreeItem['type'],
+            value: string | undefined,
+            url?: string,
+            isProse?: boolean
+        ): SubmodelTreeItem => {
+            const item: SubmodelTreeItem = {
+                idShort: child.idShort,
+                name: getDisplayName(child, env, currentLang),
+                typeAbbreviation: getAbbreviation(child.modelType),
+                description: getElementDescription(child),
+                value: signal(value),
+                type,
+                element: child,
+                url,
+                unit: env ? getUnit(env, child) : undefined,
+                isProse,
+            };
+
+            items.push(item);
+            return item;
+        };
+
         for (const child of children) {
+            // SubmodelElementCollection/List are rendered as their own nested group (see
+            // collect()/groups()), not as a leaf item here.
+            if (isSubmodelElementCollection(child) || isSubmodelElementList(child)) {
+                continue;
+            }
+
             if (isProperty(child)) {
-                const item: SubmodelTreeItem = {
-                    idShort: child.idShort,
-                    name: getDisplayName(child, env, currentLang),
-                    value: signal(child.value),
-                    type: 'text',
-                    element: child,
-                    unit: env ? getUnit(env, child) : undefined,
-                };
-
-                items.push(item);
-
+                const item = push(child, 'text', child.value);
                 if (this.live() && child.nodeId) {
-                    this.liveNodes.push({
-                        nodeId: child.nodeId,
-                        valueType: child.valueType ?? 'undefined',
-                    });
-
+                    this.liveNodes.push({ nodeId: child.nodeId, valueType: child.valueType ?? 'undefined' });
                     this.map.set(child.nodeId, item);
                     item.isOnline = true;
                 }
@@ -214,35 +255,44 @@ export class SubmodelTree implements OnDestroy {
                 if (!child.value || child.value.length === 0) {
                     continue;
                 }
-
-                items.push({
-                    idShort: child.idShort,
-                    name: getDisplayName(child, env, currentLang),
-                    value: signal(getLocaleValue(child.value, currentLang)),
-                    type: 'text',
-                    element: child,
-                    unit: env ? getUnit(env, child) : undefined,
-                });
+                
+                push(child, 'text', getLocaleValue(child.value, currentLang), undefined, true);
             } else if (isFile(child)) {
                 if (!child.value || !document) {
                     continue;
                 }
 
-                items.push({
-                    idShort: child.idShort,
-                    name: getDisplayName(child, env, currentLang),
-                    value: signal(child.value),
-                    type: 'link',
-                    element: child,
-                    url: getUrl(document, child),
-                    unit: env ? getUnit(env, child) : undefined,
-                });
+                push(child, 'link', child.value, getUrl(document, child));
+            } else if (isRange(child)) {
+                if (child.min === undefined && child.max === undefined) {
+                    continue;
+                }
+
+                push(child, 'text', `${child.min ?? '?'} … ${child.max ?? '?'}`);
+            } else if (isReferenceElement(child)) {
+                push(child, 'text', child.value ? referenceToString(child.value) : undefined);
+            } else if (isAnnotatedRelationshipElement(child) || isRelationshipElement(child)) {
+                const value =
+                    child.first && child.second
+                        ? `${referenceToString(child.first)} → ${referenceToString(child.second)}`
+                        : undefined;
+                push(child, 'text', value);
+            } else if (isEntity(child)) {
+                push(child, 'text', child.entityType);
+            } else if (isBasicEventElement(child)) {
+                push(child, 'text', child.direction);
+            } else {
+                // Blob, Operation, Capability, and any future element type this component
+                // doesn't have dedicated value-rendering for — still shown, just without a
+                // single inline value (its description, e.g. Blob's content type, still shows).
+                push(child, 'none', undefined);
             }
         }
 
         return {
             idShort: parent.idShort,
             name: getDisplayName(parent, null, currentLang),
+            typeAbbreviation: getAbbreviation(parent.modelType),
             items,
         };
     }

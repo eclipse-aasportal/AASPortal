@@ -14,24 +14,17 @@ import {
     aas,
     AASDocument,
     convertToString,
-    extensionToMimeType,
     getAbbreviation,
     getChildren,
     getLocaleValue,
-    getSemanticId,
-    isAnnotatedRelationshipElement,
     isAssetAdministrationShell,
     isBlob,
-    isEntity,
     isFile,
     isMultiLanguageProperty,
-    isOperation,
     isProperty,
     isRange,
     isReferenceElement,
     isSubmodel,
-    isSubmodelElementCollection,
-    isSubmodelElementList,
     LiveNode,
     LiveRequest,
     noop,
@@ -43,7 +36,7 @@ import {
 import { AASTreeSearch } from './aas-tree-search';
 import { AASTreeApi } from './aas-tree-api';
 import { LiveState, ViewRoute } from '../../types';
-import { basename, encodeBase64Url, findRouteForShell, findRouteForSubmodel } from '../../utilities';
+import { basename, encodeBase64Url, findRouteForShell, findRouteForSubmodel, getElementDescription } from '../../utilities';
 import { VIEW_ROUTES } from '../../views/views-routes';
 import { WebSocketService } from '../../shared/services/web-socket.service';
 import { NotifyService } from '../../core/notify/notify.service';
@@ -388,52 +381,9 @@ export class AASTreeComponent extends TreeComponent<aas.Referable, AASNodeOption
     }
 
     private getSuffix(referable: aas.Referable | null): string {
-        let suffix: string | undefined;
-        if (!referable) {
-            suffix = '';
-        } else if (isAssetAdministrationShell(referable)) {
-            suffix = referable.id;
-        } else if (isMultiLanguageProperty(referable)) {
-            if (referable && Array.isArray(referable.value)) {
-                suffix = `${referable.value.map(item => item.language).join(', ')}`;
-            }
-        } else if (isSubmodel(referable)) {
-            const sid = getSemanticId(referable);
-            suffix = sid ? `sematicId: ${sid}` : `id: ${referable.id}`;
-        } else if (isProperty(referable)) {
-            const valueType = (referable as aas.Property).valueType;
-            if (valueType) {
-                suffix = valueType.startsWith('xs:') ? valueType.substring(3) : valueType;
-            }
-        } else if (isBlob(referable)) {
-            suffix = referable.contentType;
-        } else if (isFile(referable)) {
-            if (referable.contentType) {
-                suffix = referable.contentType;
-            } else if (referable.value) {
-                suffix = extensionToMimeType(referable.value);
-            }
-        } else if (isRange(referable)) {
-            const valueType = (referable as aas.Property).valueType;
-            if (valueType) {
-                suffix = valueType.startsWith('xs:') ? valueType.substring(3) : valueType;
-            }
-        } else if (isSubmodelElementCollection(referable)) {
-            suffix = referable.value ? `${referable.value.length}` : '0';
-        } else if (isSubmodelElementList(referable)) {
-            suffix = referable.value ? `${referable.value.length}` : '0';
-        } else if (isAnnotatedRelationshipElement(referable)) {
-            suffix = referable.annotations ? `${referable.annotations.length}` : '0';
-        } else if (isEntity(referable)) {
-            suffix = referable.statements ? `${referable.statements.length}` : '0';
-        } else if (isOperation(referable)) {
-            suffix = (
-                (referable.inputVariables?.length ?? 0) +
-                (referable.inoutputVariables?.length ?? 0) +
-                (referable.outputVariables?.length ?? 0)
-            ).toString();
-        }
-
+        // The type-specific description logic lives in aas-lib/utilities.ts (getElementDescription),
+        // shared with SubmodelTree — this just adds AasTree's own bracket styling on top of it.
+        const suffix = getElementDescription(referable);
         return suffix ? '[' + suffix + ']' : '';
     }
 
