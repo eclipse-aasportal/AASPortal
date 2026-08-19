@@ -8,22 +8,38 @@
 
 <div ngbAccordion>
     @for (contact of contacts(); track contact; let i = $index) {
-    <div ngbAccordionItem [collapsed]="contact.collapsed">
-        <h2 ngbAccordionHeader>
-            <button ngbAccordionButton>{{contact.name}}</button>
-        </h2>
-        <div ngbAccordionCollapse>
-            <div ngbAccordionBody>
-                <ng-template>
-                    <dl class="row">
-                        @for (item of contact.items; track item) {
-                        <dt class="col-sm-3">{{item.displayName}}</dt>
-                        <dd class="col-sm-9">{{item.value}}</dd>
-                        }
-                    </dl>
-                </ng-template>
+
+        <div class="p-3 m-auto d-flex flex-column flex-md-row justify-content-center bg-light border border-black border-opacity-25 rounded-2" style="max-width: fit-content;">
+
+            <div class="me-0 me-md-5">
+                <p class="fw-semibold">Contact</p>
+
+                <div class="col-sm d-flex flex-column data-entry border-black border-bottom border-opacity-10">
+                    <label>{{getContactInformationValue(i, "RoleOfContactPerson")}}</label>
+                    <label>{{getContactInformationValue(i, "ContactInformation")}}</label>
+                </div>
+                <div class="col-sm d-flex flex-column data-entry border-black border-bottom border-opacity-10">
+                    <label class="label" translate="Nameplate.SERIAL_NUMBER">Phone</label>
+                    <label>{{getContactInformationValue(i, "Phone")}}</label>
+                </div>
+                <div class="col-sm d-flex flex-column data-entry">
+                    <label class="label" translate="Nameplate.SERIAL_NUMBER">Email</label>
+                    <label>{{getContactInformationValue(i, "Email")}}</label>
+                </div>
             </div>
+
+            <div class="mt-4">
+                <div class="col-sm d-flex flex-column data-entry">
+                    <label class="fw-semibold">{{getContactInformationValue(i, "Company")}}</label>
+                    <label>{{getContactInformationValue(i, "Street")}}</label>
+                    <label>{{getContactInformationValue(i, "CityTown")}}</label>
+                    <label>{{getContactInformationValue(i, "Zipcode")}}</label>
+                    <label>{{getContactInformationValue(i, "NationalCode")}}</label>
+                </div>
+            </div>
+
         </div>
-    </div>
+
     }
+
 </div>
