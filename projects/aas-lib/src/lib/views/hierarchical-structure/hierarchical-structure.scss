@@ -1,0 +1,27 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+.diagram-card {
+    height: 520px;
+    grid-template-columns: 1fr 270px;
+}
+
+@media (max-width: 900px) {
+    .diagram-card {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    .diagram-card > .border-end {
+        border-right: 0 !important;
+        border-bottom: 1px solid #dde3e0;
+        height: 400px;
+    }
+    .diagram-card > :last-child {
+        min-height: 160px;
+    }
+}

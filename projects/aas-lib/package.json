@@ -16,5 +16,11 @@
         "lint": "ng lint aas-lib",
         "format": "ng lint aas-lib --fix",
         "docs": "typedoc --out docs"
+    },
+    "dependencies": {
+        "d3-hierarchy": "^3.1.2"
+    },
+    "devDependencies": {
+        "@types/d3-hierarchy": "^3.1.7"
     }
 }

@@ -1,0 +1,152 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="bg-light border border-black border-opacity-50 rounded-3 overflow-hidden d-grid diagram-card">
+    <div class="position-relative border-end bg-white">
+        <svg
+            [attr.viewBox]="viewBox()"
+            width="100%"
+            height="100%"
+            (wheel)="onWheel($event)"
+            (mousedown)="onDown($event)"
+            (mousemove)="onMove($event)"
+            (mouseup)="onUp()"
+            (mouseleave)="onUp()"
+            (touchstart)="onTouchStart($event)"
+            (touchmove)="onTouchMove($event)"
+            (touchend)="onTouchEnd()"
+            (touchcancel)="onTouchEnd()"
+            style="user-select: none; -webkit-user-select: none; touch-action: none"
+            [style.cursor]="dragging() ? 'grabbing' : 'grab'"
+        >
+            <defs>
+                <filter id="nodeShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.06" />
+                </filter>
+            </defs>
+
+            <g [attr.transform]="transform()">
+                @for (link of layout()?.links() ?? []; track link.target.id) {
+                    <path [attr.d]="linkPath(link)" fill="none" stroke="#dde3e0" stroke-width="1"></path>
+                }
+                @for (node of layout()?.descendants() ?? []; track node.id) {
+                    <g
+                        (click)="select(node.data)"
+                        [attr.transform]="'translate(' + nx(node) + ',' + ny(node) + ')'"
+                        style="cursor: pointer"
+                        (dblclick)="openNode(node.data)"
+                    >
+                        <title>{{ node.data.suffix }}</title>
+                        <rect
+                            x="-85"
+                            y="-28"
+                            width="170"
+                            height="56"
+                            rx="9"
+                            fill="#ffffff"
+                            [attr.stroke]="node.data.selected ? '#00806d' : '#cdd6d2'"
+                            [attr.stroke-width]="node.data.selected ? 1.6 : 1"
+                            [attr.stroke-dasharray]="canExpand(node.data) ? '4 3' : null"
+                            filter="url(#nodeShadow)"
+                        ></rect>
+
+                        <text
+                            text-anchor="middle"
+                            font-size="12.5"
+                            font-weight="500"
+                            [attr.fill]="isNavigable(node.data) ? '#00806d' : '#66716c'"
+                        >
+                            @if (wrap(node.data.name); as lines) {
+                                <tspan x="0" [attr.y]="lines[1] ? -8 : 4">{{ lines[0] }}</tspan>
+                                @if (lines[1]) {
+                                    <tspan x="0" y="8">{{ lines[1] }}</tspan>
+                                }
+                            }
+                        </text>
+
+                        @if (canExpand(node.data)) {
+                            <g (click)="expand(node.data)">
+                                <rect
+                                    filter="url(#nodeShadow)"
+                                    x="-30"
+                                    y="18"
+                                    width="60"
+                                    height="16"
+                                    rx="8"
+                                    fill="#f2f4f3"
+                                ></rect>
+                                <text text-anchor="middle" y="30" font-size="9.5" fill="#00806d">+ expand</text>
+                            </g>
+                        }
+                    </g>
+                }
+            </g>
+        </svg>
+        <div class="position-absolute d-flex gap-1" style="bottom: 12px; right: 12px">
+            <button class="btn btn-sm btn-light border" (click)="zoomBy(1.2)"><i class="bi bi-plus-lg"></i></button>
+            <button class="btn btn-sm btn-light border" (click)="zoomBy(0.8)"><i class="bi bi-dash-lg"></i></button>
+            <button class="btn btn-sm btn-light border" (click)="fit()">
+                <i class="bi bi-arrows-angle-contract"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- panel column -->
+    <div class="d-none d-sm-flex bg-light p-3 flex-column">
+        @if (selectedNode(); as node) {
+            <p class="text-secondary mb-2" style="font-size: 10px; letter-spacing: 0.05em; font-weight: 600">
+                SELECTED NODE
+            </p>
+
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <div
+                    class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                    style="width: 38px; height: 38px; background: #f2f4f3"
+                >
+                    <i class="bi bi-diagram-3 text-secondary"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="fw-semibold mb-0" style="font-size: 14.5px">{{ node.name }}</p>
+                    <p class="text-secondary mb-0" style="font-size: 11px">{{ node.options.archeType }}</p>
+                </div>
+            </div>
+
+            <div class="py-2 border-bottom">
+                <p class="text-secondary mb-1" style="font-size: 10.5px">Asset ID</p>
+                <p class="mb-0 font-monospace" style="font-size: 11.5px; word-break: break-all">
+                    {{ node.id.globalAssetId }}
+                </p>
+            </div>
+            <div class="py-2">
+                <p class="text-secondary mb-1" style="font-size: 10.5px">Endpoint</p>
+                <p class="mb-0" style="font-size: 12px">{{ node.options.document?.endpoint ?? '–' }}</p>
+            </div>
+
+            <div class="mt-auto d-flex flex-column gap-2">
+                @if (getRouterLink(node); as link) {
+                    <a [routerLink]="link" class="btn btn-sm rounded-pill text-white" style="background: #00806d"
+                        >Open shell</a
+                    >
+                } @else {
+                    <button class="btn btn-sm rounded-pill" disabled>Shell not available</button>
+                }
+                <button
+                    class="btn btn-sm btn-link text-secondary text-decoration-none"
+                    (click)="copy(node.id.globalAssetId)"
+                >
+                    <i class="bi bi-copy me-1"></i>Copy asset ID
+                </button>
+            </div>
+        } @else {
+            <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center">
+                <i class="bi bi-diagram-3 text-secondary opacity-50" style="font-size: 24px"></i>
+                <p class="text-secondary mt-2 mb-0" style="font-size: 12.5px">Select a node to see its details</p>
+            </div>
+        }
+    </div>
+</div>
