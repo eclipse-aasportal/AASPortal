@@ -289,7 +289,10 @@ export class ApiClientV3 extends ApiClient {
     }
 
     protected override getConceptDescription(id: string): Promise<aas.ConceptDescription> {
-        return this.http.get<aas.ConceptDescription>(this.resolve(`concept-descriptions/${id}`), this.auth);
+        return this.http.get<aas.ConceptDescription>(
+            this.resolve(`concept-descriptions/${encodeBase64Url(id)}`),
+            this.auth,
+        );
     }
 
     private toDocument(shell: aas.AssetAdministrationShell): AASDocument {
