@@ -422,7 +422,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
      * @param factor The zoom multiplier, e.g. `1.1` to zoom in, `0.9` to zoom out.
      */
     public zoomBy(factor: number): void {
-        this.zoom.update(z => Math.min(2.5, Math.max(0.25, z * factor)));
+        this.zoom.update(z => Math.min(5, Math.max(0.25, z * factor)));
     }
 
     /**
@@ -512,7 +512,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
     }
 
     public toggleOrientation() {
-        this.horizontal.set(!this.horizontal())
+        this.horizontal.set(!this.horizontal)
     }
 
     /**

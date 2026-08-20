@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-<div class="border border-black border-opacity-50 rounded-3 overflow-hidden d-grid diagram-card">
+<div class="border border-black border-opacity-50 rounded-2 overflow-hidden d-grid diagram-card">
     <div class="position-relative border-end bg-white">
         <svg
             [attr.viewBox]="viewBox()"
@@ -73,14 +73,16 @@
                             <g (click)="expand(node.data)">
                                 <rect
                                     filter="url(#nodeShadow)"
-                                    x="-30"
-                                    y="18"
-                                    width="60"
-                                    height="16"
+                                    x="-60"
+                                    y="15"
+                                    width="120"
+                                    height="24"
                                     rx="8"
-                                    fill="#f2f4f3"
+                                    fill="#CCE9E3"
+                                    style="stroke: var(--bs-primary)"
+                                    stroke-width="0.5"
                                 ></rect>
-                                <text text-anchor="middle" y="30" font-size="9.5" fill="#00806d">+ expand</text>
+                                <text text-anchor="middle" y="30" font-size="9.5" style="fill: var(--bs-primary)">+ expand</text>
                             </g>
                         }
                     </g>
