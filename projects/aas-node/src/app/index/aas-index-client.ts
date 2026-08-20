@@ -195,27 +195,43 @@ export class AASIndexClient implements IAASIndex {
     };
 
     private invoke(name: CommandName, args: Record<string, unknown>): Promise<unknown> {
-        const id = this.id++;
         return new Promise((resolve, reject) => {
+            const id = this.nextId();
             const handle = setTimeout(() => {
-                this.pending.delete(id);
-                reject(new Error(`Request "${name}" timed out.`));
-            }, 5000);
+                const entry = this.pending.get(id);
+                if (entry) {
+                    this.pending.delete(id);
+                    entry.reject(new Error(`Request "${name}" timed out.`));
+                }
+            }, 60000);
 
             this.pending.set(id, { resolve, reject, handle });
             this.port.postMessage({ id, type: 'command', name, args } satisfies ChannelCommand);
         });
     }
 
-    private readonly onMessage = (data: ChannelResponse | ChannelError): void => {
-        const { resolve, reject, handle } = this.pending.get(data.id)!;
-        clearTimeout(handle);
-        this.pending.delete(data.id);
-        if (isChannelError(data)) {
-            return reject(new Error(data.message));
+    private nextId(): number {
+        if (this.id >= Number.MAX_SAFE_INTEGER) {
+            this.id = 0;
+            return this.id;
         }
 
-        resolve(data.result);
+        return this.id++;
+    }
+
+    private readonly onMessage = (data: ChannelResponse | ChannelError): void => {
+        const value = this.pending.get(data.id);
+        if (!value) {
+            return;
+        }
+
+        clearTimeout(value.handle);
+        this.pending.delete(data.id);
+        if (isChannelError(data)) {
+            return value.reject(new Error(data.message));
+        }
+
+        value.resolve(data.result);
     };
 
     private readonly onWorkerError = (error: unknown): void => {
