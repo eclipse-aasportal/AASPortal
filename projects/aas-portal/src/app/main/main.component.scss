@@ -84,3 +84,17 @@
     text-decoration: underline;
     text-underline-offset: 5px;
 }
+
+// The theme-toggle/settings/localize/auth icons in the header toolbar are separate components
+// (::ng-deep needed to reach into their templates, same as .fhg-main-content above) and render as
+// .btn-link/.nav-link. Both set their own color via --bs-btn-color/--bs-nav-link-color declared
+// directly on themselves rather than inheriting it, so no class on a wrapping div can reach them --
+// point those variables at the same --bs-navbar-* variables the "real" nav links already use (via
+// .navbar-nav's scoped redefinition) so both stay in sync automatically, including on hover.
+::ng-deep .fhg-main-navbar .btn-link,
+::ng-deep .fhg-main-navbar .nav-link {
+    --bs-btn-color: var(--bs-navbar-color);
+    --bs-btn-hover-color: var(--bs-navbar-hover-color);
+    --bs-nav-link-color: var(--bs-navbar-color);
+    --bs-nav-link-hover-color: var(--bs-navbar-hover-color);
+}
