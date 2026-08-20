@@ -381,7 +381,7 @@ export class MySqlIndex extends AASIndex {
     public override async getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]> {
         const connection = await this.getConnection();
         const [results] = await connection.query<MySqlConceptDescriptionIds[]>(
-            'SELECT conceptDescriptionRefs FROM `documents` WHERE endpoint = ? AND id = ?;',
+            'SELECT conceptDescriptionIds FROM `submodelConceptDescriptions` WHERE endpoint = ? AND id = ?;',
             [endpoint, id],
         );
 
@@ -405,12 +405,12 @@ export class MySqlIndex extends AASIndex {
 
         if (result[0].length === 0) {
             await connection.query<ResultSetHeader>(
-                'INSERT INTO `submodelConceptDescriptions` (endpoint, id, conceptDescriptionRefs) VALUES (?, ?, ?);',
+                'INSERT INTO `submodelConceptDescriptions` (endpoint, id, conceptDescriptionIds) VALUES (?, ?, ?);',
                 [endpoint, id, JSON.stringify(conceptDescriptionIds)],
             );
         } else {
             await connection.query<ResultSetHeader>(
-                'UPDATE `submodelConceptDescriptions` SET conceptDescriptionRefs = ? WHERE endpoint = ? AND id = ?;',
+                'UPDATE `submodelConceptDescriptions` SET conceptDescriptionIds = ? WHERE endpoint = ? AND id = ?;',
                 [JSON.stringify(conceptDescriptionIds), endpoint, id],
             );
         }

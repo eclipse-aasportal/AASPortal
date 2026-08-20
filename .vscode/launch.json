@@ -33,7 +33,7 @@
             }
         },
         {
-            "name": "Launch aas-node (aas-server)",
+            "name": "Launch aas-node (SQLite)",
             "type": "node",
             "args": [
                 "--experimental-sqlite"
@@ -62,7 +62,7 @@
             }
         },
         {
-            "name": "Launch aas-node (keycloak, aas-server)",
+            "name": "Launch aas-node (keycloak, SQLite)",
             "type": "node",
             "args": [
                 "--experimental-sqlite",
@@ -89,6 +89,36 @@
                 "IDENTITY_PROVIDER": "https://localhost:8443/realms/aas-portal",
                 "CLIENT_SECRET": "7YiU4JXS4yaYHJrytrXNw7y71l3z12QN",
                 "REDIRECT_URI": "http://localhost:4200/api/callback",
+                "COOKIE_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
+                "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
+                "HOST_URL": "http://localhost:4200",
+            }
+        },
+        {
+            "name": "Launch aas-node (MariaDB)",
+            "type": "node",
+            "args": [
+                "--experimental-sqlite"
+            ],
+            "request": "launch",
+            "preLaunchTask": "build-aas-node",
+            "program": "${workspaceFolder}/projects/aas-node/build/aas-node.js",
+            "cwd": "${workspaceFolder}",
+            "outFiles": [
+                "${workspaceFolder}/projects/aas-node/build/**/*.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "NODE_ENV": "development",
+                "AAS_NODE_PORT": "1337",
+                "CONTENT_ROOT": "projects/aas-node/build",
+                "WEB_ROOT": "projects/aas-portal/dist/browser",
+                "ASSETS": "projects/aas-node/src/assets",
+                "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
+                "AAS_INDEX": "mysql://aas-node:user-password@localhost:3306",
+                "IDENTITY_PROVIDER": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "COOKIE_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "HOST_URL": "http://localhost:4200",
