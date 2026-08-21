@@ -103,6 +103,24 @@ describe('ApiClientV3', () => {
             });
         });
 
+        it('ignores a /shells response that did not actually apply the assetId filter', async () => {
+            http.get.mockResolvedValueOnce({ result: [], paging_metadata: {} });
+            // A server that doesn't recognize the assetId query param typically ignores it rather than
+            // erroring, returning its normal unfiltered first page instead -- none of these match.
+            const unrelatedShell: aas.AssetAdministrationShell = {
+                modelType: 'AssetAdministrationShell',
+                id: 'https://i4d.de/shells/unrelated',
+                idShort: 'Unrelated',
+                assetInformation: { assetKind: 'Instance', globalAssetId: 'https://i4d.de/some-other-asset' },
+            };
+            http.get.mockResolvedValueOnce({ result: [unrelatedShell], paging_metadata: {} });
+
+            await expect(client.getAllAssetAdministrationShellIdsByAssetLink(assetId)).resolves.toEqual({
+                result: [],
+                paging_metadata: {},
+            });
+        });
+
         it('falls back to /shells when /lookup/shells is not implemented (404)', async () => {
             http.get.mockRejectedValueOnce(new Error('Not Found'));
             const shell: aas.AssetAdministrationShell = {

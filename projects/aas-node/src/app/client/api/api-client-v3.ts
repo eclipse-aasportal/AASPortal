@@ -315,14 +315,22 @@ export class ApiClientV3 extends ApiClient {
         // -- it responds 200 with an empty result for an asset that demonstrably exists. Either way,
         // fall back to filtering the plain shell repository directly: /shells also accepts an assetId
         // filter per spec, querying the live/authoritative data instead of a secondary index.
+        //
+        // Not every server actually honors that filter, though -- an implementation that doesn't
+        // recognize the assetId query param typically just ignores it and returns its normal, unfiltered
+        // first page of shells rather than erroring, so the match must be verified client-side. Trusting
+        // the server blindly here previously caused an unrelated shell to be "found" on every endpoint
+        // that ignores the filter, which then failed to insert into the index as a duplicate of a shell
+        // the regular background scan had already indexed under its real identity.
         try {
             const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
                 this.resolve('shells', { assetId }),
                 this.auth,
             );
 
-            if (result.result?.length) {
-                return { result: result.result.map(shell => shell.id), paging_metadata: {} };
+            const matches = result.result?.filter(shell => shell.assetInformation.globalAssetId === assetId) ?? [];
+            if (matches.length) {
+                return { result: matches.map(shell => shell.id), paging_metadata: {} };
             }
         } catch {
             // no match via this path either
