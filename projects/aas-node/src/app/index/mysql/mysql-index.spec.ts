@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { Connection, ResultSetHeader } from 'mysql2/promise';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
+import { PoolConnection, ResultSetHeader } from 'mysql2/promise';
 import { AASDocument, AASEndpoint } from 'aas-core';
 import { Logger } from 'aas-package';
 
@@ -22,15 +22,25 @@ describe('MySqlIndex', () => {
     let index: MySqlIndex;
     let logger: Mocked<Logger>;
     let variable: Mocked<Variable>;
-    let connection: Mocked<Connection>;
+    let connection: Mocked<PoolConnection>;
     let keywords: Mocked<KeywordDirectory>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'info']);
-        variable = createSpyObj<Variable>({}, { ENDPOINTS: [] });
+        variable = createSpyObj<Variable>(
+            {},
+            { ENDPOINTS: [], AAS_INDEX: 'mysql://user:password@localhost:3306/aas_index' },
+        );
+
         keywords = createSpyObj<KeywordDirectory>(['containedKeyword', 'toString']);
-        connection = createSpyObj<Connection>(['query', 'beginTransaction', 'commit', 'rollback']);
-        index = new MySqlIndex(logger, variable, keywords, connection);
+        index = new MySqlIndex(logger, variable, keywords);
+        connection = createSpyObj<PoolConnection>(['query', 'beginTransaction', 'commit', 'rollback', 'release']);
+        index['getConnection'] = vi.fn().mockResolvedValue(connection);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.resetAllMocks();
     });
 
     it('should be created', () => {
@@ -399,7 +409,7 @@ describe('MySqlIndex', () => {
             connection.query.mockResolvedValue([[], []]);
             await index.setSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1', ['concept-description-1']);
             expect(connection.query).toHaveBeenLastCalledWith(
-                'INSERT INTO `submodelConceptDescriptions` (endpoint, id, conceptDescriptionRefs) VALUES (?, ?, ?);',
+                'INSERT INTO `submodelConceptDescriptions` (endpoint, id, conceptDescriptionIds) VALUES (?, ?, ?);',
                 ['Endpoint 1', 'submodel-1', JSON.stringify(['concept-description-1'])],
             );
         });
@@ -412,7 +422,7 @@ describe('MySqlIndex', () => {
             connection.query.mockResolvedValue([[result], []]);
             await index.setSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1', ['concept-description-2']);
             expect(connection.query).toHaveBeenLastCalledWith(
-                'UPDATE `submodelConceptDescriptions` SET conceptDescriptionRefs = ? WHERE endpoint = ? AND id = ?;',
+                'UPDATE `submodelConceptDescriptions` SET conceptDescriptionIds = ? WHERE endpoint = ? AND id = ?;',
                 [JSON.stringify(['concept-description-2']), 'Endpoint 1', 'submodel-1'],
             );
         });
