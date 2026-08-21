@@ -75,6 +75,12 @@ export class LocalCookieStorage extends CookieStorage {
 
     protected override async setCookieData(userId: string, name: string, data: string): Promise<void> {
         const file = this.getCookiesFile(userId);
+
+        // Only ever created as a side effect of local-account registration (FileSystemIdentityProvider) --
+        // an OIDC/SSO-authenticated user's per-user directory never gets created any other way, so their
+        // very first cookie write here would otherwise throw ENOENT.
+        await fs.promises.mkdir(join(this.cookiesDirectory, userId), { recursive: true });
+
         const cookies = fs.existsSync(file) ? await this.readCookies(file) : [];
         const index = cookies.findIndex(cookie => cookie.name === name);
         if (index < 0) {

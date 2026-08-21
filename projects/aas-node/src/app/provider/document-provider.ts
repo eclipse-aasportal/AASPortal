@@ -9,6 +9,7 @@
 import { inject, singleton } from 'tsyringe';
 import path from 'path';
 import { Readable } from 'stream';
+import { LOGGER, Logger } from 'aas-package';
 import {
     AASDocument,
     aas,
@@ -31,6 +32,7 @@ export class DocumentProvider {
     public constructor(
         @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
         @inject(AASIndexClient) private readonly index: AASIndexClient,
+        @inject(LOGGER) private readonly logger: Logger,
     ) {}
 
     /**
@@ -81,9 +83,20 @@ export class DocumentProvider {
 
         for (const item of await this.index.getEndpoints()) {
             try {
-                const headers = auth.find(item => item.name === endpoint)?.headers ?? {};
+                // `item` here shadows the auth-array callback's own parameter, so the headers lookup
+                // must be spelled out this way rather than reusing `item` inside the callback too --
+                // comparing against the outer (always-undefined, since `endpoint` was falsy to reach
+                // this loop) `endpoint` parameter instead of `item.name` silently sent no auth headers
+                // for every endpoint tried here.
+                const headers = auth.find(entry => entry.name === item.name)?.headers ?? {};
                 return await this.getDocumentById(item.name, modelType, id, headers);
-            } catch {
+            } catch (error) {
+                // Swallowed on purpose -- this endpoint just doesn't have the requested document -- but
+                // logged so a real failure (auth, network, ...) against an endpoint that DOES have it
+                // isn't indistinguishable from a normal "not found here, try the next one".
+                this.logger.warning(
+                    `getDocument: endpoint "${item.name}" failed for ${modelType} "${id}": ${error?.message ?? error}`,
+                );
                 continue;
             }
         }

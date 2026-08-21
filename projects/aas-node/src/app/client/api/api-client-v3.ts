@@ -295,8 +295,40 @@ export class ApiClientV3 extends ApiClient {
         return blob.value;
     }
 
-    public override getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<PagedResult<string>> {
-        return this.http.get(this.resolve(`lookup/shells?assetIds=${encodeBase64Url(assetId)}`), this.auth);
+    public override async getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<PagedResult<string>> {
+        try {
+            const result = await this.http.get<PagedResult<string>>(
+                this.resolve(`lookup/shells?assetId=${encodeBase64Url(assetId)}`),
+                this.auth,
+            );
+
+            if (result.result?.length) {
+                return result;
+            }
+        } catch {
+            // fall through to the repository-level fallback below
+        }
+
+        // /lookup/shells is the AAS *Registry* "Basic Discovery" API -- a separate component whose job
+        // is to index *where* shells live. Some servers don't implement it at all (404). Others do, but
+        // its index can be an independently maintained, out-of-sync copy of the actual repository data
+        // -- it responds 200 with an empty result for an asset that demonstrably exists. Either way,
+        // fall back to filtering the plain shell repository directly: /shells also accepts an assetId
+        // filter per spec, querying the live/authoritative data instead of a secondary index.
+        try {
+            const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
+                this.resolve('shells', { assetId }),
+                this.auth,
+            );
+
+            if (result.result?.length) {
+                return { result: result.result.map(shell => shell.id), paging_metadata: {} };
+            }
+        } catch {
+            // no match via this path either
+        }
+
+        return { result: [], paging_metadata: {} };
     }
 
     protected override getConceptDescription(id: string): Promise<aas.ConceptDescription> {

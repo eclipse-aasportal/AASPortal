@@ -56,6 +56,70 @@ describe('ApiClientV3', () => {
         });
     });
 
+    describe('getAllAssetAdministrationShellIdsByAssetLink', () => {
+        const assetId = 'https://i4d.de/ed9a62426c5b587b69a7b482e137c487';
+
+        it('returns the result from /lookup/shells when it has a match', async () => {
+            http.get.mockResolvedValueOnce({ result: ['shell1'], paging_metadata: {} });
+
+            await expect(client.getAllAssetAdministrationShellIdsByAssetLink(assetId)).resolves.toEqual({
+                result: ['shell1'],
+                paging_metadata: {},
+            });
+
+            expect(http.get).toHaveBeenCalledTimes(1);
+        });
+
+        it('falls back to filtering /shells when /lookup/shells has no match', async () => {
+            // /lookup/shells: a registry index that is out of sync -- responds 200 with an empty result
+            http.get.mockResolvedValueOnce({ result: [], paging_metadata: {} });
+            // /shells?assetId=...: the repository itself, filtered server-side, has the shell
+            const shell: aas.AssetAdministrationShell = {
+                modelType: 'AssetAdministrationShell',
+                id: 'https://i4d.de/shells/control-cabinet',
+                idShort: 'ControlCabinet',
+                assetInformation: { assetKind: 'Instance', globalAssetId: assetId },
+            };
+            http.get.mockResolvedValueOnce({ result: [shell], paging_metadata: {} });
+
+            await expect(client.getAllAssetAdministrationShellIdsByAssetLink(assetId)).resolves.toEqual({
+                result: [shell.id],
+                paging_metadata: {},
+            });
+
+            expect(http.get).toHaveBeenCalledTimes(2);
+            const shellsUrl = http.get.mock.calls[1][0] as URL;
+            expect(shellsUrl.pathname).toBe('/shells');
+            expect(shellsUrl.searchParams.get('assetId')).toBe(assetId);
+        });
+
+        it('returns an empty result when neither /lookup/shells nor /shells has a match', async () => {
+            http.get.mockResolvedValueOnce({ result: [], paging_metadata: {} });
+            http.get.mockResolvedValueOnce({ result: [], paging_metadata: {} });
+
+            await expect(client.getAllAssetAdministrationShellIdsByAssetLink(assetId)).resolves.toEqual({
+                result: [],
+                paging_metadata: {},
+            });
+        });
+
+        it('falls back to /shells when /lookup/shells is not implemented (404)', async () => {
+            http.get.mockRejectedValueOnce(new Error('Not Found'));
+            const shell: aas.AssetAdministrationShell = {
+                modelType: 'AssetAdministrationShell',
+                id: 'https://i4d.de/shells/control-cabinet',
+                idShort: 'ControlCabinet',
+                assetInformation: { assetKind: 'Instance', globalAssetId: assetId },
+            };
+            http.get.mockResolvedValueOnce({ result: [shell], paging_metadata: {} });
+
+            await expect(client.getAllAssetAdministrationShellIdsByAssetLink(assetId)).resolves.toEqual({
+                result: [shell.id],
+                paging_metadata: {},
+            });
+        });
+    });
+
     describe('setEnvironment', () => {
         it('updates an AssetAdministrationShell', async () => {
             const aas = env.assetAdministrationShells![0];

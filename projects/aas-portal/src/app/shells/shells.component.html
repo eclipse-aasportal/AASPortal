@@ -152,7 +152,7 @@
     </div>
 
     <div [hidden]="someSelected() === false" class="hidden-selected-bar">
-            <div class="d-flex flex-row align-items-center px-3 bg-secondary me-2 my-1 rounded-3">
+            <div class="d-flex flex-row align-items-center px-3 bg-secondary-subtle me-2 my-1 border border-black border-opacity-25 rounded-3">
 
                 <div class="d-flex flex-row align-items-center text-white mx-2">
                     <button
@@ -170,7 +170,7 @@
 
                 <button
                     type="button"
-                    class="btn text-primary"
+                    class="btn text-primary bg-primary-subtle mx-2"
                     (click)="downloadPackages().subscribe()"
                     [disabled]="someSelected() === false"
                 >
@@ -179,7 +179,7 @@
                 </button>
                 <button
                     type="button"
-                    class="btn text-danger"
+                    class="btn text-danger bg-danger-subtle"
                     (click)="deletePackages().subscribe()"
                     [disabled]="someSelected() === false"
                 >
