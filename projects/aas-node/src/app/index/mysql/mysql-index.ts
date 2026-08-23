@@ -184,7 +184,7 @@ export class MySqlIndex extends AASIndex {
                 endpointName,
             ]);
 
-            this.deleteDocuments(connection, endpointName);
+            await this.deleteDocuments(connection, endpointName);
             await connection.commit();
             return results.affectedRows > 0;
         } catch (error) {
@@ -265,13 +265,21 @@ export class MySqlIndex extends AASIndex {
             );
 
             if (results.length === 0) {
+                await connection.commit();
                 return;
             }
 
             const uuid = results[0].uuid;
             await connection.query<mysql.ResultSetHeader>(
-                'UPDATE `documents` SET address = ?, idShort = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
-                [document.address, document.idShort, document.timestamp, document.thumbnail ?? null, uuid],
+                'UPDATE `documents` SET address = ?, idShort = ?, assetId = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
+                [
+                    document.address,
+                    document.idShort,
+                    document.assetId ?? null,
+                    document.timestamp,
+                    document.thumbnail ?? null,
+                    uuid,
+                ],
             );
 
             if (document.content && document.content.submodels) {
@@ -347,6 +355,7 @@ export class MySqlIndex extends AASIndex {
             await connection.beginTransaction();
             const uuid = await this.getUuid(connection, endpointName, id);
             if (!uuid) {
+                await connection.commit();
                 return false;
             }
 
@@ -389,37 +398,14 @@ export class MySqlIndex extends AASIndex {
                 await connection.query<mysql.ResultSetHeader>('DELETE FROM `documents`;');
                 await connection.query<mysql.ResultSetHeader>('DELETE FROM `submodelConceptDescriptions`;');
             } else if (id) {
-                const uuid = this.getUuid(connection, endpoint, id);
+                const uuid = await this.getUuid(connection, endpoint, id);
                 if (uuid) {
                     await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
                 }
             } else {
-                let loop = true;
-                while (loop) {
-                    const [results] = await connection.query<MySqlDocument[]>(
-                        'SELECT * FROM `documents` WHERE endpoint = ? LIMIT ?;',
-                        [endpoint, LIMIT],
-                    );
-
-                    await connection.query<mysql.ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?;', [
-                        endpoint,
-                    ]);
-                    for (const document of results) {
-                        await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [
-                            document.uuid,
-                        ]);
-
-                        await connection.query<mysql.ResultSetHeader>(
-                            'DELETE FROM `submodelConceptDescriptions` WHERE endpoint = ?;',
-                            [endpoint],
-                        );
-                    }
-
-                    if (results.length < LIMIT) {
-                        loop = false;
-                    }
-                }
+                await this.deleteDocuments(connection, endpoint);
             }
+
             await connection.commit();
         } catch (error) {
             await connection.rollback();
@@ -500,6 +486,9 @@ export class MySqlIndex extends AASIndex {
         ]);
 
         await connection.query<mysql.ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?;', [endpointName]);
+        await connection.query<mysql.ResultSetHeader>('DELETE FROM `submodelConceptDescriptions` WHERE endpoint = ?;', [
+            endpointName,
+        ]);
 
         for (const document of results) {
             await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [document.uuid]);
