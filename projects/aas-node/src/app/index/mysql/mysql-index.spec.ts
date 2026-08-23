@@ -73,6 +73,20 @@ describe('MySqlIndex', () => {
         });
     });
 
+    describe('getEndpointCount', () => {
+        it('returns the total number of endpoints', async () => {
+            const result: DocumentCount = {
+                constructor: { name: 'RowDataPacket' },
+                'COUNT(*)': 42,
+            };
+
+            connection.query.mockResolvedValue([[result], []]);
+            await expect(index.getEndpointCount()).resolves.toEqual(42);
+            expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM `endpoints` AS count;');
+            expect(connection.release).toHaveBeenCalledTimes(1);
+        });
+    });
+
     describe('getEndpoints', () => {
         it('returns all registered endpoints', async () => {
             const result: MySqlEndpoint[] = [
@@ -246,6 +260,10 @@ describe('MySqlIndex', () => {
                             return resolve([[], []]);
                         }
 
+                        if (sql === 'DELETE FROM `submodelConceptDescriptions` WHERE endpoint = ?;') {
+                            return resolve([[], []]);
+                        }
+
                         if (sql === 'DELETE FROM `elements` WHERE uuid = ?;') {
                             return resolve([[], []]);
                         }
@@ -255,12 +273,43 @@ describe('MySqlIndex', () => {
             );
 
             await expect(index.deleteEndpoint('Endpoint 1')).resolves.toEqual(true);
-            expect(connection.query).toHaveBeenCalledTimes(4);
+            expect(connection.query).toHaveBeenCalledTimes(5);
         });
     });
 
     describe('getDocuments', () => {
-        it.todo('gets the first');
+        it('returns all documents of the specified endpoint', async () => {
+            const result: MySqlDocument[] = [
+                {
+                    constructor: { name: 'RowDataPacket' },
+                    uuid: '1',
+                    id: 'http://document/aas',
+                    endpoint: 'Endpoint 1',
+                    address: 'address',
+                    idShort: 'idShort',
+                    assetId: 'assetId',
+                    thumbnail: null,
+                    timestamp: 123,
+                },
+            ];
+
+            connection.query.mockResolvedValue([result, []]);
+            await expect(index.getDocuments({ limit: 10 })).resolves.toEqual({
+                documents: [
+                    {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas',
+                        address: 'address',
+                        idShort: 'idShort',
+                        assetId: 'assetId',
+                        content: null,
+                        timestamp: 123,
+                    },
+                ],
+                next: null,
+                previous: null,
+            });
+        });
     });
 
     describe('nextPage', () => {
@@ -306,6 +355,23 @@ describe('MySqlIndex', () => {
             expect(connection.beginTransaction).toHaveBeenCalled();
             expect(connection.query).toHaveBeenCalledTimes(2);
             expect(connection.commit).toHaveBeenCalled();
+        });
+
+        it('commits when the document does not exist', async () => {
+            connection.query.mockResolvedValue([[], []]);
+
+            await expect(
+                index.update({
+                    endpoint: 'Endpoint 1',
+                    id: 'http://document/aas',
+                    address: 'address',
+                    idShort: 'idShort',
+                    timestamp: 123,
+                } satisfies AASDocument),
+            ).resolves.toEqual(void 0);
+
+            expect(connection.commit).toHaveBeenCalledTimes(1);
+            expect(connection.rollback).not.toHaveBeenCalled();
         });
     });
 
@@ -377,6 +443,15 @@ describe('MySqlIndex', () => {
             expect(connection.beginTransaction).toHaveBeenCalled();
             expect(connection.commit).toHaveBeenCalled();
         });
+
+        it('commits when the document does not exist', async () => {
+            connection.query.mockResolvedValue([[], []]);
+
+            await expect(index.delete('Endpoint 1', 'http://document/aas')).resolves.toEqual(false);
+
+            expect(connection.commit).toHaveBeenCalledTimes(1);
+            expect(connection.rollback).not.toHaveBeenCalled();
+        });
     });
 
     describe('clear', () => {
@@ -387,6 +462,30 @@ describe('MySqlIndex', () => {
             expect(connection.query).toHaveBeenNthCalledWith(1, 'DELETE FROM `elements`;');
             expect(connection.query).toHaveBeenNthCalledWith(2, 'DELETE FROM `documents`;');
             expect(connection.commit).toHaveBeenCalled();
+        });
+
+        it('clears all endpoint-scoped index data', async () => {
+            const document = { uuid: 'uuid1' } as MySqlDocument;
+            connection.query.mockImplementation((sql: string | object) => {
+                if (sql === 'SELECT uuid FROM `documents` WHERE endpoint = ?;') {
+                    return Promise.resolve([[document], []]);
+                }
+
+                return Promise.resolve([[], []]);
+            });
+
+            await expect(index.clear('Endpoint 1')).resolves.toEqual(void 0);
+
+            expect(connection.query).toHaveBeenCalledWith('DELETE FROM `documents` WHERE endpoint = ?;', [
+                'Endpoint 1',
+            ]);
+
+            expect(connection.query).toHaveBeenCalledWith(
+                'DELETE FROM `submodelConceptDescriptions` WHERE endpoint = ?;',
+                ['Endpoint 1'],
+            );
+
+            expect(connection.query).toHaveBeenCalledWith('DELETE FROM `elements` WHERE uuid = ?;', ['uuid1']);
         });
     });
 

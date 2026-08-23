@@ -135,7 +135,7 @@ export class SqliteIndex extends AASIndex {
         this.deleteEndpointSql = this.db.prepare('DELETE FROM endpoints WHERE name = ?');
         this.selectDocumentSql = this.db.prepare('SELECT uuid FROM documents WHERE endpoint = ? AND id = ?');
         this.updateDocumentSql = this.db.prepare(
-            'UPDATE documents SET address = ?, idShort = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?',
+            'UPDATE documents SET address = ?, idShort = ?, assetId = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?',
         );
 
         this.deleteElementsSql = this.db.prepare('DELETE FROM elements WHERE uuid = ?');
@@ -158,7 +158,7 @@ export class SqliteIndex extends AASIndex {
         this.selectUuidSql = this.db.prepare('SELECT uuid FROM documents WHERE endpoint = ? AND id = ?');
         this.deleteAllElementsSql = this.db.prepare('DELETE FROM elements');
         this.deleteAllDocumentsSql = this.db.prepare('DELETE FROM documents');
-        this.selectEndpointDocumentsSql = this.db.prepare('SELECT uuid FROM documents WHERE endpoint = ? LIMIT ?');
+        this.selectEndpointDocumentsSql = this.db.prepare('SELECT uuid FROM documents WHERE endpoint = ?');
         this.deleteEndpointDocumentsSql = this.db.prepare('DELETE FROM documents WHERE endpoint = ?');
         this.getConceptDescriptionIdsSql = this.db.prepare(
             'SELECT conceptDescriptionIds FROM submodelConceptDescriptions WHERE endpoint = ? AND id = ?',
@@ -379,6 +379,7 @@ export class SqliteIndex extends AASIndex {
                 this.db.exec('BEGIN');
                 const value = this.selectDocumentSql.get(document.endpoint, document.id);
                 if (!value) {
+                    this.db.exec('COMMIT');
                     resolve();
                     return;
                 }
@@ -387,6 +388,7 @@ export class SqliteIndex extends AASIndex {
                 this.updateDocumentSql.run(
                     document.address,
                     document.idShort,
+                    document.assetId ?? null,
                     document.timestamp,
                     document.thumbnail ?? null,
                     uuid,
@@ -527,11 +529,11 @@ export class SqliteIndex extends AASIndex {
         return new Promise<string[]>((resolve, reject) => {
             try {
                 const value = this.getConceptDescriptionIdsSql.get(endpoint, id);
-                if (!value || !value.conceptDescriptionRefs) {
+                if (!value || !value.conceptDescriptionIds) {
                     return resolve([]);
                 }
 
-                resolve(JSON.parse(String(value.id)) as string[]);
+                resolve(JSON.parse(String(value.conceptDescriptionIds)) as string[]);
             } catch (error) {
                 reject(error);
             }
@@ -560,18 +562,11 @@ export class SqliteIndex extends AASIndex {
     }
 
     private deleteDocuments(endpoint: string): void {
-        let loop = true;
-        while (loop) {
-            const values = this.selectEndpointDocumentsSql.all(endpoint, LIMIT);
-            this.deleteEndpointDocumentsSql.run(endpoint);
-            for (const value of values) {
-                this.deleteElementsSql.run(String(value.uuid));
-                this.deleteEndpointConceptDescriptionIdsSql.run(endpoint);
-            }
-
-            if (values.length < LIMIT) {
-                loop = false;
-            }
+        const values = this.selectEndpointDocumentsSql.all(endpoint);
+        this.deleteEndpointDocumentsSql.run(endpoint);
+        this.deleteEndpointConceptDescriptionIdsSql.run(endpoint);
+        for (const value of values) {
+            this.deleteElementsSql.run(String(value.uuid));
         }
     }
 
