@@ -49,7 +49,7 @@ export abstract class ApiClient extends EndpointClient {
 
     public override async test(): Promise<void> {
         if (this.reentry === 0) {
-            await this.http.checkUrlExist(this.endpoint.url);
+            await this.http.checkUrlExist(this.endpoint.url, this.auth);
         }
     }
 
