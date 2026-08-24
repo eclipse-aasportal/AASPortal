@@ -298,7 +298,7 @@ export class ApiClientV3 extends ApiClient {
     public override async getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<PagedResult<string>> {
         try {
             const result = await this.http.get<PagedResult<string>>(
-                this.resolve(`lookup/shells?assetId=${encodeBase64Url(assetId)}`),
+                this.resolve(`lookup/shells?assetIds=${encodeBase64Url(assetId)}`),
                 this.auth,
             );
 
@@ -309,19 +309,6 @@ export class ApiClientV3 extends ApiClient {
             // fall through to the repository-level fallback below
         }
 
-        // /lookup/shells is the AAS *Registry* "Basic Discovery" API -- a separate component whose job
-        // is to index *where* shells live. Some servers don't implement it at all (404). Others do, but
-        // its index can be an independently maintained, out-of-sync copy of the actual repository data
-        // -- it responds 200 with an empty result for an asset that demonstrably exists. Either way,
-        // fall back to filtering the plain shell repository directly: /shells also accepts an assetId
-        // filter per spec, querying the live/authoritative data instead of a secondary index.
-        //
-        // Not every server actually honors that filter, though -- an implementation that doesn't
-        // recognize the assetId query param typically just ignores it and returns its normal, unfiltered
-        // first page of shells rather than erroring, so the match must be verified client-side. Trusting
-        // the server blindly here previously caused an unrelated shell to be "found" on every endpoint
-        // that ignores the filter, which then failed to insert into the index as a duplicate of a shell
-        // the regular background scan had already indexed under its real identity.
         try {
             const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
                 this.resolve('shells', { assetId }),

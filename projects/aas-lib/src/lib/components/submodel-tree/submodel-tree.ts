@@ -94,10 +94,23 @@ export class SubmodelTree implements OnDestroy {
         });
 
         effect(() => {
-            const all = this.groups().map(g => g.path);
-            this.expanded.set(new Set(all));
+            const groups = this.groups();
+            // Auto-expanding every group is fine (and nice: no extra clicks) for a typical submodel,
+            // but for a very large/deeply nested one (e.g. a full ECLASS TechnicalData tree with
+            // thousands of nested collections) it means the *entire* tree renders as DOM at once,
+            // recursively, via *ngTemplateOutlet -- easily enough to hang the page even with the
+            // underlying data computed quickly. Past the threshold, only the root starts expanded;
+            // the rest is available on demand via toggle()/search, same as before.
+            const paths =
+                groups.length <= SubmodelTree.autoExpandThreshold
+                    ? groups.map(g => g.path)
+                    : groups.filter(g => g.level === 0).map(g => g.path);
+            this.expanded.set(new Set(paths));
         });
     }
+
+    /** Group-count threshold above which the tree starts collapsed (root only) instead of fully expanded. */
+    private static readonly autoExpandThreshold = 150;
 
     /** The submodel to display. */
     public readonly submodel = input<aas.Submodel | undefined>(undefined);
@@ -114,7 +127,16 @@ export class SubmodelTree implements OnDestroy {
     public readonly live = input<boolean>(true);
 
     public readonly expanded = signal<ReadonlySet<string>>(new Set());
+
+    /** The committed search term that actually filters the tree -- see {@link queryDraft}. */
     public readonly query = signal('');
+
+    /**
+     * The search box's live text, updated on every keystroke. Kept separate from {@link query} (which
+     * drives the actual filtering/re-render) so typing doesn't recompute and re-render a large tree once
+     * per character -- {@link submitQuery} commits the draft to `query` on Enter instead.
+     */
+    public readonly queryDraft = signal('');
 
     private readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
 
@@ -135,10 +157,7 @@ export class SubmodelTree implements OnDestroy {
     public rootGroup = computed(() => this.groups()[0]);
 
     public childGroups(path: string): SubmodelTreeGroup[] {
-        const visible = this.filtered().visible;
-        return this.groups().filter(
-            g => g.path.startsWith(path + '/') && !g.path.slice(path.length + 1).includes('/') && visible.has(g.path),
-        );
+        return this.filtered().childrenByPath.get(path) ?? [];
     }
 
     public fileName(fileName: string | undefined): string | undefined {
@@ -151,13 +170,36 @@ export class SubmodelTree implements OnDestroy {
     }
 
     public isExpanded(path: string): boolean {
-        return this.query().trim().length > 0 || this.expanded().has(path);
+        const query = this.query().trim();
+        if (query.length > 0) {
+            // Force-expanding every matched group is convenient for a normal search result, but the
+            // matched set can itself still be large enough to reproduce the same render blowup the
+            // default-collapsed fix above prevents (e.g. searching a common term against a huge tree).
+            // Past the same threshold, fall back to the actual expanded state instead -- search still
+            // narrows what's shown via itemsOf()/childGroups(), it just stops auto-opening everything.
+            if (this.filtered().visible.size <= SubmodelTree.autoExpandThreshold) {
+                return true;
+            }
+        }
+
+        return this.expanded().has(path);
     }
 
     public toggle(path: string): void {
         const next = new Set(this.expanded());
         next.has(path) ? next.delete(path) : next.add(path);
         this.expanded.set(next); // new Set, so the signal actually fires
+    }
+
+    /** Commits {@link queryDraft} to {@link query}, actually applying the search (Enter key handler). */
+    public submitQuery(): void {
+        this.query.set(this.queryDraft());
+    }
+
+    /** Clears both the search box and the applied search. */
+    public clearQuery(): void {
+        this.queryDraft.set('');
+        this.query.set('');
     }
 
     public itemsOf(path: string): SubmodelTreeItem[] {
@@ -191,7 +233,32 @@ export class SubmodelTree implements OnDestroy {
             }
         }
 
-        return { visible, itemsByPath };
+        // Parent path -> its direct children, built once here instead of childGroups() re-scanning
+        // every group on every call. childGroups() is invoked twice per rendered group from the
+        // template (the item-count badge and the recursive @for), so that used to be an O(groups²)
+        // scan -- unnoticeable for a handful of groups, but pegs the main thread for a large, deeply
+        // nested submodel (e.g. a full ECLASS TechnicalData tree with hundreds of nested collections).
+        const childrenByPath = new Map<string, SubmodelTreeGroup[]>();
+        for (const group of this.groups()) {
+            if (!visible.has(group.path)) {
+                continue;
+            }
+
+            const separatorIndex = group.path.lastIndexOf('/');
+            if (separatorIndex < 0) {
+                continue; // a root group has no parent entry
+            }
+
+            const parentPath = group.path.slice(0, separatorIndex);
+            const siblings = childrenByPath.get(parentPath);
+            if (siblings) {
+                siblings.push(group);
+            } else {
+                childrenByPath.set(parentPath, [group]);
+            }
+        }
+
+        return { visible, itemsByPath, childrenByPath };
     });
 
     private collect(referable: aas.Referable, level: number, parentPath: string, out: SubmodelTreeGroup[]): void {

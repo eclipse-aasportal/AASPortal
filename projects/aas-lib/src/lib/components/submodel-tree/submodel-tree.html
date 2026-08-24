@@ -56,15 +56,16 @@
 <div class="mt-2 bg-body-tertiary border border-black border-opacity-25 rounded-2 p-2 w-100 w-sm-75 m-auto">
     @if (rootGroup(); as root) {
     <div class="d-flex align-items-center gap-2 border rounded-3 px-3 py-2 mb-3">
-        <i class="bi bi-search text-secondary"></i>
+        <i class="bi bi-search text-secondary" role="button" (click)="submitQuery()"></i>
         <input type="text" class="border-0 flex-grow-1 bg-transparent"
             style="outline: none"
-            placeholder="Search values…"
-            [value]="query()"
-            (input)="query.set($any($event.target).value)">
+            placeholder="Search values… (press Enter)"
+            [value]="queryDraft()"
+            (input)="queryDraft.set($any($event.target).value)"
+            (keydown.enter)="submitQuery()">
         @if (query()) {
             <span class="small text-secondary">{{ matchCount() }} matches</span>
-            <i class="bi bi-x text-secondary" role="button" (click)="query.set('')"></i>
+            <i class="bi bi-x text-secondary" role="button" (click)="clearQuery()"></i>
         }
     </div>
         <ng-container *ngTemplateOutlet="groupTpl; context: { $implicit: root }"></ng-container>
