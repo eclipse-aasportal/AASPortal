@@ -7,21 +7,16 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import net from 'net';
 import { Readable } from 'stream';
 import { describe, beforeEach, it, expect, afterEach, vi, Mocked } from 'vitest';
 import { HttpClient } from './http-client.js';
 import { createSpyObj } from '../test/mocks.js';
-import { HttpCache } from './http-cache.js';
 
 describe('HttpClient', () => {
-    let server: HttpClient;
-    let cache: Mocked<HttpCache>;
+    let client: HttpClient;
 
     beforeEach(() => {
-        cache = createSpyObj<HttpCache>(['clear', 'get', 'remove', 'set']);
-        cache.get.mockReturnValue(undefined);
-        server = new HttpClient(cache);
+        client = new HttpClient();
     });
 
     afterEach(() => {
@@ -29,7 +24,7 @@ describe('HttpClient', () => {
     });
 
     it('should created', () => {
-        expect(server).toBeTruthy();
+        expect(client).toBeTruthy();
     });
 
     describe('getReadable', () => {
@@ -50,7 +45,7 @@ describe('HttpClient', () => {
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
             vi.spyOn(Readable, 'fromWeb').mockReturnValue(new Readable());
 
-            const result = await server.getReadable(new URL('http://localhost:1234/hello/world'));
+            const result = await client.getReadable(new URL('http://localhost:1234/hello/world'));
             expect(Readable.fromWeb).toHaveBeenCalled();
             expect(result.read).toBeTruthy();
         });
@@ -65,7 +60,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.getReadable(new URL('http://localhost:1234/hello/world'))).rejects.toThrow();
+            await expect(client.getReadable(new URL('http://localhost:1234/hello/world'))).rejects.toThrow();
         });
 
         it('returns an empty readable stream if response.body is null', async () => {
@@ -78,7 +73,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(() => server.getReadable(new URL('http://localhost:1234/hello/world'))).rejects.toThrowError();
+            await expect(() => client.getReadable(new URL('http://localhost:1234/hello/world'))).rejects.toThrowError();
         });
     });
 
@@ -89,14 +84,32 @@ describe('HttpClient', () => {
                 ok: true,
                 status: 200,
                 statusText: 'OK',
+                headers: new Headers([['content-type', 'application/json']]),
+                body: createSpyObj<ReadableStream>([]),
             });
 
             response.json.mockResolvedValue(mockData);
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            const result = await server.get<typeof mockData>(new URL('http://localhost:1234/test'));
+            const result = await client.get<typeof mockData>(new URL('http://localhost:1234/test'));
             expect(result).toEqual(mockData);
             expect(response.json).toHaveBeenCalled();
+        });
+
+        it('parses a structured JSON media type', async () => {
+            const mockData = { title: 'Problem details' };
+            const response = createSpyObj<Response>(['json'], {
+                ok: true,
+                status: 200,
+                headers: new Headers([['content-type', 'Application/Problem+Json; charset=utf-8']]),
+                body: createSpyObj<ReadableStream>([]),
+            });
+
+            response.json.mockResolvedValue(mockData);
+            vi.spyOn(global, 'fetch').mockResolvedValue(response);
+
+            await expect(client.get(new URL('http://localhost:1234/test'))).resolves.toEqual(mockData);
+            expect(response.json).toHaveBeenCalledOnce();
         });
 
         it('should reject with error when response is not ok', async () => {
@@ -104,11 +117,13 @@ describe('HttpClient', () => {
                 ok: false,
                 status: 404,
                 statusText: 'Not found',
+                headers: new Headers([['content-type', 'application/json']]),
+                body: createSpyObj<ReadableStream>([]),
             });
 
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(server.get<object>(new URL('http://localhost:1234/test'))).rejects.toThrow();
+            await expect(client.get<object>(new URL('http://localhost:1234/test'))).rejects.toThrow();
         });
 
         it('should reject if response.json throws', async () => {
@@ -116,12 +131,44 @@ describe('HttpClient', () => {
                 ok: true,
                 status: 200,
                 statusText: 'OK',
+                headers: new Headers([['content-type', 'application/json']]),
+                body: createSpyObj<ReadableStream>([]),
             });
 
             response.json.mockRejectedValue(new Error('JSON parse error'));
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(server.get<object>(new URL('http://localhost:1234/test'))).rejects.toThrow('JSON parse error');
+            await expect(client.get<object>(new URL('http://localhost:1234/test'))).rejects.toThrow('JSON parse error');
+        });
+
+        it('cancels the response body before retrying', async () => {
+            const discardedBody = createSpyObj<ReadableStream>(['cancel']);
+            discardedBody.cancel.mockResolvedValue(undefined);
+            const retryableResponse = createSpyObj<Response>([], {
+                ok: false,
+                status: 503,
+                body: discardedBody,
+            });
+            const expected = { foo: 'bar' };
+            const successfulResponse = createSpyObj<Response>(['json'], {
+                ok: true,
+                status: 200,
+                headers: new Headers([['content-type', 'application/json']]),
+                body: createSpyObj<ReadableStream>([]),
+            });
+
+            successfulResponse.json.mockResolvedValue(expected);
+            vi.spyOn(global, 'fetch')
+                .mockResolvedValueOnce(retryableResponse)
+                .mockResolvedValueOnce(successfulResponse);
+            vi.useFakeTimers();
+
+            const request = client.get(new URL('http://localhost:1234/test'));
+            await vi.advanceTimersByTimeAsync(1000);
+
+            await expect(request).resolves.toEqual(expected);
+            expect(discardedBody.cancel).toHaveBeenCalledOnce();
+            vi.useRealTimers();
         });
     });
 
@@ -131,22 +178,27 @@ describe('HttpClient', () => {
                 ok: true,
                 status: 200,
                 statusText: 'OK',
+                headers: new Headers(),
+                body: null,
             } as unknown as Response;
 
             const spy = vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
             await expect(
-                server.put(new URL('http://localhost:1234/test'), { foo: 'bar' }, { 'X-Test': 'yes' }),
-            ).resolves.toBeUndefined();
+                client.put(new URL('http://localhost:1234/test'), { foo: 'bar' }, { 'X-Test': 'yes' }),
+            ).resolves.toBe(void 0);
 
-            expect(spy).toHaveBeenCalledWith('http://localhost:1234/test', {
-                method: 'PUT',
-                headers: {
-                    'X-Test': 'yes',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ foo: 'bar' }),
-            });
+            expect(spy).toHaveBeenCalledWith(
+                'http://localhost:1234/test',
+                expect.objectContaining({
+                    method: 'PUT',
+                    headers: {
+                        'X-Test': 'yes',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ foo: 'bar' }),
+                }),
+            );
         });
 
         it('should throw error when response is not ok', async () => {
@@ -158,7 +210,7 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(response);
 
-            await expect(server.put(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow();
+            await expect(client.put(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow();
         });
     });
 
@@ -173,13 +225,16 @@ describe('HttpClient', () => {
             const spy = vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
             await expect(
-                server.delete(new URL('http://localhost:1234/test'), { 'X-Test': 'yes' }),
+                client.delete(new URL('http://localhost:1234/test'), { 'X-Test': 'yes' }),
             ).resolves.toBeUndefined();
 
-            expect(spy).toHaveBeenCalledWith('http://localhost:1234/test', {
-                method: 'DELETE',
-                headers: { 'X-Test': 'yes' },
-            });
+            expect(spy).toHaveBeenCalledWith(
+                'http://localhost:1234/test',
+                expect.objectContaining({
+                    method: 'DELETE',
+                    headers: { 'X-Test': 'yes' },
+                }),
+            );
         });
 
         it('should throw error when response is not ok', async () => {
@@ -191,96 +246,112 @@ describe('HttpClient', () => {
 
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.delete(new URL('http://localhost:1234/test'))).rejects.toThrow();
+            await expect(client.delete(new URL('http://localhost:1234/test'))).rejects.toThrow();
         });
     });
 
     describe('checkUrlExist', () => {
-        let socket: Mocked<net.Socket>;
-
-        beforeEach(() => {
-            socket = createSpyObj<net.Socket>(['setTimeout', 'on', 'end', 'destroy', 'timeout']);
-        });
-
         it('validates a connection', async () => {
-            socket.on.mockImplementation((event, listener) => {
-                if ((event as string) === 'end') {
-                    setTimeout(() => (listener as () => void)());
-                }
-
-                return socket;
-            });
-
-            vi.spyOn(net, 'createConnection').mockReturnValue(socket);
-            await expect(server.checkUrlExist('http://localhost:1234')).resolves.toBeUndefined();
+            const response = createSpyObj<Response>([], { ok: true });
+            const mock = vi.spyOn(global, 'fetch').mockResolvedValue(response);
+            const headers = { Authorization: 'Bearer token' };
+            await expect(client.checkUrlExist('http://localhost:9876', headers)).resolves.toBe(void 0);
+            expect(mock).toHaveBeenCalledWith(
+                'http://localhost:9876',
+                expect.objectContaining({ method: 'HEAD', headers }),
+            );
         });
 
-        it('throws an error if a connection does not exist', async () => {
-            socket.on.mockImplementation((event, listener) => {
-                if (event === 'timeout') {
-                    setTimeout(() => (listener as () => void)());
-                }
-
-                return socket;
+        it('preserves an HTTP response error', async () => {
+            const response = createSpyObj<Response>(['text'], { ok: false, status: 401 });
+            response.text.mockResolvedValue('Unauthorized');
+            const mock = vi.spyOn(global, 'fetch').mockResolvedValue(response);
+            await expect(client.checkUrlExist('http://localhost:9876')).rejects.toMatchObject({
+                message: 'Unauthorized',
+                statusCode: 401,
             });
 
-            vi.spyOn(net, 'createConnection').mockReturnValue(socket);
-            await expect(server.checkUrlExist('http://localhost:9876')).rejects.toThrow();
+            expect(mock).toHaveBeenCalledWith('http://localhost:9876', expect.objectContaining({ method: 'HEAD' }));
         });
     });
 
     describe('post', () => {
         it('should resolve with response text when response is ok', async () => {
-            const mockResponse = {
+            const mockResponse = createSpyObj<Response>(['text'], {
                 ok: true,
                 status: 201,
                 statusText: 'Created',
-                text: vi.fn().mockResolvedValue('success'),
-            } as unknown as Response;
+                body: createSpyObj<ReadableStream>([]),
+                headers: new Headers(),
+            });
 
-            const spy = vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
-
-            const result = await server.post(
+            mockResponse.text.mockResolvedValue('success');
+            const mock = vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
+            const result = await client.post(
                 new URL('http://localhost:1234/test'),
                 { foo: 'bar' },
                 { 'X-Test': 'yes' },
             );
+
             expect(result).toBe('success');
-            expect(spy).toHaveBeenCalledWith('http://localhost:1234/test', {
-                method: 'POST',
-                headers: {
-                    'X-Test': 'yes',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ foo: 'bar' }),
-            });
+            expect(mock).toHaveBeenCalledWith(
+                'http://localhost:1234/test',
+                expect.objectContaining({
+                    method: 'POST',
+                    headers: {
+                        'X-Test': 'yes',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ foo: 'bar' }),
+                }),
+            );
+
             expect(mockResponse.text).toHaveBeenCalled();
         });
 
         it('should throw error when response is not ok', async () => {
-            const mockResponse = {
+            const mockResponse = createSpyObj<Response>(['text'], {
                 ok: false,
-                status: 400,
-                statusText: 'Bad Request',
-                text: vi.fn(),
-            } as unknown as Response;
+                status: 201,
+                statusText: 'Created',
+                body: null,
+                headers: new Headers(),
+            });
 
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
+            await expect(client.post(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow();
+        });
 
-            await expect(server.post(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow();
+        it('does not retry a failed POST request', async () => {
+            const mockResponse = createSpyObj<Response>(['text'], {
+                ok: false,
+                status: 503,
+                headers: new Headers(),
+                body: null,
+            });
+
+            mockResponse.text.mockResolvedValue('Service unavailable');
+            const fetch = vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
+
+            await expect(client.post(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow(
+                'Service unavailable',
+            );
+            expect(fetch).toHaveBeenCalledTimes(1);
         });
 
         it('should throw if response.text throws', async () => {
-            const mockResponse = {
+            const mockResponse = createSpyObj<Response>(['text'], {
                 ok: true,
                 status: 200,
                 statusText: 'OK',
-                text: vi.fn().mockRejectedValue(new Error('Text parse error')),
-            } as unknown as Response;
+                headers: new Headers(),
+                body: createSpyObj<ReadableStream>([]),
+            });
 
+            mockResponse.text.mockRejectedValue(new Error('Text parse error'));
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
-            await expect(server.post(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow(
+            await expect(client.post(new URL('http://localhost:1234/test'), { foo: 'bar' })).rejects.toThrow(
                 'Text parse error',
             );
         });
@@ -288,37 +359,63 @@ describe('HttpClient', () => {
 
     describe('postFormData', () => {
         it('should resolve when response is ok', async () => {
-            const mockResponse = {
+            const mockResponse = createSpyObj<Response>(['text'], {
                 ok: true,
                 status: 200,
                 statusText: 'OK',
-            } as unknown as Response;
+                body: createSpyObj<ReadableStream>([]),
+                headers: new Headers(),
+            });
 
             const formData = {} as FormData;
             const spy = vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
 
             await expect(
-                server.postFormData(new URL('http://localhost:1234/test'), formData, { 'X-Test': 'yes' }),
+                client.postFormData(new URL('http://localhost:1234/test'), formData, { 'X-Test': 'yes' }),
             ).resolves.toBeUndefined();
 
-            expect(spy).toHaveBeenCalledWith('http://localhost:1234/test', {
-                method: 'POST',
-                headers: { 'X-Test': 'yes' },
-                body: formData,
+            expect(spy).toHaveBeenCalledWith(
+                'http://localhost:1234/test',
+                expect.objectContaining({
+                    method: 'POST',
+                    headers: { 'X-Test': 'yes' },
+                    body: formData,
+                }),
+            );
+        });
+
+        it('returns a typed JSON response for a structured JSON media type', async () => {
+            const mockResponse = createSpyObj<Response>(['json'], {
+                ok: true,
+                status: 200,
+                body: createSpyObj<ReadableStream>([]),
+                headers: new Headers([['content-type', 'application/vnd.aas+json']]),
             });
+            const expected = { id: 'package-1' };
+            mockResponse.json.mockResolvedValue(expected);
+            vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
+
+            const result: { id: string } = await client.postFormData<{ id: string }>(
+                new URL('http://localhost:1234/test'),
+                {} as FormData,
+            );
+
+            expect(result).toEqual(expected);
+            expect(mockResponse.json).toHaveBeenCalledOnce();
         });
 
         it('should throw error when response is not ok', async () => {
-            const mockResponse = {
+            const mockResponse = createSpyObj<Response>(['text'], {
                 ok: false,
                 status: 400,
                 statusText: 'Bad Request',
-            } as unknown as Response;
+                headers: new Headers(),
+                body: null,
+            });
 
             const formData = {} as FormData;
             vi.spyOn(global, 'fetch').mockResolvedValue(mockResponse);
-
-            await expect(server.postFormData(new URL('http://localhost:1234/test'), formData)).rejects.toThrow();
+            await expect(client.postFormData(new URL('http://localhost:1234/test'), formData)).rejects.toThrow();
         });
     });
 });

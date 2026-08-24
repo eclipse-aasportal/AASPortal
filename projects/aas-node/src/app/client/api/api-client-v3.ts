@@ -253,12 +253,10 @@ export class ApiClientV3 extends ApiClient {
             request.inoutputVariables = structuredClone(operation.inoutputVariables);
         }
 
-        const result: OperationResult = JSON.parse(
-            await this.http.post(
-                this.resolve(`submodels/${smId}/submodel-elements/${idShortPath}/invoke`),
-                request,
-                this.auth,
-            ),
+        const result: OperationResult = await this.http.post(
+            this.resolve(`submodels/${smId}/submodel-elements/${idShortPath}/invoke`),
+            request,
+            this.auth,
         );
 
         if (!result.success) {
@@ -345,8 +343,8 @@ export class ApiClientV3 extends ApiClient {
         await this.http.put(this.resolve(`shells/${aasId}`), new JsonWriterV3().convert(shell), this.auth);
     }
 
-    private async postShell(shell: aas.AssetAdministrationShell): Promise<string> {
-        return await this.http.post(this.resolve(`shells`), new JsonWriterV3().convert(shell), this.auth);
+    private postShell(shell: aas.AssetAdministrationShell): Promise<void> {
+        return this.http.post(this.resolve(`shells`), new JsonWriterV3().convert(shell), this.auth);
     }
 
     private async hasSubmodel(submodel: aas.Submodel): Promise<boolean> {

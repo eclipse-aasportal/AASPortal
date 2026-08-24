@@ -49,7 +49,7 @@ export abstract class ApiClient extends EndpointClient {
 
     public override async test(): Promise<void> {
         if (this.reentry === 0) {
-            await this.http.checkUrlExist(this.endpoint.url);
+            await this.http.checkUrlExist(this.endpoint.url, this.auth);
         }
     }
 
@@ -89,7 +89,7 @@ export abstract class ApiClient extends EndpointClient {
      * @returns The current value.
      */
     public async readValue(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
-        const property = await this.http.getLiveData<PropertyValue>(new URL(url), this.auth);
+        const property = await this.http.get<PropertyValue>(new URL(url), this.auth);
         return convertFromString(property.value, valueType);
     }
 
