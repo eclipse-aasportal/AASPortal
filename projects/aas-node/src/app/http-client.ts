@@ -6,18 +6,16 @@
  *
  *****************************************************************************/
 
-import net from 'net';
 import { Readable } from 'stream';
-import { inject, singleton } from 'tsyringe';
+import { singleton } from 'tsyringe';
 import { ApplicationError } from 'aas-core';
-import { HttpCache } from './http-cache.js';
 
 /**
  * A simple HTTP client for making requests to servers.
  */
 @singleton()
 export class HttpClient {
-    public constructor(@inject(HttpCache) private readonly cache: HttpCache) {}
+    private readonly DEFAULT_TIMEOUT_MS = 5000;
 
     /**
      * Gets a JSON value of type `T` from a server.
@@ -27,37 +25,9 @@ export class HttpClient {
      * @returns The requested object.
      */
     public async get<T = unknown>(url: URL, headers?: Record<string, string>): Promise<T> {
-        const href = url.href;
-        let value = this.cache.get(href);
-        if (value !== undefined) {
-            return value as T;
-        }
-
-        const response = await fetch(href, { method: 'GET', headers });
-        if (!response.ok) {
-            const message = await response.text().catch(() => 'GET request failed');
-            throw new ApplicationError(message, {}, response.status);
-        }
-
-        value = await response.json();
-        this.cache.set(href, value);
-        return value as T;
-    }
-
-    /**
-     * Gets a JSON value of type `T` from a server (no cache, no logging).
-     * @param url The URL to send the GET request to.
-     * @param headers The additional outgoing http headers.
-     * @returns The requested value.
-     */
-    public async getLiveData<T = unknown>(url: URL, headers?: Record<string, string>): Promise<T> {
-        const response = await fetch(url.href, { method: 'GET', headers });
-        if (!response.ok) {
-            const message = await response.text().catch(() => 'GET live request failed');
-            throw new ApplicationError(message, {}, response.status);
-        }
-
-        return (await response.json()) as T;
+        const response = await this.retryableRequest(() => this.fetchWithTimeout(url.href, { method: 'GET', headers }));
+        await this.handleResponse(response, 'GET');
+        return this.parseJson(response);
     }
 
     /**
@@ -68,15 +38,11 @@ export class HttpClient {
      * @throws If the response status is not OK (status code outside the 200–299 range).
      */
     public async getReadable(url: URL, headers?: Record<string, string>): Promise<NodeJS.ReadableStream> {
-        const response = await fetch(url.href, { method: 'GET', headers });
-        if (!response.ok) {
-            const message = await response.text().catch(() => 'GET request failed');
-            throw new ApplicationError(message, {}, response.status);
-        }
+        const response = await this.retryableRequest(() => this.fetchWithTimeout(url.href, { method: 'GET', headers }));
+        await this.handleResponse(response, 'GET');
 
         if (!response.body) {
-            const message = await response.text().catch(() => 'GET readable failed');
-            throw new ApplicationError(message, {}, 400);
+            throw new ApplicationError('Response body missing.', {}, 400);
         }
 
         return Readable.fromWeb(response.body);
@@ -86,68 +52,47 @@ export class HttpClient {
      * Sends a PUT request with a JSON payload to the specified URL.
      *
      * @param url - The target URL to which the PUT request will be sent.
-     * @param obj - The object to be serialized as JSON and sent in the request body.
+     * @param data - The object to be serialized as JSON and sent in the request body.
      * @param headers - Optional additional headers to include in the request.
-     * @returns A promise that resolves to the response body as a string.
      * @throws {Error} If the HTTP response status is not OK (status code outside the range 200-299).
      */
-    public async put(url: URL, obj: object, headers?: Record<string, string>): Promise<void> {
-        const response = await fetch(url.href, {
-            method: 'PUT',
-            headers: {
-                ...headers,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(obj),
-        });
+    public async put<T = unknown>(url: URL, data: unknown, headers?: Record<string, string>): Promise<T> {
+        const response = await this.retryableRequest(() =>
+            this.fetchWithTimeout(url.href, {
+                method: 'PUT',
+                headers: {
+                    ...headers,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            }),
+        );
 
-        if (!response.ok) {
-            const message = await response.text().catch(() => 'PUT request failed');
-            throw new ApplicationError(message, {}, response.status);
-        }
-    }
-
-    /**
-     * Deletes an object.
-     * @param url The URL of the object to delete.
-     * @param headers Additional outgoing http headers.
-     */
-    public async delete(url: URL, headers?: Record<string, string>): Promise<void> {
-        const response = await fetch(url.href, {
-            method: 'DELETE',
-            headers,
-        });
-
-        if (!response.ok) {
-            const message = await response.text().catch(() => 'DELETE request failed');
-            throw new ApplicationError(message, {}, response.status);
-        }
+        await this.handleResponse(response, 'PUT');
+        return this.parseBody(response) as T;
     }
 
     /**
      * Sends a POST request with a JSON payload to the specified URL.
      * @param url - The target URL to which the POST request will be sent.
-     * @param obj - The object to be serialized as JSON and sent in the request body.
+     * @param data - The object to be serialized as JSON and sent in the request body.
      * @param headers - Optional additional headers to include in the request.
-     * @returns A promise that resolves to the response body as a string.
      * @throws {Error} If the HTTP response status is not OK (status code outside the range 200-299).
      */
-    public async post(url: URL, obj: object, headers?: Record<string, string>): Promise<string> {
-        const response = await fetch(url.href, {
-            method: 'POST',
-            headers: {
-                ...headers,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(obj),
-        });
+    public async post<T = unknown>(url: URL, data: unknown, headers?: Record<string, string>): Promise<T> {
+        const response = await this.retryableRequest(() =>
+            this.fetchWithTimeout(url.href, {
+                method: 'POST',
+                headers: {
+                    ...headers,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            }),
+        );
 
-        if (!response.ok) {
-            const message = await response.text().catch(() => 'POST request failed');
-            throw new ApplicationError(message, {}, response.status);
-        }
-
-        return await response.text();
+        await this.handleResponse(response, 'POST');
+        return this.parseBody(response) as T;
     }
 
     /**
@@ -158,49 +103,144 @@ export class HttpClient {
      * @returns A promise that resolves when the request completes successfully.
      * @throws {Error} If the response status is not OK (i.e., not in the 2xx range).
      */
-    public async postFormData(url: URL, formData: FormData, headers?: Record<string, string>): Promise<void> {
-        const response = await fetch(url.href, {
-            method: 'POST',
-            headers,
-            body: formData,
-        });
+    public async postFormData<T = unknown>(
+        url: URL,
+        formData: FormData,
+        headers?: Record<string, string>,
+    ): Promise<unknown> {
+        const response = await this.retryableRequest(() =>
+            this.fetchWithTimeout(url.href, {
+                method: 'POST',
+                headers,
+                body: formData,
+            }),
+        );
 
-        if (!response.ok) {
-            const message = await response.text().catch(() => 'POST request failed');
-            throw new ApplicationError(message, {}, response.status);
-        }
+        await this.handleResponse(response, 'POST');
+        return this.parseBody(response) as T;
+    }
+
+    /**
+     * Deletes an object.
+     * @param url The URL of the object to delete.
+     * @param headers Additional outgoing http headers.
+     */
+    public async delete(url: URL, headers?: Record<string, string>): Promise<void> {
+        const response = await this.retryableRequest(() =>
+            this.fetchWithTimeout(url.href, {
+                method: 'DELETE',
+                headers,
+            }),
+        );
+
+        await this.handleResponse(response, 'DELETE');
     }
 
     /**
      * Checks the connection to an endpoint with the specified URL.
      * @param url The current URL.
      */
-    public checkUrlExist(url: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    public async checkUrlExist(url: string, timeoutMs: number = 5000): Promise<void> {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+            const response = await fetch(url, {
+                method: 'HEAD',
+                signal: controller.signal,
+            });
+
+            await this.handleResponse(response, 'HEAD');
+        } catch (error) {
+            throw new ApplicationError(
+                `Failed to connect to ${url}: ${error instanceof Error ? error.message : String(error)}`,
+                {},
+                503,
+            );
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    private async retryableRequest(
+        fn: () => Promise<Response>,
+        maxRetries = 3,
+        backoffMs = 1000,
+        retryableStatuses = [408, 429, 500, 502, 503, 504],
+    ): Promise<Response> {
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
-                const temp = new URL(url);
-                const port = Number(temp.port ? temp.port : temp.protocol === 'http:' ? 80 : 443);
-                const socket = net.createConnection(port, temp.hostname);
-                socket.setTimeout(3000);
-                socket
-                    .on('connect', () => {
-                        socket.end();
-                    })
-                    .on('end', () => {
-                        socket.destroy();
-                        resolve();
-                    })
-                    .on('timeout', () => {
-                        socket.destroy();
-                        reject(new Error(`${url} does not exist.`));
-                    })
-                    .on('error', () => {
-                        socket.destroy();
-                        reject(new Error(`${url} does not exist.`));
-                    });
+                const response = await fn();
+                const shouldRetry = retryableStatuses.includes(response.status) && attempt < maxRetries - 1;
+                if (shouldRetry) {
+                    await new Promise(r => setTimeout(r, backoffMs * Math.pow(2, attempt)));
+                    continue;
+                }
+
+                return response;
             } catch (error) {
-                reject(error);
+                if (attempt === maxRetries - 1) {
+                    throw error;
+                }
+
+                await new Promise(r => setTimeout(r, backoffMs * Math.pow(2, attempt)));
             }
-        });
+        }
+
+        throw new Error('Max retries exceeded');
+    }
+
+    private async fetchWithTimeout(
+        url: string,
+        options: RequestInit,
+        timeoutMs = this.DEFAULT_TIMEOUT_MS,
+    ): Promise<Response> {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+            return await fetch(url, { ...options, signal: controller.signal });
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    private async handleResponse(response: Response, method: string): Promise<void> {
+        if (!response.ok) {
+            const message = await response.text().catch(() => `${method} request failed`);
+            throw new ApplicationError(message, {}, response.status);
+        }
+    }
+
+    private async parseJson<T>(response: Response): Promise<T> {
+        const contentType = response.headers.get('content-type');
+        if (!contentType?.includes('application/json')) {
+            const body = await response.text();
+            throw new ApplicationError(
+                `Expected JSON but got ${contentType}. Response: ${body.substring(0, 200)}`,
+                {},
+                400,
+            );
+        }
+
+        try {
+            return (await response.json()) as T;
+        } catch (error) {
+            throw new ApplicationError(`Failed to parse JSON: ${error}`, {}, 400);
+        }
+    }
+
+    private async parseBody(response: Response): Promise<unknown> {
+        if (!response.body) {
+            return;
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.startsWith('application/json')) {
+            return await response.json();
+        }
+
+        // If not JSON, return the raw text
+        return await response.text();
     }
 }

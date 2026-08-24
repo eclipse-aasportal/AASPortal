@@ -97,7 +97,7 @@ describe('ApiClientV3', () => {
                 success: true,
             };
 
-            http.post.mockResolvedValue(JSON.stringify(result));
+            http.post.mockResolvedValue(result);
 
             const operation: aas.Operation = {
                 idShort: 'noop',
@@ -117,7 +117,7 @@ describe('ApiClientV3', () => {
                 success: false,
             };
 
-            http.post.mockResolvedValue(JSON.stringify(result));
+            http.post.mockResolvedValue(result);
 
             const operation: aas.Operation = {
                 idShort: 'noop',

@@ -89,7 +89,7 @@ export abstract class ApiClient extends EndpointClient {
      * @returns The current value.
      */
     public async readValue(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
-        const property = await this.http.getLiveData<PropertyValue>(new URL(url), this.auth);
+        const property = await this.http.get<PropertyValue>(new URL(url), this.auth);
         return convertFromString(property.value, valueType);
     }
 
