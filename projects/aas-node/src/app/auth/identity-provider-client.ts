@@ -30,6 +30,7 @@ export abstract class IdentityProviderClient {
     protected constructor(
         protected readonly logger: Logger,
         protected readonly cookies: CookieStorage,
+        protected readonly clientId: string,
     ) {}
 
     /**
@@ -116,7 +117,9 @@ export abstract class IdentityProviderClient {
                         id: userId,
                         name: String(payload.name),
                         role: 'editor',
-                        endpoints,
+                        client_id: this.clientId,
+                        session_state: req.session.session_state,
+                        check_session_iframe: req.session.check_session_iframe,
                     };
                 } catch (error) {
                     if (error.name !== 'TokenExpiredError' || !refresh_token) {
@@ -128,7 +131,12 @@ export abstract class IdentityProviderClient {
                         const tokenData = await this.refreshToken(refresh_token);
                         req.session.access_token = tokenData.access_token;
                         req.session.refresh_token = tokenData.refresh_token;
-                        req.user = tokenData.user;
+                        req.user = {
+                            ...tokenData.user,
+                            client_id: this.clientId,
+                            session_state: req.session.session_state,
+                            check_session_iframe: req.session.check_session_iframe,
+                        };
                     } catch (error) {
                         noop(error);
                         this.destroySession(req.session);
@@ -140,7 +148,12 @@ export abstract class IdentityProviderClient {
                     const tokenData = await this.refreshToken(refresh_token);
                     req.session.access_token = tokenData.access_token;
                     req.session.refresh_token = tokenData.refresh_token;
-                    req.user = tokenData.user;
+                    req.user = {
+                        ...tokenData.user,
+                        client_id: this.clientId,
+                        session_state: req.session.session_state,
+                        check_session_iframe: req.session.check_session_iframe,
+                    };
                 } catch (error) {
                     noop(error);
                     this.destroySession(req.session);

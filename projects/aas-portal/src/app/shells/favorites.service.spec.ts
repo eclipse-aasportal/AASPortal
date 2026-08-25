@@ -11,7 +11,7 @@ import { ApplicationRef, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { lastValueFrom, of } from 'rxjs';
 import { AuthService, CookieService } from 'aas-lib';
-import { AASDocument, User } from 'aas-core';
+import { AASDocument, SessionUser } from 'aas-core';
 import { FavoritesList, FavoritesService, FavoritesState } from './favorites.service';
 import { createSpyObj } from '../../test/mocks';
 
@@ -21,7 +21,7 @@ describe('FavoritesService', () => {
     let auth: Mocked<AuthService>;
     let app: ApplicationRef;
 
-    const user = signal<User | null>(null);
+    const user = signal<SessionUser | null>(null);
     const favorite: AASDocument = {
         address: 'http://localhost/aas',
         idShort: 'AAS',

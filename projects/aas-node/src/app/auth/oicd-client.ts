@@ -55,7 +55,6 @@ export interface TokenEndpointResponse {
 export class OicdClient extends IdentityProviderClient {
     private configuration?: AuthorizationServer;
     private readonly server: string;
-    private readonly clientId: string;
     private readonly clientSecret: string;
     private readonly secure = process.env.NODE_ENV === 'production';
     private jwksClient?: JwksClient;
@@ -65,10 +64,9 @@ export class OicdClient extends IdentityProviderClient {
         @inject(COOKIE_STORE) cookies: CookieStorage,
         @inject(Variable) private readonly variable: Variable,
     ) {
-        super(logger, cookies);
+        super(logger, cookies, variable.CLIENT_ID);
 
         this.server = this.variable.IDENTITY_PROVIDER;
-        this.clientId = this.variable.CLIENT_ID;
         this.clientSecret = this.variable.CLIENT_SECRET;
         this.logger.info(`Using OIDC Client '${this.server}'`);
     }

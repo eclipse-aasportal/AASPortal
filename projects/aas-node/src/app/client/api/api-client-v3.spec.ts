@@ -26,7 +26,7 @@ describe('ApiClientV3', () => {
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         index = createSpyObj<AASIndexClient>(['getConceptDescriptionRefs']);
-        http = createSpyObj<HttpClient>(['get', 'getLiveData', 'getReadable', 'post', 'postFormData', 'put', 'delete']);
+        http = createSpyObj<HttpClient>(['get', 'getReadable', 'post', 'postFormData', 'put', 'delete']);
         client = new ApiClientV3(
             logger,
             index,

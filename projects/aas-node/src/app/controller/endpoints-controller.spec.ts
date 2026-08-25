@@ -13,7 +13,7 @@ import { describe, beforeEach, it, expect, Mocked, vi, afterEach } from 'vitest'
 import express, { Express, json, urlencoded } from 'express';
 import request from 'supertest';
 import multer from 'multer';
-import { AASEndpoint, UpdateIndexStatus, EndpointAuth } from 'aas-core';
+import { AASEndpoint, UpdateIndexStatus, AASEndpointAuth } from 'aas-core';
 
 import { createSpyObj } from '../../test/mocks.js';
 import { RegisterRoutes } from '../routes/routes.js';
@@ -55,7 +55,7 @@ describe('EndpointsController', () => {
         app.use(urlencoded({ extended: true }));
         app.set('trust proxy', 1);
         app.use((req, res, next) => {
-            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'editor' };
+            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'client-123' };
             next();
         });
 
@@ -149,7 +149,7 @@ describe('EndpointsController', () => {
     });
 
     it('GET: /api/v1/endpoints/auth', async () => {
-        const endpointAuth: EndpointAuth = {
+        const endpointAuth: AASEndpointAuth = {
             name: 'Samples',
             headers: { key: 'value' },
         };
@@ -168,7 +168,7 @@ describe('EndpointsController', () => {
     });
 
     it('PATCH: /api/v1/endpoints/auth', async () => {
-        const endpointAuth: EndpointAuth = {
+        const endpointAuth: AASEndpointAuth = {
             name: 'Samples',
             headers: { key: '*****' },
         };

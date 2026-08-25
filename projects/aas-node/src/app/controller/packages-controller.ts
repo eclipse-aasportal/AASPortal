@@ -35,7 +35,7 @@ export class PackagesController extends Controller {
         @Path() id: string,
         @Request() req: express.Request,
     ): Promise<NodeJS.ReadableStream> {
-        const headers = req.user?.endpoints?.find(item => item.name === endpoint)?.headers;
+        const headers = req.session?.endpoints?.find(item => item.name === endpoint)?.headers;
         return await this.service.getPackage(decodeBase64Url(endpoint), decodeBase64Url(id), headers);
     }
 
@@ -52,7 +52,7 @@ export class PackagesController extends Controller {
         @UploadedFile() file: Express.Multer.File,
         @Request() req: express.Request,
     ): Promise<void> {
-        const headers = req.user?.endpoints?.find(item => item.name === endpoint)?.headers;
+        const headers = req.session?.endpoints?.find(item => item.name === endpoint)?.headers;
         await this.service.insertPackages(decodeBase64Url(endpoint), file, headers);
     }
 
@@ -69,7 +69,7 @@ export class PackagesController extends Controller {
         @Path() id: string,
         @Request() req: express.Request,
     ): Promise<void> {
-        const headers = req.user?.endpoints?.find(item => item.name === endpoint)?.headers;
+        const headers = req.session?.endpoints?.find(item => item.name === endpoint)?.headers;
         await this.service.deletePackage(decodeBase64Url(endpoint), decodeBase64Url(id), headers);
     }
 }

@@ -13,7 +13,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { AASEndpoint, EndpointAuth } from 'aas-core';
+import { AASEndpoint, AASEndpointAuth } from 'aas-core';
 import { EndpointAuthForm } from './endpoint-auth-form';
 import { createSpyObj, FakeLoader } from '../../../../test/mocks';
 import { FormError } from '../../../shared/components/form-error/form-error';
@@ -67,7 +67,7 @@ describe('EndpointAuthForm', () => {
                 name: 'Endpoint B',
                 headers: {},
             },
-        ] satisfies EndpointAuth[]);
+        ] satisfies AASEndpointAuth[]);
 
         httpController.expectOne('/api/v1/endpoints').flush([
             {
@@ -145,7 +145,7 @@ describe('EndpointAuthForm', () => {
                 name: 'Endpoint B',
                 headers: { Authorization: 'Bearer a-bearer-token' },
             },
-        ] satisfies EndpointAuth[]);
+        ] satisfies AASEndpointAuth[]);
     });
 
     it('should auth Endpoint B via API Key', () => {
@@ -182,7 +182,7 @@ describe('EndpointAuthForm', () => {
                 name: 'Endpoint B',
                 headers: { 'X-API-KEY': 'an-api-key' },
             },
-        ] satisfies EndpointAuth[]);
+        ] satisfies AASEndpointAuth[]);
     });
 
     it('should remove auth form Endpoint A', () => {
@@ -197,6 +197,6 @@ describe('EndpointAuthForm', () => {
                 name: 'Endpoint A',
                 headers: {},
             },
-        ] satisfies EndpointAuth[]);
+        ] satisfies AASEndpointAuth[]);
     });
 });

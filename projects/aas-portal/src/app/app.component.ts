@@ -6,7 +6,8 @@
  *
  *****************************************************************************/
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { SessionCheck } from 'aas-lib';
 import { MainComponent } from './main/main.component';
 
 @Component({
@@ -15,4 +16,6 @@ import { MainComponent } from './main/main.component';
     styleUrls: ['./app.component.scss'],
     imports: [MainComponent],
 })
-export class AppComponent {}
+export class AppComponent {
+    private readonly sessionCheck = inject(SessionCheck);
+}

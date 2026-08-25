@@ -48,7 +48,7 @@ export abstract class IdentityProvider extends IdentityProviderClient {
         cookies: CookieStorage,
         protected readonly variable: Variable,
     ) {
-        super(logger, cookies);
+        super(logger, cookies, variable.CLIENT_ID);
 
         this.algorithm = 'HS256';
     }

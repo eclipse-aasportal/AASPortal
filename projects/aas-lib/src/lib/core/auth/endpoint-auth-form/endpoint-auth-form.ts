@@ -11,7 +11,7 @@ import { Component, computed, effect, inject, signal, untracked } from '@angular
 import { form, FormField, required, SchemaPathTree, applyEach } from '@angular/forms/signals';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
-import { AASEndpoint, EndpointAuth } from 'aas-core';
+import { AASEndpoint, AASEndpointAuth } from 'aas-core';
 import { FormError } from '../../../shared/components/form-error/form-error';
 
 type AuthorizationType = 'EndpointAuthForm.NO_AUTH' | 'EndpointAuthForm.API_KEY' | 'EndpointAuthForm.BEARER_TOKEN';
@@ -61,8 +61,8 @@ export class EndpointAuthForm {
     private readonly modal = inject(NgbActiveModal);
     private readonly model = signal<EndpointAuthModel>(initialState);
 
-    private readonly endpointAuthItems = httpResource<EndpointAuth[]>(() => '/api/v1/endpoints/auth', {
-        defaultValue: [] as EndpointAuth[],
+    private readonly endpointAuthItems = httpResource<AASEndpointAuth[]>(() => '/api/v1/endpoints/auth', {
+        defaultValue: [] as AASEndpointAuth[],
     });
 
     private readonly endpoints = httpResource<string[]>(() => '/api/v1/endpoints', {
@@ -215,7 +215,7 @@ export class EndpointAuthForm {
         return errors;
     }
 
-    private toEndpointAuth(item: EndpointAuthItem): EndpointAuth {
+    private toEndpointAuth(item: EndpointAuthItem): AASEndpointAuth {
         const headers: Record<string, string> = {};
         if (item.authorization === 'EndpointAuthForm.API_KEY') {
             headers[item.key] = item.value;

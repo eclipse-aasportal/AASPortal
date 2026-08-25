@@ -14,7 +14,7 @@ import { lastValueFrom, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 
-import { User } from 'aas-core';
+import { SessionUser } from 'aas-core';
 import { WINDOW } from '../../shared/services/window.service';
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
@@ -80,10 +80,11 @@ describe('AuthService', () => {
 
     describe('login', () => {
         it('should perform login and update user state', async () => {
-            const mockUser: User = {
+            const mockUser: SessionUser = {
                 id: 'john.dow@email.com',
                 name: 'John Dow',
                 role: 'editor',
+                client_id: 'client-123',
             };
 
             http.post.mockReturnValue(of(mockUser));

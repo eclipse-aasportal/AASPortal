@@ -6,18 +6,12 @@
  *
  *****************************************************************************/
 
-import { UserRole, EndpointAuth } from 'aas-core';
-import { aasV2 } from 'aas-package';
+import { AASEndpointAuth, SessionUser } from 'aas-core';
 
 /** Extend Express Request type to include 'user' */
 declare module 'express-serve-static-core' {
     interface Request {
-        user?: {
-            id: string;
-            name: string;
-            role: UserRole;
-            endpoints?: EndpointAuth[];
-        };
+        user?: SessionUser;
     }
 }
 
@@ -26,51 +20,11 @@ declare module 'express-session' {
         access_token?: string;
         refresh_token?: string;
         code_verifier?: string;
-        endpoints?: EndpointAuth[];
+        endpoints?: AASEndpointAuth[];
         session_state?: string;
         check_session_iframe?: string;
         state?: string;
     }
-}
-
-export interface AASRegistryModelType {
-    name: 'AssetAdministrationShellDescriptor' | 'Asset';
-}
-
-/** Defines the supported endpoint types. */
-export type EndpointType = 'file' | 'http' | 'opc';
-
-/** Represents an endpoint of an AAS resource. */
-export interface EndpointDescriptor {
-    address: string;
-    type: EndpointType;
-}
-
-/** The self-describing information of a network resource. */
-export interface AASRegistryDescriptor {
-    endpoints: EndpointDescriptor[];
-}
-
-/** Descriptor of a Submodel. */
-export interface SubmodelDescriptor extends AASRegistryDescriptor {
-    identification: aasV2.Identifier;
-    idShort: string;
-}
-
-/** Descriptor of an Asset. */
-export interface AssetDescriptor extends AASRegistryDescriptor {
-    modelType: AASRegistryModelType;
-    identification: aasV2.Identifier;
-    idShort: string;
-}
-
-/** Descriptor of an Asset Administration Shell */
-export interface AssetAdministrationShellDescriptor extends AASRegistryDescriptor {
-    modelType: AASRegistryModelType;
-    identification: aasV2.Identifier;
-    idShort: string;
-    asset: AssetDescriptor;
-    submodels: SubmodelDescriptor[];
 }
 
 /** The data sent to and from a worker thread. */

@@ -73,7 +73,7 @@ export class DocumentsController extends Controller {
             undefined,
             'AssetAdministrationShell',
             decodeBase64Url(id),
-            req.user?.endpoints,
+            req.session?.endpoints,
         );
     }
 
@@ -85,7 +85,7 @@ export class DocumentsController extends Controller {
     @Get('documents/assets/{id}')
     @OperationId('getDocumentByAsset')
     public async getDocumentByAsset(@Path() id: string, @Request() req: express.Request): Promise<AASDocument> {
-        return await this.provider.getDocument(undefined, 'Asset', decodeBase64Url(id), req.user?.endpoints);
+        return await this.provider.getDocument(undefined, 'Asset', decodeBase64Url(id), req.session?.endpoints);
     }
 
     /**
@@ -105,7 +105,7 @@ export class DocumentsController extends Controller {
         return await this.provider.getThumbnail(
             endpoint,
             decodeBase64Url(id),
-            req.user?.endpoints?.find(item => item.name === endpoint)?.headers,
+            req.session?.endpoints?.find(item => item.name === endpoint)?.headers,
         );
     }
 
@@ -127,7 +127,7 @@ export class DocumentsController extends Controller {
             endpoint,
             'AssetAdministrationShell',
             decodeBase64Url(id),
-            req.user?.endpoints ?? [],
+            req.session?.endpoints ?? [],
         );
     }
 
@@ -148,7 +148,7 @@ export class DocumentsController extends Controller {
             decodeBase64Url(endpoint),
             'Asset',
             decodeBase64Url(id),
-            req.user?.endpoints ?? [],
+            req.session?.endpoints ?? [],
         );
     }
 
@@ -176,7 +176,7 @@ export class DocumentsController extends Controller {
             decodeBase64Url(id),
             decodeBase64Url(smId),
             path,
-            req.user?.endpoints?.find(item => item.name === endpoint)?.headers,
+            req.session?.endpoints?.find(item => item.name === endpoint)?.headers,
             queryParams,
         );
     }
@@ -202,7 +202,7 @@ export class DocumentsController extends Controller {
             endpoint,
             decodeBase64Url(id),
             env,
-            req.user?.endpoints?.find(item => item.name === endpoint)?.headers,
+            req.session?.endpoints?.find(item => item.name === endpoint)?.headers,
         );
     }
 
@@ -227,7 +227,7 @@ export class DocumentsController extends Controller {
             endpoint,
             decodeBase64Url(id),
             operation,
-            req.user?.endpoints?.find(item => item.name === endpoint)?.headers,
+            req.session?.endpoints?.find(item => item.name === endpoint)?.headers,
         );
     }
 }

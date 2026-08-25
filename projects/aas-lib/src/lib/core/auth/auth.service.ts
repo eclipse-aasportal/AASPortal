@@ -11,7 +11,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { map, Observable, of, switchMap, take, throwError } from 'rxjs';
-import { UserProfile, UserRole, User, Credentials, EndpointAuth } from 'aas-core';
+import { UserProfile, UserRole, Credentials, AASEndpointAuth, SessionUser } from 'aas-core';
 import { DocumentCache } from '../../shared/services/document-cache';
 
 @Injectable({
@@ -22,10 +22,10 @@ export class AuthService {
     private readonly cache = inject(DocumentCache);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly document = inject(DOCUMENT);
-    private readonly _user = signal<User | null | undefined>(undefined);
+    private readonly _user = signal<SessionUser | null | undefined>(undefined);
 
     public constructor() {
-        this.http.get<User | null>('/api/me').subscribe({
+        this.http.get<SessionUser | null>('/api/me').subscribe({
             next: user => {
                 this._user.set(user);
                 this.cache.clear();
@@ -105,7 +105,7 @@ export class AuthService {
                 });
 
                 return this.http
-                    .post<User>(callback, credentials, { params: queryParams })
+                    .post<SessionUser>(callback, credentials, { params: queryParams })
                     .pipe(map(user => this._user.set(user)));
             }),
         );
@@ -138,7 +138,7 @@ export class AuthService {
      * @param profile The updated user profile.
      */
     public updateAccount(profile: UserProfile): Observable<void> {
-        return this.http.patch<User>('/api/accounts', profile).pipe(map(user => this._user.set(user)));
+        return this.http.patch<SessionUser>('/api/accounts', profile).pipe(map(user => this._user.set(user)));
     }
 
     /**
@@ -170,7 +170,7 @@ export class AuthService {
      * @param items The endpoint authentication items to update.
      * @returns An observable that completes when the update operation is successful.
      */
-    public updateEndpointAuth(items: EndpointAuth[]): Observable<void> {
+    public updateEndpointAuth(items: AASEndpointAuth[]): Observable<void> {
         return this.http.patch('/api/v1/endpoints/auth', items, { responseType: 'text' }).pipe(map(() => void 0));
     }
 }

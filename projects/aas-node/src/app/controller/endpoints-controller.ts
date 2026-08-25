@@ -24,7 +24,7 @@ import {
 } from 'tsoa';
 import express from 'express';
 
-import { UpdateIndexStatus, ApplicationError, EndpointAuth, type AASEndpoint } from 'aas-core';
+import { UpdateIndexStatus, ApplicationError, AASEndpointAuth, type AASEndpoint } from 'aas-core';
 import { decodeBase64Url } from 'aas-package';
 
 import { EndpointProvider } from '../provider/endpoint-provider.js';
@@ -163,7 +163,7 @@ export class EndpointsController extends Controller {
      */
     @Get('auth')
     @OperationId('GetAllEndpointAuth')
-    public async getAllEndpointAuth(@Request() req: express.Request): Promise<EndpointAuth[]> {
+    public async getAllEndpointAuth(@Request() req: express.Request): Promise<AASEndpointAuth[]> {
         const user = req.user;
         if (!user) {
             throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
@@ -190,7 +190,7 @@ export class EndpointsController extends Controller {
     @Patch('auth')
     @OperationId('UpdateEndpointAuthItems')
     public async updateEndpointAuthItems(
-        @Body() items: EndpointAuth[],
+        @Body() items: AASEndpointAuth[],
         @Request() req: express.Request,
     ): Promise<void> {
         const user = req.user;
