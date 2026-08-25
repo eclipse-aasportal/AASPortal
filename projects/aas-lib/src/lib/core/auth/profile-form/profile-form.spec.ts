@@ -13,7 +13,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { lastValueFrom, of } from 'rxjs';
 
-import { ApplicationError, User, UserProfile } from 'aas-core';
+import { ApplicationError, SessionUser, UserProfile } from 'aas-core';
 import { ProfileForm } from './profile-form';
 import { createSpyObj, FakeLoader } from '../../../../test/mocks';
 import { AuthService } from '../auth.service';
@@ -30,10 +30,11 @@ describe('ProfileForm', () => {
 
     beforeEach(async () => {
         auth = createSpyObj<AuthService>(['updateAccount', 'deleteAccount'], {
-            user: signal<User | null>({
+            user: signal<SessionUser | null>({
                 id: 'john.doe@email.com',
                 name: 'John',
                 role: 'editor',
+                client_id: 'client-123',
             }),
         });
 

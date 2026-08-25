@@ -19,6 +19,20 @@ export const USER_ROLES: Record<string, string> = {
     reader: 'reader',
 };
 
+/** JSON web token private claim. */
+export interface User {
+    id: string;
+    name: string;
+    role: UserRole;
+}
+
+/** User with additional session information. */
+export interface SessionUser extends User {
+    client_id: string;
+    session_state?: string;
+    check_session_iframe?: string;
+}
+
 /** The user profile. */
 export interface UserProfile {
     /** A valid e-mail address of the user. */
@@ -71,13 +85,6 @@ export function isCredentials(obj: unknown): obj is Credentials {
 /** Result of a login or profile update message. */
 export interface AuthResult {
     token: string;
-}
-
-/** JSON web token private claim. */
-export interface User {
-    id: string;
-    name: string;
-    role: UserRole;
 }
 
 /**

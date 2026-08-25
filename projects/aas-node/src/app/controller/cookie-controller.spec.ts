@@ -35,7 +35,7 @@ describe('CookieController', () => {
         app.use(text());
         app.use(urlencoded({ extended: true }));
         app.use((req, res, next) => {
-            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'editor' };
+            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'client-123' };
             next();
         });
 

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ApplicationError, EndpointAuth } from 'aas-core';
+import { ApplicationError, AASEndpointAuth } from 'aas-core';
 import { InjectionToken } from 'tsyringe';
 import { ERRORS } from '../errors.js';
 
@@ -48,9 +48,9 @@ export abstract class CookieStorage {
      * @param userId The user identification.
      * @returns The user specific authentication/authorization or an empty array if it does not exist.
      */
-    public async getEndpoints(userId: string): Promise<EndpointAuth[]> {
+    public async getEndpoints(userId: string): Promise<AASEndpointAuth[]> {
         const data = await this.getCookieData(userId, 'endpoints');
-        return data ? (JSON.parse(data) as EndpointAuth[]) : [];
+        return data ? (JSON.parse(data) as AASEndpointAuth[]) : [];
     }
 
     /**
@@ -58,7 +58,7 @@ export abstract class CookieStorage {
      * @param userId The user identification.
      * @param items The user specific authentication/authorization.
      */
-    public async updatesEndpoints(userId: string, items: EndpointAuth[]): Promise<void> {
+    public async updatesEndpoints(userId: string, items: AASEndpointAuth[]): Promise<void> {
         const endpoints = await this.getEndpoints(userId);
         for (const item of items) {
             const name = item.name;

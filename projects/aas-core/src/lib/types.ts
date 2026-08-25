@@ -86,7 +86,7 @@ export type UpdateIndexStatus = {
 );
 
 /** Authentication of a user for an AAS endpoint. */
-export interface EndpointAuth {
+export interface AASEndpointAuth {
     name: string;
     headers: Record<string, string>;
 }

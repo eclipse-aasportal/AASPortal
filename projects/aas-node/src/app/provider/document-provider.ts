@@ -16,7 +16,7 @@ import {
     isFile,
     isBlob,
     selectReferable,
-    EndpointAuth,
+    AASEndpointAuth,
     isLoadedEnvironment,
 } from 'aas-core';
 
@@ -45,7 +45,7 @@ export class DocumentProvider {
         endpoint: string | undefined,
         modelType: 'AssetAdministrationShell' | 'Asset',
         id: string,
-        auth: EndpointAuth[] = [],
+        auth: AASEndpointAuth[] = [],
     ): Promise<AASDocument> {
         const document = await this.index.find(endpoint, modelType, id);
         if (document) {

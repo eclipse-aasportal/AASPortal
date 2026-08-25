@@ -12,7 +12,7 @@ import { NgbDropdown, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/n
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { TranslateDirective } from '@ngx-translate/core';
-import { EndpointAuth } from 'aas-core';
+import { AASEndpointAuth } from 'aas-core';
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
 import { EndpointAuthForm } from './endpoint-auth-form/endpoint-auth-form';
@@ -45,7 +45,7 @@ export class AuthComponent {
             return this.auth.login();
         }
 
-        return from<Promise<EndpointAuth[]>>(
+        return from<Promise<AASEndpointAuth[]>>(
             this.modal.open(EndpointAuthForm, { backdrop: 'static', scrollable: true }).result,
         ).pipe(
             mergeMap(items =>
