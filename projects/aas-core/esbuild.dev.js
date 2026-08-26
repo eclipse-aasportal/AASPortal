@@ -15,7 +15,7 @@ await esbuild.build({
     bundle: true,
     platform: 'neutral',
     format: 'esm',
-    target: 'es2022',
+    target: 'es2024',
     tsconfig: 'tsconfig.lib.json',
     external: ['lodash-es'],
     minify: false,
