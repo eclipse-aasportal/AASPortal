@@ -7,6 +7,21 @@
  *****************************************************************************/
 
  .form-register {
-    width: 360px;
-    max-width: 360px;
+    width: 500px;
+    max-width: 500px;
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled {
+  --bs-btn-disabled-bg: var(--bs-secondary-bg);
+  --bs-btn-disabled-color: var(--bs-secondary-color);
+  --bs-btn-disabled-border-color: var(--bs-border-color);
+  --bs-btn-disabled-opacity: 1;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--bs-body-bg) inset;
+  -webkit-text-fill-color: var(--bs-body-color);
+  transition: background-color 9999s ease-in-out 0s;
 }
