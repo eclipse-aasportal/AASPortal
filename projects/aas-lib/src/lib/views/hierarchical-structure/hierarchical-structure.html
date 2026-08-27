@@ -8,6 +8,13 @@
 
 <div class="border border-black border-opacity-50 rounded-2 overflow-hidden d-grid diagram-card">
     <div class="position-relative border-end bg-white">
+        @if (loading()) {
+            <div class="position-absolute d-flex" style="top: 12px; right: 12px">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
         <svg
             [attr.viewBox]="viewBox()"
             width="100%"

@@ -9,7 +9,7 @@
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
-import { catchError, concatMap, map, of, Subject } from 'rxjs';
+import { catchError, concatMap, finalize, map, of, Subject } from 'rxjs';
 
 import {
     aas,
@@ -66,6 +66,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
     private readonly router = inject(Router);
     private readonly subject = new Subject<HierarchicalNode>();
     private readonly visited = new Set<string>();
+    private readonly pending = signal(0);
     private readonly vbWidth = 1200;
     private readonly vbHeight = 500;
 
@@ -114,6 +115,7 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
                     return this.api.getDocument('Asset', globalAssetId).pipe(
                         catchError(() => of(null)),
                         map(document => ({ document, item })),
+                        finalize(() => this.pending.update(n => n - 1)),
                     );
                 }),
             )
@@ -226,8 +228,15 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
      * @param item The loaded node.
      */
     protected loaded(item: HierarchicalNode): void {
+        if (item.id.globalAssetId && !item.options.document) {
+            this.pending.update(n => n + 1);
+        }
+
         this.subject.next(item);
     }
+
+    /** Whether any shell lookups triggered by {@link loaded} are still in flight. */
+    public readonly loading = computed(() => this.pending() > 0);
 
     /**
      * Not relevant.

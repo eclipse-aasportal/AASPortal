@@ -199,6 +199,9 @@ export class EndpointsController extends Controller {
         }
 
         await this.cookieStorage.updatesEndpoints(user.id, items);
+        if (req.session) {
+            req.session.endpoints = await this.cookieStorage.getEndpoints(user.id);
+        }
     }
 
     /**
