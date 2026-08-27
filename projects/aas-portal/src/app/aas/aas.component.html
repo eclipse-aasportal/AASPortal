@@ -100,6 +100,21 @@
                 }
             </div>
         </div>
+    } @else if (error() === 'permission') {
+        <div class="alert alert-warning text-center mt-2" role="alert">
+            <i class="bi bi-shield-lock me-2"></i>
+            <span translate="AAS.NO_PERMISSION"></span>
+            <div class="mt-2">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="openEndpointAuth().subscribe()"
+                    translate="AAS.ADD_API_KEY"
+                ></button>
+            </div>
+        </div>
+    } @else if (error() === 'other') {
+        <div class="alert alert-danger text-center mt-2" role="alert" translate="AAS.LOAD_FAILED"></div>
     } @else {
         <div class="alert alert-info text-center mt-2" role="alert" translate="AAS.EMPTY"></div>
     }

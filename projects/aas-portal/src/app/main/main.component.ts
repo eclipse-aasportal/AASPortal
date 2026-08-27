@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -27,6 +27,8 @@ import {
 } from 'aas-lib';
 
 import { environment } from '../../environments/environment';
+import { AASState } from '../aas/aas.state';
+import { ViewState } from '../view/view.state';
 
 /**
  * Minimal shape of the runtime configuration written into `window.__env__` by config.js. See
@@ -81,6 +83,8 @@ export class MainComponent {
     private readonly toolbar = inject(ToolbarService);
     private readonly indexChange = inject(IndexChange);
     private readonly http = inject(HttpClient);
+    private readonly aasState = inject(AASState);
+    private readonly viewState = inject(ViewState);
 
     public readonly toolbarTemplate = this.toolbar.toolbarTemplate;
 
@@ -107,6 +111,14 @@ export class MainComponent {
         { id: LinkId.DASHBOARD, name: 'Main.DASHBOARD', url: '/dashboard' },
         { id: LinkId.ABOUT, name: 'Main.ABOUT', url: '/about' },
     ]).asReadonly();
+
+    /** Whether the given nav link has no data behind it and should be disabled. */
+    public readonly isDisabled = computed(() => {
+        const noAAS = this.aasState.document() === null;
+        const noView = this.viewState.activeView() === null;
+        return (link: LinkDescriptor): boolean =>
+            (link.id === LinkId.AAS && noAAS) || (link.id === LinkId.VIEW && noView);
+    });
 
     public readonly languages = signal(['en-us', 'de-de']).asReadonly();
 

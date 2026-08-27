@@ -7,11 +7,12 @@
  *****************************************************************************/
 
 import { NgClass } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateDirective } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { EMPTY, map, Observable, first, combineLatest } from 'rxjs';
-import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { catchError, EMPTY, from, map, mergeMap, Observable, of, tap, first, combineLatest } from 'rxjs';
+import { NgbModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import {
     Component,
     DOCUMENT,
@@ -25,7 +26,7 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { aas } from 'aas-core';
+import { aas, AASEndpointAuth } from 'aas-core';
 import {
     decodeBase64Url,
     NotifyService,
@@ -33,6 +34,8 @@ import {
     ToolbarService,
     encodeBase64Url,
     EndpointsApi,
+    AuthService,
+    EndpointAuthForm,
     findRouteForShell,
     findRouteForSubmodel,
     VIEW_ROUTES,
@@ -67,6 +70,8 @@ export class AASComponent implements OnInit, OnDestroy {
     private readonly notify = inject(NotifyService);
     private readonly dashboard = inject(DashboardService);
     private readonly api = inject(EndpointsApi);
+    private readonly auth = inject(AuthService);
+    private readonly modal = inject(NgbModal);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly dom = inject(DOCUMENT);
@@ -98,6 +103,9 @@ export class AASComponent implements OnInit, OnDestroy {
     );
 
     public readonly document = this.state.document;
+
+    /** Set when the requested AAS failed to load, e.g. because of a missing/invalid endpoint API key. */
+    public readonly error = this.state.error;
 
     public getSubmodels(): aas.Submodel[] | undefined {
         return this.state.document()?.content?.submodels ?? [];
@@ -169,9 +177,51 @@ export class AASComponent implements OnInit, OnDestroy {
 
     private getDocument(id: string, endpoint?: string): void {
         this.api.getDocument('AssetAdministrationShell', id, endpoint).subscribe({
-            next: document => this.state.update({ document }),
-            error: error => console.debug(error),
+            next: document => this.state.update({ document, error: null }),
+            error: error => {
+                // Without resetting `document` here, this AAS-independent, root-provided state
+                // would keep showing whichever shell was last successfully loaded, silently
+                // hiding the fact that loading *this* one just failed.
+                console.debug(error);
+                const status = error instanceof HttpErrorResponse ? error.status : undefined;
+                this.state.update({
+                    document: null,
+                    error: status === 401 || status === 403 ? 'permission' : 'other',
+                });
+            },
         });
+    }
+
+    /**
+     * Opens the "endpoint authentication" dialog so the user can add/fix an API key, then retries
+     * loading the current AAS.
+     */
+    public openEndpointAuth(): Observable<void> {
+        if (!this.auth.isAuthenticated()) {
+            return this.auth.login();
+        }
+
+        return from<Promise<AASEndpointAuth[]>>(
+            this.modal.open(EndpointAuthForm, { backdrop: 'static', scrollable: true }).result,
+        ).pipe(
+            mergeMap(items =>
+                this.auth.updateEndpointAuth(items).pipe(
+                    tap(() => this.retry()),
+                    catchError(error => of(this.notify.error(error))),
+                ),
+            ),
+        );
+    }
+
+    /** Reloads the AAS for the route's current params, e.g. after the user just added an API key. */
+    private retry(): void {
+        const routeParams = this.route.snapshot.params;
+        const params = routeParams.id || routeParams.docs ? routeParams : this.route.snapshot.queryParams;
+        if (!params.id) {
+            return;
+        }
+
+        this.getDocument(decodeBase64Url(params.id), params.endpoint ? decodeBase64Url(params.endpoint) : undefined);
     }
 
     private versionToString(administration?: aas.AdministrativeInformation): string {

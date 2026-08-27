@@ -19,11 +19,11 @@
                 <div [ngbCollapse]="isMenuCollapsed()" class="collapse navbar-collapse">
                     <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto">
                         @for (link of links(); track link) {
-                            <li [ngbNavItem]="link.id" class="nav-item">
+                            <li [ngbNavItem]="link.id" [disabled]="isDisabled()(link)" class="nav-item">
                                 <a
                                     ngbNavLink
                                     class="nav-item"
-                                    [routerLink]="link.url"
+                                    [routerLink]="isDisabled()(link) ? null : link.url"
                                     routerLinkActive="active"
                                     (click)="isMenuCollapsed.set(true)"
                                     >{{ link.name | translate }}</a
