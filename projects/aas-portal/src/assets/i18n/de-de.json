@@ -44,7 +44,7 @@
         "MANUAL": "manuell",
         "MINUTES": "Minuten",
         "NO_AUTH": "Keine Autorisierung",
-        "OK": "OK",
+        "OK": "Hinzufügen",
         "ONCE": "einmalig",
         "OPC_UA": "OPC UA",
         "PLACEHOLDER_NAME": "eindeutigen Namen eingeben",
@@ -308,7 +308,7 @@
     "PromptDialog": {
         "CANCEL": "Abbrechen",
         "CAPTION": "Eingabeaufforderung",
-        "OK": "OK"
+        "OK": "Index leeren"
     },
     "QueryParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {0} erwartet.",
@@ -392,7 +392,7 @@
         "MANUAL": "manuell",
         "MINUTES": "Minuten",
         "NO_AUTH": "Keine Autorisierung",
-        "OK": "OK",
+        "UPDATE": "Aktualisieren",
         "ONCE": "einmalig",
         "OPC_UA": "OPC UA",
         "PLACEHOLDER_URL_FILE": "file:///",
@@ -401,6 +401,7 @@
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
         "SCHEDULE": "Endpunkt-Index aktualisieren",
         "URL": "URL",
+        "KEY": "Key",
         "VALUE": "Wert",
         "WebDAV": "WebDAV",
         "ERROR_NAME_REQUIRED": "Name für Endpunkt erforderlich.",

@@ -7,7 +7,7 @@
  !---------------------------------------------------------------------------->
 
 <form (submit)="submit($event)">
-    <div class="modal-header text-info">
+    <div class="modal-header text-secondary">
         <h4 class="modal-title">
             <i class="bi bi-plus-circle"></i>
             <span class="ms-2" translate="UpdateEndpointForm.CAPTION"></span>
@@ -195,7 +195,7 @@
         <button
             type="button"
             id="AID_DELETE_ENDPOINT"
-            class="btn btn-danger me-auto"
+            class="btn btn-outline-danger me-auto"
             [disabled]="!!deleting()"
             (click)="deleteEndpoint()"
             translate="UpdateEndpointForm.DELETE"
@@ -204,7 +204,7 @@
             type="submit"
             class="btn btn-primary"
             [disabled]="!canClose()"
-            translate="UpdateEndpointForm.OK"
+            translate="UpdateEndpointForm.UPDATE"
         ></button>
         <button
             type="button"
