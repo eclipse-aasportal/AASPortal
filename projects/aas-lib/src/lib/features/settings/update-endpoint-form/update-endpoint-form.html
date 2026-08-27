@@ -26,7 +26,7 @@
         @if (idx >= 0) {
             <label class="form-lable mt-3" for="div-endpoint-url" translate="UpdateEndpointForm.URL"></label>
             <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
-                <button type="button" class="btn btn-secondary" ngbDropdownToggle>
+                <button type="button" class="btn btn-outline-secondary" ngbDropdownToggle>
                     {{ 'UpdateEndpointForm.' + template().type | translate }}
                 </button>
                 <div class="dropdown-menu" ngbDropdownMenu>
@@ -196,6 +196,7 @@
             type="button"
             id="AID_DELETE_ENDPOINT"
             class="btn btn-danger me-auto"
+            [disabled]="!!deleting()"
             (click)="deleteEndpoint()"
             translate="UpdateEndpointForm.DELETE"
         ></button>
@@ -207,7 +208,7 @@
         ></button>
         <button
             type="button"
-            class="btn btn-secondary"
+            class="btn btn-outline-secondary"
             (click)="cancel()"
             translate="UpdateEndpointForm.CANCEL"
         ></button>

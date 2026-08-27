@@ -27,18 +27,18 @@
     </div>
     <div class="modal-footer">
         <button
-            type="button"
-            id="AID_PROMPT_CANCEL"
-            class="btn btn-secondary"
-            (click)="cancel()"
-            translate="PromptDialog.CANCEL"
-        ></button>
-        <button
             type="submit"
             id="AID_PROMPT_OK"
-            class="btn btn-primary"
+            class="btn btn-outline-primary"
             [disabled]="form().invalid()"
             translate="PromptDialog.OK"
+        ></button>
+        <button
+            type="button"
+            id="AID_PROMPT_CANCEL"
+            class="btn btn-outline-secondary"
+            (click)="cancel()"
+            translate="PromptDialog.CANCEL"
         ></button>
     </div>
 </form>

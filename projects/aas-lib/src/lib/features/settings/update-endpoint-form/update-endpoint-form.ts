@@ -21,12 +21,15 @@ import {
 } from '@angular/forms/signals';
 import { NgbActiveModal, NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 import semver from 'semver';
 import { AASEndpoint, AASEndpointScheduleType, AASEndpointType } from 'aas-core';
 import { FormError } from '../../../shared/components/form-error/form-error';
 import { PromptDialog } from '../../../core/prompt-dialog/prompt-dialog';
 import { validateEndpointUrl } from '../../../utilities';
 import { EndpointTemplate, templates } from '../endpoint-templates';
+import { EndpointsApi } from '../../../shared/services/endpoints-api';
+import { NotifyService } from '../../../core/notify/notify.service';
 
 type AuthorizationType =
     'UpdateEndpointForm.NO_AUTH' | 'UpdateEndpointForm.API_KEY' | 'UpdateEndpointForm.BEARER_TOKEN';
@@ -92,7 +95,10 @@ export class UpdateEndpointForm {
     private readonly activeModal = inject(NgbActiveModal);
     private readonly modal = inject(NgbModal);
     private readonly translate = inject(TranslateService);
+    private readonly api = inject(EndpointsApi);
+    private readonly notify = inject(NotifyService);
     private readonly toDelete: string[] = [];
+    private readonly _deleting = signal<string | undefined>(undefined);
     private readonly _templates = signal<EndpointTemplate[]>(templates);
 
     private readonly _endpoints = httpResource<AASEndpoint[]>(() => '/api/v1/endpoints', {
@@ -182,6 +188,8 @@ export class UpdateEndpointForm {
 
     public readonly template = this._template.asReadonly();
 
+    public readonly deleting = this._deleting.asReadonly();
+
     public selectTemplate(value: EndpointTemplate): void {
         this._template.set(value);
     }
@@ -200,20 +208,21 @@ export class UpdateEndpointForm {
             return;
         }
 
-        this.toDelete.push(name);
-
-        this.model.update(state => {
-            const items = [...state.items];
-            let index = items.findIndex(item => item.name === name);
-            if (index < 0) {
-                return state;
-            }
-
-            items.splice(index, 1);
-            index = Math.min(index, items.length - 1);
-            const endpoint = index >= 0 ? items[index].name : '';
-            return { ...state, items, endpoint };
-        });
+        // The confirm-by-typing-the-name prompt above is already the user's explicit confirmation,
+        // so the endpoint is removed immediately here instead of only being staged for the separate
+        // "OK" button -- previously, deleting only spliced the row out of this modal's local state,
+        // so dismissing the dialog (or simply forgetting to click "OK" afterward) silently discarded
+        // the deletion and the endpoint reappeared after a reload.
+        this._deleting.set(name);
+        try {
+            await firstValueFrom(this.api.removeEndpoint(name));
+            this.notify.info('Settings.AAS_ENDPOINT_DELETED', { endpoint: name });
+            this._endpoints.reload();
+        } catch (error) {
+            this.notify.error(error);
+        } finally {
+            this._deleting.set(undefined);
+        }
     }
 
     public submit(event: Event): void {
