@@ -142,3 +142,13 @@ $primary-dark: tint-color($primary, 40%); // same 40% tint ratio Bootstrap itsel
     --bs-primary: #{$primary-dark};
     --bs-primary-rgb: #{to-rgb($primary-dark)};
 }
+
+// $secondary itself is left untouched here (unlike $primary above), because --bs-secondary-rgb is
+// also what .bg-secondary/.border-secondary/etc. read from -- overriding it would lighten those
+// backgrounds/borders too, not just text. .text-secondary is fixed directly instead, so only the
+// (otherwise unreadably dark) text color changes for dark mode.
+$secondary-dark: tint-color($secondary, 40%); // same 40% tint ratio as $primary-dark above
+
+:root[data-bs-theme="dark"] .text-secondary {
+    color: rgba(#{to-rgb($secondary-dark)}, var(--bs-text-opacity)) !important;
+}

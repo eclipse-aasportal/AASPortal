@@ -9,6 +9,7 @@
 import { inject, Injectable, InjectionToken, linkedSignal, Type } from '@angular/core';
 import { catchError, map, Observable, of } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { NotifyService } from '../../core/notify/notify.service';
 import { CookieService } from './cookie.service';
 import { rxResource } from '@angular/core/rxjs-interop';
 
@@ -37,6 +38,7 @@ const cookieName = 'v1.StartTiles';
 export class StartService {
     private readonly cookies = inject(CookieService);
     private readonly auth = inject(AuthService);
+    private readonly notify = inject(NotifyService);
     private readonly types = inject(START_TILE_TYPES);
     private readonly startTiles = inject(START_TILES);
 
@@ -68,6 +70,7 @@ export class StartService {
         }
 
         this.tiles.update(state => [...state, { id, inputs, type: typeName }]);
+        this.notify.info('Start.TILE_ADDED');
         return true;
     }
 

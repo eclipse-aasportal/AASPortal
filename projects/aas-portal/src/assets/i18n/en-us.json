@@ -372,7 +372,8 @@
         "VIEWS": "Views"
     },
     "Start": {
-        "EMPTY": "The START page is empty."
+        "EMPTY": "The START page is empty.",
+        "TILE_ADDED": "Added to Start."
     },
     "TechnicalData": {
         "TITLE": "Technical Data"

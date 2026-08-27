@@ -14,6 +14,7 @@ import { TestBed } from '@angular/core/testing';
 import { createSpyObj } from '../../../test/mocks';
 import { CookieService } from '../../shared/services/cookie.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { NotifyService } from '../../core/notify/notify.service';
 import {
     START_TILE_TYPES,
     START_TILES,
@@ -33,11 +34,13 @@ describe('StartService', () => {
     let service: StartService;
     let cookies: Mocked<CookieService>;
     let auth: Mocked<AuthService>;
+    let notify: Mocked<NotifyService>;
 
     beforeEach(() => {
         cookies = createSpyObj<CookieService>(['getCookie', 'setCookie', 'deleteCookie']);
         cookies.getCookie.mockReturnValue(of(undefined));
         auth = createSpyObj<AuthService>([], { user: signal(null) });
+        notify = createSpyObj<NotifyService>(['info', 'error']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -61,6 +64,10 @@ describe('StartService', () => {
                 {
                     provide: AuthService,
                     useValue: auth,
+                },
+                {
+                    provide: NotifyService,
+                    useValue: notify,
                 },
                 provideZonelessChangeDetection(),
             ],
@@ -96,14 +103,21 @@ describe('StartService', () => {
             expect(service.tiles().length).toBe(2);
         });
 
+        it('should notify when a tile is added', () => {
+            service.add('TestCard', 'newTestCard', {});
+            expect(notify.info).toHaveBeenCalledWith('Start.TILE_ADDED');
+        });
+
         it('should not add a tile with an unknown type', () => {
             expect(service.add('UnknownCard', 'new', {})).toBe(false);
             expect(service.tiles().length).toBe(1);
+            expect(notify.info).not.toHaveBeenCalled();
         });
 
         it('should not add a tile with an existing id', () => {
             expect(service.add('TestCard', 'test', {})).toBe(false);
             expect(service.tiles().length).toBe(1);
+            expect(notify.info).not.toHaveBeenCalled();
         });
     });
 
