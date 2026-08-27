@@ -136,7 +136,7 @@
     },
     "DigitalProductPassport": {
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
-        "CAPTION": "Product Passport",
+        "CAPTION": "Digital Product Passport",
         "Description": "Description",
         "DOCUMENTATION": "Documentation",
         "EMPTY": "No product passport available.",

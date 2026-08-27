@@ -136,7 +136,7 @@
     },
     "DigitalProductPassport": {
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
-        "CAPTION": "Produktpass",
+        "CAPTION": "Digitaler Produktpass",
         "Description": "Beschreibung",
         "DOCUMENTATION": "Dokumentation",
         "EMPTY": "Kein Produktpass verfügbar.",
