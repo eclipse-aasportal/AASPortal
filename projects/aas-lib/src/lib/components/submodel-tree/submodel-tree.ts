@@ -150,7 +150,7 @@ export class SubmodelTree implements OnDestroy {
         }
 
         const groups: SubmodelTreeGroup[] = [];
-        this.collect(submodel, 0, '', groups);
+        this.collect(submodel, 0, '', submodel.idShort, groups);
         return groups;
     });
 
@@ -261,20 +261,33 @@ export class SubmodelTree implements OnDestroy {
         return { visible, itemsByPath, childrenByPath };
     });
 
-    private collect(referable: aas.Referable, level: number, parentPath: string, out: SubmodelTreeGroup[]): void {
-        const path = parentPath ? `${parentPath}/${referable.idShort}` : referable.idShort;
+    private collect(
+        referable: aas.Referable,
+        level: number,
+        parentPath: string,
+        segment: string,
+        out: SubmodelTreeGroup[],
+    ): void {
+        const path = parentPath ? `${parentPath}/${segment}` : segment;
         const children = getChildren(referable);
 
-        out.push({ ...this.createGroup(referable, children), path, level });
+        out.push({ ...this.createGroup(referable, children, segment), path, level });
 
-        for (const child of children) {
+        children.forEach((child, index) => {
             if ((isSubmodelElementCollection(child) || isSubmodelElementList(child)) && child.value) {
-                this.collect(child, level + 1, path, out);
+                // List items have no idShort at all (AAS spec), and some real-world exports also
+                // repeat the same idShort across sibling collections (e.g. multiple "component
+                // receptacle" entries) -- always fold in the index so paths stay unique either way.
+                this.collect(child, level + 1, path, `${index}:${child.idShort ?? ''}`, out);
             }
-        }
+        });
     }
 
-    private createGroup(parent: aas.Referable, children: aas.Referable[]): Omit<SubmodelTreeGroup, 'path' | 'level'> {
+    private createGroup(
+        parent: aas.Referable,
+        children: aas.Referable[],
+        segment: string,
+    ): Omit<SubmodelTreeGroup, 'path' | 'level'> {
         const currentLang = this.currentLang();
         const document = this.document();
         const env = document?.content;
@@ -356,9 +369,13 @@ export class SubmodelTree implements OnDestroy {
             }
         }
 
+        // parent.idShort is undefined for a SubmodelElementList item (AAS spec) -- getDisplayName()'s
+        // idShort fallback requires a string, so give it a synthetic one (just the sibling index,
+        // not the full "index:idShort" path segment). displayName, if present, still wins either way.
+        const idShort = parent.idShort ?? segment.split(':', 1)[0];
         return {
-            idShort: parent.idShort,
-            name: getDisplayName(parent, null, currentLang),
+            idShort,
+            name: getDisplayName(parent.idShort ? parent : { ...parent, idShort }, null, currentLang),
             typeAbbreviation: getAbbreviation(parent.modelType),
             items,
         };
