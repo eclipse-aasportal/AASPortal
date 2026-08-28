@@ -6,6 +6,24 @@
  *
  *****************************************************************************/
 
+.information {
+   max-width: 100%;
+}
+
+.thumbnail {
+   max-width: 100%;
+}
+
+@media (min-width: 576px) {
+   .information {
+      max-width: 60%;
+   }
+
+   .thumbnail {
+      max-width: 40%;
+   }
+}
+
  .fhg-aas-header {
     grid-area: header;
     overflow: hidden;
