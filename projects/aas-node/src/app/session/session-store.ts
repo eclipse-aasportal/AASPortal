@@ -8,9 +8,9 @@
 
 import session, { Cookie, SessionData } from 'express-session';
 import mongoose from 'mongoose';
-import { InjectionToken } from 'tsyringe';
-import { Logger } from 'aas-package';
-import { Variable } from '../variable';
+import { container, InjectionToken, singleton } from 'tsyringe';
+import { LOGGER, MongoDBConnectionProvider } from 'aas-package';
+import { Variable } from '../variable.js';
 
 interface ToJson {
     toJSON(value: unknown): Cookie;
@@ -22,6 +22,7 @@ function isToJson(value: unknown): value is ToJson {
 
 export interface SessionDataDocument extends mongoose.Document<string> {
     _id: string;
+    userId: string;
     session: SessionData;
     lastAccessAt: Date;
 }
@@ -33,24 +34,26 @@ export const SESSION_STORE = Symbol('SESSION_STORE') as InjectionToken<session.S
  * This class extends the `session.Store` class from the `express-session` package and provides methods
  * for managing session data in a MongoDB collection.
  */
+@singleton()
 export class SessionStore extends session.Store {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly variable = container.resolve(Variable);
+    private readonly connection: mongoose.Connection;
     private readonly model: mongoose.Model<SessionDataDocument>;
     private readonly schema = new mongoose.Schema<SessionDataDocument>({
         _id: { type: String, required: true },
+        userId: { type: String, required: false },
         session: { type: mongoose.Schema.Types.Mixed, required: false },
         lastAccessAt: { type: Date, default: Date.now },
     });
 
-    public constructor(
-        private readonly logger: Logger,
-        private readonly connection: mongoose.Connection,
-        private readonly variable: Variable,
-    ) {
+    public constructor() {
         super();
 
+        this.connection = container.resolve(MongoDBConnectionProvider).getConnection(this.variable.SESSION_STORE!);
         this.schema.index({ lastAccessAt: 1 }, { expireAfterSeconds: this.variable.SESSION_TTL });
         this.model = this.connection.model<SessionDataDocument>('SessionData', this.schema);
-        this.logger.info('Using MongoDB session store');
+        this.logger.info(`Using MongoDB session store "${this.variable.SESSION_STORE}"`);
     }
 
     public override get(
@@ -184,7 +187,7 @@ export class SessionStore extends session.Store {
         await this.model
             .findOneAndUpdate(
                 { _id },
-                { _id, session: { ...data, cookie }, lastAccessAt: new Date() },
+                { _id, userId: data.user_id, session: { ...data, cookie }, lastAccessAt: new Date() },
                 { upsert: true },
             )
             .exec();
@@ -196,7 +199,7 @@ export class SessionStore extends session.Store {
         await this.model
             .findOneAndUpdate(
                 { _id },
-                { _id, session: { ...data, cookie }, lastAccessAt: new Date() },
+                { _id, userId: data.user_id, session: { ...data, cookie }, lastAccessAt: new Date() },
                 { returnDocument: 'after' },
             )
             .exec();

@@ -10,43 +10,31 @@ import 'reflect-metadata';
 import { describe, afterEach, beforeEach, it, expect, vitest, vi, Mocked } from 'vitest';
 import express from 'express';
 import { Session, SessionData } from 'express-session';
+import bcrypt from 'bcryptjs';
 import { UserProfile } from 'aas-core';
-import { Logger } from 'aas-package';
 
 import { createSpyObj } from '../../test/mocks.js';
-import { FileSystemIdentityProvider } from './file-system-identity-provider.js';
-import { IdentityProvider, UserData } from './identity-provider.js';
+import { IdentityProvider } from './identity-provider.js';
 import { Variable } from '../variable.js';
-import { CookieStorage } from '../cookie-storage/cookie-storage.js';
-
-vi.mock('fs', () => {
-    const fs = vi.importActual('fs');
-    return {
-        default: {
-            ...fs,
-            promises: {
-                readFile: vi.fn().mockResolvedValue(
-                    JSON.stringify({
-                        id: 'john.doe@email.com',
-                        name: 'John Doe',
-                        role: 'editor',
-                        created: new Date(),
-                        password: '$2b$10$vInNMtSyK./X7OVfPHP4Fuuv/oA9bJEQQfZq2hQu/YMTxQUs7otGu',
-                    } satisfies UserData),
-                ),
-                writeFile: vi.fn(),
-                mkdir: vi.fn(),
-                rm: vi.fn(),
-            },
-            existsSync: vi.fn().mockReturnValue(true),
-        },
-    };
-});
+import { COOKIE_STORE, CookieStore } from '../cookie-storage/cookie-store.js';
+import { USER_STORE, UserData, UserStore } from './user-store.js';
+import { USER_RIGHTS_STORE, UserRightsStore } from './user-rights-store.js';
+import { container } from 'tsyringe';
+import { Logger, LOGGER } from 'aas-package';
 
 describe('FileSystemIdentityProvider', () => {
     let identityProvider: IdentityProvider;
     let variable: Mocked<Variable>;
-    let cookies: Mocked<CookieStorage>;
+    let cookies: Mocked<CookieStore>;
+    let userStore: Mocked<UserStore>;
+    let userRightsStore: Mocked<UserRightsStore>;
+
+    const createUserData = async (id = 'john.doe@email.com', password = 'password123'): Promise<UserData> => ({
+        id,
+        name: 'John Doe',
+        password: await bcrypt.hash(password, 10),
+        created: new Date(),
+    });
 
     const createSessionMock = (data: Partial<SessionData> = {}): Mocked<Session & SessionData> => {
         const session = createSpyObj<Session & SessionData>(['destroy', 'save'], data as SessionData);
@@ -57,6 +45,7 @@ describe('FileSystemIdentityProvider', () => {
 
             return session;
         });
+
         session.destroy.mockImplementation(callback => {
             callback(undefined);
             return session;
@@ -74,8 +63,22 @@ describe('FileSystemIdentityProvider', () => {
             HOST_URL: 'http://localhost',
         });
 
-        cookies = createSpyObj<CookieStorage>(['getCookie', 'setCookie', 'getEndpoints', 'updatesEndpoints']);
-        identityProvider = new FileSystemIdentityProvider(createSpyObj<Logger>(['error']), cookies, variable);
+        cookies = createSpyObj<CookieStore>(['getCookie', 'setCookie', 'getEndpoints', 'updatesEndpoints']);
+
+        container.clearInstances();
+        container.registerInstance(Variable, variable);
+        container.registerInstance(LOGGER, createSpyObj<Logger>(['info', 'warning', 'error']));
+        container.registerInstance(COOKIE_STORE, cookies);
+        container.registerInstance(USER_STORE, createSpyObj<UserStore>(['get', 'set', 'delete']));
+        container.registerInstance(
+            USER_RIGHTS_STORE,
+            createSpyObj<UserRightsStore>(['get', 'add', 'update', 'delete']),
+        );
+
+        container.registerSingleton(IdentityProvider);
+        identityProvider = container.resolve(IdentityProvider);
+        userStore = container.resolve(USER_STORE) as Mocked<UserStore>;
+        userRightsStore = container.resolve(USER_RIGHTS_STORE) as Mocked<UserRightsStore>;
     });
 
     afterEach(() => {
@@ -83,7 +86,7 @@ describe('FileSystemIdentityProvider', () => {
     });
 
     it('should create', () => {
-        expect(identityProvider).toBeInstanceOf(FileSystemIdentityProvider);
+        expect(identityProvider).toBeInstanceOf(IdentityProvider);
     });
 
     describe('middleware', () => {
@@ -129,10 +132,19 @@ describe('FileSystemIdentityProvider', () => {
                 session,
             });
 
+            userStore.get.mockResolvedValue(await createUserData());
+            userRightsStore.get.mockResolvedValue({ id: 'john.doe@email.com', role: 'user' });
             const res = createSpyObj<express.Response>(['cookie', 'json', 'redirect', 'status', 'sendStatus']);
             identityProvider['isValidCodeChallenge'] = vi.fn().mockReturnValue(true);
             await identityProvider.callback(req, res);
-            expect(res.json).toHaveBeenCalledWith({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
+            expect(res.json).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    id: 'john.doe@email.com',
+                    name: 'John Doe',
+                    role: 'user',
+                    client_id: 'test-client-id',
+                }),
+            );
         });
 
         it('should return 400 if state is invalid', async () => {
@@ -235,7 +247,7 @@ describe('FileSystemIdentityProvider', () => {
             session.refresh_token = 'test-refresh-token';
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
             });
 
             const res = createSpyObj<express.Response>(['clearCookie', 'setHeader']);
@@ -253,7 +265,7 @@ describe('FileSystemIdentityProvider', () => {
             expect(req.user).toEqual({
                 id: 'john.doe@email.com',
                 name: 'John Doe',
-                role: 'editor',
+                role: 'user',
                 client_id: 'test-client-id',
             });
         });
@@ -264,7 +276,7 @@ describe('FileSystemIdentityProvider', () => {
             session.refresh_token = 'test-refresh-token';
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
             });
 
             const res = createSpyObj<express.Response>(['clearCookie', 'cookie', 'redirect', 'setHeader']);
@@ -272,7 +284,7 @@ describe('FileSystemIdentityProvider', () => {
             identityProvider['refreshToken'] = vi.fn().mockResolvedValue({
                 access_token: 'new-access-token',
                 refresh_token: 'test-refresh-token',
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
             });
 
             const next = vi.fn();
@@ -283,7 +295,7 @@ describe('FileSystemIdentityProvider', () => {
             expect(req.user).toEqual({
                 id: 'john.doe@email.com',
                 name: 'John Doe',
-                role: 'editor',
+                role: 'user',
                 client_id: 'test-client-id',
             });
 
@@ -296,7 +308,7 @@ describe('FileSystemIdentityProvider', () => {
             session.refresh_token = 'test-refresh-token';
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
             });
 
             const res = createSpyObj<express.Response>(['clearCookie', 'cookie', 'setHeader']);
@@ -304,7 +316,7 @@ describe('FileSystemIdentityProvider', () => {
             identityProvider['refreshToken'] = vi.fn().mockResolvedValue({
                 access_token: 'new-access-token',
                 refresh_token: 'test-refresh-token',
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
             });
 
             const next = vi.fn();
@@ -314,7 +326,7 @@ describe('FileSystemIdentityProvider', () => {
             expect(req.user).toEqual({
                 id: 'john.doe@email.com',
                 name: 'John Doe',
-                role: 'editor',
+                role: 'user',
                 client_id: 'test-client-id',
             });
 
@@ -338,7 +350,7 @@ describe('FileSystemIdentityProvider', () => {
             await middleware(req, res, next);
             expect(identityProvider['verifyAccessToken']).toHaveBeenCalledWith('invalid-access-token');
             expect(identityProvider['destroySession']).toHaveBeenCalledWith(session);
-            expect(res.redirect).toHaveBeenCalledWith('/api/login');
+            expect(res.redirect).toHaveBeenCalledWith('/auth/login');
         });
     });
 
@@ -347,7 +359,7 @@ describe('FileSystemIdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
                 body: {
                     name: 'John Doe Updated',
                     id: 'john.doe@email.com',
@@ -356,21 +368,29 @@ describe('FileSystemIdentityProvider', () => {
                 } satisfies UserProfile,
             });
 
+            userStore.get.mockResolvedValue(await createUserData());
+
+            userRightsStore.get.mockResolvedValue({ id: 'john.doe@email.com', role: 'user' });
+
             const res = createSpyObj<express.Response>(['json', 'status']);
             res.status.mockReturnThis();
             await identityProvider.updateAccount(req, res);
-            expect(res.json).toHaveBeenCalledWith({
-                id: 'john.doe@email.com',
-                name: 'John Doe Updated',
-                role: 'editor',
-            });
+            expect(res.status).toHaveBeenCalledWith(201);
+            expect(res.json).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    id: 'john.doe@email.com',
+                    name: 'John Doe Updated',
+                    role: 'user',
+                    client_id: 'test-client-id',
+                }),
+            );
         });
 
         it('should return 404 if user does not exist', async () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
                 body: {
                     name: 'John Doe Updated',
                     id: 'john.doe@email.com',
@@ -381,7 +401,7 @@ describe('FileSystemIdentityProvider', () => {
 
             const res = createSpyObj<express.Response>(['json', 'status']);
             res.status.mockReturnThis();
-            identityProvider['read'] = vi.fn().mockResolvedValue(undefined);
+            userStore.get.mockResolvedValue(undefined);
             await identityProvider.updateAccount(req, res);
             expect(res.status).toHaveBeenCalledWith(404);
         });
@@ -409,10 +429,10 @@ describe('FileSystemIdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
                 body: {
                     name: 'John Doe Updated',
-                    id: 'john,doe@email.com',
+                    id: 'john.doe@email.com',
                     password: 'wrong-password',
                     newPassword: 'new-password',
                 } satisfies UserProfile,
@@ -420,6 +440,7 @@ describe('FileSystemIdentityProvider', () => {
 
             const res = createSpyObj<express.Response>(['json', 'status']);
             res.status.mockReturnThis();
+            userStore.get.mockResolvedValue(await createUserData());
             await identityProvider.updateAccount(req, res);
             expect(res.status).toHaveBeenCalledWith(401);
         });
@@ -428,10 +449,10 @@ describe('FileSystemIdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john,doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
                 body: {
                     name: 'John Doe Updated',
-                    id: 'john,doe@email.com',
+                    id: 'john.doe@email.com',
                     password: 'password123',
                     newPassword: 'short',
                 } satisfies UserProfile,
@@ -439,6 +460,7 @@ describe('FileSystemIdentityProvider', () => {
 
             const res = createSpyObj<express.Response>(['json', 'status']);
             res.status.mockReturnThis();
+            userStore.get.mockResolvedValue(await createUserData());
             await identityProvider.updateAccount(req, res);
             expect(res.status).toHaveBeenCalledWith(400);
         });
@@ -449,10 +471,11 @@ describe('FileSystemIdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
             });
 
-            const res = createSpyObj<express.Response>(['clearCookie', 'sendStatus']);
+            const res = createSpyObj<express.Response>(['clearCookie', 'sendStatus', 'status']);
+            userStore.delete.mockResolvedValue(true);
             await identityProvider.deleteAccount(req, res);
             expect(res.sendStatus).toHaveBeenCalledWith(200);
         });
@@ -461,12 +484,12 @@ describe('FileSystemIdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
             });
 
             const res = createSpyObj<express.Response>(['json', 'status']);
             res.status.mockReturnThis();
-            identityProvider['delete'] = vi.fn().mockResolvedValue(false);
+            userStore.delete.mockResolvedValue(false);
             await identityProvider.deleteAccount(req, res);
             expect(res.status).toHaveBeenCalledWith(404);
         });

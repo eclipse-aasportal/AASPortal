@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ApplicationConfig, ErrorHandler, provideZonelessChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, ErrorHandler, inject, provideAppInitializer, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -18,6 +18,7 @@ import {
     CustomerFeedbackCardComponent,
     FavoriteComponent,
     NotifyService,
+    SessionCheck,
     START_TILE_TYPES,
     START_TILES,
     StartTileType,
@@ -80,6 +81,9 @@ export const appConfig: ApplicationConfig = {
             useFactory: (notify: NotifyService) => notify,
             deps: [NotifyService],
         },
+        provideAppInitializer(() => {
+            inject(SessionCheck).start();
+        }),
         provideZonelessChangeDetection(),
     ],
 };

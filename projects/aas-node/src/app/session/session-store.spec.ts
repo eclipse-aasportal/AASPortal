@@ -6,14 +6,16 @@
  *
  *****************************************************************************/
 
+import 'reflect-metadata';
 import { beforeEach, afterEach, describe, Mocked, vi, it, expect } from 'vitest';
 import mongoose from 'mongoose';
-import { Logger } from 'aas-package';
-
-import { SessionDataDocument, SessionStore } from './session-store';
-import { createSpyObj } from '../../test/mocks';
+import { LOGGER, Logger, MongoDBConnectionProvider } from 'aas-package';
 import { SessionData } from 'express-session';
-import { Variable } from '../variable';
+
+import { SessionDataDocument, SessionStore } from './session-store.js';
+import { createSpyObj } from '../../test/mocks.js';
+import { Variable } from '../variable.js';
+import { container } from 'tsyringe';
 
 vi.mock(import('mongoose'), () => {
     return {
@@ -34,6 +36,7 @@ vi.mock(import('mongoose'), () => {
 describe('SessionStore', () => {
     let store: SessionStore;
     let logger: Mocked<Logger>;
+    let connectionProvider: Mocked<MongoDBConnectionProvider>;
     let connection: Mocked<mongoose.Connection>;
     let variable: Mocked<Variable>;
     let model: Mocked<mongoose.Model<SessionDataDocument>>;
@@ -62,7 +65,15 @@ describe('SessionStore', () => {
 
         model = modelConstructor as unknown as Mocked<mongoose.Model<SessionDataDocument>>;
         connection.model.mockReturnValue(model as unknown as mongoose.Model<unknown>);
-        store = new SessionStore(logger, connection, variable);
+        connectionProvider = createSpyObj<MongoDBConnectionProvider>(['getConnection']);
+        connectionProvider.getConnection.mockReturnValue(connection);
+
+        container.clearInstances();
+        container.registerInstance(LOGGER, logger);
+        container.registerInstance(MongoDBConnectionProvider, connectionProvider);
+        container.registerInstance(Variable, variable);
+        container.registerSingleton(SessionStore);
+        store = container.resolve(SessionStore);
     });
 
     afterEach(() => {
@@ -76,7 +87,7 @@ describe('SessionStore', () => {
     describe('get', () => {
         it('should get session data', async () => {
             const sessionId = 'session-id';
-            const sessionData = {
+            const sessionData: SessionData = {
                 cookie: {
                     originalMaxAge: 1000,
                     expires: new Date(),
@@ -84,9 +95,16 @@ describe('SessionStore', () => {
                     httpOnly: true,
                     domain: 'example.com',
                 },
+                user_id: 'user-id',
                 state: 'state',
                 code_verifier: 'code_verifier',
                 endpoints: [],
+                access_token: 'access_token',
+                refresh_token: 'refresh_token',
+                expires_at: 1234567890,
+                op_session_Id: 'sessionId',
+                session_state: 'session_state',
+                check_session_iframe: 'check_session_iframe',
             };
 
             const doc = createSpyObj<SessionDataDocument>(['toObject'], {
@@ -134,9 +152,16 @@ describe('SessionStore', () => {
                     httpOnly: true,
                     domain: 'example.com',
                 },
+                user_id: 'user-id',
                 state: 'state',
                 code_verifier: 'code_verifier',
                 endpoints: [],
+                access_token: 'access_token',
+                refresh_token: 'refresh_token',
+                expires_at: 1234567890,
+                op_session_Id: 'sessionId',
+                session_state: 'session_state',
+                check_session_iframe: 'check_session_iframe',
             };
 
             const query = createSpyObj<mongoose.Query<SessionDataDocument | null, SessionDataDocument>>(['exec'], {});
@@ -170,9 +195,16 @@ describe('SessionStore', () => {
                     httpOnly: true,
                     domain: 'example.com',
                 },
+                user_id: 'user-id',
                 state: 'state',
                 code_verifier: 'code_verifier',
                 endpoints: [],
+                access_token: 'access_token',
+                refresh_token: 'refresh_token',
+                expires_at: 1234567890,
+                op_session_Id: 'sessionId',
+                session_state: 'session_state',
+                check_session_iframe: 'check_session_iframe',
             };
 
             const existingSessionData: SessionData = {
@@ -183,9 +215,16 @@ describe('SessionStore', () => {
                     httpOnly: true,
                     domain: 'example.com',
                 },
+                user_id: 'user-id',
                 state: 'old-state',
                 code_verifier: 'old-code_verifier',
                 endpoints: [],
+                access_token: 'old-access_token',
+                refresh_token: 'old-refresh_token',
+                expires_at: 9876543210,
+                op_session_Id: 'old-sessionId',
+                session_state: 'old-session_state',
+                check_session_iframe: 'old-check_session_iframe',
             };
 
             const existingDoc = createSpyObj<SessionDataDocument>(['save'], {
@@ -223,9 +262,16 @@ describe('SessionStore', () => {
                     httpOnly: true,
                     domain: 'example.com',
                 },
+                user_id: 'user-id',
                 state: 'state',
                 code_verifier: 'code_verifier',
                 endpoints: [],
+                access_token: 'access_token',
+                refresh_token: 'refresh_token',
+                expires_at: 1234567890,
+                op_session_Id: 'sessionId',
+                session_state: 'session_state',
+                check_session_iframe: 'check_session_iframe',
             };
 
             const query = createSpyObj<mongoose.Query<SessionDataDocument | null, SessionDataDocument>>(['exec'], {});
@@ -301,9 +347,16 @@ describe('SessionStore', () => {
                         httpOnly: true,
                         domain: 'example.com',
                     },
+                    user_id: 'user-id-1',
                     state: 'state-1',
                     code_verifier: 'code_verifier-1',
                     endpoints: [],
+                    access_token: 'access_token-1',
+                    refresh_token: 'refresh_token-1',
+                    expires_at: 1234567890,
+                    op_session_Id: 'sessionId-1',
+                    session_state: 'session_state-1',
+                    check_session_iframe: 'check_session_iframe-1',
                 },
             });
 
@@ -317,9 +370,16 @@ describe('SessionStore', () => {
                         httpOnly: true,
                         domain: 'example.com',
                     },
+                    user_id: 'user-id-2',
                     state: 'state-2',
                     code_verifier: 'code_verifier-2',
                     endpoints: [],
+                    access_token: 'access_token-2',
+                    refresh_token: 'refresh_token-2',
+                    expires_at: 9876543210,
+                    op_session_Id: 'sessionId-2',
+                    session_state: 'session_state-2',
+                    check_session_iframe: 'check_session_iframe-2',
                 },
             });
 

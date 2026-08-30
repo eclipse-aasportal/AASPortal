@@ -166,7 +166,7 @@ export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
             const worker = new Worker(this.script, { env: SHARE_ENV, name: workerName });
             this.pool.set(worker, task);
             const { port1, port2 } = new MessageChannel();
-            this.index.connect(port1);
+            this.index.connect(port1, workerName);
             worker.postMessage(
                 {
                     application: 'ScanApp',

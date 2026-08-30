@@ -82,7 +82,7 @@ describe('RegisterForm', () => {
             password: 'password123',
         });
 
-        expect(window.location.href).toBe('/api/login');
+        expect(window.location.href).toBe('/auth/login');
     });
 
     it('should handle an error when creating a new account', async () => {

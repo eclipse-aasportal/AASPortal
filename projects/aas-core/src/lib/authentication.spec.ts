@@ -29,16 +29,12 @@ describe('authentication', () => {
     });
 
     describe('isUserAuthorized', () => {
-        it('true for actual: guest, expected: guest', () => {
-            expect(isUserAuthorized('editor', ['reader', 'editor', 'admin'])).toBeTruthy();
+        it('true for actual: user, expected: user', () => {
+            expect(isUserAuthorized('user', ['user', 'admin'])).toBeTruthy();
         });
 
-        it('false for actual: guest, expected: editor', () => {
-            expect(isUserAuthorized('editor', ['reader', 'admin'])).toBeFalsy();
-        });
-
-        it('false for actual: guest, expected: admin', () => {
-            expect(isUserAuthorized('reader', [])).toBeFalsy();
+        it('false for actual: user, expected: admin', () => {
+            expect(isUserAuthorized('user', ['admin'])).toBeFalsy();
         });
     });
 

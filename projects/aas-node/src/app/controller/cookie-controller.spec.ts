@@ -15,18 +15,18 @@ import { describe, it, expect, Mocked, vi, beforeAll, afterAll } from 'vitest';
 import { createSpyObj } from '../../test/mocks.js';
 import { RegisterRoutes } from '../routes/routes.js';
 import { errorHandler } from '../../test/assets/error-handler.js';
-import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, CookieStore } from '../cookie-storage/cookie-store.js';
 import { Authentication } from './authentication.js';
 
 describe('CookieController', () => {
     let app: Express;
-    let storage: Mocked<CookieStorage>;
+    let storage: Mocked<CookieStore>;
     let authentication: Mocked<Authentication>;
 
     beforeAll(() => {
-        storage = createSpyObj<CookieStorage>(['deleteCookie', 'getCookie', 'setCookie']);
+        storage = createSpyObj<CookieStore>(['deleteCookie', 'getCookie', 'setCookie']);
         authentication = createSpyObj<Authentication>(['authentication']);
-        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'user' });
         container.registerInstance(COOKIE_STORE, storage);
         container.registerInstance(Authentication, authentication);
 
@@ -35,7 +35,7 @@ describe('CookieController', () => {
         app.use(text());
         app.use(urlencoded({ extended: true }));
         app.use((req, res, next) => {
-            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'client-123' };
+            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'client-123' };
             next();
         });
 

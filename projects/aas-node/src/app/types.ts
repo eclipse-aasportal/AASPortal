@@ -17,13 +17,16 @@ declare module 'express-serve-static-core' {
 
 declare module 'express-session' {
     interface SessionData {
-        access_token?: string;
-        refresh_token?: string;
-        code_verifier?: string;
-        endpoints?: AASEndpointAuth[];
-        session_state?: string;
-        check_session_iframe?: string;
-        state?: string;
+        user_id: string;
+        access_token: string;
+        refresh_token: string;
+        expires_at: number;
+        code_verifier: string;
+        endpoints: AASEndpointAuth[];
+        op_session_Id: string;
+        session_state: string;
+        check_session_iframe: string;
+        state: string;
     }
 }
 

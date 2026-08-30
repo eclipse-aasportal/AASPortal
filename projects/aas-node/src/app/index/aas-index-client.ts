@@ -57,13 +57,13 @@ export class AASIndexClient implements IAASIndex {
         }
     }
 
-    public connect(port: MessagePort): void {
+    public connect(port: MessagePort, name: string): void {
         this.worker?.postMessage(
             {
                 application: 'IndexApp',
                 type: 'command',
                 name: 'connect',
-                args: { port },
+                args: { port, name },
             } satisfies CommandData,
             [port],
         );

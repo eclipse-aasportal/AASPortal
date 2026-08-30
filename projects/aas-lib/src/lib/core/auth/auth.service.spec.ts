@@ -83,7 +83,7 @@ describe('AuthService', () => {
             const mockUser: SessionUser = {
                 id: 'john.dow@email.com',
                 name: 'John Dow',
-                role: 'editor',
+                role: 'user',
                 client_id: 'client-123',
             };
 

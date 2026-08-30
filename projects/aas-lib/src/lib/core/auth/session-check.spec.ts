@@ -32,7 +32,7 @@ describe('SessionCheck', () => {
     const sessionUser: SessionUser = {
         id: 'user',
         name: 'User',
-        role: 'reader',
+        role: 'user',
         client_id: 'client',
         session_state: 'state',
         check_session_iframe: 'https://identity.example/check-session',

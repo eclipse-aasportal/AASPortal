@@ -189,7 +189,7 @@ export class DocumentsController extends Controller {
      * @returns The messages of the update process.
      */
     @Put('endpoints/{endpoint}/documents/{id}')
-    @Security('oauth2', ['editor', 'admin'])
+    @Security('oauth2', ['user', 'admin'])
     @OperationId('updateDocument')
     public async updateDocument(
         @Path() endpoint: string,
@@ -214,7 +214,7 @@ export class DocumentsController extends Controller {
      * @returns The executed `Operation`.
      */
     @Post('endpoints/{endpoint}/documents/{id}/invoke')
-    @Security('oauth2', ['editor', 'admin'])
+    @Security('oauth2', ['user', 'admin'])
     @OperationId('invokeOperation')
     public async invokeOperation(
         @Path() endpoint: string,

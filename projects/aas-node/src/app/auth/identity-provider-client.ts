@@ -6,15 +6,16 @@
  *
  *****************************************************************************/
 
-import { InjectionToken } from 'tsyringe';
+import { container, InjectionToken } from 'tsyringe';
 import crypto from 'crypto';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { Session } from 'express-session';
 import { User, noop } from 'aas-core';
-import { Logger } from 'aas-package';
-import { CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { LOGGER } from 'aas-package';
+import { COOKIE_STORE } from '../cookie-storage/cookie-store.js';
 import { ERRORS } from '../errors.js';
+import { Variable } from '../variable.js';
 
 /** Injection token. */
 export const IDENTITY_PROVIDER: InjectionToken<IdentityProviderClient> = 'IDENTITY_PROVIDER';
@@ -27,11 +28,10 @@ export interface RefreshTokenResponse {
 
 /** Defines an identifier provider client. */
 export abstract class IdentityProviderClient {
-    protected constructor(
-        protected readonly logger: Logger,
-        protected readonly cookies: CookieStorage,
-        protected readonly clientId: string,
-    ) {}
+    protected readonly logger = container.resolve(LOGGER);
+    protected readonly cookies = container.resolve(COOKIE_STORE);
+    protected readonly variable = container.resolve(Variable);
+    protected readonly clientId = this.variable.CLIENT_ID;
 
     /**
      * Retrieves the user information associated with the given request.
@@ -59,6 +59,13 @@ export abstract class IdentityProviderClient {
      * @param res The response.
      */
     public abstract callback(req: express.Request, res: express.Response): Promise<express.Response | void>;
+
+    /**
+     *
+     * @param req The request.
+     * @param res The response.
+     */
+    public abstract checkSession(req: express.Request, res: express.Response): Promise<express.Response | void>;
 
     /**
      * The logout method for the identity provider. This method is called when a user tries to log out.
@@ -116,7 +123,7 @@ export abstract class IdentityProviderClient {
                     req.user = {
                         id: userId,
                         name: String(payload.name),
-                        role: 'editor',
+                        role: 'user',
                         client_id: this.clientId,
                         session_state: req.session.session_state,
                         check_session_iframe: req.session.check_session_iframe,
@@ -124,7 +131,7 @@ export abstract class IdentityProviderClient {
                 } catch (error) {
                     if (error.name !== 'TokenExpiredError' || !refresh_token) {
                         this.destroySession(req.session);
-                        return res.redirect('/api/login');
+                        return res.redirect('/auth/login');
                     }
 
                     try {
@@ -140,7 +147,7 @@ export abstract class IdentityProviderClient {
                     } catch (error) {
                         noop(error);
                         this.destroySession(req.session);
-                        return res.redirect('/api/login');
+                        return res.redirect('/auth/login');
                     }
                 }
             } else if (refresh_token) {
@@ -157,7 +164,7 @@ export abstract class IdentityProviderClient {
                 } catch (error) {
                     noop(error);
                     this.destroySession(req.session);
-                    return res.redirect('/api/login');
+                    return res.redirect('/auth/login');
                 }
             }
 

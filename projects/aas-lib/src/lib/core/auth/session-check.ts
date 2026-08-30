@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { DOCUMENT, effect, inject, OnDestroy, Service } from '@angular/core';
-import { SessionUser } from 'aas-core';
+import { noop, SessionUser } from 'aas-core';
 import { WINDOW } from '../../shared/services/window.service';
 import { AuthService } from './auth.service';
 
@@ -28,6 +28,10 @@ export class SessionCheck implements OnDestroy {
                 this.startSessionChecks(user.client_id, user.session_state);
             }
         });
+    }
+
+    public start(): void {
+        noop();
     }
 
     public ngOnDestroy(): void {
@@ -76,11 +80,11 @@ export class SessionCheck implements OnDestroy {
             return;
         }
 
-        contentWindow.postMessage(`${clientId} ${sessionState}`, this.getOpOrigin());
+        contentWindow.postMessage(`${clientId} ${sessionState}`, this.getOrigin());
     }
 
     private readonly onMessage = (event: MessageEvent): void => {
-        if (event.origin !== this.getOpOrigin() || event.source !== this.iframe?.contentWindow) {
+        if (event.origin !== this.getOrigin() || event.source !== this.iframe?.contentWindow) {
             return;
         }
 
@@ -92,7 +96,7 @@ export class SessionCheck implements OnDestroy {
         }
     };
 
-    private getOpOrigin(): string {
+    private getOrigin(): string {
         const src = this.iframe?.src;
         if (!src) {
             return '';

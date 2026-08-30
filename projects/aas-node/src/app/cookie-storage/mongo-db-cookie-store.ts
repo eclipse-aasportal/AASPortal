@@ -11,7 +11,7 @@ import mongoose from 'mongoose';
 import { Cookie } from 'aas-core';
 import { Logger, LOGGER, MongoDBConnectionProvider } from 'aas-package';
 import { Variable } from '../variable.js';
-import { CookieStorage } from './cookie-storage.js';
+import { CookieStore } from './cookie-store.js';
 
 export interface UserCookies {
     id: string;
@@ -24,7 +24,7 @@ interface UserCookiesDocument extends UserCookies, mongoose.Document {}
  * A cookie storage implementation that uses MongoDB to store cookies.
  */
 @singleton()
-export class MongoDBCookieStorage extends CookieStorage {
+export class MongoDBCookieStore extends CookieStore {
     private readonly connection: mongoose.Connection;
     private readonly model: mongoose.Model<UserCookiesDocument>;
     private readonly schema = new mongoose.Schema<UserCookiesDocument>({

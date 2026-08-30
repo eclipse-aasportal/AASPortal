@@ -6,15 +6,17 @@
  *
  *****************************************************************************/
 
+import { container, singleton } from 'tsyringe';
 import { ConsoleLogger } from './console-logger.js';
-import { Logger, LogLevel } from './logger.js';
+import { Logger } from './logger.js';
 
+@singleton()
 export class LoggerFactory {
     private static instance?: Logger;
 
-    public static getInstance(logLevel: LogLevel, isMainLogger = false): Logger {
+    public getInstance(): Logger {
         if (!LoggerFactory.instance) {
-            LoggerFactory.instance = new ConsoleLogger(logLevel, isMainLogger);
+            LoggerFactory.instance = container.resolve(ConsoleLogger);
         }
 
         return LoggerFactory.instance;

@@ -8,16 +8,9 @@
 
 import capitalize from 'lodash-es/capitalize.js';
 
-export type UserRole = 'reader' | 'editor' | 'admin' | undefined;
+export type UserRole = 'user' | 'admin';
 
-export const priority: UserRole[] = ['reader', 'editor', 'admin'];
-
-/** The user roles. */
-export const USER_ROLES: Record<string, string> = {
-    admin: 'admin',
-    editor: 'editor',
-    reader: 'reader',
-};
+export const priority: UserRole[] = ['user', 'admin'];
 
 /** JSON web token private claim. */
 export interface User {

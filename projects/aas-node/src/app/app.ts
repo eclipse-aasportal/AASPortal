@@ -91,31 +91,35 @@ export class App {
             },
         );
 
-        this.app.get('/api/me', async (req, res) => {
+        this.app.get('/auth/me', async (req, res) => {
             await this.identityProvider.me(req, res);
         });
 
-        this.app.get('/api/login', async (req, res) => {
+        this.app.get('/auth/login', async (req, res) => {
             await this.identityProvider.login(req, res);
         });
 
-        this.app.use('/api/callback', async (req, res) => {
+        this.app.use('/auth/callback', async (req, res) => {
             await this.identityProvider.callback(req, res);
         });
 
-        this.app.post('/api/logout', async (req, res) => {
+        this.app.get('/auth/login_status_iframe.html', async (req, res) => {
+            await this.identityProvider.checkSession(req, res);
+        });
+
+        this.app.post('/auth/logout', async (req, res) => {
             await this.identityProvider.logout(req, res);
         });
 
-        this.app.post('/api/accounts', async (req, res) => {
+        this.app.post('/auth/accounts', async (req, res) => {
             await this.identityProvider.createAccount(req, res);
         });
 
-        this.app.patch('/api/accounts', async (req, res) => {
+        this.app.patch('/auth/accounts', async (req, res) => {
             await this.identityProvider.updateAccount(req, res);
         });
 
-        this.app.delete('/api/accounts', async (req, res) => {
+        this.app.delete('/auth/accounts', async (req, res) => {
             await this.identityProvider.deleteAccount(req, res);
         });
 

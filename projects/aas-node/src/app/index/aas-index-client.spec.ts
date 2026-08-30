@@ -10,11 +10,11 @@ import 'reflect-metadata';
 import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { container } from 'tsyringe';
 import { MessagePort, Worker } from 'worker_threads';
-import { AASIndexClient } from './aas-index-client.js';
-import { Variable } from '../variable';
-import { createSpyObj } from '../../test/mocks';
-import { ChannelCommand, ChannelError, ChannelResponse } from './aas-index';
 import { aas, AASCursor } from 'aas-core';
+import { AASIndexClient } from './aas-index-client.js';
+import { Variable } from '../variable.js';
+import { createSpyObj } from '../../test/mocks.js';
+import { ChannelCommand, ChannelError, ChannelResponse } from './aas-index.js';
 
 vi.mock(import('worker_threads'), () => {
     class WorkerMock implements Partial<Worker> {
@@ -132,14 +132,14 @@ describe('AASIndexClient', () => {
 
     it('should connect to the worker', () => {
         const port: Mocked<MessagePort> = createSpyObj<MessagePort>(['postMessage', 'on', 'off']);
-        client.connect(port);
+        client.connect(port, 'worker-name');
 
         expect(client['worker']?.postMessage).toHaveBeenCalledWith(
             {
                 application: 'IndexApp',
                 type: 'command',
                 name: 'connect',
-                args: { port },
+                args: { port, name: 'worker-name' },
             },
             [port],
         );

@@ -7,18 +7,16 @@
  *****************************************************************************/
 
 import express from 'express';
-import { inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import jwt from 'jsonwebtoken';
 import jwksClient, { JwksClient } from 'jwks-rsa';
 import * as z from 'zod';
 
 import { ApplicationError, ErrorData, User } from 'aas-core';
-import { Logger, LOGGER } from 'aas-package';
 
 import { IdentityProviderClient, RefreshTokenResponse } from './identity-provider-client.js';
-import { Variable } from '../variable.js';
 import { ERRORS } from '../errors.js';
-import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { USER_RIGHTS_STORE } from './user-rights-store.js';
 
 export const AuthorizationServerSchema = z.object({
     issuer: z.url(),
@@ -41,30 +39,29 @@ export interface AuthorizationDetails {
     readonly identifier?: string;
 }
 
+/** see: https://connect2id.com/products/server/docs/api/token#token-response */
 export interface TokenEndpointResponse {
     readonly access_token: string;
-    readonly expires_in?: number;
+    readonly expires_in: number;
     readonly id_token?: string;
     readonly refresh_token?: string;
-    readonly scope?: string;
+    readonly refresh_token_expires_in?: number;
+    readonly scope: string;
     readonly authorization_details?: AuthorizationDetails[];
     readonly token_type: 'bearer' | 'dpop' | Lowercase<string>;
 }
 
 @singleton()
-export class OicdClient extends IdentityProviderClient {
+export class OidcClient extends IdentityProviderClient {
+    private readonly userRights = container.resolve(USER_RIGHTS_STORE);
     private configuration?: AuthorizationServer;
     private readonly server: string;
     private readonly clientSecret: string;
     private readonly secure = process.env.NODE_ENV === 'production';
     private jwksClient?: JwksClient;
 
-    public constructor(
-        @inject(LOGGER) logger: Logger,
-        @inject(COOKIE_STORE) cookies: CookieStorage,
-        @inject(Variable) private readonly variable: Variable,
-    ) {
-        super(logger, cookies, variable.CLIENT_ID);
+    public constructor() {
+        super();
 
         this.server = this.variable.IDENTITY_PROVIDER;
         this.clientSecret = this.variable.CLIENT_SECRET;
@@ -76,7 +73,7 @@ export class OicdClient extends IdentityProviderClient {
             const authorization_endpoint = (await this.getConfiguration()).authorization_endpoint;
             const code_verifier = this.generateCodeVerifier();
             const code_challenge = this.generateCodeChallenge(code_verifier);
-            const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/api/callback`;
+            const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/auth/callback`;
             const state = this.generateCodeVerifier(24);
             req.session.code_verifier = code_verifier;
             req.session.state = state;
@@ -99,14 +96,13 @@ export class OicdClient extends IdentityProviderClient {
         try {
             const configuration = await this.getConfiguration();
             const token_endpoint = configuration.token_endpoint;
-            const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/api/callback`;
-            const code = req.query.code as string | undefined;
-            const session_state = req.query.session_state as string | undefined;
-            const code_verifier = req.session.code_verifier;
+            const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/auth/callback`;
+            const code = String(req.query.code);
+            const session_state = String(req.query.session_state);
+            const code_verifier = String(req.session.code_verifier);
             const state = req.session.state;
             delete req.session.code_verifier;
             delete req.session.state;
-            delete req.session.session_state;
             if (!code || !state || req.query.state !== state) {
                 return res.status(400).json({
                     name: 'ApplicationError',
@@ -115,19 +111,13 @@ export class OicdClient extends IdentityProviderClient {
                 } satisfies ErrorData);
             }
 
-            if (session_state) {
-                req.session.session_state = session_state;
-            }
-
             const params = new URLSearchParams();
             params.set('grant_type', 'authorization_code');
             params.set('client_id', this.clientId);
             params.set('client_secret', this.clientSecret);
             params.set('code', code);
             params.set('redirect_uri', redirect_uri);
-            if (code_verifier) {
-                params.set('code_verifier', code_verifier);
-            }
+            params.set('code_verifier', code_verifier);
 
             const response = await fetch(token_endpoint, {
                 method: 'POST',
@@ -153,12 +143,19 @@ export class OicdClient extends IdentityProviderClient {
             }
 
             const tokenData = (await response.json()) as TokenEndpointResponse;
+            const payload = jwt.decode(tokenData.access_token, { json: true });
+            req.session.user_id = payload?.email;
             req.session.access_token = tokenData.access_token;
+            req.session.expires_at = Date.now() + tokenData.expires_in * 1000;
             req.session.refresh_token = tokenData.refresh_token;
             res.redirect(new URL('start', this.variable.HOST_URL ?? `${req.protocol}://${req.host}`).href);
         } catch (error) {
             return this.sendError(res, error);
         }
+    }
+
+    public override async checkSession(req: express.Request, res: express.Response): Promise<express.Response | void> {
+        return res.sendStatus(501);
     }
 
     public override async logout(req: express.Request, res: express.Response): Promise<express.Response> {
@@ -201,7 +198,7 @@ export class OicdClient extends IdentityProviderClient {
     }
 
     public override async createAccount(req: express.Request, res: express.Response): Promise<express.Response> {
-        return res.sendStatus(500);
+        return res.sendStatus(501);
     }
 
     protected override async getPublicKey(token: string): Promise<string> {
@@ -257,11 +254,9 @@ export class OicdClient extends IdentityProviderClient {
             throw new ApplicationError(ERRORS.INTERNAL_SERVER_ERROR, {}, 500);
         }
 
-        const user: User = {
-            id: String(payload.email),
-            name: String(payload.name),
-            role: 'editor',
-        };
+        const id = String(payload.email);
+        const role = (await this.userRights.get(id)).role;
+        const user: User = { id, name: String(payload.name), role };
 
         return { refresh_token: tokenData.refresh_token!, access_token: tokenData.access_token, user };
     }

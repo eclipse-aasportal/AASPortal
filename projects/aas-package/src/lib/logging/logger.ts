@@ -12,6 +12,8 @@ import type { Request, Response, NextFunction, RequestHandler } from 'express';
 /** Injection token. */
 export const LOGGER: InjectionToken<Logger> = Symbol('LOGGER');
 
+export const LOG_LEVEL: InjectionToken<LogLevel> = Symbol('LOG_LEVEL');
+
 /** The logging levels. */
 export type LogLevel = 'Error' | 'Warning' | 'Info';
 

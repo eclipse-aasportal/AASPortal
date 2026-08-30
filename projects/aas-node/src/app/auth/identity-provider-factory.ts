@@ -6,28 +6,22 @@
  *
  *****************************************************************************/
 
-import { DependencyContainer } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import { IdentityProviderClient } from './identity-provider-client.js';
 import { Variable } from '../variable.js';
-import { FileSystemIdentityProvider } from './file-system-identity-provider.js';
-import { MongoDBIdentityProvider } from './mongo-db-identity-provider.js';
-import { OicdClient } from './oicd-client.js';
+import { OidcClient } from './oidc-client.js';
+import { IdentityProvider } from './identity-provider.js';
 
+@singleton()
 export class IdentityProviderFactory {
     private static instance: IdentityProviderClient;
 
-    public static getInstance(c: DependencyContainer): IdentityProviderClient {
-        if (!IdentityProviderFactory.instance) {
-            const value = c.resolve(Variable).IDENTITY_PROVIDER;
-            if (!value || value.startsWith('file:')) {
-                IdentityProviderFactory.instance = c.resolve(FileSystemIdentityProvider);
-            } else if (value.startsWith('mongodb:')) {
-                IdentityProviderFactory.instance = c.resolve(MongoDBIdentityProvider);
-            } else if (value.startsWith('https:') || value.startsWith('http:')) {
-                IdentityProviderFactory.instance = c.resolve(OicdClient);
-            } else {
-                throw new Error(`Unknown identity provider: ${value}`);
-            }
+    public getInstance(): IdentityProviderClient {
+        const value = container.resolve(Variable).IDENTITY_PROVIDER;
+        if (value.startsWith('https:') || value.startsWith('http:')) {
+            IdentityProviderFactory.instance = container.resolve(OidcClient);
+        } else {
+            IdentityProviderFactory.instance = container.resolve(IdentityProvider);
         }
 
         return IdentityProviderFactory.instance;
