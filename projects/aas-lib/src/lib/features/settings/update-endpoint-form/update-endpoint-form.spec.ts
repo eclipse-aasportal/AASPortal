@@ -126,6 +126,11 @@ describe('UpdateEndpointForm', () => {
         await app.tick();
         httpController.expectOne({ method: 'DELETE', url: '/api/v1/endpoints/RW5kcG9pbnQgQQ' }).flush(null);
 
+        // deleteEndpoint()'s own promise resolves once it has *triggered* the reload -- it doesn't
+        // wait for that reload's request to actually complete, so await it before expecting that
+        // request rather than after.
+        await deletePromise;
+
         await app.tick();
         httpController.expectOne('/api/v1/endpoints').flush([
             {
@@ -135,8 +140,8 @@ describe('UpdateEndpointForm', () => {
             },
         ] satisfies AASEndpoint[]);
 
-        await deletePromise;
-        await fixture.whenStable();
+        await app.tick();
+        await app.tick(); // let the resource-sync effect pick up the reloaded value
 
         expect(component.form.items.length).toBe(1);
         expect(component.form.endpoint().value()).toBe('Endpoint B');
