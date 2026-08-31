@@ -126,6 +126,7 @@ export type ViewRouteName =
     | 'OperationalData'
     | 'Laser'
     | 'ServiceRequestNotification'
+    | 'SensorMeasurementValue'
     | 'TechnicalData';
 
 export type ViewRouteMap = Partial<Record<ViewRouteName, aas.Submodel>>;

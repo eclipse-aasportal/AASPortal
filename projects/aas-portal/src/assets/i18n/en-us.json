@@ -341,6 +341,22 @@
     "ServiceRequestNotification": {
         "TITLE": "Service Request Notification"
     },
+    "SensorMeasurementValue": {
+        "TITLE": "Sensor Measurement Value",
+        "VALUE": "Value",
+        "TIMESTAMP": "Measurement timestamp",
+        "PREDEFINED_VALUE": "Predefined value",
+        "QUALITY": "Quality",
+        "RANGE": "Range",
+        "SCALE": "Scale",
+        "TAG": "Tag",
+        "ORIGIN": "Origin",
+        "VERSION": "Version",
+        "IDENTIFIER": "Identifier",
+        "LIVE": "Live value",
+        "EXTENSIONS": "Additional elements",
+        "INVALID_TEMPLATE": "The Measurement Value submodel does not conform to IDTA 02029-1 v1.0."
+    },
     "Settings": {
         "ADD_ENDPOINT": "Add Endpoint...",
         "ENDPOINT_INDEX": "Endpoint Index...",
@@ -364,6 +380,7 @@
         "OperationalData": "Operational data",
         "PLACEHOLDER_FILTER": "Filter",
         "ServiceRequestNotification": "Service request notification",
+        "SensorMeasurementValue": "Sensor measurement value",
         "TechnicalData": "Technical data",
         "VIEWS": "Views"
     },
