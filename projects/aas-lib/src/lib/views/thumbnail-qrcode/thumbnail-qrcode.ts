@@ -6,7 +6,17 @@
  *
  *****************************************************************************/
 
-import { Component, computed, effect, ElementRef, inject, InjectionToken, input, linkedSignal, viewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    effect,
+    ElementRef,
+    inject,
+    InjectionToken,
+    input,
+    linkedSignal,
+    viewChild,
+} from '@angular/core';
 import QRCode from 'qrcode';
 import { aas, AASDocument } from 'aas-core';
 import { WINDOW } from '../../shared/services/window.service';
@@ -23,7 +33,7 @@ export const QR_CODE = new InjectionToken<typeof QRCode>('Draw QR code', { facto
     selector: 'fhg-thumbnail-qrcode',
     templateUrl: './thumbnail-qrcode.html',
     styleUrl: './thumbnail-qrcode.scss',
-    imports: [TranslateDirective]
+    imports: [TranslateDirective],
 })
 export class ThumbnailQRCode {
     public constructor() {
@@ -44,7 +54,7 @@ export class ThumbnailQRCode {
     public readonly id = computed(() => this.document()?.id ?? '-');
 
     public readonly assetId = computed(() => this.document()?.assetId ?? '-');
-    
+
     public readonly version = computed(() =>
         this.versionToString(this.document()?.content?.assetAdministrationShells?.at(0)?.administration),
     );

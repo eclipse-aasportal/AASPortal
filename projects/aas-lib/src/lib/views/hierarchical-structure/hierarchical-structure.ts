@@ -520,8 +520,8 @@ export class HierarchicalStructure extends TreeComponent<aas.Entity, NodeOptions
         return Math.hypot(dx, dy);
     }
 
-    public toggleOrientation() {
-        this.horizontal.set(!this.horizontal)
+    public toggleOrientation(): void {
+        this.horizontal.set(!this.horizontal);
     }
 
     /**

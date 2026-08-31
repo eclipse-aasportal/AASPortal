@@ -29,7 +29,14 @@ import { RouterModule } from '@angular/router';
     templateUrl: './contact-information-view.html',
     styleUrls: ['./contact-information-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'ContactInformation' }],
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, ContactInformation, RouterModule],
+    imports: [
+        TranslateDirective,
+        NgbPaginationModule,
+        NgbAccordionModule,
+        ThumbnailQRCode,
+        ContactInformation,
+        RouterModule,
+    ],
 })
 export class ContactInformationView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

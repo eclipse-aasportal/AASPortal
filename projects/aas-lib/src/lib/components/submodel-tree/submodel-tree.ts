@@ -298,7 +298,7 @@ export class SubmodelTree implements OnDestroy {
             type: SubmodelTreeItem['type'],
             value: string | undefined,
             url?: string,
-            isProse?: boolean
+            isProse?: boolean,
         ): SubmodelTreeItem => {
             const item: SubmodelTreeItem = {
                 idShort: child.idShort,
@@ -335,7 +335,7 @@ export class SubmodelTree implements OnDestroy {
                 if (!child.value || child.value.length === 0) {
                     continue;
                 }
-                
+
                 push(child, 'text', getLocaleValue(child.value, currentLang), undefined, true);
             } else if (isFile(child)) {
                 if (!child.value || !document) {

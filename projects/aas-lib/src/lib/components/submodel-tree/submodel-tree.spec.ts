@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { describe, beforeEach, it, expect, Mocked } from 'vitest';
+import { describe, beforeEach, it, expect } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -92,7 +92,7 @@ describe('SubmodelTree', () => {
         expect(new Set(paths).size).toBe(paths.length);
     });
 
-    it('does not let sibling list items overwrite each other\'s items', () => {
+    it("does not let sibling list items overwrite each other's items", () => {
         const listItemGroups = component.groups().filter(group => group.level === 2);
         expect(listItemGroups.length).toBe(2);
 

@@ -18,7 +18,6 @@ const initialState: HierarchicalStructureViewData = {
 
 @Injectable({
     providedIn: 'root',
-    
 })
 export class HierarchicalStructureViewState extends LeafViewState<HierarchicalStructureViewData> {
     public constructor() {
