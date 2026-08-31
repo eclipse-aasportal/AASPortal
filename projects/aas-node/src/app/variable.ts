@@ -82,10 +82,10 @@ export class Variable {
     /** The number of worker threads. */
     public readonly MAX_WORKERS: number = process.env.MAX_WORKERS ? Number(process.env.MAX_WORKERS) : 2;
 
-    /** The time before a new endpoint scan starts.*/
+    /** The time before a new endpoint scan starts (default 1 hour = 3,600,00 ms).*/
     public readonly SCAN_ENDPOINT_TIMEOUT: number = process.env.SCAN_ENDPOINT_TIMEOUT
         ? Number(process.env.SCAN_ENDPOINT_TIMEOUT)
-        : 3600000;
+        : 3_600_000;
 
     /** The session secret. */
     public readonly SESSION_SECRET: string = process.env.SESSION_SECRET ?? 'aas-portal-session-secret';
@@ -93,7 +93,7 @@ export class Variable {
     /** The session store. */
     public readonly SESSION_STORE?: string = process.env.SESSION_STORE;
 
-    /** The session time-to-live in seconds. */
+    /** The session time-to-live in seconds (default 1 day = 86400). */
     public readonly SESSION_TTL: number = process.env.SESSION_TTL ? Number(process.env.SESSION_TTL) : 86400;
 
     /** The root directory for static files. */

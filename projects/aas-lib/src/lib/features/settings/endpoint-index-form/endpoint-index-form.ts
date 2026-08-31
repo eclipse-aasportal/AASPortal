@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Component, effect, inject, linkedSignal } from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NgbActiveModal, NgbModal, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -16,6 +16,7 @@ import { AASEndpointScheduleType } from 'aas-core';
 import { IndexChange } from '../../../shared/services/index-change';
 import { EndpointsApi } from '../../../shared/services/endpoints-api';
 import { PromptDialog } from '../../../core/prompt-dialog/prompt-dialog';
+import { AuthService } from '../../../../public-api';
 
 export interface EndpointIndexItem {
     name: string;
@@ -39,6 +40,7 @@ export class EndpointIndexForm {
     private readonly api = inject(EndpointsApi);
     private readonly translate = inject(TranslateService);
     private readonly modal = inject(NgbModal);
+    private readonly auth = inject(AuthService);
 
     public constructor() {
         this.indexChange.startUpdate.pipe(takeUntilDestroyed()).subscribe(event => {
@@ -139,6 +141,8 @@ export class EndpointIndexForm {
             { initialValue: [] as EndpointIndexItem[] },
         ),
     );
+
+    public readonly isAdmin = computed(() => this.auth.role() === 'admin');
 
     public close(): void {
         this.activeModal.close();

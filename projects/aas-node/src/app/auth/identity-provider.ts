@@ -9,6 +9,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { nanoid } from 'nanoid';
 import {
     isCredentials,
     User,
@@ -26,8 +27,8 @@ import { createHash, randomBytes } from 'crypto';
 import { USER_STORE, UserData } from './user-store.js';
 import { container, singleton } from 'tsyringe';
 import { USER_RIGHTS_STORE } from './user-rights-store.js';
-import { nanoid } from 'nanoid';
 
+const AAS_NODE_SESSION = 'AAS_NODE_SESSION';
 const ACCESS_TOKEN_EXPIRES_IN = 5 * 60; // 5 minutes
 const REFRESH_TOKEN_EXPIRES_IN = 7 * 24 * 60 * 60; // 7 days
 
@@ -114,7 +115,7 @@ export class IdentityProvider extends IdentityProviderClient {
         req.session.session_state = session_state;
         req.session.check_session_iframe = check_session_iframe;
 
-        res.cookie('AAS_NODE_SESSION', op_session_id, {
+        res.cookie(AAS_NODE_SESSION, op_session_id, {
             httpOnly: false,
             secure: true,
             sameSite: 'none',
@@ -144,63 +145,73 @@ export class IdentityProvider extends IdentityProviderClient {
         });
 
         const html = `
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>Check Session State</title>
-</head>
-<body>
-    <script>
-        const clientId = "${this.variable.CLIENT_ID}";
-        const sessionState = "${req.session.session_state}";
-        const opCookieName = "AAS_NODE_SESSION";
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Check Session State</title>
+    </head>
+    <body>
+        <script>
+            const clientId = '${this.variable.CLIENT_ID}';
+            const sessionState = '${req.session.session_state}';
+            const opCookieName = 'AAS_NODE_SESSION';
 
-        window.addEventListener("message", async (e) => {
-            const clientOrigin = e.origin;
-            const expectedMessage = clientId + " " + sessionState;
+            window.addEventListener(
+                'message',
+                async e => {
+                    const clientOrigin = e.origin;
+                    const expectedMessage = clientId + ' ' + sessionState;
+                    if (e.data === expectedMessage) {
+                        let status = 'changed';
+                        const opSessionId = getCookie(opCookieName);
+                        if (opSessionId) {
+                            const salt = sessionState.split('.')[1] || '';
+                            const hashInput = clientId + ' ' + clientOrigin + ' ' + opSessionId + ' ' + salt;
+                            const encoder = new TextEncoder();
+                            const data = encoder.encode(hashInput);
+                            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                            const hashArray = Array.from(new Uint8Array(hashBuffer));
+                            const hashBase64 = btoa(String.fromCharCode.apply(null, hashArray));
+                            const calculatedState =
+                                hashBase64
+                                    .replace(/=/g, '')
+                                    .replace(/\\+/g, '-')
+                                    .replace(/\\//g, '_') +
+                                '.' +
+                                salt;
 
-            if (e.data === expectedMessage) {
-                let status = "changed";
-                const opSessionId = getCookie(opCookieName);
+                            if (calculatedState === sessionState) {
+                                status = 'unchanged';
+                            }
+                        }
 
-                if (opSessionId) {
-                    const salt = sessionState.split('.')[1] || '';
-                    const hashInput = clientId + ' ' + clientOrigin + ' ' + opSessionId + ' ' + salt;
-                    const encoder = new TextEncoder();
-                    const data = encoder.encode(hashInput);
-                    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                    
-                    const hashArray = Array.from(new Uint8Array(hashBuffer));
-                    const hashBase64 = btoa(String.fromCharCode.apply(null, hashArray));
-                    const calculatedState = hashBase64.replace(/=/g, '').replace(/\\+/g, '-').replace(/\\//g, '_') + '.' + salt;
-                    if (calculatedState === sessionState) {
-                        status = "unchanged";
+                        e.source.postMessage(status, clientOrigin);
                     }
-                }
-                
-                e.source.postMessage(expectedMessage + " status:" + status, clientOrigin);
-            }
-        }, false);
+                },
+                false,
+            );
 
-        function getCookie(name) {
-            const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
-            if (parts.length === 2) return parts.pop().split(";").shift();
-        }
-    </script>
-</body>
+            function getCookie(name) {
+                const value = '; ' + document.cookie;
+                const parts = value.split('; ' + name + '=');
+                if (parts.length === 2) {
+                    return parts.pop().split(';').shift();
+                }
+            }
+        </script>
+    </body>
 </html>
     `;
 
         res.setHeader('Content-Type', 'text/html');
-        //res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-        return res.sendStatus(200).send(html);
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        return res.status(200).send(html);
     }
 
     public override async logout(req: express.Request, res: express.Response): Promise<express.Response> {
         delete req.user;
-        await this.destroySession(req.session);
+        await this.destroySession(req, res);
         return res.sendStatus(200);
     }
 
@@ -349,6 +360,11 @@ export class IdentityProvider extends IdentityProviderClient {
 
         const access_token = this.createAccessToken(user);
         return { refresh_token, access_token, user };
+    }
+
+    protected override async destroySession(req: express.Request, res: express.Response): Promise<void> {
+        await super.destroySession(req, res);
+        res.clearCookie(AAS_NODE_SESSION);
     }
 
     private isValidCodeChallenge(

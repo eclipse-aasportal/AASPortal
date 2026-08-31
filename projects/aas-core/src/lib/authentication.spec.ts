@@ -29,12 +29,24 @@ describe('authentication', () => {
     });
 
     describe('isUserAuthorized', () => {
-        it('true for actual: user, expected: user', () => {
-            expect(isUserAuthorized('user', ['user', 'admin'])).toBeTruthy();
+        it('true for actual: undefined, minimalRequired: undefined', () => {
+            expect(isUserAuthorized(undefined, undefined)).toBeTruthy();
         });
 
-        it('false for actual: user, expected: admin', () => {
-            expect(isUserAuthorized('user', ['admin'])).toBeFalsy();
+        it('false for actual: undefined, minimalRequired: "user"', () => {
+            expect(isUserAuthorized(undefined, undefined)).toBeTruthy();
+        });
+
+        it('true for actual: "user", minimalRequired: "user"', () => {
+            expect(isUserAuthorized('user', 'user')).toBeTruthy();
+        });
+
+        it('false for actual: "user", minimalRequired: "admin"', () => {
+            expect(isUserAuthorized('user', 'admin')).toBeFalsy();
+        });
+
+        it('true for actual: "admin", minimalRequired: "admin"', () => {
+            expect(isUserAuthorized('user', 'admin')).toBeFalsy();
         });
     });
 

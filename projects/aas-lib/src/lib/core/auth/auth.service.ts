@@ -11,8 +11,18 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { map, Observable, of, switchMap, take, throwError } from 'rxjs';
-import { UserProfile, UserRole, Credentials, AASEndpointAuth, SessionUser } from 'aas-core';
+import {
+    UserProfile,
+    UserRole,
+    Credentials,
+    AASEndpointAuth,
+    SessionUser,
+    ApplicationError,
+    isUserAuthorized,
+} from 'aas-core';
 import { DocumentCache } from '../../shared/services/document-cache';
+import { ERRORS } from '../../messages';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
     providedIn: 'root',
@@ -22,6 +32,7 @@ export class AuthService {
     private readonly cache = inject(DocumentCache);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly document = inject(DOCUMENT);
+    private readonly translate = inject(TranslateService);
     private readonly _user = signal<SessionUser | null | undefined>(undefined);
 
     public constructor() {
@@ -58,14 +69,17 @@ export class AuthService {
 
     /**
      * Ensures that the current user has the expected rights.
-     * @param roles The expected user roles.
+     * @param roles The minimum required role.
      */
-    public ensureAuthorized(...roles: UserRole[]): Observable<void> {
-        if (this.isAuthorized(roles)) {
-            return of(void 0);
-        }
-
-        return of(void 0);
+    public checkAuthorized(requiredRole: UserRole): Observable<void> {
+        return this.isAuthorized(requiredRole)
+            ? of(void 0)
+            : throwError(
+                  () =>
+                      new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {
+                          role: this.translate.instant(`AuthService.${requiredRole}`),
+                      }),
+              );
     }
 
     /**
@@ -152,17 +166,8 @@ export class AuthService {
      * Determines whether the current user is authorized for the specified roles.
      * @param expected The expected role, the current user must have.
      */
-    public isAuthorized(expected: UserRole[] | undefined): boolean {
-        if (!expected) {
-            return true;
-        }
-
-        const role = this.role();
-        if (!role) {
-            return false;
-        }
-
-        return expected.indexOf(role) >= 0;
+    public isAuthorized(requiredRole: UserRole | undefined): boolean {
+        return isUserAuthorized(this.role(), requiredRole);
     }
 
     /**

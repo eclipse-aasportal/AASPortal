@@ -10,7 +10,7 @@ import capitalize from 'lodash-es/capitalize.js';
 
 export type UserRole = 'user' | 'admin';
 
-export const priority: UserRole[] = ['user', 'admin'];
+const priority: UserRole[] = ['user', 'admin'];
 
 /** JSON web token private claim. */
 export interface User {
@@ -103,10 +103,18 @@ export function getUserNameFromEMail(email: string): string {
 }
 
 /**
- * Determines whether the current user is authorized for the specified roles.
+ * Determines whether the current user is authorized for the specified role.
  * @param actual The actual role.
- * @param expected The expected roles.
+ * @param minimumRequired The minimum required role.
  */
-export function isUserAuthorized(actual: UserRole, expected: UserRole[]): boolean {
-    return expected.indexOf(actual) >= 0;
+export function isUserAuthorized(actual: UserRole | undefined, minimumRequired: UserRole | undefined): boolean {
+    if (!minimumRequired) {
+        return true;
+    }
+
+    if (!actual) {
+        return false;
+    }
+
+    return priority.indexOf(actual) >= priority.indexOf(minimumRequired);
 }

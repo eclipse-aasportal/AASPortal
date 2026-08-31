@@ -78,7 +78,8 @@
         "LOGIN": "Anmelden...",
         "LOGOUT": "Abmelden",
         "CREATE_ACCOUNT": "Registrieren...",
-        "UPDATE_PROFILE": "Profil..."
+        "UPDATE_PROFILE": "Profil...",
+        "admin": "Administrator"
     },
     "Browser": {
         "TITLE": "AAS-Browser",
@@ -191,7 +192,7 @@
         "PASSWORD_EXPIRED": "Das Password ist abgelaufen.",
         "PASSWORD_REQUIRED": "Passwort erforderlich.",
         "PASSWORDS_NOT_EQUAL": "Die Passwörter sind nicht gleich.",
-        "UNAUTHORIZED_ACCESS": "Nicht autorisierter Zugriff.",
+        "UNAUTHORIZED_ACCESS": "Nicht autorisierter Zugriff. Sie benötigen {{role}}-Rechte.",
         "UNCAUGHT": "{0}",
         "UNKNOWN_USER": "Der Benutzer {{id}} ist unbekannt.",
         "UNKNOWN_VARIABLE_VALUE_TYPE": "Der Datentyp der Variable '{0}' ist unbestimmt.'",

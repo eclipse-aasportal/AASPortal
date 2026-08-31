@@ -39,19 +39,18 @@
                         } @else {
                             <div class=""></div>
                         }
-                        <div class="">
-                            <button
-                                type="button"
-                                class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
-                                [ngbTooltip]="'EndpointIndexForm.CLEAR_ENDPOINT_INDEX_TOOL_TIP' | translate"
-                                [openDelay]="300"
-                                placement="top"
-                                container="body"
-                                (click)="clearIndex(item.name).subscribe()"
-                            >
-                                <i class="bi bi-eraser-fill"></i>
-                            </button>
-                        </div>
+
+                        <button
+                            type="button"
+                            class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
+                            [ngbTooltip]="'EndpointIndexForm.CLEAR_ENDPOINT_INDEX_TOOL_TIP' | translate"
+                            [openDelay]="300"
+                            placement="top"
+                            container="body"
+                            (click)="clearIndex(item.name).subscribe()"
+                        >
+                            <i class="bi bi-eraser-fill"></i>
+                        </button>
                     } @else {
                         @if (item.progress < 0) {
                             <div class="text-center">
@@ -62,7 +61,7 @@
                         } @else {
                             <ngb-progressbar class="" [showValue]="true" type="info" [value]="item.progress" />
                         }
-                        <div class=""></div>
+
                         <button
                             type="button"
                             class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"

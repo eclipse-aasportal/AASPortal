@@ -22,16 +22,17 @@ export interface UserData {
 
 export const USER_STORE: InjectionToken<UserStore> = Symbol('USER_STORE');
 
+/** Represents a persistent user data store. */
 export abstract class UserStore {
     /**
-     * Reads the data of the user with the specified identification.
+     * Gets the data of the user with the specified identification.
      * @param userId The user identification (e-mail).
      * @returns The data of the specified user or `undefined` if such a user does not exist.
      */
     public abstract get(userId: string): Promise<UserData | undefined>;
 
     /**
-     * Writes the data of a new or already registered user with the specified identification.
+     * Adds or updates the data of a new or already registered user with the specified identification.
      * @param userId The user identification.
      * @param data The user data.
      */

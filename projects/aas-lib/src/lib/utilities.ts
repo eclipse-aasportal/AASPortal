@@ -54,7 +54,7 @@ export function messageToString(message: unknown, translate: TranslateService): 
     if (message instanceof ApplicationError) {
         text = translate.instant(message.message, message.args);
     } else if (typeof message === 'string') {
-        text = message;
+        text = translate.instant(message);
     } else if (message instanceof HttpErrorResponse) {
         if (isErrorData(message.error)) {
             text = translate.instant(message.error.message, message.error.args);

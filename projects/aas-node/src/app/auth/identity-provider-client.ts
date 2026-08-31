@@ -10,7 +10,6 @@ import { container, InjectionToken } from 'tsyringe';
 import crypto from 'crypto';
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { Session } from 'express-session';
 import { User, noop } from 'aas-core';
 import { LOGGER } from 'aas-package';
 import { COOKIE_STORE } from '../cookie-storage/cookie-store.js';
@@ -130,7 +129,7 @@ export abstract class IdentityProviderClient {
                     };
                 } catch (error) {
                     if (error.name !== 'TokenExpiredError' || !refresh_token) {
-                        this.destroySession(req.session);
+                        this.destroySession(req, res);
                         return res.redirect('/auth/login');
                     }
 
@@ -146,7 +145,7 @@ export abstract class IdentityProviderClient {
                         };
                     } catch (error) {
                         noop(error);
-                        this.destroySession(req.session);
+                        this.destroySession(req, res);
                         return res.redirect('/auth/login');
                     }
                 }
@@ -163,7 +162,7 @@ export abstract class IdentityProviderClient {
                     };
                 } catch (error) {
                     noop(error);
-                    this.destroySession(req.session);
+                    this.destroySession(req, res);
                     return res.redirect('/auth/login');
                 }
             }
@@ -220,12 +219,14 @@ export abstract class IdentityProviderClient {
      * the promise will always resolve regardless of errors. This method is typically used during logout or
      * other flows where a clean session termination is required.
      *
-     * @param session The session object to be destroyed.
+     * @param req The request.
+     * @param res The response.
      * @returns A promise that resolves once the session has been destroyed, regardless of success or failure.
      */
-    protected destroySession(session: Session): Promise<void> {
+    protected destroySession(req: express.Request, res: express.Response): Promise<void> {
         return new Promise(resolve => {
-            session.destroy(err => {
+            noop(res);
+            req.session.destroy(err => {
                 if (err) {
                     this.logger.error(err);
                 }

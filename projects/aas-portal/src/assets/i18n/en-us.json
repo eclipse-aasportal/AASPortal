@@ -78,7 +78,8 @@
         "LOGIN": "Login...",
         "LOGOUT": "Logout",
         "CREATE_ACCOUNT": "Register...",
-        "UPDATE_PROFILE": "Profile..."
+        "UPDATE_PROFILE": "Profile...",
+        "admin": "administrator"
     },
     "Browser": {
         "EMPTY": "No Asset Administration Shell available.",
@@ -192,7 +193,7 @@
         "PASSWORD_EXPIRED": "The password is expired.",
         "PASSWORD_REQUIRED": "Password required.",
         "PASSWORDS_NOT_EQUAL": "The passwords are not equal.",
-        "UNAUTHORIZED": "Unauthorized access.",
+        "UNAUTHORIZED_ACCESS": "Unauthorized access. You need {{role}} privileges.",
         "UNCAUGHT": "{0}",
         "UNKNOWN_USER": "The user {{id}} is unknown.",
         "UNKNOWN_VARIABLE_VALUE_TYPE": "The data type of the variable '{0}' is undefined.",
