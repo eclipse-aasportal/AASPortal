@@ -6,17 +6,38 @@
  *
  *****************************************************************************/
 
-import { Component, computed, effect, inject, linkedSignal } from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { NgbActiveModal, NgbModal, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import {
+    NgbActiveModal,
+    NgbAlert,
+    NgbAlertModule,
+    NgbModal,
+    NgbProgressbarModule,
+    NgbTooltipModule,
+} from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { filter, from, map, mergeMap, Observable, of, toArray, zip } from 'rxjs';
+import {
+    catchError,
+    debounceTime,
+    filter,
+    from,
+    map,
+    mergeMap,
+    Observable,
+    of,
+    Subject,
+    tap,
+    toArray,
+    zip,
+} from 'rxjs';
 import { AASEndpointScheduleType } from 'aas-core';
 import { IndexChange } from '../../../shared/services/index-change';
 import { EndpointsApi } from '../../../shared/services/endpoints-api';
 import { PromptDialog } from '../../../core/prompt-dialog/prompt-dialog';
-import { AuthService } from '../../../../public-api';
+import { AuthService } from '../../../core/auth/auth.service';
+import { messageToString } from '../../../utilities';
 
 export interface EndpointIndexItem {
     name: string;
@@ -29,7 +50,7 @@ export interface EndpointIndexItem {
 
 @Component({
     selector: 'fhg-endpoint-index-form',
-    imports: [FormsModule, TranslateDirective, TranslatePipe, NgbTooltipModule, NgbProgressbarModule],
+    imports: [FormsModule, TranslateDirective, TranslatePipe, NgbTooltipModule, NgbProgressbarModule, NgbAlertModule],
     providers: [],
     templateUrl: './endpoint-index-form.html',
     styleUrl: './endpoint-index-form.scss',
@@ -41,6 +62,7 @@ export class EndpointIndexForm {
     private readonly translate = inject(TranslateService);
     private readonly modal = inject(NgbModal);
     private readonly auth = inject(AuthService);
+    private _message$ = new Subject<string>();
 
     public constructor() {
         this.indexChange.startUpdate.pipe(takeUntilDestroyed()).subscribe(event => {
@@ -110,7 +132,19 @@ export class EndpointIndexForm {
                 });
             });
         });
+
+        this._message$
+            .pipe(
+                takeUntilDestroyed(),
+                tap(message => this.successMessage.set(message)),
+                debounceTime(5000),
+            )
+            .subscribe(() => this.selfClosingAlert()?.close());
     }
+
+    public readonly selfClosingAlert = viewChild<NgbAlert>('selfClosingAlert');
+
+    public readonly successMessage = signal('');
 
     public readonly items = linkedSignal(
         toSignal(
@@ -169,16 +203,31 @@ export class EndpointIndexForm {
                     return of(void 0);
                 }
 
-                return this.indexChange.clearIndex(endpoint);
+                return this.indexChange.clearIndex(endpoint).pipe(
+                    catchError(error => {
+                        this._message$.next(messageToString(error, this.translate));
+                        return of(void 0);
+                    }),
+                );
             }),
         );
     }
 
     public startScan(endpoint: string): Observable<void> {
-        return this.indexChange.startUpdateIndex(endpoint);
+        return this.indexChange.startUpdateIndex(endpoint).pipe(
+            catchError(error => {
+                this._message$.next(messageToString(error, this.translate));
+                return of(void 0);
+            }),
+        );
     }
 
     public cancelScan(endpoint: string): Observable<void> {
-        return this.indexChange.cancelUpdateIndex(endpoint);
+        return this.indexChange.cancelUpdateIndex(endpoint).pipe(
+            catchError(error => {
+                this._message$.next(messageToString(error, this.translate));
+                return of(void 0);
+            }),
+        );
     }
 }

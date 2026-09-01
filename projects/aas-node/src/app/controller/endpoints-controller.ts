@@ -49,7 +49,7 @@ export class EndpointsController extends Controller {
      * @returns All current available endpoints.
      */
     @Get('')
-    @Security('oauth2', ['admin'])
+    @Security('oauth2', ['user', 'admin'])
     @OperationId('GetEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
         return (await this.index.getEndpoints()).map(endpoint => {
@@ -166,7 +166,7 @@ export class EndpointsController extends Controller {
     public async getAllEndpointAuth(@Request() req: express.Request): Promise<AASEndpointAuth[]> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {}, 401);
         }
 
         return (await this.cookieStorage.getEndpoints(user.id)).map(endpoint => {
@@ -195,7 +195,7 @@ export class EndpointsController extends Controller {
     ): Promise<void> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {}, 401);
         }
 
         await this.cookieStorage.updatesEndpoints(user.id, items);

@@ -15,6 +15,11 @@
         <button type="button" class="btn-close" (click)="close()"></button>
     </div>
     <div class="modal-body">
+        @if (successMessage()) {
+            <ngb-alert #selfClosingAlert type="danger" (closed)="successMessage.set('')">{{
+                successMessage()
+            }}</ngb-alert>
+        }
         <div class="endpoint-index-grid">
             @for (item of items(); track item.name; let i = $index) {
                 <div class="endpoint-index-row">

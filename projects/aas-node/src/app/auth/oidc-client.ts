@@ -129,7 +129,7 @@ export class OidcClient extends IdentityProviderClient {
 
             if (!response.ok) {
                 const message = await response.text().catch(() => 'Token endpoint error');
-                this.destroySession(req.session);
+                this.destroySession(req, res);
                 return res.status(response.status).json({
                     name: 'ApplicationError',
                     message,
@@ -190,7 +190,7 @@ export class OidcClient extends IdentityProviderClient {
                 } satisfies ErrorData);
             }
 
-            await this.destroySession(req.session);
+            await this.destroySession(req, res);
             return res.sendStatus(200);
         } catch (error) {
             return this.sendError(res, error);
@@ -296,7 +296,8 @@ export class OidcClient extends IdentityProviderClient {
         if (error instanceof Error) {
             return res.status(500).json({
                 name: 'ApplicationError',
-                message: error.stack ?? error.message,
+                message: error.message,
+                stack: error.stack,
                 status: 500,
             } satisfies ErrorData);
         }

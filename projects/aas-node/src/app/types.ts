@@ -59,6 +59,7 @@ export interface ResponseData extends WorkerData {
 export interface ErrorData extends WorkerData {
     type: 'error';
     message: string;
+    stack?: string;
 }
 
 export function isCommandData(data: WorkerData): data is CommandData {

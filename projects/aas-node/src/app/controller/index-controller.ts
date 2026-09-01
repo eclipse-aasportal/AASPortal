@@ -25,7 +25,7 @@ export class IndexController extends Controller {
      * @summary Clears the index fro all AAS endpoints.
      */
     @Delete('clear-index')
-    @Security('oauth2', ['user', 'admin'])
+    @Security('oauth2', ['admin'])
     @OperationId('ClearIndex')
     public async clearIndex(): Promise<void> {
         await this.provider.clearIndex();
@@ -36,7 +36,7 @@ export class IndexController extends Controller {
      * @param name The endpoint name (Base64-URL encoded).
      */
     @Delete('{name}/clear-index')
-    @Security('oauth2', ['user', 'admin'])
+    @Security('oauth2', ['admin'])
     @OperationId('ClearEndpointIndex')
     public async clearEndpointIndex(@Path() name: string): Promise<void> {
         await this.provider.clearIndex(decodeBase64Url(name));

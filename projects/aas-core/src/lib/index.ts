@@ -206,7 +206,11 @@ export function isErrorData(value: unknown): value is ErrorData {
         return false;
     }
 
-    return typeof (value as ErrorData).message === 'string' && typeof (value as ErrorData).name === 'string';
+    return (
+        typeof (value as ErrorData).message === 'string' &&
+        typeof (value as ErrorData).name === 'string' &&
+        typeof (value as ErrorData).status === 'number'
+    );
 }
 
 /**

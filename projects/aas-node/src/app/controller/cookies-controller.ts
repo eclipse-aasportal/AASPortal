@@ -32,7 +32,7 @@ export class CookiesController extends Controller {
     public async getCookie(@Path() name: string, @Request() req: express.Request): Promise<string | undefined> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {}, 401);
         }
 
         return await this.storage.getCookie(user.id, name);
@@ -48,7 +48,7 @@ export class CookiesController extends Controller {
     public async setCookie(@Request() req: express.Request, @Path() name: string, @Body() data: string): Promise<void> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {}, 401);
         }
 
         await this.storage.setCookie(user.id, name, data);
@@ -63,7 +63,7 @@ export class CookiesController extends Controller {
     public async deleteCookie(@Path() name: string, @Request() request: express.Request): Promise<void> {
         const user = request.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {}, 401);
         }
 
         await this.storage.deleteCookie(user.id, name);

@@ -11,6 +11,7 @@ import { describe, afterEach, beforeEach, it, expect, vitest, vi, Mocked } from 
 import express from 'express';
 import { Session, SessionData } from 'express-session';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { UserProfile } from 'aas-core';
 
 import { createSpyObj } from '../../test/mocks.js';
@@ -61,6 +62,7 @@ describe('FileSystemIdentityProvider', () => {
             CLIENT_SECRET: 'test-client-secret',
             REDIRECT_URI: 'http://localhost/callback',
             HOST_URL: 'http://localhost',
+            SESSION_TTL: 86400,
         });
 
         cookies = createSpyObj<CookieStore>(['getCookie', 'setCookie', 'getEndpoints', 'updatesEndpoints']);
@@ -227,6 +229,67 @@ describe('FileSystemIdentityProvider', () => {
         });
     });
 
+    describe('refreshToken', () => {
+        const createRefreshToken = (expiresIn?: number): string =>
+            jwt.sign({ email: 'john.doe@email.com', name: 'John Doe' }, variable.CLIENT_SECRET, {
+                issuer: variable.IDENTITY_PROVIDER,
+                audience: variable.CLIENT_ID,
+                subject: 'john.doe@email.com',
+                algorithm: 'HS256',
+                ...(expiresIn === undefined ? {} : { expiresIn }),
+            });
+
+        it('should reject a refresh token with an invalid signature', async () => {
+            const refreshToken = `${createRefreshToken()}.tampered`;
+
+            await expect(identityProvider['refreshToken'](refreshToken)).rejects.toThrow();
+        });
+
+        it('should reject an expired refresh token', async () => {
+            const refreshToken = createRefreshToken(-1);
+
+            await expect(identityProvider['refreshToken'](refreshToken)).rejects.toThrow('jwt expired');
+        });
+    });
+
+    describe('checkSession', () => {
+        it('should return 401 if user is not logged in', async () => {
+            const req = createSpyObj<express.Request>([], { session: createSessionMock(), user: undefined });
+            const res = createSpyObj<express.Response>(['json', 'status']);
+            res.status.mockReturnThis();
+
+            await identityProvider.checkSession(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(401);
+        });
+
+        it('should safely serialize values embedded in the session iframe', async () => {
+            Object.assign(variable, { CLIENT_ID: `client'</script><script>alert(1)</script>` });
+            const req = createSpyObj<express.Request>([], {
+                session: createSessionMock({ session_state: `state'</script><script>alert(1)</script>` }),
+                user: {
+                    id: 'john.doe@email.com',
+                    name: 'John Doe',
+                    role: 'user',
+                    client_id: `client'</script><script>alert(1)</script>`,
+                },
+            });
+            const res = createSpyObj<express.Response>(['send', 'setHeader', 'status']);
+            res.status.mockReturnThis();
+
+            await identityProvider.checkSession(req, res);
+
+            expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/html');
+            expect(res.setHeader).toHaveBeenCalledWith(
+                'Cache-Control',
+                'no-store, no-cache, must-revalidate, max-age=0',
+            );
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith(expect.not.stringContaining('</script><script>alert(1)</script>'));
+            expect(res.send).toHaveBeenCalledWith(expect.stringContaining('\\u003c/script\\u003e'));
+        });
+    });
+
     describe('logout', () => {
         it('should logout a user', async () => {
             const session = createSessionMock();
@@ -349,7 +412,7 @@ describe('FileSystemIdentityProvider', () => {
             const middleware = identityProvider.middleware();
             await middleware(req, res, next);
             expect(identityProvider['verifyAccessToken']).toHaveBeenCalledWith('invalid-access-token');
-            expect(identityProvider['destroySession']).toHaveBeenCalledWith(session);
+            expect(identityProvider['destroySession']).toHaveBeenCalledWith(req, res);
             expect(res.redirect).toHaveBeenCalledWith('/auth/login');
         });
     });

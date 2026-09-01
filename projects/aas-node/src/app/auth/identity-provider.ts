@@ -30,7 +30,6 @@ import { USER_RIGHTS_STORE } from './user-rights-store.js';
 
 const AAS_NODE_SESSION = 'AAS_NODE_SESSION';
 const ACCESS_TOKEN_EXPIRES_IN = 5 * 60; // 5 minutes
-const REFRESH_TOKEN_EXPIRES_IN = 7 * 24 * 60 * 60; // 7 days
 
 @singleton()
 export class IdentityProvider extends IdentityProviderClient {
@@ -51,6 +50,7 @@ export class IdentityProvider extends IdentityProviderClient {
         const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/auth/callback`;
         req.session.state = state;
         req.session.code_verifier = code_verifier;
+
         const url = new URL('login', this.variable.HOST_URL ?? `${req.protocol}://${req.host}`);
         url.searchParams.set('client_id', this.variable.CLIENT_ID);
         url.searchParams.set('code_challenge', code_challenge);
@@ -119,6 +119,7 @@ export class IdentityProvider extends IdentityProviderClient {
             httpOnly: false,
             secure: true,
             sameSite: 'none',
+            expires: new Date(Date.now() + this.variable.SESSION_TTL * 1000),
             path: '/',
         });
 
@@ -134,16 +135,14 @@ export class IdentityProvider extends IdentityProviderClient {
         const user = req.user;
         if (!user) {
             return res.status(401).json({
-                message: ERRORS.UNAUTHORIZED,
+                message: ERRORS.UNAUTHORIZED_ACCESS,
                 name: 'ApplicationError',
                 status: 401,
             } satisfies ErrorData);
         }
 
-        res.cookie('AAS_NODE_SESSION', req.session.op_session_Id, {
-            expires: new Date(Date.now() + this.variable.SESSION_TTL * 1000),
-        });
-
+        const clientId = this.toScriptLiteral(this.variable.CLIENT_ID);
+        const sessionState = this.toScriptLiteral(req.session.session_state);
         const html = `
 <!doctype html>
 <html>
@@ -153,9 +152,9 @@ export class IdentityProvider extends IdentityProviderClient {
     </head>
     <body>
         <script>
-            const clientId = '${this.variable.CLIENT_ID}';
-            const sessionState = '${req.session.session_state}';
-            const opCookieName = 'AAS_NODE_SESSION';
+            const clientId = ${clientId};
+            const sessionState = ${sessionState};
+            const opCookieName = '${AAS_NODE_SESSION}';
 
             window.addEventListener(
                 'message',
@@ -163,31 +162,33 @@ export class IdentityProvider extends IdentityProviderClient {
                     const clientOrigin = e.origin;
                     const expectedMessage = clientId + ' ' + sessionState;
                     if (e.data === expectedMessage) {
-                        let status = 'changed';
-                        const opSessionId = getCookie(opCookieName);
-                        if (opSessionId) {
-                            const salt = sessionState.split('.')[1] || '';
-                            const hashInput = clientId + ' ' + clientOrigin + ' ' + opSessionId + ' ' + salt;
-                            const encoder = new TextEncoder();
-                            const data = encoder.encode(hashInput);
-                            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                            const hashArray = Array.from(new Uint8Array(hashBuffer));
-                            const hashBase64 = btoa(String.fromCharCode.apply(null, hashArray));
-                            const calculatedState =
-                                hashBase64
-                                    .replace(/=/g, '')
-                                    .replace(/\\+/g, '-')
-                                    .replace(/\\//g, '_') +
-                                '.' +
-                                salt;
-
-                            if (calculatedState === sessionState) {
-                                status = 'unchanged';
-                            }
-                        }
-
-                        e.source.postMessage(status, clientOrigin);
+                        return;
                     }
+
+                    let status = 'changed';
+                    const opSessionId = getCookie(opCookieName);
+                    if (opSessionId) {
+                        const salt = sessionState.split('.')[1] || '';
+                        const hashInput = clientId + ' ' + clientOrigin + ' ' + opSessionId + ' ' + salt;
+                        const encoder = new TextEncoder();
+                        const data = encoder.encode(hashInput);
+                        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                        const hashArray = Array.from(new Uint8Array(hashBuffer));
+                        const hashBase64 = btoa(String.fromCharCode.apply(null, hashArray));
+                        const calculatedState =
+                            hashBase64
+                                .replace(/=/g, '')
+                                .replace(/\\+/g, '-')
+                                .replace(/\\//g, '_') +
+                            '.' +
+                            salt;
+
+                        if (calculatedState === sessionState) {
+                            status = 'unchanged';
+                        }
+                    }
+
+                    e.source?.postMessage(status, clientOrigin);
                 },
                 false,
             );
@@ -265,7 +266,7 @@ export class IdentityProvider extends IdentityProviderClient {
         const user = req.user;
         if (!user) {
             return res.status(401).json({
-                message: ERRORS.UNAUTHORIZED,
+                message: ERRORS.UNAUTHORIZED_ACCESS,
                 name: 'ApplicationError',
                 status: 401,
             } satisfies ErrorData);
@@ -280,7 +281,7 @@ export class IdentityProvider extends IdentityProviderClient {
             } satisfies ErrorData);
         }
 
-        const data = await this.userStore.get(profile.id);
+        const data = await this.userStore.get(user.id);
         if (!data) {
             return res.status(404).json({
                 message: ERRORS.USER_DOES_NOT_EXIST,
@@ -328,7 +329,7 @@ export class IdentityProvider extends IdentityProviderClient {
         const user = req.user;
         if (!user) {
             return res.status(401).json({
-                message: ERRORS.UNAUTHORIZED,
+                message: ERRORS.UNAUTHORIZED_ACCESS,
                 name: 'ApplicationError',
                 status: 401,
             } satisfies ErrorData);
@@ -351,11 +352,24 @@ export class IdentityProvider extends IdentityProviderClient {
     }
 
     protected override async refreshToken(refresh_token: string): Promise<RefreshTokenResponse> {
-        const payload = jwt.decode(refresh_token, { json: true })!;
+        const payload = jwt.verify(refresh_token, this.variable.CLIENT_SECRET, {
+            issuer: this.variable.IDENTITY_PROVIDER,
+            audience: this.variable.CLIENT_ID,
+            algorithms: [this.algorithm],
+        });
+        if (
+            typeof payload === 'string' ||
+            typeof payload.email !== 'string' ||
+            typeof payload.name !== 'string' ||
+            payload.sub !== payload.email
+        ) {
+            throw new jwt.JsonWebTokenError('Invalid refresh token payload');
+        }
+
         const user: User = {
             id: payload.email,
             name: payload.name,
-            role: 'user',
+            role: (await this.userRights.get(payload.email)).role,
         };
 
         const access_token = this.createAccessToken(user);
@@ -390,6 +404,19 @@ export class IdentityProvider extends IdentityProviderClient {
         return `${hash}.${salt}`;
     }
 
+    private toScriptLiteral(value: string | undefined): string {
+        return JSON.stringify(value ?? '').replace(/[<>&\u2028\u2029]/g, (character: string): string => {
+            const escape = {
+                '<': '\\u003c',
+                '>': '\\u003e',
+                '&': '\\u0026',
+                '\u2028': '\\u2028',
+                '\u2029': '\\u2029',
+            }[character];
+            return escape ?? character;
+        });
+    }
+
     private createAccessToken(user: User): string {
         return jwt.sign({ email: user.id, name: user.name }, this.variable.CLIENT_SECRET, {
             issuer: this.variable.IDENTITY_PROVIDER,
@@ -405,7 +432,7 @@ export class IdentityProvider extends IdentityProviderClient {
             issuer: this.variable.IDENTITY_PROVIDER,
             audience: this.variable.CLIENT_ID,
             subject: user.id,
-            expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+            expiresIn: this.variable.SESSION_TTL,
             algorithm: this.algorithm,
         });
     }

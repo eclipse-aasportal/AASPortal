@@ -53,6 +53,7 @@ export class IndexApp {
                 application: 'IndexApp',
                 type: 'error',
                 message: error.message,
+                stack: error.stack,
             } satisfies ErrorData);
         }
     };

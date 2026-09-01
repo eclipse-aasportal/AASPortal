@@ -93,7 +93,7 @@ export class Variable {
     /** The session store. */
     public readonly SESSION_STORE?: string = process.env.SESSION_STORE;
 
-    /** The session time-to-live in seconds (default 1 day = 86400). */
+    /** The session time-to-live in seconds (default 1 day = 86400 s). */
     public readonly SESSION_TTL: number = process.env.SESSION_TTL ? Number(process.env.SESSION_TTL) : 86400;
 
     /** The root directory for static files. */
