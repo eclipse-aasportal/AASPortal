@@ -91,7 +91,7 @@ export class Variable {
     public readonly SESSION_SECRET: string = process.env.SESSION_SECRET ?? 'aas-portal-session-secret';
 
     /** The session store. */
-    public readonly SESSION_STORE?: string = process.env.SESSION_STORE;
+    public readonly SESSION_STORE: string = process.env.SESSION_STORE ?? 'aasportal-users.db';
 
     /** The session time-to-live in seconds (default 1 day = 86400 s). */
     public readonly SESSION_TTL: number = process.env.SESSION_TTL ? Number(process.env.SESSION_TTL) : 86400;

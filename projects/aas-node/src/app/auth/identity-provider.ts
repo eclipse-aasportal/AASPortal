@@ -135,7 +135,7 @@ export class IdentityProvider extends IdentityProviderClient {
         const user = req.user;
         if (!user) {
             return res.status(401).json({
-                message: ERRORS.UNAUTHORIZED_ACCESS,
+                message: ERRORS.UNAUTHENTICATED_ACCESS,
                 name: 'ApplicationError',
                 status: 401,
             } satisfies ErrorData);
@@ -266,7 +266,7 @@ export class IdentityProvider extends IdentityProviderClient {
         const user = req.user;
         if (!user) {
             return res.status(401).json({
-                message: ERRORS.UNAUTHORIZED_ACCESS,
+                message: ERRORS.UNAUTHENTICATED_ACCESS,
                 name: 'ApplicationError',
                 status: 401,
             } satisfies ErrorData);

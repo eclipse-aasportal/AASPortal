@@ -47,16 +47,16 @@ export class SqliteUserStore extends UserStore {
     }
 
     public override async get(userId: string): Promise<UserData | undefined> {
-        const value = this.getUserSql.get(userId);
-        if (!value) {
+        const result = this.getUserSql.get(userId);
+        if (!result) {
             return undefined;
         }
 
         return {
-            id: String(value.id),
-            name: String(value.name),
-            password: String(value.password),
-            created: new Date(String(value.created)),
+            id: String(result.id),
+            name: String(result.name),
+            password: String(result.password),
+            created: new Date(String(result.created)),
         };
     }
 

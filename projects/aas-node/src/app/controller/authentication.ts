@@ -27,11 +27,11 @@ export class Authentication {
     public async authentication(req: Request, name: string, scopes: UserRole[]): Promise<User> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, undefined, 401);
+            throw new ApplicationError(ERRORS.UNAUTHENTICATED_ACCESS, undefined, 401);
         }
 
         if (name === 'oauth2' && scopes.length > 0 && !scopes.some(scope => isUserAuthorized(user.role, scope))) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, { role: scopes.at(0) }, 401);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, { role: `UserRole.${scopes.at(0)}` }, 403);
         }
 
         return user;

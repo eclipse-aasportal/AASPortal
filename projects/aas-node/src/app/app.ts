@@ -24,7 +24,7 @@ import { RegisterRoutes } from './routes/routes.js';
 import { Variable } from './variable.js';
 import { errorHandler } from './error-handler.js';
 import { IDENTITY_PROVIDER, IdentityProviderClient } from './auth/identity-provider-client.js';
-import { SESSION_STORE } from './session/session-store.js';
+import { SESSION_STORE, SessionStore } from './session/session-store.js';
 
 @singleton()
 export class App {
@@ -34,7 +34,7 @@ export class App {
         @inject(LOGGER) private readonly logger: Logger,
         @inject(Variable) private readonly variable: Variable,
         @inject(IDENTITY_PROVIDER) private readonly identityProvider: IdentityProviderClient,
-        @inject(SESSION_STORE) private readonly sessionStore: session.Store,
+        @inject(SESSION_STORE) private readonly sessionStore: SessionStore,
     ) {
         this.app = express();
         this.setup();

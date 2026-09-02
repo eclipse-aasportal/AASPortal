@@ -52,24 +52,38 @@ import {
 export function messageToString(message: unknown, translate: TranslateService): string {
     let text: string;
     if (message instanceof ApplicationError) {
-        text = translate.instant(message.message, message.args);
+        text = translate.instant(message.message, translateArgs(message.args));
     } else if (typeof message === 'string') {
         text = translate.instant(message);
     } else if (message instanceof HttpErrorResponse) {
         if (isErrorData(message.error)) {
-            text = translate.instant(message.error.message, message.error.args);
+            text = translate.instant(message.error.message, translateArgs(message.error.args));
         } else {
             text = message.message ?? `${message.status} ${message.message}`;
         }
     } else if (message instanceof Error) {
         text = message.message;
     } else if (isErrorData(message)) {
-        text = translate.instant(message.message, message.args);
+        text = translate.instant(message.message, translateArgs(message.args));
     } else {
         text = convertToString(message);
     }
 
     return text;
+
+    function translateArgs(args: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+        if (!args) {
+            return args;
+        }
+
+        const result: Record<string, unknown> = {};
+        for (const name in args) {
+            const value = args[name];
+            result[name] = typeof value === 'string' ? translate.instant(value) : value;
+        }
+
+        return result;
+    }
 }
 
 /**

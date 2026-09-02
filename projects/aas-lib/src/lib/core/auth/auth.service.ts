@@ -77,7 +77,7 @@ export class AuthService {
             : throwError(
                   () =>
                       new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {
-                          role: this.translate.instant(`Auth.${requiredRole}`),
+                          role: this.translate.instant(`UserRole.${requiredRole}`),
                       }),
               );
     }

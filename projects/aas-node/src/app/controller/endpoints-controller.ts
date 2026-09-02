@@ -166,7 +166,7 @@ export class EndpointsController extends Controller {
     public async getAllEndpointAuth(@Request() req: express.Request): Promise<AASEndpointAuth[]> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHENTICATED_ACCESS, {}, 401);
         }
 
         return (await this.cookieStorage.getEndpoints(user.id)).map(endpoint => {

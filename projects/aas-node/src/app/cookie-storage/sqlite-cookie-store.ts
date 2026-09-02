@@ -47,7 +47,7 @@ export class SqliteCookieStore extends CookieStore {
 
         this.deleteCookieSql = this.db.prepare('DELETE FROM cookies WHERE user_id = ? AND name = ?');
 
-        this.logger.info('Using SQLite cookie store "${this.variable.COOKIE_STORE}".');
+        this.logger.info(`Using SQLite cookie store "${this.variable.COOKIE_STORE}".`);
     }
 
     public override async deleteCookie(userId: string, name: string): Promise<void> {

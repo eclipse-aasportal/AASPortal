@@ -7,8 +7,10 @@
  *****************************************************************************/
 
 import { container, singleton } from 'tsyringe';
-import { SessionStore } from './session-store.js';
+import { MongoDbSessionStore } from './mongo-db-session-store.js';
 import { Variable } from '../variable.js';
+import { SqliteSessionStore } from './sqlite-session-store.js';
+import { SessionStore } from './session-store.js';
 
 /**
  * A factory class for creating and managing a singleton instance of the `SessionStore`.
@@ -25,9 +27,9 @@ export class SessionStoreFactory {
         if (!SessionStoreFactory.instance) {
             const url = this.variable.SESSION_STORE;
             if (url?.startsWith('mongodb:')) {
-                SessionStoreFactory.instance = container.resolve(SessionStore);
+                SessionStoreFactory.instance = container.resolve(MongoDbSessionStore);
             } else {
-                SessionStoreFactory.instance = undefined;
+                SessionStoreFactory.instance = container.resolve(SqliteSessionStore);
             }
         }
 

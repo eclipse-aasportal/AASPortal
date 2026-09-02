@@ -7,15 +7,15 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
+import { container } from 'tsyringe';
 import { beforeEach, afterEach, describe, Mocked, vi, it, expect } from 'vitest';
 import mongoose from 'mongoose';
 import { LOGGER, Logger, MongoDBConnectionProvider } from 'aas-package';
 import { SessionData } from 'express-session';
 
-import { SessionDataDocument, SessionStore } from './session-store.js';
+import { SessionDataDocument, MongoDbSessionStore } from './mongo-db-session-store.js';
 import { createSpyObj } from '../../test/mocks.js';
 import { Variable } from '../variable.js';
-import { container } from 'tsyringe';
 
 vi.mock(import('mongoose'), () => {
     return {
@@ -33,8 +33,8 @@ vi.mock(import('mongoose'), () => {
     } as any;
 });
 
-describe('SessionStore', () => {
-    let store: SessionStore;
+describe('MongoDbSessionStore', () => {
+    let store: MongoDbSessionStore;
     let logger: Mocked<Logger>;
     let connectionProvider: Mocked<MongoDBConnectionProvider>;
     let connection: Mocked<mongoose.Connection>;
@@ -72,8 +72,8 @@ describe('SessionStore', () => {
         container.registerInstance(LOGGER, logger);
         container.registerInstance(MongoDBConnectionProvider, connectionProvider);
         container.registerInstance(Variable, variable);
-        container.registerSingleton(SessionStore);
-        store = container.resolve(SessionStore);
+        container.registerSingleton(MongoDbSessionStore);
+        store = container.resolve(MongoDbSessionStore);
     });
 
     afterEach(() => {
@@ -81,7 +81,7 @@ describe('SessionStore', () => {
     });
 
     it('should create', () => {
-        expect(store).toBeInstanceOf(SessionStore);
+        expect(store).toBeInstanceOf(MongoDbSessionStore);
     });
 
     describe('get', () => {

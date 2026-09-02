@@ -12,7 +12,7 @@ import { container } from 'tsyringe';
 import { SessionStoreFactory } from './session-store-factory.js';
 import { createSpyObj } from '../../test/mocks.js';
 import { Variable } from '../variable.js';
-import { SessionStore } from './session-store.js';
+import { MongoDbSessionStore } from './mongo-db-session-store.js';
 
 describe('SessionStoreFactory', () => {
     let factory: SessionStoreFactory;
@@ -42,9 +42,9 @@ describe('SessionStoreFactory', () => {
 
     it('should create a SessionStore instance if SESSION_STORE is set to a valid MongoDB URL', () => {
         vi.spyOn(variable, 'SESSION_STORE', 'get').mockReturnValue('mongodb://localhost:27017/test');
-        vi.spyOn(container, 'resolve').mockReturnValue(createSpyObj<SessionStore>([]));
+        vi.spyOn(container, 'resolve').mockReturnValue(createSpyObj<MongoDbSessionStore>([]));
         const result = factory.getInstance();
-        expect(container.resolve).toHaveBeenCalledWith(SessionStore);
+        expect(container.resolve).toHaveBeenCalledWith(MongoDbSessionStore);
         expect(result).toBeDefined();
     });
 });
