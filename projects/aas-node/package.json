@@ -20,7 +20,7 @@
         "docs": "typedoc --out docs"
     },
     "dependencies": {
-        "@xmldom/xmldom": "^0.8.10",
+        "@xmldom/xmldom": "^0.8.15",
         "bcryptjs": "^3.0.3",
         "compression": "^1.8.1",
         "cookie-parser": "^1.4.7",
