@@ -16,19 +16,26 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class MaxLengthPipe implements PipeTransform {
     private max = 80;
 
-    public transform(value: string | undefined, max = 80): string {
+    /**
+     * @param endBias Share of the visible (non-"...") characters kept from the end of the
+     * string, from 0 (all from the start) to 1 (all from the end). Defaults to 0.5, an even
+     * split between start and end, matching the previous fixed behavior.
+     */
+    public transform(value: string | undefined, max = 80, endBias = 0.5): string {
         this.max = Math.max(5, Number(max));
         if (!value) {
             return '';
         }
 
-        return value.length <= this.max ? value : this.shortenText(value);
+        return value.length <= this.max ? value : this.shortenText(value, endBias);
     }
 
-    private shortenText(value: string): string {
-        const m2 = this.max / 2;
-        const start = value.slice(0, m2 - 1);
-        const end = value.slice(value.length - m2 + 2);
+    private shortenText(value: string, endBias: number): string {
+        const available = this.max - 3; // reserve space for the "..." separator
+        const endLength = Math.min(available - 1, Math.max(1, Math.round(available * endBias)));
+        const startLength = available - endLength;
+        const start = value.slice(0, startLength);
+        const end = value.slice(value.length - endLength);
         return start + '...' + end;
     }
 }

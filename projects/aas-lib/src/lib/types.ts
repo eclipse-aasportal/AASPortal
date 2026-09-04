@@ -108,6 +108,11 @@ export type RouteData = Data &
         | { type: 'Leaf'; semanticIds?: string[]; idShorts?: string[] }
         | { type: 'Composition'; routes: string[] }
         | { type: 'Default' }
+        // Fallback view for a single submodel that matches no Leaf route's semanticIds/idShorts.
+        // Unlike 'Leaf', which knows in advance which submodel(s) it is for, a 'DefaultSubmodel'
+        // route is generic — the specific submodel to display is instead passed explicitly via
+        // the `submodel` (idShort) route/query param at navigation time. See LeafView.findSubmodel.
+        | { type: 'DefaultSubmodel' }
     );
 
 export type ViewRoute = Route & { path: ViewRouteName; data: RouteData };
@@ -120,6 +125,7 @@ export type ViewRouteName =
     | 'content'
     | 'CustomerFeedback'
     | 'DigitalProductPassport'
+    | 'GenericSubmodel'
     | 'HandoverDocumentation'
     | 'HierarchicalStructure'
     | 'Nameplate'

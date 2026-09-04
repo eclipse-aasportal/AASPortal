@@ -1,0 +1,73 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<ng-template #groupTpl let-group>
+<div class="mt-2">
+    <div class="d-flex align-items-center gap-2 fw-medium"
+        role="button" (click)="toggle(group.path)">
+        <i class="bi text-primary" [class.bi-chevron-down]="isExpanded(group.path)"
+                        [class.bi-chevron-right]="!isExpanded(group.path)"></i>
+        <i class="bi bi-folder text-primary"></i>
+        <!-- <span class="text-body-tertiary fw-bold small text-nowrap" style="min-width: 2.5rem">{{ group.typeAbbreviation }}</span> -->
+        <span style="min-width: 0; overflow-wrap: anywhere; word-break: break-word">{{ group.name }}</span>
+        <span class="small label text-opacity-25 text-start">{{ group.items.length + childGroups(group.path).length}}</span>
+    </div>
+
+    @if (isExpanded(group.path)) {
+    <div class="ps-4">
+        @for (item of itemsOf(group.path); track item.idShort) {
+        <div class="d-flex flex-wrap justify-content-between py-1 border-bottom">
+            <span class="d-flex align-items-baseline gap-2" style="min-width: 0">
+                <!-- <span class="text-body-tertiary fw-bold small text-nowrap" style="min-width: 2.5rem; flex-shrink: 0">{{ item.typeAbbreviation }}</span> -->
+                <span class="small label" style="min-width: 0; overflow-wrap: anywhere; word-break: break-word">
+                    {{ item.name }}
+                    <!-- @if (item.description) {
+                        <span class="small label" style="overflow-wrap: anywhere; word-break: break-word"> - [{{ item.description }}]</span>
+                    } -->
+                </span>
+            </span>
+            <span class="d-flex flex-wrap align-items-center gap-2 text-start" style="max-width: 60%; min-width: 0">
+                @if (item.type === 'link') {
+                    <a class="small" [href]="item.url" target="_blank" style="min-width: 0; overflow-wrap: anywhere; word-break: break-word">{{ fileName(item.value()) }}</a>
+                } @else if (item.type === 'text') {
+                    <span [class.font-monospace]="!item.isProse" [class.text-start]="!item.isProse" class="small" style="min-width: 0; overflow-wrap: anywhere; word-break: break-word">{{ item.value() }}</span>
+                }
+                @if (item.unit) {
+                    <span class="small font-monospace" style="min-width: 3rem">{{ item.unit }}</span>
+                }
+                @if (item.isOnline) {
+                    <i class="bi bi-broadcast text-success small"></i>
+                }
+            </span>
+        </div>
+        }
+        @for (child of childGroups(group.path); track child.path) {
+        <ng-container *ngTemplateOutlet="groupTpl; context: { $implicit: child }"></ng-container>
+        }
+    </div>
+    }
+</div>
+</ng-template>
+<div class="mt-2 bg-body-tertiary border border-black border-opacity-25 rounded-2 p-2 w-100 w-sm-75 m-auto">
+    @if (rootGroup(); as root) {
+    <div class="d-flex align-items-center gap-2 border rounded-3 px-3 py-2 mb-3">
+        <i class="bi bi-search text-secondary" role="button" (click)="submitQuery()"></i>
+        <input type="text" class="border-0 flex-grow-1 bg-transparent"
+            style="outline: none"
+            placeholder="Search values… (press Enter)"
+            [value]="queryDraft()"
+            (input)="queryDraft.set($any($event.target).value)"
+            (keydown.enter)="submitQuery()">
+        @if (query()) {
+            <span class="small text-secondary">{{ matchCount() }} matches</span>
+            <i class="bi bi-x text-secondary" role="button" (click)="clearQuery()"></i>
+        }
+    </div>
+        <ng-container *ngTemplateOutlet="groupTpl; context: { $implicit: root }"></ng-container>
+    }
+</div>

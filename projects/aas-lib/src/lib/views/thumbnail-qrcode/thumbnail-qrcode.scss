@@ -6,3 +6,19 @@
  *
  *****************************************************************************/
 
+ .qrCode {
+    width:100px !important;
+    height: 100px !important;
+ }
+
+// The old inline max-height: 150px was a fixed pixel cap that never changed with the
+// viewport, so on narrow windows the image stayed exactly the same size instead of
+// scaling down. Cap it responsively instead, in vw as well as px, so it actually shrinks.
+.thumbnail-img {
+    max-height: min(150px, 30vw);
+ }
+ 
+.label {
+    font-size: 14px;
+    color: var(--bs-gray-600)
+ }

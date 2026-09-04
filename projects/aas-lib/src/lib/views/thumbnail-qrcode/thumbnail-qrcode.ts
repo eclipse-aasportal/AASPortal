@@ -6,11 +6,22 @@
  *
  *****************************************************************************/
 
-import { Component, effect, ElementRef, inject, InjectionToken, input, linkedSignal, viewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    effect,
+    ElementRef,
+    inject,
+    InjectionToken,
+    input,
+    linkedSignal,
+    viewChild,
+} from '@angular/core';
 import QRCode from 'qrcode';
-import { AASDocument } from 'aas-core';
+import { aas, AASDocument } from 'aas-core';
 import { WINDOW } from '../../shared/services/window.service';
 import { encodeBase64Url } from '../../utilities';
+import { TranslateDirective } from '@ngx-translate/core';
 
 export const QR_CODE = new InjectionToken<typeof QRCode>('Draw QR code', { factory: (): typeof QRCode => QRCode });
 
@@ -22,6 +33,7 @@ export const QR_CODE = new InjectionToken<typeof QRCode>('Draw QR code', { facto
     selector: 'fhg-thumbnail-qrcode',
     templateUrl: './thumbnail-qrcode.html',
     styleUrl: './thumbnail-qrcode.scss',
+    imports: [TranslateDirective],
 })
 export class ThumbnailQRCode {
     public constructor() {
@@ -37,6 +49,15 @@ export class ThumbnailQRCode {
         });
     }
 
+    public readonly idShort = computed(() => this.document()?.idShort ?? '-');
+
+    public readonly id = computed(() => this.document()?.id ?? '-');
+
+    public readonly assetId = computed(() => this.document()?.assetId ?? '-');
+
+    public readonly version = computed(() =>
+        this.versionToString(this.document()?.content?.assetAdministrationShells?.at(0)?.administration),
+    );
     /** The canvas element that displays the QR code. */
     public readonly qrCodeContainer = viewChild<ElementRef<HTMLCanvasElement>>('qrCode');
 
@@ -52,4 +73,22 @@ export class ThumbnailQRCode {
 
         return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
     });
+
+    private versionToString(administration?: aas.AdministrativeInformation): string {
+        let version: string = administration?.version ?? '';
+        const revision: string = administration?.revision ?? '';
+        if (revision.length > 0) {
+            if (version.length > 0) {
+                version += ' (' + revision + ')';
+            } else {
+                version = revision;
+            }
+        }
+
+        if (version.length === 0) {
+            version = '-';
+        }
+
+        return version;
+    }
 }

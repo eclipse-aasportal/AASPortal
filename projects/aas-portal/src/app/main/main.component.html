@@ -6,12 +6,12 @@
  !
  !---------------------------------------------------------------------------->
 
-<div class="fhg-main-page bg-body-secondary">
-    <div class="fhg-main-navbar">
-        <nav class="navbar navbar-expand-sm bg-body">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="https://www.iosb-ina.fraunhofer.de/" target="_blank">
-                    <img src="/assets/fhg-logo.svg" width="40" alt="Fraunhofer" />
+<div class="fhg-main-page">
+    <div class="fhg-main-navbar bg-secondary rounded-top m-2">
+        <nav class="navbar navbar-expand-sm" data-bs-theme="dark">
+            <div class="container-fluid text-primary">
+                <a class="navbar-brand d-flex align-items-center" [href]="companyUrl()" target="_blank">
+                    <img class="" src="/assets/company-logo.svg" width="40" alt="Company logo" />
                 </a>
                 <button class="navbar-toggler" type="button" (click)="isMenuCollapsed.set(!isMenuCollapsed())">
                     <span class="navbar-toggler-icon"></span>
@@ -19,11 +19,11 @@
                 <div [ngbCollapse]="isMenuCollapsed()" class="collapse navbar-collapse">
                     <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto">
                         @for (link of links(); track link) {
-                            <li [ngbNavItem]="link.id" class="nav-item">
+                            <li [ngbNavItem]="link.id" [disabled]="isDisabled()(link)" class="nav-item">
                                 <a
                                     ngbNavLink
                                     class="nav-item"
-                                    [routerLink]="link.url"
+                                    [routerLink]="isDisabled()(link) ? null : link.url"
                                     routerLinkActive="active"
                                     (click)="isMenuCollapsed.set(true)"
                                     >{{ link.name | translate }}</a
@@ -32,12 +32,12 @@
                         }
                     </ul>
                     <div class="d-flex align-items-center me-1">
-                        <fhg-theme-toggle class="text-primary m-1"></fhg-theme-toggle>
-                        <fhg-settings class="text-primary m-1"></fhg-settings>
-                        <fhg-localize class="text-primary m-1" [languages]="languages()"></fhg-localize>
-                        <fhg-auth class="text-primary m-1"></fhg-auth>
+                        <fhg-theme-toggle class="m-1"></fhg-theme-toggle>
+                        <fhg-settings class="m-1"></fhg-settings>
+                        <fhg-localize class="m-1" [languages]="languages()"></fhg-localize>
+                        <fhg-auth class="m-1"></fhg-auth>
                         <img
-                            class="m-1 d-none d-md-block object-fit-contain"
+                            class="m-1 d-none d-md-block object-fit-contain bg-white rounded p-1"
                             src="/assets/aas-portal.svg"
                             width="67"
                             height="40"

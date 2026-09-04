@@ -7,7 +7,7 @@
  !---------------------------------------------------------------------------->
 
 <form (submit)="submit($event)">
-    <div class="modal-header text-info">
+    <div class="modal-header text-secondary">
         <h4 class="modal-title">
             <i class="bi bi-plus-circle"></i>
             <span class="ms-2" translate="EndpointAuthForm.CAPTION"></span>
@@ -68,6 +68,6 @@
     </div>
     <div class="modal-footer">
         <button type="submit" id="AID_SUBMIT" class="btn btn-primary" [disabled]="form().invalid() || !form().dirty()" translate="EndpointAuthForm.OK"></button>
-        <button type="button" id="AID_CANCEL" class="btn btn-secondary" (click)="cancel()" translate="EndpointAuthForm.CANCEL"></button>
+        <button type="button" id="AID_CANCEL" class="btn btn-outline-secondary" (click)="cancel()" translate="EndpointAuthForm.CANCEL"></button>
     </div>
 </form>

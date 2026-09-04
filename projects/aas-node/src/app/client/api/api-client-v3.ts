@@ -43,6 +43,19 @@ export interface OperationResult {
     inoutputVariables?: aas.OperationVariable[];
 }
 
+/**
+ * Percent-encodes an idShortPath before it is embedded in a request URL. `SubmodelElementList`
+ * indices produce path segments like `Documents[0].DocumentVersions[0]`; `[` and `]` are not
+ * escaped by `URL`/`new URL()`, but servers such as BaSyx correctly reject them un-encoded as an
+ * invalid URI (RFC 3986). `encodeURIComponent` escapes the brackets while leaving the `.` segment
+ * separators untouched, which is what the AAS REST API expects.
+ * @param idShortPath The raw idShortPath.
+ * @returns The percent-encoded idShortPath.
+ */
+function encodeIdShortPath(idShortPath: string): string {
+    return encodeURIComponent(idShortPath);
+}
+
 export class ApiClientV3 extends ApiClient {
     public constructor(
         logger: Logger,
@@ -195,7 +208,7 @@ export class ApiClientV3 extends ApiClient {
         }
 
         const id = encodeBase64Url(file.path.id);
-        const idShortPath = file.path.idShortPath;
+        const idShortPath = encodeIdShortPath(file.path.idShortPath);
         const url = this.resolve(`submodels/${id}/submodel-elements/${idShortPath}/attachment`);
         return await this.http.getReadable(url, this.auth);
     }
@@ -203,7 +216,7 @@ export class ApiClientV3 extends ApiClient {
     public override resolveNodeId(_: aas.AssetAdministrationShell, nodeId: string): string {
         const index = nodeId.indexOf('#');
         const smId = nodeId.substring(0, index);
-        const idShortPath = nodeId.substring(index + 1);
+        const idShortPath = encodeIdShortPath(nodeId.substring(index + 1));
         return this.resolve(`submodels/${smId}/submodel-elements/${idShortPath}`).href;
     }
 
@@ -242,7 +255,7 @@ export class ApiClientV3 extends ApiClient {
         }
 
         const smId = encodeBase64Url(operation.path.id);
-        const idShortPath = operation.path.idShortPath;
+        const idShortPath = encodeIdShortPath(operation.path.idShortPath);
         const request: OperationRequest = {};
 
         if (operation.inputVariables) {
@@ -282,8 +295,35 @@ export class ApiClientV3 extends ApiClient {
         return blob.value;
     }
 
-    public override getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<PagedResult<string>> {
-        return this.http.get(this.resolve(`lookup/shells?assetIds=${encodeBase64Url(assetId)}`), this.auth);
+    public override async getAllAssetAdministrationShellIdsByAssetLink(assetId: string): Promise<PagedResult<string>> {
+        try {
+            const result = await this.http.get<PagedResult<string>>(
+                this.resolve(`lookup/shells?assetIds=${encodeBase64Url(assetId)}`),
+                this.auth,
+            );
+
+            if (result.result?.length) {
+                return result;
+            }
+        } catch {
+            // fall through to the repository-level fallback below
+        }
+
+        try {
+            const result = await this.http.get<PagedResult<aas.AssetAdministrationShell>>(
+                this.resolve('shells', { assetId }),
+                this.auth,
+            );
+
+            const matches = result.result?.filter(shell => shell.assetInformation.globalAssetId === assetId) ?? [];
+            if (matches.length) {
+                return { result: matches.map(shell => shell.id), paging_metadata: {} };
+            }
+        } catch {
+            // no match via this path either
+        }
+
+        return { result: [], paging_metadata: {} };
     }
 
     protected override getConceptDescription(id: string): Promise<aas.ConceptDescription> {

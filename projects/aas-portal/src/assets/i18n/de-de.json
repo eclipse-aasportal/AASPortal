@@ -4,10 +4,13 @@
         "CONTENT": "AAS Content",
         "PLACEHOLDER_SEARCH": "Suche",
         "EMPTY": "Kein AAS-Document verfügbar.",
+        "NO_PERMISSION": "Sie haben keine Berechtigung, diese AAS zu öffnen. Prüfen Sie, ob für diesen Endpunkt ein API-Schlüssel benötigt wird, und fügen Sie ihn unten hinzu.",
+        "ADD_API_KEY": "API-Schlüssel hinzufügen",
+        "LOAD_FAILED": "Diese AAS konnte nicht geladen werden.",
         "VERSION": "Version",
         "AAS_ID": "AAS ID",
         "ASSET_ID": "Asset ID",
-        "OVERVIEW": "AAS-Übersicht"
+        "OVERVIEW": "AAS-Übersicht",
     },
     "AASContent": {
         "TITLE": "AAS-Baum",
@@ -44,7 +47,7 @@
         "MANUAL": "manuell",
         "MINUTES": "Minuten",
         "NO_AUTH": "Keine Autorisierung",
-        "OK": "OK",
+        "OK": "Hinzufügen",
         "ONCE": "einmalig",
         "OPC_UA": "OPC UA",
         "PLACEHOLDER_NAME": "eindeutigen Namen eingeben",
@@ -136,7 +139,7 @@
     },
     "DigitalProductPassport": {
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
-        "CAPTION": "Produktpass",
+        "CAPTION": "Digitaler Produktpass",
         "Description": "Beschreibung",
         "DOCUMENTATION": "Dokumentation",
         "EMPTY": "Kein Produktpass verfügbar.",
@@ -308,7 +311,7 @@
     "PromptDialog": {
         "CANCEL": "Abbrechen",
         "CAPTION": "Eingabeaufforderung",
-        "OK": "OK"
+        "OK": "Index leeren"
     },
     "QueryParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {0} erwartet.",
@@ -357,6 +360,7 @@
         "CustomerFeedback": "Nutzer-Feedback",
         "DigitalProductPassport": "Produktpass",
         "FAVORITES": "Alle Verwaltungsschalen",
+        "GenericSubmodel": "Generische Ansicht",
         "HandoverDocumentation": "Übergabedokumentation",
         "HierarchicalStructure": "Hierarchische Strukturen",
         "Nameplate": "Typenschild",
@@ -367,7 +371,8 @@
         "VIEWS": "Sichten"
     },
     "Start": {
-        "EMPTY": "Die START-Seite ist leer."
+        "EMPTY": "Die START-Seite ist leer.",
+        "TILE_ADDED": "Zu Start hinzugefügt."
     },
     "TechnicalData": {
         "TITLE": "Technische Daten"
@@ -391,7 +396,7 @@
         "MANUAL": "manuell",
         "MINUTES": "Minuten",
         "NO_AUTH": "Keine Autorisierung",
-        "OK": "OK",
+        "UPDATE": "Aktualisieren",
         "ONCE": "einmalig",
         "OPC_UA": "OPC UA",
         "PLACEHOLDER_URL_FILE": "file:///",
@@ -400,6 +405,7 @@
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
         "SCHEDULE": "Endpunkt-Index aktualisieren",
         "URL": "URL",
+        "KEY": "Key",
         "VALUE": "Wert",
         "WebDAV": "WebDAV",
         "ERROR_NAME_REQUIRED": "Name für Endpunkt erforderlich.",

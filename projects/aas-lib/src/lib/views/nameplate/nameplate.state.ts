@@ -103,7 +103,7 @@ export class NameplateState extends ChildState {
                 {
                     type: 'format',
                     idShortPath: 'AddressInformation',
-                    format: '{Street} {NationalCode}-{ZipCode} {CityTown}',
+                    format: '{Street} {NationalCode}-{Zipcode} {CityTown}',
                 },
                 {
                     type: 'format',

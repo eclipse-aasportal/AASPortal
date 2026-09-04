@@ -9,11 +9,12 @@
 import { beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { QR_CODE, ThumbnailQRCode } from './thumbnail-qrcode';
 import { WINDOW, WindowService } from '../../shared/services/window.service';
 
 import sample from '../../../test/assets/dpp-sample.json';
-import { createSpyObj } from '../../../test/mocks';
+import { createSpyObj, FakeLoader } from '../../../test/mocks';
 
 describe('ThumbnailQRCode', () => {
     let component: ThumbnailQRCode;
@@ -36,6 +37,12 @@ describe('ThumbnailQRCode', () => {
                     provide: QR_CODE,
                     useValue: { toCanvas: vitest.fn() },
                 },
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useClass: FakeLoader,
+                    },
+                }),
                 provideZonelessChangeDetection(),
             ],
         }).compileComponents();

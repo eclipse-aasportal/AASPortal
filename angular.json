@@ -28,6 +28,7 @@
                         "inlineStyleLanguage": "scss",
                         "assets": [
                             "projects/aas-portal/src/favicon.ico",
+                            "projects/aas-portal/src/theme.js",
                             "projects/aas-portal/src/assets"
                         ],
                         "styles": [

@@ -57,4 +57,25 @@ export class ContactInformation extends ChildComponent {
      * The computed list of contact data sheets.
      */
     public readonly contacts = computed(() => this.state().contacts());
+
+    public getContactInformationValue(index: number, names: string | string[]): string | string[] | undefined {
+        if (!this.contacts()) return '-1';
+        if (!this.contacts()[index]) return '-1';
+
+        if (Array.isArray(names)) {
+            for (const name of names) {
+                const value = this.contacts()[index].items.find(
+                    element => element.idShort.toLowerCase() == name.toLowerCase(),
+                );
+                if (value) return value.value;
+            }
+        } else {
+            const value = this.contacts()[index].items.find(
+                element => element.idShort.toLowerCase() == names.toLowerCase(),
+            );
+            if (value) return value.value;
+        }
+
+        return '-1';
+    }
 }

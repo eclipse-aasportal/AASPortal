@@ -4,6 +4,9 @@
         "CONTENT": "AAS Content",
         "PLACEHOLDER_SEARCH": "Search",
         "EMPTY": "No AAS document available.",
+        "NO_PERMISSION": "You don't have permission to open this AAS. Check whether this endpoint needs an API key and add it below.",
+        "ADD_API_KEY": "Add API key",
+        "LOAD_FAILED": "This AAS could not be loaded.",
         "VERSION": "Version",
         "AAS_ID": "AAS ID",
         "ASSET_ID": "Asset ID",
@@ -44,7 +47,7 @@
         "MANUAL": "manual",
         "MINUTES": "Minutes",
         "NO_AUTH": "No authorization",
-        "OK": "OK",
+        "OK": "Add",
         "ONCE": "once",
         "OPC_UA": "OPC UA",
         "PLACEHOLDER_NAME": "enter a unique name",
@@ -136,7 +139,7 @@
     },
     "DigitalProductPassport": {
         "BANNER": "Fraunhofer IOSB-INA DPPPortal",
-        "CAPTION": "Product Passport",
+        "CAPTION": "Digital Product Passport",
         "Description": "Description",
         "DOCUMENTATION": "Documentation",
         "EMPTY": "No product passport available.",
@@ -309,7 +312,7 @@
     "PromptDialog": {
         "CANCEL": "Cancel",
         "CAPTION": "Prompt",
-        "OK": "OK"
+        "OK": "Clear Index"
     },
     "QueryParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel element name expected at position {0}.",
@@ -358,6 +361,7 @@
         "CustomerFeedback": "User feedback",
         "DigitalProductPassport": "Product passport",
         "FAVORITES": "All shells",
+        "GenericSubmodel": "Generic view",
         "HandoverDocumentation": "Handover documentation",
         "HierarchicalStructure": "Hierarchical Structures",
         "Nameplate": "Nameplate",
@@ -368,7 +372,8 @@
         "VIEWS": "Views"
     },
     "Start": {
-        "EMPTY": "The START page is empty."
+        "EMPTY": "The START page is empty.",
+        "TILE_ADDED": "Added to Start."
     },
     "TechnicalData": {
         "TITLE": "Technical Data"
@@ -392,7 +397,7 @@
         "MANUAL": "manual",
         "MINUTES": "Minutes",
         "NO_AUTH": "No authorization",
-        "OK": "OK",
+        "UPDATE": "Update",
         "ONCE": "once",
         "OPC_UA": "OPC UA",
         "PLACEHOLDER_URL_FILE": "file:///",
@@ -401,6 +406,7 @@
         "PLACEHOLDER_URL_WEBDAV": "http(s)://",
         "SCHEDULE": "Update endpoint index",
         "URL": "URL",
+        "KEY": "Key",
         "VALUE": "Value",
         "WebDAV": "WebDAV",
         "ERROR_NAME_REQUIRED": "Endpoint name required.",

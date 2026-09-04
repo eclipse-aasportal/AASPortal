@@ -226,6 +226,14 @@ export class ShellsComponent implements OnDestroy {
     }
 
     /**
+     * Updates the state by setting the selected documents.
+     * @param documents - An array of AASDocument objects to be set as selected
+     */
+    public emptySelected(): void {
+        this.state.update({ selected: [] });
+    }
+
+    /**
      * Initiates download(s) of the AASX package files for the currently selected document(s).
      *
      * @returns An Observable that completes when the download request(s) complete.

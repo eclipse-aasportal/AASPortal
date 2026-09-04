@@ -13,9 +13,16 @@ import {
     aas,
     ApplicationError,
     convertToString,
+    extensionToMimeType,
     getLocaleValue,
     getPreferredName,
     AASDocument,
+    isAnnotatedRelationshipElement,
+    isAssetAdministrationShell,
+    isBlob,
+    isEntity,
+    isOperation,
+    isRange,
     isSubmodelElementCollection,
     getReferable,
     isProperty,
@@ -166,6 +173,72 @@ export function getDisplayName(referable: aas.Referable, env?: aas.Environment |
     }
 
     return toDisplayName(referable.idShort);
+}
+
+/**
+ * Computes a short, type-specific description for the given Referable — e.g. a Property's
+ * value type, a File's content type, a Collection's item count, or a MultiLanguageProperty's
+ * languages. Gives the user a quick sense of an element's content without expanding it.
+ * Shared between AasTree (which wraps it in brackets) and SubmodelTree.
+ * @param referable The current Referable, or `null` for an empty description.
+ * @returns The description, or an empty string if none applies to this Referable's type.
+ */
+export function getElementDescription(referable: aas.Referable | null): string {
+    if (!referable) {
+        return '';
+    }
+
+    if (isAssetAdministrationShell(referable)) {
+        return referable.id;
+    }
+
+    if (isMultiLanguageProperty(referable)) {
+        return Array.isArray(referable.value) ? referable.value.map(item => item.language).join(', ') : '';
+    }
+
+    if (isSubmodel(referable)) {
+        const sid = getSemanticId(referable);
+        return sid ? `sematicId: ${sid}` : `id: ${referable.id}`;
+    }
+
+    if (isProperty(referable) || isRange(referable)) {
+        const valueType = referable.valueType;
+        return valueType ? (valueType.startsWith('xs:') ? valueType.substring(3) : valueType) : '';
+    }
+
+    if (isBlob(referable)) {
+        return referable.contentType ?? '';
+    }
+
+    if (isFile(referable)) {
+        if (referable.contentType) {
+            return referable.contentType;
+        }
+
+        return referable.value ? (extensionToMimeType(referable.value) ?? '') : '';
+    }
+
+    if (isSubmodelElementCollection(referable) || isSubmodelElementList(referable)) {
+        return referable.value ? `${referable.value.length}` : '0';
+    }
+
+    if (isAnnotatedRelationshipElement(referable)) {
+        return referable.annotations ? `${referable.annotations.length}` : '0';
+    }
+
+    if (isEntity(referable)) {
+        return referable.statements ? `${referable.statements.length}` : '0';
+    }
+
+    if (isOperation(referable)) {
+        return (
+            (referable.inputVariables?.length ?? 0) +
+            (referable.inoutputVariables?.length ?? 0) +
+            (referable.outputVariables?.length ?? 0)
+        ).toString();
+    }
+
+    return '';
 }
 
 /**
@@ -678,7 +751,10 @@ export function findRouteForSubmodel(
         }
     }
 
-    return defaultRoute ? viewRoutes.find(item => item.data.type === 'Default') : undefined;
+    // Submodel-level fallback is a distinct route type from the whole-shell 'Default' (used by
+    // findRouteForShell below) — an unmatched submodel opens the generic per-submodel view, not
+    // the whole-AAS tree browser.
+    return defaultRoute ? viewRoutes.find(item => item.data.type === 'DefaultSubmodel') : undefined;
 }
 
 /**
