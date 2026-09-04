@@ -20,6 +20,8 @@
             document.write('<base href="' + baseHref + '">');
         })();
     </script>
+    <!-- Applies a runtime-configurable brand color (THEME_PRIMARY_COLOR env var / assets/theme-config.json). See theme.js. -->
+    <script src="theme.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script>
@@ -31,7 +33,7 @@
     </script>
 </head>
 
-<body>
+<body class="bg-body-secondary">
     <fhg-root></fhg-root>
 </body>
 

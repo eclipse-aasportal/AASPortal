@@ -10,6 +10,8 @@ import 'reflect-metadata';
 import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import { aas, AASDocument } from 'aas-core';
 
+import { Logger } from 'aas-package';
+
 import { DocumentProvider } from './document-provider.js';
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { createSpyObj } from '../../test/mocks.js';
@@ -20,11 +22,12 @@ describe('DocumentProvider', function () {
     let aasProvider: DocumentProvider;
     let index: Mocked<AASIndexClient>;
     const clientFactory = createSpyObj<EndpointClientFactory>(['create', 'testAsync']);
+    const logger = createSpyObj<Logger>(['error', 'warning', 'info']);
 
     beforeEach(function () {
         clientFactory.testAsync.mockReturnValue(new Promise<void>(resolve => resolve()));
         index = createSpyObj<AASIndexClient>(['get', 'find', 'getEndpoint', 'getEndpoints', 'insert']);
-        aasProvider = new DocumentProvider(clientFactory, index);
+        aasProvider = new DocumentProvider(clientFactory, index, logger);
     });
 
     describe('getDocument', () => {

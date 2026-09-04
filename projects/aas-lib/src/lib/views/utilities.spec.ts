@@ -68,7 +68,7 @@ describe('utilities', () => {
                 },
             };
 
-            expect(findRouteForSubmodel(viewRoutes, submodel)?.data.type).toEqual('Default');
+            expect(findRouteForSubmodel(viewRoutes, submodel)?.data.type).toEqual('DefaultSubmodel');
         });
 
         it('should has a OperationData route', () => {

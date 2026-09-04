@@ -97,6 +97,15 @@ services:
     restart: always
     environment:
       - BASE_HREF=${BASE_HREF:-/}
+      - THEME_PRIMARY_COLOR=${THEME_PRIMARY_COLOR:-}
+      - THEME_SECONDARY_COLOR=${THEME_SECONDARY_COLOR:-}
+      - COMPANY_URL=${COMPANY_URL:-}
+    # To white-label the header logos, mount replacements over the built-in ones -- no rebuild needed.
+    # company-logo.svg (top-left, links to COMPANY_URL above) and aas-portal.svg (top-right) are both
+    # plain static files:
+    # volumes:
+    #   - ./my-company-logo.svg:/usr/share/nginx/html/assets/company-logo.svg:ro
+    #   - ./my-logo.svg:/usr/share/nginx/html/assets/aas-portal.svg:ro
     ports:
       - 80:80
 

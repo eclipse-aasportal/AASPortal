@@ -13,3 +13,11 @@
 .start-10 {
     left: 10%!important;
 }
+
+.btn-primary:disabled,
+.btn-primary.disabled {
+  --bs-btn-disabled-bg: var(--bs-secondary-bg);
+  --bs-btn-disabled-color: var(--bs-secondary-color);
+  --bs-btn-disabled-border-color: var(--bs-border-color);
+  --bs-btn-disabled-opacity: 1;
+}

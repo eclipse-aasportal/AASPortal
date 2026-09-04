@@ -13,8 +13,9 @@ $enable-grid-classes: false;
 $enable-cssgrid: true;
 
 $primary: #009374;
+$secondary: #19001e;
 $info: #1f82c0;
-$danger: #c52523;
+$danger: #f0a091;
 
 $enable-negative-margins: true;
 
@@ -128,10 +129,26 @@ th[sortable].desc:before {
     width: 1rem;
 }
 
-:root[data-bs-theme="dark"] .bg-primary {
-  background-color: rgba(0, 147, 116, 0.8) !important;
+// --bs-primary (and its -rgb companion) is a "raw" theme color — Bootstrap generates it once on
+// :root from $theme-colors and never redefines it under [data-bs-theme="dark"] (only its derived
+// -bg-subtle/-text-emphasis/-border-subtle variants get a dark value, and even those are just a
+// differently-shaded version of this same light-mode $primary, not an independent dark palette).
+// Overriding the variable itself — rather than individual classes like .btn-primary/.bg-primary —
+// means every rule that already reads var(--bs-primary) (buttons, text, borders, hover states, ...)
+// gets the dark-mode value automatically, no !important or per-component overrides needed.
+$primary-dark: tint-color($primary, 40%); // same 40% tint ratio Bootstrap itself uses for $primary-text-emphasis-dark
+
+:root[data-bs-theme="dark"] {
+    --bs-primary: #{$primary-dark};
+    --bs-primary-rgb: #{to-rgb($primary-dark)};
 }
 
-:root[data-bs-theme="dark"] .btn-primary {
-  background-color: rgba(0, 147, 116, 0.8) !important;
+// $secondary itself is left untouched here (unlike $primary above), because --bs-secondary-rgb is
+// also what .bg-secondary/.border-secondary/etc. read from -- overriding it would lighten those
+// backgrounds/borders too, not just text. .text-secondary is fixed directly instead, so only the
+// (otherwise unreadably dark) text color changes for dark mode.
+$secondary-dark: tint-color($secondary, 40%); // same 40% tint ratio as $primary-dark above
+
+:root[data-bs-theme="dark"] .text-secondary {
+    color: rgba(#{to-rgb($secondary-dark)}, var(--bs-text-opacity)) !important;
 }

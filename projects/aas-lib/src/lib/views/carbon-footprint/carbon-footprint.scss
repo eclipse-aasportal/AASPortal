@@ -15,7 +15,67 @@
 
  }
 
- .label {
-    font-size: 10px;
-    font-weight: bold;
- }
+// Both boxes used to be `width: fit-content` (sized to their own content) inside a plain
+// flex row. flex-grow ratios with a zero basis give an exact 1/3 : 2/3 split driven purely
+// by the ratio — not by each box's own content width — so it holds at any container width.
+// min-width: 0 overrides the flex default that refuses to shrink a box below its content's
+// natural width, which would otherwise silently break the ratio once content is wide enough.
+.pcf-summary {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.pcf-details {
+    flex: 2 1 0;
+    min-width: 0;
+}
+
+.details-left {
+   flex: 1 1 0;
+}
+
+.details-right {
+   flex: 1 1 0;
+}
+
+// ngb-pagination is a separate (ng-bootstrap) component with its own view encapsulation,
+// so a plain selector here can't reach its internally-rendered `.pagination`/`.page-link`
+// markup — ::ng-deep is required, same as reaching into any other component's host from
+// outside. :host scopes it to this component's own <ngb-pagination> instances only, so it
+// doesn't leak the btn-outline-primary look onto pagination controls elsewhere in the app.
+:host ::ng-deep ngb-pagination {
+    .pagination {
+        // Bootstrap's default pagination color already resolves to $primary via --bs-link-color,
+        // so only the border/background actually change visually from the variable overrides below.
+        // The bigger visual difference vs. a real btn-outline-primary is shape: pagination items are
+        // flush against each other with square middle corners by default (border-start/end-radius only
+        // on the first/last item) — gap + a forced border-radius below is what makes each one read as
+        // a separate rounded button instead of one connected bar.
+        gap: 0.375rem;
+
+        --bs-pagination-color: var(--bs-primary);
+        --bs-pagination-bg: transparent;
+        --bs-pagination-border-color: var(--bs-primary);
+        --bs-pagination-hover-color: #fff;
+        --bs-pagination-hover-bg: var(--bs-primary);
+        --bs-pagination-hover-border-color: var(--bs-primary);
+        --bs-pagination-focus-color: var(--bs-primary);
+        --bs-pagination-active-color: #fff;
+        --bs-pagination-active-bg: var(--bs-primary);
+        --bs-pagination-active-border-color: var(--bs-primary);
+    }
+
+    // Bootstrap only rounds the first/last .page-link via a higher-specificity selector
+    // (.page-item:first-child/:last-child .page-link); !important is needed here to make
+    // every item — not just the ends — fully rounded like a real outline button.
+    .page-link {
+        margin-left: 0 !important;
+        border-radius: var(--bs-border-radius) !important;
+        font-weight: 500;
+    }
+}
+
+label {
+    font-size: 14px;
+    color: var(--bs-gray-600);
+}

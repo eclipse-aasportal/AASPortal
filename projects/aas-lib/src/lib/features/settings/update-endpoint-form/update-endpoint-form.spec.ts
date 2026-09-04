@@ -12,6 +12,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { UpdateEndpointForm, UpdateEndpointResult } from './update-endpoint-form';
 import { AASEndpoint } from 'aas-core';
@@ -45,6 +46,7 @@ describe('UpdateEndpointForm', () => {
                 provideZonelessChangeDetection(),
                 provideHttpClient(),
                 provideHttpClientTesting(),
+                provideRouter([]),
             ],
             imports: [UpdateEndpointForm, FormError],
         }).compileComponents();
@@ -114,14 +116,40 @@ describe('UpdateEndpointForm', () => {
 
     it('should remove Endpoint A', async () => {
         vi.spyOn(PromptDialog, 'confirm').mockResolvedValue('Endpoint A');
-        await component.deleteEndpoint();
+
+        // Deleting is confirmed by typing the endpoint's name in the prompt dialog, so it must be
+        // sent to the server right away -- it must not depend on the separate "OK" button being
+        // clicked afterward, or a dismissed/forgotten dialog would silently discard the deletion.
+        const deletePromise = component.deleteEndpoint();
         expect(PromptDialog.confirm).toHaveBeenCalled();
+
+        await app.tick();
+        httpController.expectOne({ method: 'DELETE', url: '/api/v1/endpoints/RW5kcG9pbnQgQQ' }).flush(null);
+
+        // deleteEndpoint()'s own promise resolves once it has *triggered* the reload -- it doesn't
+        // wait for that reload's request to actually complete, so await it before expecting that
+        // request rather than after.
+        await deletePromise;
+
+        await app.tick();
+        httpController.expectOne('/api/v1/endpoints').flush([
+            {
+                name: 'Endpoint B',
+                url: 'opc.tcp://example.com:4840',
+                type: 'OPC_UA',
+            },
+        ] satisfies AASEndpoint[]);
+
+        await app.tick();
+        await app.tick(); // let the resource-sync effect pick up the reloaded value
+
         expect(component.form.items.length).toBe(1);
         expect(component.form.endpoint().value()).toBe('Endpoint B');
         expect(component.index()).toBe(0);
+
         component.submit(new Event('submit'));
         expect(activeModal.close).toHaveBeenCalledWith({
-            delete: ['Endpoint A'],
+            delete: [],
             update: [],
         } satisfies UpdateEndpointResult);
     });

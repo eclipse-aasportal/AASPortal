@@ -6,9 +6,9 @@
  !
  !---------------------------------------------------------------------------->
 
-<main class="form-login position-absolute top-50 start-50 translate-middle">
+<main class="form-login position-absolute top-50 start-50 translate-middle border border-black border-opacity-25 rounded-2 bg-body-tertiary p-4">
     <form (submit)="submit($event)">
-        <h5 class="text-info text-center">
+        <h5 class="text-secondary text-start mb-5">
             <i class="bi bi-person-circle"></i>
             <span class="ms-2" translate="LoginForm.CAPTION"></span>
         </h5>
@@ -29,7 +29,7 @@
             [disabled]="form().invalid()"
             translate="LoginForm.LOGIN"
         ></button>
-        <div class="text-center mb-3 fs-sm">
+        <div class="text-start mb-3 fs-sm">
             <span class="me-2 text-secondary" translate="LoginForm.NOT_REGISTERED"></span>
             <a href="/register" translate="LoginForm.CREATE_ACCOUNT"></a>
         </div>

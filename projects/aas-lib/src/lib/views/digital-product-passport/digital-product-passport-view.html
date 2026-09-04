@@ -8,29 +8,25 @@
 
 @if (submodels()) {
     <div class="container h-100">
-        <div class="d-flex flex-column">
-            <div class="bg-primary text-center py-2 my-2 fs-5" translate="DigitalProductPassport.BANNER"></div>
+
+        <div class="d-flex flex-column mt-2">
             <div class="d-flex flex-row">
-                <div class="flex-fill">
-                    <div class="text-center fw-bold fs-4 mb-2" translate="DigitalProductPassport.CAPTION"></div>
-                    <div class="text-center mb-2">{{ mainData().uriOfTheProduct }}</div>
-                    <div class="text-center mb-2">
-                        <span class="fw-medium" translate="DigitalProductPassport.TYPE"></span>
-                        <span class="fw-medium">:&nbsp;</span>
-                        <span>{{ mainData().productType }}</span>
-                        <span>,&nbsp;</span>
-                        <span class="fw-medium" translate="DigitalProductPassport.SERIAL_NUMBER"></span>
-                        <span class="fw-medium">:&nbsp;</span><span>{{ mainData().serialNumber }}</span>
-                    </div>
-                </div>  
-                <div class="flex-shrink-1">
-                    <div class="d-flex flex-column">
-                        <label style="font-size: 10px; font-weight: bold;">AAS Overview</label>
-                        <button [routerLink]="openAASOverview()" type="button" class="btn btn-primary" style="font-size: 1.5rem; width: min-content;"><i class="bi bi-box-arrow-up-right"></i></button>
-                    </div>
+                <div class="d-flex flex-column data-entry">
+                    <h3 translate="DigitalProductPassport.CAPTION"></h3>
+                </div>
+
+                <div class="mt-1 mx-4 d-flex flex-row ms-auto">
+                    <button
+                        [routerLink]="openAASOverview()"
+                        type="button"
+                        class="btn btn-outline-primary rounded-5 px-3"
+                        style="width: fit-content"
+                    >
+                        <span class="me-2" translate="AAS.OVERVIEW"></span>
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </button>
                 </div>
             </div>
-
             <fhg-thumbnail-qrcode [document]="document()"></fhg-thumbnail-qrcode>
             @if (hazardStatement()) {
                 <div class="text-center fs-3 fw-bold mb-2">{{ hazardStatement() }}</div>
@@ -39,6 +35,7 @@
                 </div>
             }
         </div>
+        
         <hr/>
         <label class="label">Nameplate</label>
         <div class="mt-3">

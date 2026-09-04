@@ -127,6 +127,16 @@ export abstract class LeafView extends View {
             return undefined;
         }
 
+        if (this.view.data.type === 'DefaultSubmodel') {
+            // Generic fallback views have no static semanticIds/idShorts to match against —
+            // the specific submodel is instead identified by the `submodel` (idShort) param
+            // the caller passed when navigating here (see aas.component.ts openSubmodelView).
+            const idShort =
+                this.route.snapshot.paramMap.get('submodel') ?? this.route.snapshot.queryParamMap.get('submodel');
+
+            return idShort ? env.submodels.find(submodel => submodel.idShort === idShort) : undefined;
+        }
+
         for (const submodel of env.submodels) {
             if (this.view.data.semanticIds) {
                 const semanticId = getSemanticId(submodel);

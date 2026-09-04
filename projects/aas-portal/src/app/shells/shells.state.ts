@@ -149,6 +149,11 @@ export class ShellsState {
     public update(newState: Partial<ShellsData>): void {
         if (newState.position !== undefined) {
             this.position$.set(newState.position);
+        } else if (newState.limit !== undefined || newState.filterText !== undefined) {
+            // Changing the page size or the search filter invalidates the current pagination
+            // cursor (it points at a document boundary from the previous query), so jump back
+            // to the first page instead of silently re-using a now-stale cursor.
+            this.position$.set({ next: undefined, previous: null });
         }
 
         if (newState.limit !== undefined) {

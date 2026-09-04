@@ -9,67 +9,66 @@
 <div class="container h-100 w-100 px-2" style="overflow-y: auto">
     <!-- Header of AAS View -->
     @if (document()) {
-        <div class="fhg-aas-header">
-            <div class="d-flex flex-row flex-wrap align-items-center justify-content-around">
-                <!-- Header of the header -->
-                <div class="container h-100 align-self-start text-white">
-                    <div class="d-flex flex-column text-center">
-                        <div class="bg-primary text-center py-2 my-2 fs-5">
-                            <div class="d-flex flex-column data-entry">
-                                <label style="font-size: 15px" translate="AAS.OVERVIEW"></label>
-                                <label style="font-size: 20px">{{ idShort() }}</label>
-                            </div>
+        <div class="fhg-aas-header mb-3">
+            <div class="container h-100 align-self-start d-flex flex-column flex-md-row">
+                <div class="d-flex flex-column w-75">
+                    <div class="py-2 my-2 fs-5">
+                        <div class="d-flex flex-column data-entry">
+                            <h3 translate="AAS.OVERVIEW"></h3>
+                            <h2 style="overflow-wrap: anywhere; word-break: break-word">{{ idShort() }}</h2>
                         </div>
                     </div>
                 </div>
-                <div class="flex-fill d-flex flex-row flex-wrap align-items-center justify-content-center">
-                    <div class="border border-secondary rounded p-1">
-                        <img
-                            class="img-fluid"
-                            [src]="thumbnail()"
-                            alt="thumbnail"
-                            (error)="thumbnail.set('/assets/resources/aas-idta.png')"
-                            style="max-height: 180px"
-                        />
-                    </div>
-                    <div class="d-flex flex-column ps-1">
-                        <div class="col-md-6 p-1 d-flex flex-column mt-0">
-                            <label class="label" translate="AAS.VERSION"></label>
-                            <label class="ms-2">{{ version() }}</label>
-                        </div>
-                        <div class="col-md-6 p-1 d-flex flex-column mt-0">
-                            <label class="label" translate="AAS.AAS_ID"></label>
-                            <label class="ms-2">{{ id() }}</label>
-                        </div>
-                        <div class="col-md-6 p-1 d-flex flex-column mt-0">
-                            <label class="label" translate="AAS.ASSET_ID"></label>
-                            <label class="ms-2">{{ assetId() }}</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex flex-sm-column flex-row align-items-end mb-sm-0 mb-4">
-                    <div class="d-flex flex-column mt-1 mx-4">
-                        <label class="label" translate="AAS.CONTENT"></label>
+                <div style="min-width: 30%;" class="d-flex flex-md-column flex-row flex-wrap justify-content-start justify-content-md-center align-items-end mb-md-0 mb-4 ms-md-auto">
+                    <div class="mt-1 mx-1 mx-md-4 d-flex flex-row">
                         <button
                             [routerLink]="openContentView()"
                             type="button"
-                            class="btn btn-primary"
-                            style="font-size: 1.5rem; width: min-content"
+                            class="btn btn-outline-primary rounded-5 px-3"
+                            style="width: fit-content"
                         >
+                            <span class="me-2" translate="AAS.CONTENT"></span>
                             <i class="bi bi-box-arrow-up-right"></i>
                         </button>
                     </div>
-                    <div class="d-flex flex-column mt-1 mx-4">
-                        <label class="label" translate="AAS.BROWSER"></label>
+                    <div class="mt-1 mx-1 mx-md-4">
+                        
                         <button
                             [routerLink]="openBrowserView()"
                             type="button"
-                            class="btn btn-primary"
-                            style="font-size: 1.5rem; width: min-content"
+                            class="btn btn-outline-primary rounded-5 px-3"
+                            style="width: fit-content"
                         >
+                            <span class="me-2" translate="AAS.BROWSER"></span>
                             <i class="bi bi-box-arrow-up-right"></i>
                         </button>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-body-tertiary border border-black border-opacity-50 rounded-2 p-4">
+                <!-- Header of the header -->
+                <div class="d-flex flex-column flex-sm-row flex-wrap align-items-center justify-content-around md-justify-content-start">
+                    <div class="left-side border border-secondary rounded p-1 thumbnail">
+                        <img
+                            class="img-fluid thumbnail-img"
+                            [src]="thumbnail()"
+                            alt="thumbnail"
+                            (error)="thumbnail.set('/assets/resources/aas-idta.png')"
+                        />
+                    </div>
+                    <div class="right-side d-flex flex-column flex-grow information">
+                        <div class="p-1 d-flex flex-column mt-0">
+                            <label class="label" translate="AAS.VERSION"></label>
+                            <label class="ms-2" style="overflow-wrap: anywhere; word-break: break-all">{{ version() }}</label>
+                        </div>
+                        <div class="p-1 d-flex flex-column mt-0">
+                            <label class="label" translate="AAS.AAS_ID"></label>
+                            <label class="ms-2" style="overflow-wrap: anywhere; word-break: break-all">{{ id() }}</label>
+                        </div>
+                        <div class="p-1 d-flex flex-column mt-0">
+                            <label class="label" translate="AAS.ASSET_ID"></label>
+                            <label class="ms-2" style="overflow-wrap: anywhere; word-break: break-all">{{ assetId() }}</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -79,34 +78,43 @@
         <div class="fhg-aas-document">
             <div class="d-flex flex-row flex-wrap">
                 @for (submodel of getSubmodels(); track submodel) {
-                    <div
-                        class="d-flex flex-row mx-2 my-1 py-2 px-3 border border-1 border-black rounded-3 align-items-center bg-primary-subtle w-md-40"
+                    <a
+                        [routerLink]="openSubmodelView(submodel)"
+                        class="fhg-submodel-card d-flex flex-row mx-2 my-1 py-2 px-3 border border-1 border-black border-opacity-50 rounded-3 align-items-center w-md-40 text-decoration-none text-body"
                     >
-                        <div class="me-4 text-secondary" style="font-size: 3.5rem">
+                        <div class="me-4" style="font-size: 24px;">
                             <i class="bi" [ngClass]="getSubmodelIcon(submodel)"></i>
                         </div>
                         <div class="me-4">
-                            <label style="font-size: 14px; overflow-wrap: anywhere; word-break: break-word">{{
-                                getSubmodelSemanticId(submodel)
+                            <label class="text-body-secondary" style="font-size: 14px; overflow-wrap: anywhere; word-break: break-word">{{
+                                getSubmodelSemanticId(submodel) | max: 55 : 0.55
                             }}</label>
-                            <h4 style="overflow-wrap: anywhere; word-break: break-word">
+                            <h4 class="" style="overflow-wrap: anywhere; word-break: break-word">
                                 {{ submodel.idShort }}
                             </h4>
                         </div>
-                        <div class="ms-auto">
-                            <button
-                                [routerLink]="openSubmodelView(submodel)"
-                                type="button"
-                                class="btn btn-primary"
-                                style="font-size: 1.5rem"
-                            >
-                                <i class="bi bi-box-arrow-up-right"></i>
-                            </button>
+                        <div class="ms-auto text-primary" style="font-size: 1.5rem">
+                            <i class="bi bi-chevron-right"></i>
                         </div>
-                    </div>
+                    </a>
                 }
             </div>
         </div>
+    } @else if (error() === 'permission') {
+        <div class="alert alert-warning text-center mt-2" role="alert">
+            <i class="bi bi-shield-lock me-2"></i>
+            <span translate="AAS.NO_PERMISSION"></span>
+            <div class="mt-2">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="openEndpointAuth().subscribe()"
+                    translate="AAS.ADD_API_KEY"
+                ></button>
+            </div>
+        </div>
+    } @else if (error() === 'other') {
+        <div class="alert alert-danger text-center mt-2" role="alert" translate="AAS.LOAD_FAILED"></div>
     } @else {
         <div class="alert alert-info text-center mt-2" role="alert" translate="AAS.EMPTY"></div>
     }
@@ -115,7 +123,8 @@
 <!-- Toolbar -->
 <ng-template #toolbar>
     <div class="input-group me-2 my-1">
-        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+        <button class="btn btn-outline-primary rounded-3" type="button" (click)="addToStart().subscribe()">
+            <span class="me-2">Add to Start</span>
             <i class="bi bi-house-add"></i>
         </button>
     </div>

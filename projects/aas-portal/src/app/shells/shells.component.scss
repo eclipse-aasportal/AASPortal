@@ -6,3 +6,32 @@
  *
  *****************************************************************************/
 
+.hidden-selected-bar {
+    position:fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.vertical-line {
+    background-color: #ffffff;
+    align-self: center; 
+    height: 16px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.pager-btn{
+    --bs-btn-border-color: transparent;
+    --bs-btn-disabled-border-color: transparent;
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-opacity: 1;
+    --bs-btn-disabled-color: #c3cac6;
+    --bs-btn-hover-bg: var(--bs-tertiary-bg);
+}
+
+.btn-views {
+    --bs-btn-color: var(--bs-primary);
+    --bs-btn-border-color: transparent;
+    --bs-btn-active-border-color: transparent;
+}

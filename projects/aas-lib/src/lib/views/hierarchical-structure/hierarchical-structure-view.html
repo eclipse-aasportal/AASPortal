@@ -7,19 +7,35 @@
  !---------------------------------------------------------------------------->
 
 <div class="container h-100">
-    <div class="d-flex flex-column text-center">
-        <div class="bg-primary text-center py-2 my-2 fs-5">
-            <span translate="HierarchicalStructure.TITLE"></span>
-            <span class="ms-1">{{ version() }}</span>
+    <div class="d-flex flex-column mt-2 mb-2">
+        <div class="d-flex flex-column flex-sm-row">
+            <div class="d-flex flex-column data-entry flex-shrink-1">
+                <h3 translate="HierarchicalStructure.TITLE"></h3>
+            </div>
+
+            <div class="mt-1 mx-sm-4 d-flex flex-row ms-sm-auto">
+                <button
+                    [routerLink]="openAASOverview()"
+                    type="button"
+                    class="btn btn-outline-primary rounded-5 px-3"
+                    style="width: fit-content"
+                >
+                    <span class="me-2" translate="AAS.OVERVIEW"></span>
+                    <i class="bi bi-box-arrow-up-right"></i>
+                </button>
+            </div>
         </div>
         <fhg-thumbnail-qrcode [document]="document()"></fhg-thumbnail-qrcode>
     </div>
+
+
     <fhg-hierarchical-structure [document]="document()" [submodel]="submodel()"></fhg-hierarchical-structure>
 </div>
 
 <ng-template #toolbar>
     <div class="input-group me-2 my-1">
-        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
+        <button class="btn btn-outline-primary" type="button" (click)="addToStart().subscribe()">
+            Add to Start
             <i class="bi bi-house-add"></i>
         </button>
     </div>

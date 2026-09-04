@@ -7,7 +7,7 @@
  !---------------------------------------------------------------------------->
 
 <form (submit)="submit($event)" class="modal-content">
-    <div class="modal-header text-info">
+    <div class="modal-header text-secondary">
         <h4 class="modal-title">
             <i class="bi bi-gear"></i>
             <span class="ms-2" translate="EndpointIndexForm.CAPTION"></span>
@@ -18,27 +18,32 @@
         <div class="endpoint-index-grid">
             @for (item of items(); track item.name; let i = $index) {
                 <div class="endpoint-index-row">
-                    <div class="fw-medium">{{ item.name }}</div>
-                    @if (item.status === 'idle') {
-                        <div class="text-end">
-                            <span>{{ item.count }}</span
-                            ><span class="ms-2">{{ 'EndpointIndexForm.SHELLS' | translate }}</span>
+                    <div class="flex-column align-items-start justify-content-center">
+                        <div class="fw-medium">{{ item.name }}</div>
+                        <div class="text-start label">
+                            <span>{{ item.count }}</span>
+                            <span class="ms-1">{{ 'EndpointIndexForm.SHELLS' | translate }}</span>
                         </div>
-                        @if (item.schedule === 'manual' || item.schedule === 'once') {
-                            <button
-                                type="button"
-                                class="btn btn-lg btn-outline-primary border-0 endpoint-index-icon-btn"
-                                [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
-                                [openDelay]="300"
-                                placement="top"
-                                container="body"
-                                (click)="startScan(item.name).subscribe()"
-                            >
-                                <i class="bi bi-caret-right-square"></i>
-                            </button>
-                        } @else {
-                            <div class=""></div>
-                        }
+                    </div>
+                    
+                    @if (item.status === 'idle') {
+
+                        <div>
+                            @if (item.schedule === 'manual' || item.schedule === 'once') {
+                                <button
+                                    type="button"
+                                    class="btn btn-lg btn-outline-primary py-0 px-3 endpoint-index-icon-btn"
+                                    [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
+                                    [openDelay]="300"
+                                    placement="top"
+                                    container="body"
+                                    (click)="startScan(item.name).subscribe()"
+                                >
+                                    <i class="bi bi-play-fill"></i>
+                                    <span class="fw-light" style="font-size: 15px;">Scan</span>
+                                </button>
+                            }
+                        </div>
                         <div class="">
                             <button
                                 type="button"
@@ -47,6 +52,7 @@
                                 [openDelay]="300"
                                 placement="top"
                                 container="body"
+                                [disabled]="item.count <= 0"
                                 (click)="clearIndex(item.name).subscribe()"
                             >
                                 <i class="bi bi-eraser-fill"></i>
@@ -62,19 +68,21 @@
                         } @else {
                             <ngb-progressbar class="" [showValue]="true" type="info" [value]="item.progress" />
                         }
-                        <div class=""></div>
-                        <button
-                            type="button"
-                            class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
-                            [ngbTooltip]="'EndpointIndexForm.CANCEL_SCAN_TOOL_TIP' | translate"
-                            [openDelay]="300"
-                            placement="top"
-                            container="body"
-                            (click)="cancelScan(item.name).subscribe()"
-                        >
-                            <i class="bi bi-stop-circle"></i>
-                        </button>
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
+                                [ngbTooltip]="'EndpointIndexForm.CANCEL_SCAN_TOOL_TIP' | translate"
+                                [openDelay]="300"
+                                placement="top"
+                                container="body"
+                                (click)="cancelScan(item.name).subscribe()"
+                            >
+                                <i class="bi bi-stop-circle"></i>
+                            </button>
+                        </div>
                     }
+                    <div class="endpoint-index-divider"></div>
                 </div>
             }
         </div>
@@ -83,15 +91,16 @@
         <button
             type="button"
             id="AID_CLEAR_INDEX"
-            class="btn btn-lg btn-outline-danger border-0 me-auto"
+            class="btn btn-lg btn-outline-danger me-auto border-0 py-1 px-3"
             [ngbTooltip]="'EndpointIndexForm.CLEAR_INDEX_TOOLTIP' | translate"
             [openDelay]="300"
             placement="top"
             container="body"
             (click)="clearIndex()"
         >
-            <i class="bi bi-eraser-fill"></i>
+            <i class="bi bi-trash3"></i>
+            <span class="fw-light" style="font-size: 15px;">Clear Entire Index</span>
         </button>
-        <button type="submit" class="btn btn-primary" translate="EndpointIndexForm.CLOSE"></button>
+        <button type="submit" class="btn btn-sm border rounded-2 px-4" translate="EndpointIndexForm.CLOSE"></button>
     </div>
 </form>
