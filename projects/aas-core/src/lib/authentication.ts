@@ -16,11 +16,11 @@ const priority: UserRole[] = ['user', 'admin'];
 export interface User {
     id: string;
     name: string;
-    role: UserRole;
 }
 
 /** User with additional session information. */
 export interface SessionUser extends User {
+    role: UserRole;
     client_id: string;
     session_state?: string;
     check_session_iframe?: string;

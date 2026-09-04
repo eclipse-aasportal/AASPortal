@@ -102,7 +102,7 @@ describe('AASComponent', () => {
                 },
                 {
                     provide: AuthService,
-                    useValue: createSpyObj<AuthService>(['ensureAuthorized']),
+                    useValue: createSpyObj<AuthService>(['checkAuthorized']),
                 },
                 {
                     provide: StartService,

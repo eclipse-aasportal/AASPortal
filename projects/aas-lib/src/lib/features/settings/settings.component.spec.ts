@@ -28,7 +28,7 @@ describe('SettingsComponent', () => {
 
     beforeEach(async () => {
         modal = createSpyObj<NgbModal>(['open']);
-        auth = createSpyObj<AuthService>(['ensureAuthorized']);
+        auth = createSpyObj<AuthService>(['checkAuthorized']);
         api = createSpyObj<EndpointsApi>(['addEndpoint']);
         notify = createSpyObj<NotifyService>(['info', 'error']);
 

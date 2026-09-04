@@ -108,21 +108,27 @@ export abstract class IdentityProviderClient {
     public middleware(): express.RequestHandler {
         return async (req, res, next) => {
             delete req.user;
-            const { access_token, refresh_token } = req.session;
+            const { access_token, refresh_token, expires_at } = req.session;
             if (access_token) {
                 try {
-                    const payload = await this.verifyAccessToken(access_token);
-                    const userId = String(payload.email);
-                    let endpoints = req.session.endpoints;
-                    if (!endpoints) {
-                        endpoints = await this.cookies.getEndpoints(userId);
-                        req.session.endpoints = endpoints;
+                    if (!expires_at || expires_at < Date.now()) {
+                        const payload = await this.verifyAccessToken(access_token);
+                        const userId = String(payload.email);
+                        let endpoints = req.session.endpoints;
+                        if (payload.exp) {
+                            req.session.expires_at = payload.exp * 1000;
+                        }
+
+                        if (!endpoints) {
+                            endpoints = await this.cookies.getEndpoints(userId);
+                            req.session.endpoints = endpoints;
+                        }
                     }
 
                     req.user = {
-                        id: userId,
-                        name: String(payload.name),
-                        role: 'user',
+                        id: req.session.user_id!,
+                        name: req.session.name!,
+                        role: req.session.role!,
                         client_id: this.clientId,
                         session_state: req.session.session_state,
                         check_session_iframe: req.session.check_session_iframe,
@@ -134,11 +140,13 @@ export abstract class IdentityProviderClient {
                     }
 
                     try {
+                        delete req.session.expires_at;
                         const tokenData = await this.refreshToken(refresh_token);
                         req.session.access_token = tokenData.access_token;
                         req.session.refresh_token = tokenData.refresh_token;
                         req.user = {
                             ...tokenData.user,
+                            role: req.session.role!,
                             client_id: this.clientId,
                             session_state: req.session.session_state,
                             check_session_iframe: req.session.check_session_iframe,
@@ -151,11 +159,13 @@ export abstract class IdentityProviderClient {
                 }
             } else if (refresh_token) {
                 try {
+                    delete req.session.expires_at;
                     const tokenData = await this.refreshToken(refresh_token);
                     req.session.access_token = tokenData.access_token;
                     req.session.refresh_token = tokenData.refresh_token;
                     req.user = {
                         ...tokenData.user,
+                        role: req.session.role!,
                         client_id: this.clientId,
                         session_state: req.session.session_state,
                         check_session_iframe: req.session.check_session_iframe,
@@ -238,6 +248,18 @@ export abstract class IdentityProviderClient {
 
     protected getVerifyOptions(): jwt.VerifyOptions | undefined {
         return undefined;
+    }
+
+    protected decodeAccessToken(token: string): User {
+        const payload = jwt.decode(token, { json: true });
+        if (!payload || typeof payload?.email !== 'string' || typeof payload?.name !== 'string') {
+            throw new Error('Invalid access token');
+        }
+
+        return {
+            id: payload.email,
+            name: payload.name,
+        };
     }
 
     private async verifyAccessToken(token: string): Promise<jwt.JwtPayload> {

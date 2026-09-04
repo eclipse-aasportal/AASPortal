@@ -33,7 +33,7 @@ describe('PackagesController', () => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         provider = createSpyObj<PackageProvider>(['getPackage', 'insertPackages', 'deletePackage']);
         authentication = createSpyObj<Authentication>(['authentication']);
-        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'user' });
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(PackageProvider, provider);

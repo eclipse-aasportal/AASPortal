@@ -29,7 +29,7 @@
                 "NODE_ENV": "development",
                 "CONTENT_ROOT": "projects/aas-node/build",
                 "WEB_ROOT": "projects/aas-portal/dist/browser",
-                "ASSETS": "projects/aas-node/src/assets",
+                "ASSETS": "projects/aas-node/src/assets"
             }
         },
         {

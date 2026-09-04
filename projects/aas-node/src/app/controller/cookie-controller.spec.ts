@@ -26,7 +26,7 @@ describe('CookieController', () => {
     beforeAll(() => {
         storage = createSpyObj<CookieStore>(['deleteCookie', 'getCookie', 'setCookie']);
         authentication = createSpyObj<Authentication>(['authentication']);
-        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'user' });
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
         container.registerInstance(COOKIE_STORE, storage);
         container.registerInstance(Authentication, authentication);
 

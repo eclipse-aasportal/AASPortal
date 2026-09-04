@@ -12,7 +12,7 @@ import jwt from 'jsonwebtoken';
 import jwksClient, { JwksClient } from 'jwks-rsa';
 import * as z from 'zod';
 
-import { ApplicationError, ErrorData, User } from 'aas-core';
+import { ApplicationError, ErrorData } from 'aas-core';
 
 import { IdentityProviderClient, RefreshTokenResponse } from './identity-provider-client.js';
 import { ERRORS } from '../errors.js';
@@ -143,10 +143,11 @@ export class OidcClient extends IdentityProviderClient {
             }
 
             const tokenData = (await response.json()) as TokenEndpointResponse;
-            const payload = jwt.decode(tokenData.access_token, { json: true });
-            req.session.user_id = payload?.email;
+            const { id, name } = this.decodeAccessToken(tokenData.access_token);
+            req.session.user_id = id;
+            req.session.name = name;
+            req.session.role = (await this.userRights.get(id)).role;
             req.session.access_token = tokenData.access_token;
-            req.session.expires_at = Date.now() + tokenData.expires_in * 1000;
             req.session.refresh_token = tokenData.refresh_token;
             res.redirect(new URL('start', this.variable.HOST_URL ?? `${req.protocol}://${req.host}`).href);
         } catch (error) {
@@ -249,15 +250,7 @@ export class OidcClient extends IdentityProviderClient {
         }
 
         const tokenData = (await response.json()) as TokenEndpointResponse;
-        const payload = jwt.decode(tokenData.access_token, { json: true });
-        if (!payload) {
-            throw new ApplicationError(ERRORS.INTERNAL_SERVER_ERROR, {}, 500);
-        }
-
-        const id = String(payload.email);
-        const role = (await this.userRights.get(id)).role;
-        const user: User = { id, name: String(payload.name), role };
-
+        const user = this.decodeAccessToken(tokenData.access_token);
         return { refresh_token: tokenData.refresh_token!, access_token: tokenData.access_token, user };
     }
 

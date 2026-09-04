@@ -96,8 +96,7 @@ export class IdentityProvider extends IdentityProviderClient {
             } satisfies ErrorData);
         }
 
-        const role = (await this.userRights.get(data.id)).role;
-        const user: User = { id: data.id, name: data.name, role };
+        const user: User = { id: data.id, name: data.name };
         const redirect_uri = this.variable.REDIRECT_URI ?? `${req.protocol}://${req.host}/auth/callback`;
         const op_session_id = nanoid();
         const session_state = this.generateSessionState(
@@ -108,10 +107,10 @@ export class IdentityProvider extends IdentityProviderClient {
 
         const check_session_iframe = `${this.variable.HOST_URL ?? `${req.protocol}://${req.host}`}/auth/login_status_iframe.html`;
         req.session.user_id = user.id;
+        req.session.name = user.name;
+        req.session.role = (await this.userRights.get(data.id)).role;
         req.session.access_token = this.createAccessToken(user);
-        req.session.expires_at = Date.now() + ACCESS_TOKEN_EXPIRES_IN * 1000;
         req.session.refresh_token = this.createRefreshToken(user);
-        req.session.op_session_Id = op_session_id;
         req.session.session_state = session_state;
         req.session.check_session_iframe = check_session_iframe;
 
@@ -124,8 +123,10 @@ export class IdentityProvider extends IdentityProviderClient {
         });
 
         res.json({
-            ...user,
             client_id: this.variable.CLIENT_ID,
+            id: req.session.user_id,
+            name: req.session.name,
+            role: req.session.role,
             session_state,
             check_session_iframe,
         } satisfies SessionUser);
@@ -161,7 +162,7 @@ export class IdentityProvider extends IdentityProviderClient {
                 async e => {
                     const clientOrigin = e.origin;
                     const expectedMessage = clientId + ' ' + sessionState;
-                    if (e.data === expectedMessage) {
+                    if (e.data !== expectedMessage) {
                         return;
                     }
 
@@ -369,7 +370,6 @@ export class IdentityProvider extends IdentityProviderClient {
         const user: User = {
             id: payload.email,
             name: payload.name,
-            role: (await this.userRights.get(payload.email)).role,
         };
 
         const access_token = this.createAccessToken(user);

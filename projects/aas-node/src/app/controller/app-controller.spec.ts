@@ -35,7 +35,7 @@ describe('AppController', () => {
         applicationInfo = createSpyObj<ApplicationInfo>(['getAsync']);
 
         authentication = createSpyObj<Authentication>(['authentication']);
-        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'user' });
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);

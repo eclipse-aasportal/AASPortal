@@ -33,7 +33,7 @@ describe('IndexController', () => {
         provider = createSpyObj<EndpointProvider>(['clearIndex']);
         index = createSpyObj<AASIndex>(['getEndpoints', 'getEndpointCount', 'getCount']);
         authentication = createSpyObj<Authentication>(['authentication']);
-        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'user' });
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
         cookieStorage = createSpyObj<CookieStore>(['getEndpoints', 'updatesEndpoints']);
 
         container.registerInstance(EndpointProvider, provider);

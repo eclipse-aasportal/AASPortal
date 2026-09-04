@@ -25,7 +25,7 @@ describe('OidcClient', () => {
     let logger: Mocked<Logger>;
     let configuration: Mocked<AuthorizationServer>;
     let cookies: Mocked<CookieStore>;
-    let userRightsStore: Mocked<UserRightsStore>;
+    let userRights: Mocked<UserRightsStore>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -48,12 +48,12 @@ describe('OidcClient', () => {
         });
 
         cookies = createSpyObj<CookieStore>(['getCookie', 'setCookie', 'getEndpoints']);
-        userRightsStore = createSpyObj<UserRightsStore>(['get', 'add', 'update', 'delete']);
+        userRights = createSpyObj<UserRightsStore>(['get', 'add', 'update', 'delete']);
         container.clearInstances();
         container.registerInstance(LOGGER, logger);
         container.registerInstance(COOKIE_STORE, cookies);
         container.registerInstance(Variable, variable);
-        container.registerInstance(USER_RIGHTS_STORE, userRightsStore);
+        container.registerInstance(USER_RIGHTS_STORE, userRights);
         container.registerSingleton(OidcClient);
         identityProvider = container.resolve(OidcClient);
     });
@@ -109,7 +109,9 @@ describe('OidcClient', () => {
 
     describe('callback', () => {
         it('should authorize the current user', async () => {
-            const res = createSpyObj<express.Response>(['redirect', 'cookie']);
+            const res = createSpyObj<express.Response>(['redirect', 'cookie', 'status', 'json']);
+            res.status.mockReturnThis();
+
             const session = createSpyObj<Session & SessionData>(['save'], {
                 state: 'test-state',
                 code_verifier: 'test-code-verifier',
@@ -123,7 +125,7 @@ describe('OidcClient', () => {
                 protocol: 'https',
                 host: 'localhost',
                 session,
-                query: { code: 'test-code', state: 'test-state' },
+                query: { code: 'test-code', state: 'test-state', session_state: 'test-session-state' },
             });
 
             const configurationResponse = createSpyObj<Response>(['json'], {
@@ -157,6 +159,12 @@ describe('OidcClient', () => {
             });
 
             identityProvider['getPublicKey'] = vi.fn(() => Promise.resolve('test-public-key'));
+            identityProvider['decodeAccessToken'] = vi.fn().mockReturnValue({
+                id: 'john.doe@email.com',
+                name: 'John Doe',
+            });
+
+            userRights.get.mockResolvedValue({ role: 'user', id: 'john.doe@email.com' });
 
             await identityProvider.callback(req, res);
             expect(req.session.state).toBeUndefined();

@@ -9,8 +9,9 @@
 import { inject, Injectable, computed, signal, DOCUMENT } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { map, Observable, of, switchMap, take, throwError } from 'rxjs';
+import { map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
 import {
     UserProfile,
     UserRole,
@@ -22,7 +23,7 @@ import {
 } from 'aas-core';
 import { DocumentCache } from '../../shared/services/document-cache';
 import { ERRORS } from '../../messages';
-import { TranslateService } from '@ngx-translate/core';
+import { WINDOW } from '../../shared/services/window.service';
 
 @Injectable({
     providedIn: 'root',
@@ -33,6 +34,7 @@ export class AuthService {
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly document = inject(DOCUMENT);
     private readonly translate = inject(TranslateService);
+    private readonly window = inject(WINDOW);
     private readonly _user = signal<SessionUser | null | undefined>(undefined);
 
     public constructor() {
@@ -136,7 +138,10 @@ export class AuthService {
             return of(void 0);
         }
 
-        return this.http.post('/auth/logout', null, { responseType: 'text' }).pipe(map(() => this._user.set(null)));
+        return this.http.post('/auth/logout', null, { responseType: 'text' }).pipe(
+            map(() => this._user.set(null)),
+            tap(() => this.window.location.assign('/auth/login')),
+        );
     }
 
     /**

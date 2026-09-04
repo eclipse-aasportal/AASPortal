@@ -12,7 +12,7 @@ import express from 'express';
 import { Session, SessionData } from 'express-session';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { UserProfile } from 'aas-core';
+import { SessionUser, UserProfile } from 'aas-core';
 
 import { createSpyObj } from '../../test/mocks.js';
 import { IdentityProvider } from './identity-provider.js';
@@ -23,7 +23,7 @@ import { USER_RIGHTS_STORE, UserRightsStore } from './user-rights-store.js';
 import { container } from 'tsyringe';
 import { Logger, LOGGER } from 'aas-package';
 
-describe('FileSystemIdentityProvider', () => {
+describe('IdentityProvider', () => {
     let identityProvider: IdentityProvider;
     let variable: Mocked<Variable>;
     let cookies: Mocked<CookieStore>;
@@ -306,6 +306,9 @@ describe('FileSystemIdentityProvider', () => {
     describe('middleware', () => {
         it('set request user', async () => {
             const session = createSessionMock();
+            session.user_id = 'john.doe@email.com';
+            session.name = 'John Doe';
+            session.role = 'user';
             session.access_token = 'test-access-token';
             session.refresh_token = 'test-refresh-token';
             const req = createSpyObj<express.Request>([], {
@@ -316,7 +319,7 @@ describe('FileSystemIdentityProvider', () => {
             const res = createSpyObj<express.Response>(['clearCookie', 'setHeader']);
             identityProvider['verifyAccessToken'] = vi
                 .fn()
-                .mockResolvedValue({ email: 'john.doe@email.com', name: 'John Doe' });
+                .mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
 
             cookies.getEndpoints.mockResolvedValue([]);
 
@@ -337,6 +340,11 @@ describe('FileSystemIdentityProvider', () => {
             const session = createSessionMock();
             session.access_token = 'expired-access-token';
             session.refresh_token = 'test-refresh-token';
+            session.user_id = 'john.doe@email.com';
+            session.name = 'John Doe';
+            session.role = 'user';
+            session.session_state = 'test-session-state';
+            session.check_session_iframe = 'test-check-session-iframe';
             const req = createSpyObj<express.Request>([], {
                 session,
                 user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
@@ -360,7 +368,9 @@ describe('FileSystemIdentityProvider', () => {
                 name: 'John Doe',
                 role: 'user',
                 client_id: 'test-client-id',
-            });
+                session_state: 'test-session-state',
+                check_session_iframe: 'test-check-session-iframe',
+            } as SessionUser);
 
             expect(next).toHaveBeenCalled();
         });
@@ -369,6 +379,11 @@ describe('FileSystemIdentityProvider', () => {
             const session = createSessionMock();
             session.access_token = 'test-access-token';
             session.refresh_token = 'test-refresh-token';
+            session.user_id = 'john.doe@email.com';
+            session.name = 'John Doe';
+            session.role = 'user';
+            session.session_state = 'test-session-state';
+            session.check_session_iframe = 'test-check-session-iframe';
             const req = createSpyObj<express.Request>([], {
                 session,
                 user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
@@ -391,6 +406,8 @@ describe('FileSystemIdentityProvider', () => {
                 name: 'John Doe',
                 role: 'user',
                 client_id: 'test-client-id',
+                session_state: 'test-session-state',
+                check_session_iframe: 'test-check-session-iframe',
             });
 
             expect(next).toHaveBeenCalled();

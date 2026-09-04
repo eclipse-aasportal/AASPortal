@@ -42,7 +42,7 @@ describe('EndpointsController', () => {
 
         index = createSpyObj<AASIndexClient>(['getEndpoints', 'getEndpointCount', 'getDocumentCount']);
         authentication = createSpyObj<Authentication>(['authentication']);
-        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'user' });
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
         cookieStorage = createSpyObj<CookieStore>(['getEndpoints', 'updatesEndpoints']);
 
         container.registerInstance(EndpointProvider, provider);

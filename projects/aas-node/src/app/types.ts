@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { AASEndpointAuth, SessionUser } from 'aas-core';
+import { AASEndpointAuth, SessionUser, UserRole } from 'aas-core';
 
 /** Extend Express Request type to include 'user' */
 declare module 'express-serve-static-core' {
@@ -18,12 +18,13 @@ declare module 'express-serve-static-core' {
 declare module 'express-session' {
     interface SessionData {
         user_id: string;
+        name: string;
+        role: UserRole;
         access_token: string;
         refresh_token: string;
         expires_at: number;
         code_verifier: string;
         endpoints: AASEndpointAuth[];
-        op_session_Id: string;
         session_state: string;
         check_session_iframe: string;
         state: string;

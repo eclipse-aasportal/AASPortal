@@ -15,7 +15,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 
 import { SessionUser } from 'aas-core';
-import { WINDOW } from '../../shared/services/window.service';
+import { WINDOW, WindowService } from '../../shared/services/window.service';
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
@@ -23,7 +23,7 @@ import { createSpyObj, FakeLoader } from '../../../test/mocks';
 describe('AuthService', () => {
     let service: AuthService;
     let http: Mocked<HttpClient>;
-    let window: Mocked<Window>;
+    let window: Mocked<WindowService>;
     let activatedRoute: Mocked<ActivatedRoute>;
     let paramMap: Mocked<ParamMap>;
 
@@ -33,7 +33,8 @@ describe('AuthService', () => {
 
         const localStorage = createSpyObj<Storage>(['getItem', 'setItem', 'removeItem', 'clear']);
         localStorage.getItem.mockReturnValue(null);
-        window = createSpyObj<Window>(['confirm'], { localStorage });
+        const location = createSpyObj<Location>(['assign']);
+        window = createSpyObj<WindowService>(['confirm'], { localStorage, location });
 
         paramMap = createSpyObj<ParamMap>(['get']);
         activatedRoute = createSpyObj<ActivatedRoute>([], { queryParamMap: of(paramMap) });
