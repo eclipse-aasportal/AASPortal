@@ -117,7 +117,7 @@
 		"@types/swagger-ui-express": "^4.1.8",
 		"@types/ws": "^8.18.1",
 		"@vitest/coverage-v8": "^4.1.10",
-		"angular-eslint": "22.0.0",
+		"angular-eslint": "22.2.0",
 		"esbuild": "^0.28.1",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
