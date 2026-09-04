@@ -43,7 +43,7 @@ export class SettingsComponent {
             return this.auth.login();
         }
 
-        return this.auth.ensureAuthorized('editor').pipe(
+        return this.auth.checkAuthorized('admin').pipe(
             map(() => this.modal.open(AddEndpointForm, { backdrop: 'static' })),
             mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
             mergeMap(endpoint => {
@@ -59,6 +59,7 @@ export class SettingsComponent {
                     }),
                 );
             }),
+            catchError(error => of(this.notify.error(error))),
         );
     }
 
@@ -74,7 +75,7 @@ export class SettingsComponent {
             return this.auth.login();
         }
 
-        return this.auth.ensureAuthorized('editor').pipe(
+        return this.auth.checkAuthorized('admin').pipe(
             map(() => this.modal.open(UpdateEndpointForm, { backdrop: 'static' })),
             mergeMap(modalRef => from<Promise<UpdateEndpointResult>>(modalRef.result)),
             mergeMap(result => {
@@ -109,6 +110,7 @@ export class SettingsComponent {
                     ),
                 );
             }),
+            catchError(error => of(this.notify.error(error))),
         );
     }
 
@@ -118,16 +120,11 @@ export class SettingsComponent {
      *
      * @returns An Observable that completes when the dialog has been closed.
      */
-    public console(): Observable<void> {
+    public openEndpointIndex(): Observable<void> {
         if (!this.auth.isAuthenticated()) {
             return this.auth.login();
         }
 
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => {
-                const modalRef = this.modal.open(EndpointIndexForm, { backdrop: 'static', scrollable: true });
-                return from(modalRef.result);
-            }),
-        );
+        return from(this.modal.open(EndpointIndexForm, { backdrop: 'static', scrollable: true }).result);
     }
 }

@@ -9,7 +9,7 @@
 import { noop } from 'aas-core';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-export const editorPayload: JwtPayload = { sub: 'john.doe@email.com', name: 'John', role: 'editor' };
+export const editorPayload: JwtPayload = { sub: 'john.doe@email.com', name: 'John', role: 'user' };
 
 export function getToken(name?: string): string {
     noop(name);

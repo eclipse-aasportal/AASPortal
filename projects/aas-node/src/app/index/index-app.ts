@@ -11,7 +11,7 @@ import { parentPort, MessagePort } from 'worker_threads';
 import { aas, AASCursor, AASDocument, AASEndpoint } from 'aas-core';
 import { LOGGER } from 'aas-package';
 import { AAS_INDEX, ChannelCommand, ChannelError, ChannelResponse, IAASIndex, CommandName } from './aas-index.js';
-import { CommandData, ResponseData, ErrorData } from '../types.js';
+import { ResponseData, ErrorData, isCommandData, WorkerData } from '../types.js';
 
 @singleton()
 export class IndexApp {
@@ -24,9 +24,9 @@ export class IndexApp {
         parentPort?.on('message', this.parentPortOnMessage);
     }
 
-    private readonly parentPortOnMessage = (data: CommandData): void => {
+    private readonly parentPortOnMessage = (data: WorkerData): void => {
         try {
-            if (data.type === 'command') {
+            if (isCommandData(data)) {
                 if (data.name === 'connect') {
                     const port = data.args.port as MessagePort;
                     port.on('message', data => this.onMessage(port, data));
@@ -53,6 +53,7 @@ export class IndexApp {
                 application: 'IndexApp',
                 type: 'error',
                 message: error.message,
+                stack: error.stack,
             } satisfies ErrorData);
         }
     };

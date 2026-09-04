@@ -189,6 +189,7 @@ export interface DirEntry {
 export type ErrorData = {
     name: string;
     message: string;
+    stack?: string;
     status: number;
     args?: Record<string, unknown>;
 };
@@ -312,7 +313,7 @@ export class ApplicationError extends Error {
      * @returns {ErrorData} The serialized error containing name, message, and status code.
      */
     public toJson(): ErrorData {
-        const data: ErrorData = { name: this.name, message: this.stack ?? this.message, status: this.statusCode };
+        const data: ErrorData = { name: this.name, message: this.message, stack: this.stack, status: this.statusCode };
         if (this.args) {
             data.args = this.args;
         }

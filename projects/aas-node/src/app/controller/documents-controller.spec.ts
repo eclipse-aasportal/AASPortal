@@ -38,7 +38,7 @@ describe('DocumentsController', () => {
         index = createSpyObj<AASIndexClient>(['getDocuments', 'getEndpoints', 'getEndpoint', 'find', 'getCount'], {});
         provider = createSpyObj<DocumentProvider>(['updateDocument', 'getDocument', 'getDataElementValue', 'invoke']);
         authentication = createSpyObj<Authentication>(['authentication']);
-        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
 
         container.registerInstance(LOGGER, logger);
         container.registerInstance(AASIndexClient, index);

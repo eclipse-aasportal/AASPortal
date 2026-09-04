@@ -268,7 +268,7 @@ export class ShellsComponent implements OnDestroy {
                     this.favorites.remove(this.state.selected(), activeFavorites);
                     return this.favorites.save();
                 } else {
-                    return this.auth.ensureAuthorized('editor').pipe(
+                    return this.auth.checkAuthorized('user').pipe(
                         mergeMap(() =>
                             ConfirmDialog.open(
                                 this.modal,
@@ -373,7 +373,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     private uploadPackages(files: File[]): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
+        return this.auth.checkAuthorized('user').pipe(
             mergeMap(() => this.api.getEndpoints()),
             mergeMap(endpoints => {
                 if (endpoints.length <= 1) {

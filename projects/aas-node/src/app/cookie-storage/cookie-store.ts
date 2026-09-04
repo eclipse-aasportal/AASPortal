@@ -11,10 +11,10 @@ import { InjectionToken } from 'tsyringe';
 import { ERRORS } from '../errors.js';
 
 /** Injection token. */
-export const COOKIE_STORE: InjectionToken<CookieStorage> = 'COOKIE_STORE';
+export const COOKIE_STORE: InjectionToken<CookieStore> = 'COOKIE_STORE';
 
 /** Defines user storage. */
-export abstract class CookieStorage {
+export abstract class CookieStore {
     /**
      * Gets the value of a cookie.
      * @param userId The user identification.

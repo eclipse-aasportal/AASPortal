@@ -29,7 +29,7 @@ import { decodeBase64Url } from 'aas-package';
 
 import { EndpointProvider } from '../provider/endpoint-provider.js';
 import { ERRORS } from '../errors.js';
-import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, CookieStore } from '../cookie-storage/cookie-store.js';
 import { AASIndexClient } from '../index/aas-index-client.js';
 
 @injectable()
@@ -38,7 +38,7 @@ import { AASIndexClient } from '../index/aas-index-client.js';
 export class EndpointsController extends Controller {
     public constructor(
         @inject(EndpointProvider) private readonly provider: EndpointProvider,
-        @inject(COOKIE_STORE) private readonly cookieStorage: CookieStorage,
+        @inject(COOKIE_STORE) private readonly cookieStorage: CookieStore,
         @inject(AASIndexClient) private readonly index: AASIndexClient,
     ) {
         super();
@@ -49,7 +49,7 @@ export class EndpointsController extends Controller {
      * @returns All current available endpoints.
      */
     @Get('')
-    @Security('oauth2', ['reader', 'editor', 'admin'])
+    @Security('oauth2', ['user', 'admin'])
     @OperationId('GetEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
         return (await this.index.getEndpoints()).map(endpoint => {
@@ -102,7 +102,7 @@ export class EndpointsController extends Controller {
      * @param endpoint The endpoint data.
      */
     @Post('')
-    @Security('oauth2', ['editor', 'admin'])
+    @Security('oauth2', ['admin'])
     @OperationId('AddEndpoint')
     public async addEndpoint(@Body() endpoint: AASEndpoint): Promise<void> {
         await this.provider.addEndpoint(endpoint);
@@ -114,7 +114,7 @@ export class EndpointsController extends Controller {
      * @param endpoint The new endpoint data.
      */
     @Put('{name}')
-    @Security('oauth2', ['editor', 'admin'])
+    @Security('oauth2', ['admin'])
     @OperationId('UpdateEndpoint')
     public async updateEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         if (decodeBase64Url(name) !== endpoint.name) {
@@ -129,7 +129,7 @@ export class EndpointsController extends Controller {
      * @param name The endpoint name.
      */
     @Delete('{name}')
-    @Security('oauth2', ['editor', 'admin'])
+    @Security('oauth2', ['admin'])
     @OperationId('DeleteEndpoint')
     public async deleteEndpoint(@Path() name: string): Promise<void> {
         await this.provider.removeEndpoint(decodeBase64Url(name));
@@ -140,7 +140,7 @@ export class EndpointsController extends Controller {
      * @param name The endpoint name (Base64-URL encoded).
      */
     @Put('{name}/start-scan')
-    @Security('oauth2', ['editor', 'admin'])
+    @Security('oauth2', ['admin'])
     @OperationId('StartEndpointScan')
     public async startEndpointScan(@Path() name: string): Promise<void> {
         await this.provider.startEndpointScan(decodeBase64Url(name));
@@ -151,7 +151,7 @@ export class EndpointsController extends Controller {
      * @param name The endpoint name (Base64-URL encoded).
      */
     @Put('{name}/cancel-scan')
-    @Security('oauth2', ['editor', 'admin'])
+    @Security('oauth2', ['admin'])
     @OperationId('CancelEndpointScan')
     public async cancelEndpointScan(@Path() name: string): Promise<void> {
         await this.provider.cancelEndpointScan(decodeBase64Url(name));
@@ -166,7 +166,7 @@ export class EndpointsController extends Controller {
     public async getAllEndpointAuth(@Request() req: express.Request): Promise<AASEndpointAuth[]> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHENTICATED_ACCESS, {}, 401);
         }
 
         return (await this.cookieStorage.getEndpoints(user.id)).map(endpoint => {
@@ -195,7 +195,7 @@ export class EndpointsController extends Controller {
     ): Promise<void> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {}, 401);
         }
 
         await this.cookieStorage.updatesEndpoints(user.id, items);

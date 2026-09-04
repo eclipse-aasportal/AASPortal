@@ -67,7 +67,7 @@ export class RegisterForm {
         const data = this.model();
         this.auth.createAccount({ id: data.id, name: data.name, password: data.password1 }).subscribe({
             next: () => {
-                this.window.location.href = '/api/login';
+                this.window.location.href = '/auth/login';
             },
             error: error => {
                 this.notify.error(error);

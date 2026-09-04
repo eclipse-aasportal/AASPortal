@@ -9,10 +9,21 @@
 import { inject, Injectable, computed, signal, DOCUMENT } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { map, Observable, of, switchMap, take, throwError } from 'rxjs';
-import { UserProfile, UserRole, Credentials, AASEndpointAuth, SessionUser } from 'aas-core';
+import { map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
+import {
+    UserProfile,
+    UserRole,
+    Credentials,
+    AASEndpointAuth,
+    SessionUser,
+    ApplicationError,
+    isUserAuthorized,
+} from 'aas-core';
 import { DocumentCache } from '../../shared/services/document-cache';
+import { ERRORS } from '../../messages';
+import { WINDOW } from '../../shared/services/window.service';
 
 @Injectable({
     providedIn: 'root',
@@ -22,10 +33,12 @@ export class AuthService {
     private readonly cache = inject(DocumentCache);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly document = inject(DOCUMENT);
+    private readonly translate = inject(TranslateService);
+    private readonly window = inject(WINDOW);
     private readonly _user = signal<SessionUser | null | undefined>(undefined);
 
     public constructor() {
-        this.http.get<SessionUser | null>('/api/me').subscribe({
+        this.http.get<SessionUser | null>('/auth/me').subscribe({
             next: user => {
                 this._user.set(user);
                 this.cache.clear();
@@ -58,19 +71,22 @@ export class AuthService {
 
     /**
      * Ensures that the current user has the expected rights.
-     * @param roles The expected user roles.
+     * @param roles The minimum required role.
      */
-    public ensureAuthorized(...roles: UserRole[]): Observable<void> {
-        if (this.isAuthorized(roles)) {
-            return of(void 0);
-        }
-
-        return of(void 0);
+    public checkAuthorized(requiredRole: UserRole): Observable<void> {
+        return this.isAuthorized(requiredRole)
+            ? of(void 0)
+            : throwError(
+                  () =>
+                      new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {
+                          role: this.translate.instant(`UserRole.${requiredRole}`),
+                      }),
+              );
     }
 
     /**
      * Performs user authentication using the provided credentials.
-     * Sends a POST request to the '/api/login' endpoint with the credentials.
+     * Sends a POST request to the '/auth/login' endpoint with the credentials.
      * @param credentials The credentials object containing the login information.
      * @returns An observable that completes when the user is authenticated.
      */
@@ -80,7 +96,7 @@ export class AuthService {
         }
 
         if (!credentials) {
-            return of(this.document.location.assign('/api/login'));
+            return of(this.document.location.assign('/auth/login'));
         }
 
         return this.activeRoute.queryParamMap.pipe(
@@ -112,7 +128,7 @@ export class AuthService {
     }
 
     /**
-     * Logs out the current user by sending a POST request to the '/api/logout' endpoint.
+     * Logs out the current user by sending a POST request to the '/auth/logout' endpoint.
      * Upon successful completion, resets the internal user state to null,
      * indicating that no user is authenticated.
      * @returns An observable that completes once the logout process and user state update are finished.
@@ -122,7 +138,10 @@ export class AuthService {
             return of(void 0);
         }
 
-        return this.http.post('/api/logout', null, { responseType: 'text' }).pipe(map(() => this._user.set(null)));
+        return this.http.post('/auth/logout', null, { responseType: 'text' }).pipe(
+            map(() => this._user.set(null)),
+            tap(() => this.window.location.assign('/auth/login')),
+        );
     }
 
     /**
@@ -130,7 +149,7 @@ export class AuthService {
      * @param profile The profile of the new user.
      */
     public createAccount(profile?: UserProfile): Observable<void> {
-        return this.http.post('/api/accounts', profile, { responseType: 'text' }).pipe(map(() => void 0));
+        return this.http.post('/auth/accounts', profile, { responseType: 'text' }).pipe(map(() => void 0));
     }
 
     /**
@@ -138,31 +157,22 @@ export class AuthService {
      * @param profile The updated user profile.
      */
     public updateAccount(profile: UserProfile): Observable<void> {
-        return this.http.patch<SessionUser>('/api/accounts', profile).pipe(map(user => this._user.set(user)));
+        return this.http.patch<SessionUser>('/auth/accounts', profile).pipe(map(user => this._user.set(user)));
     }
 
     /**
      * Deletes the account of the current authenticated user.
      */
     public deleteAccount(): Observable<void> {
-        return this.http.delete('/api/accounts', { responseType: 'text' }).pipe(map(() => this._user.set(null)));
+        return this.http.delete('/auth/accounts', { responseType: 'text' }).pipe(map(() => this._user.set(null)));
     }
 
     /**
      * Determines whether the current user is authorized for the specified roles.
      * @param expected The expected role, the current user must have.
      */
-    public isAuthorized(expected: UserRole[] | undefined): boolean {
-        if (!expected) {
-            return true;
-        }
-
-        const role = this.role();
-        if (!role) {
-            return false;
-        }
-
-        return expected.indexOf(role) >= 0;
+    public isAuthorized(requiredRole: UserRole | undefined): boolean {
+        return isUserAuthorized(this.role(), requiredRole);
     }
 
     /**

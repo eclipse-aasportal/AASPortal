@@ -6,30 +6,27 @@
  *
  *****************************************************************************/
 
-import { ApplicationError } from 'aas-core';
+import { ApplicationError, ErrorData } from 'aas-core';
 import { Request, Response } from 'express';
 import { ValidateError } from 'tsoa';
-import { ERRORS } from '../../app/errors.js';
 
 export const errorHandler = (err: Error, req: Request, res: Response): void => {
     if (err instanceof ValidateError) {
-        res.status(422).json({
+        res.status(err.status).json({
+            name: err.name,
             message: 'Validation Failed',
-            details: err?.fields,
-        });
+            stack: err.stack,
+            status: err.status,
+            args: err?.fields,
+        } satisfies ErrorData);
     } else if (err instanceof ApplicationError) {
-        if (err.name === ERRORS.UNAUTHORIZED) {
-            res.status(401).json({
-                message: 'Unauthorized',
-            });
-        }
-
-        res.status(500).json({
-            message: 'Internal Server Error',
-        });
+        res.status(err.statusCode).json(err.toJson());
     } else {
         res.status(500).json({
-            message: 'Internal Server Error',
-        });
+            message: err.message,
+            name: err.name,
+            stack: err.stack,
+            status: 500
+        } satisfies ErrorData);
     }
 };

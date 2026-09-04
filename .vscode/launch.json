@@ -29,7 +29,7 @@
                 "NODE_ENV": "development",
                 "CONTENT_ROOT": "projects/aas-node/build",
                 "WEB_ROOT": "projects/aas-portal/dist/browser",
-                "ASSETS": "projects/aas-node/src/assets",
+                "ASSETS": "projects/aas-node/src/assets"
             }
         },
         {
@@ -88,7 +88,7 @@
                 "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
                 "IDENTITY_PROVIDER": "https://localhost:8443/realms/aas-portal",
                 "CLIENT_SECRET": "7YiU4JXS4yaYHJrytrXNw7y71l3z12QN",
-                "REDIRECT_URI": "http://localhost:4200/api/callback",
+                "REDIRECT_URI": "http://localhost:4200/auth/callback",
                 "COOKIE_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "HOST_URL": "http://localhost:4200",
@@ -150,7 +150,7 @@
                 "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
                 "IDENTITY_PROVIDER": "https://localhost:8443/realms/aas-portal",
                 "CLIENT_SECRET": "7YiU4JXS4yaYHJrytrXNw7y71l3z12QN",
-                "REDIRECT_URI": "http://localhost:4200/api/callback",
+                "REDIRECT_URI": "http://localhost:4200/auth/callback",
                 "COOKIE_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "HOST_URL": "http://localhost:4200",

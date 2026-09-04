@@ -8,6 +8,7 @@
 
 import { singleton } from 'tsyringe';
 import path from 'path/posix';
+import { LogLevel } from 'aas-package';
 
 @singleton()
 export class Variable {
@@ -33,7 +34,13 @@ export class Variable {
     public readonly CONTENT_ROOT: string = path.resolve(process.env.CONTENT_ROOT ?? './');
 
     /** The URL of the cookie storage. */
-    public readonly COOKIE_STORE?: string = process.env.COOKIE_STORE;
+    public readonly COOKIE_STORE: string = process.env.COOKIE_STORE ?? 'aasportal-users.db';
+
+    /** The URL of the user store. */
+    public readonly USER_STORE: string = process.env.USER_STORE ?? 'aasportal-users.db';
+
+    /** The URL of the user rights store. */
+    public readonly USER_RIGHTS_STORE: string = process.env.USER_RIGHTS_STORE ?? 'aasportal-users.db';
 
     /** The CORS origin settings. */
     public readonly CORS_ORIGIN: string | string[] = process.env.CORS_ORIGIN
@@ -70,24 +77,23 @@ export class Variable {
     public readonly REDIRECT_URI?: string = process.env.REDIRECT_URI;
 
     /** The logging level. */
-    public readonly LOG_LEVEL: 'Error' | 'Warning' | 'Info' =
-        (process.env.LOG_LEVEL as 'Error' | 'Warning' | 'Info') ?? 'Info';
+    public readonly LOG_LEVEL: LogLevel = (process.env.LOG_LEVEL as LogLevel) ?? 'Info';
 
     /** The number of worker threads. */
     public readonly MAX_WORKERS: number = process.env.MAX_WORKERS ? Number(process.env.MAX_WORKERS) : 2;
 
-    /** The time before a new endpoint scan starts.*/
+    /** The time before a new endpoint scan starts (default 1 hour = 3,600,00 ms).*/
     public readonly SCAN_ENDPOINT_TIMEOUT: number = process.env.SCAN_ENDPOINT_TIMEOUT
         ? Number(process.env.SCAN_ENDPOINT_TIMEOUT)
-        : 3600000;
+        : 3_600_000;
 
     /** The session secret. */
     public readonly SESSION_SECRET: string = process.env.SESSION_SECRET ?? 'aas-portal-session-secret';
 
     /** The session store. */
-    public readonly SESSION_STORE?: string = process.env.SESSION_STORE;
+    public readonly SESSION_STORE: string = process.env.SESSION_STORE ?? 'aasportal-users.db';
 
-    /** The session time-to-live in seconds. */
+    /** The session time-to-live in seconds (default 1 day = 86400 s). */
     public readonly SESSION_TTL: number = process.env.SESSION_TTL ? Number(process.env.SESSION_TTL) : 86400;
 
     /** The root directory for static files. */

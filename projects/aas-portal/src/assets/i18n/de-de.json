@@ -194,7 +194,8 @@
         "PASSWORD_EXPIRED": "Das Password ist abgelaufen.",
         "PASSWORD_REQUIRED": "Passwort erforderlich.",
         "PASSWORDS_NOT_EQUAL": "Die Passwörter sind nicht gleich.",
-        "UNAUTHORIZED_ACCESS": "Nicht autorisierter Zugriff.",
+        "UNAUTHORIZED_ACCESS": "Nicht autorisierter Zugriff. Sie benötigen {{role}}-Rechte.",
+        "UNAUTHENTICATED_ACCESS": "Unauthentifizierter Zugriff. Bitte melden Sie sich an.",
         "UNCAUGHT": "{0}",
         "UNKNOWN_USER": "Der Benutzer {{id}} ist unbekannt.",
         "UNKNOWN_VARIABLE_VALUE_TYPE": "Der Datentyp der Variable '{0}' ist unbestimmt.'",
@@ -235,7 +236,6 @@
         "AAS_OFFLINE": "Die Verwaltungsschale ist offline. Letzte Aktualisierung: {{timestamp}}",
         "FILE_SUCCESSFULLY_DOWNLOADED": "{{file}} wurde erfolgreich heruntergeladen.",
         "FILE_SUCCESSFULLY_UPLOADED": "{{file}} wurde erfolgreich hochgeladen.",
-        "NEW_PASSWORD_SENT": "Ein neues Password wurde versendet.",
         "NO_SHELL_AVAILABLE": "Keine Verwaltungsschale ausgewählt."
     },
     "LicenseInfo": {
@@ -421,5 +421,9 @@
         "Invalid URL": "Ungültige URL",
         "OPC_TCP_PROTOCOL_REQUIRED": "Protokoll opc.tcp: erforderlich.",
         "FILE_PROTOCOL_REQUIRED": "Protokoll file: erforderlich."
+    },
+    "UserRole": {
+        "admin": "Administrator",
+        "user": "registrierter Anwender"
     }
 }

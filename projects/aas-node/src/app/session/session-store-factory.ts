@@ -6,11 +6,11 @@
  *
  *****************************************************************************/
 
-import { DependencyContainer } from 'tsyringe';
-import { LOGGER, MongoDBConnectionProvider } from 'aas-package';
-import { ApplicationError } from 'aas-core';
-import { SessionStore } from './session-store.js';
+import { container, singleton } from 'tsyringe';
+import { MongoDbSessionStore } from './mongo-db-session-store.js';
 import { Variable } from '../variable.js';
+import { SqliteSessionStore } from './sqlite-session-store.js';
+import { SessionStore } from './session-store.js';
 
 /**
  * A factory class for creating and managing a singleton instance of the `SessionStore`.
@@ -18,20 +18,18 @@ import { Variable } from '../variable.js';
  * The session store is configured based on the provided dependency container, which resolves necessary dependencies such as
  * the session store URL and MongoDB connection provider.
  */
+@singleton()
 export class SessionStoreFactory {
     private static instance?: SessionStore;
+    private readonly variable = container.resolve(Variable);
 
-    public static getInstance(c: DependencyContainer): SessionStore | undefined {
+    public getInstance(): SessionStore | undefined {
         if (!SessionStoreFactory.instance) {
-            const url = c.resolve(Variable).SESSION_STORE;
-            const variable = c.resolve(Variable);
-            if (!url) {
-                SessionStoreFactory.instance = undefined;
-            } else if (url.startsWith('mongodb:')) {
-                const connection = c.resolve(MongoDBConnectionProvider).getConnection(url);
-                SessionStoreFactory.instance = new SessionStore(c.resolve(LOGGER), connection, variable);
+            const url = this.variable.SESSION_STORE;
+            if (url?.startsWith('mongodb:')) {
+                SessionStoreFactory.instance = container.resolve(MongoDbSessionStore);
             } else {
-                throw new ApplicationError(`Unknown session store: ${url}`);
+                SessionStoreFactory.instance = container.resolve(SqliteSessionStore);
             }
         }
 

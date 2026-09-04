@@ -20,7 +20,7 @@ import { RegisterRoutes } from '../routes/routes.js';
 import { Authentication } from './authentication.js';
 import { errorHandler } from '../../test/assets/error-handler.js';
 import { EndpointProvider } from '../provider/endpoint-provider.js';
-import { COOKIE_STORE, CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, CookieStore } from '../cookie-storage/cookie-store.js';
 import { AASIndexClient } from '../index/aas-index-client.js';
 
 describe('EndpointsController', () => {
@@ -28,7 +28,7 @@ describe('EndpointsController', () => {
     let provider: Mocked<EndpointProvider>;
     let authentication: Mocked<Authentication>;
     let index: Mocked<AASIndexClient>;
-    let cookieStorage: Mocked<CookieStorage>;
+    let cookieStorage: Mocked<CookieStore>;
 
     beforeEach(() => {
         provider = createSpyObj<EndpointProvider>([
@@ -42,8 +42,8 @@ describe('EndpointsController', () => {
 
         index = createSpyObj<AASIndexClient>(['getEndpoints', 'getEndpointCount', 'getDocumentCount']);
         authentication = createSpyObj<Authentication>(['authentication']);
-        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe', role: 'editor' });
-        cookieStorage = createSpyObj<CookieStorage>(['getEndpoints', 'updatesEndpoints']);
+        authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
+        cookieStorage = createSpyObj<CookieStore>(['getEndpoints', 'updatesEndpoints']);
 
         container.registerInstance(EndpointProvider, provider);
         container.registerInstance(Authentication, authentication);
@@ -55,7 +55,7 @@ describe('EndpointsController', () => {
         app.use(urlencoded({ extended: true }));
         app.set('trust proxy', 1);
         app.use((req, res, next) => {
-            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'editor', client_id: 'client-123' };
+            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'client-123' };
             next();
         });
 

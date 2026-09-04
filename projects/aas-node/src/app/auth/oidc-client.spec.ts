@@ -10,19 +10,22 @@ import 'reflect-metadata';
 import { describe, beforeEach, it, expect, Mocked, vi, afterEach } from 'vitest';
 import express from 'express';
 import { Session, SessionData } from 'express-session';
-import { Logger } from 'aas-package';
+import { Logger, LOGGER } from 'aas-package';
+import { container } from 'tsyringe';
 
-import { AuthorizationServer, OicdClient, TokenEndpointResponse } from './oicd-client.js';
+import { AuthorizationServer, OidcClient, TokenEndpointResponse } from './oidc-client.js';
 import { Variable } from '../variable.js';
 import { createSpyObj } from '../../test/mocks.js';
-import { CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, CookieStore } from '../cookie-storage/cookie-store.js';
+import { USER_RIGHTS_STORE, UserRightsStore } from './user-rights-store.js';
 
-describe('OicdClient', () => {
-    let identityProvider: OicdClient;
+describe('OidcClient', () => {
+    let identityProvider: OidcClient;
     let variable: Mocked<Variable>;
     let logger: Mocked<Logger>;
     let configuration: Mocked<AuthorizationServer>;
-    let cookies: Mocked<CookieStorage>;
+    let cookies: Mocked<CookieStore>;
+    let userRights: Mocked<UserRightsStore>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
@@ -44,8 +47,15 @@ describe('OicdClient', () => {
             userinfo_endpoint: 'https://example.com/userinfo',
         });
 
-        cookies = createSpyObj<CookieStorage>(['getCookie', 'setCookie', 'getEndpoints']);
-        identityProvider = new OicdClient(logger, cookies, variable);
+        cookies = createSpyObj<CookieStore>(['getCookie', 'setCookie', 'getEndpoints']);
+        userRights = createSpyObj<UserRightsStore>(['get', 'add', 'update', 'delete']);
+        container.clearInstances();
+        container.registerInstance(LOGGER, logger);
+        container.registerInstance(COOKIE_STORE, cookies);
+        container.registerInstance(Variable, variable);
+        container.registerInstance(USER_RIGHTS_STORE, userRights);
+        container.registerSingleton(OidcClient);
+        identityProvider = container.resolve(OidcClient);
     });
 
     afterEach(() => {
@@ -53,7 +63,7 @@ describe('OicdClient', () => {
     });
 
     it('should create', () => {
-        expect(identityProvider).toBeInstanceOf(OicdClient);
+        expect(identityProvider).toBeInstanceOf(OidcClient);
     });
 
     describe('login', () => {
@@ -99,7 +109,9 @@ describe('OicdClient', () => {
 
     describe('callback', () => {
         it('should authorize the current user', async () => {
-            const res = createSpyObj<express.Response>(['redirect', 'cookie']);
+            const res = createSpyObj<express.Response>(['redirect', 'cookie', 'status', 'json']);
+            res.status.mockReturnThis();
+
             const session = createSpyObj<Session & SessionData>(['save'], {
                 state: 'test-state',
                 code_verifier: 'test-code-verifier',
@@ -113,7 +125,7 @@ describe('OicdClient', () => {
                 protocol: 'https',
                 host: 'localhost',
                 session,
-                query: { code: 'test-code', state: 'test-state' },
+                query: { code: 'test-code', state: 'test-state', session_state: 'test-session-state' },
             });
 
             const configurationResponse = createSpyObj<Response>(['json'], {
@@ -134,6 +146,8 @@ describe('OicdClient', () => {
                 access_token: 'test-access-token',
                 refresh_token: 'test-refresh-token',
                 token_type: 'access',
+                expires_in: 0,
+                scope: 'email',
             } satisfies TokenEndpointResponse);
 
             vi.spyOn(global, 'fetch').mockImplementation(url => {
@@ -145,6 +159,12 @@ describe('OicdClient', () => {
             });
 
             identityProvider['getPublicKey'] = vi.fn(() => Promise.resolve('test-public-key'));
+            identityProvider['decodeAccessToken'] = vi.fn().mockReturnValue({
+                id: 'john.doe@email.com',
+                name: 'John Doe',
+            });
+
+            userRights.get.mockResolvedValue({ role: 'user', id: 'john.doe@email.com' });
 
             await identityProvider.callback(req, res);
             expect(req.session.state).toBeUndefined();

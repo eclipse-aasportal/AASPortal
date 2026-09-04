@@ -195,7 +195,8 @@
         "PASSWORD_EXPIRED": "The password is expired.",
         "PASSWORD_REQUIRED": "Password required.",
         "PASSWORDS_NOT_EQUAL": "The passwords are not equal.",
-        "UNAUTHORIZED": "Unauthorized access.",
+        "UNAUTHORIZED_ACCESS": "Unauthorized access. You need {{role}} privileges.",
+        "UNAUTHENTICATED_ACCESS": "Unauthenticated access. Please log in.",
         "UNCAUGHT": "{0}",
         "UNKNOWN_USER": "The user {{id}} is unknown.",
         "UNKNOWN_VARIABLE_VALUE_TYPE": "The data type of the variable '{0}' is undefined.",
@@ -236,7 +237,6 @@
         "AAS_OFFLINE": "The Asset Administration Shell is offline. Last update: {{timestamp}}",
         "FILE_SUCCESSFULLY_DOWNLOADED": "{{file}} was successfully downloaded.",
         "FILE_SUCCESSFULLY_UPLOADED": "{{file}} was successfully uploaded.",
-        "NEW_PASSWORD_SENT": "A new password has been sent.",
         "NO_SHELL_AVAILABLE": "No Asset Administration Shell selected."
     },
     "LicenseInfo": {
@@ -422,5 +422,9 @@
         "Invalid URL": "Invalid URL",
         "OPC_TCP_PROTOCOL_REQUIRED": "Protocol opc.tcp: required.",
         "FILE_PROTOCOL_REQUIRED": "Protocol file: required."
+    },
+    "UserRole": {
+        "admin": "administrator",
+        "user": "user"
     }
 }

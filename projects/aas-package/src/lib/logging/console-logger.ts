@@ -6,8 +6,9 @@
  *
  *****************************************************************************/
 
-import { Worker } from 'node:worker_threads';
-import { Logger, LogLevel } from './logger.js';
+import { container, singleton } from 'tsyringe';
+import { Worker } from 'worker_threads';
+import { LOG_LEVEL, Logger, LogLevel } from './logger.js';
 
 interface LoggerMessage {
     level: LogLevel;
@@ -15,15 +16,12 @@ interface LoggerMessage {
 }
 
 /** Provides a logger that writes messages to `stdout` and `stderr`. */
+@singleton()
 export class ConsoleLogger extends Logger {
     private worker?: Worker;
 
-    public constructor(logLevel: LogLevel, isMainLogger = false) {
-        super(logLevel);
-
-        if (isMainLogger) {
-            this.startWorker();
-        }
+    public constructor() {
+        super(container.isRegistered(LOG_LEVEL) ? container.resolve(LOG_LEVEL) : 'Info');
     }
 
     public override error(error: Error | string): Promise<void> {
@@ -49,58 +47,6 @@ export class ConsoleLogger extends Logger {
         }
 
         return this.postMessage({ level: 'Info', message });
-    }
-
-    private startWorker(): void {
-        try {
-            const workerCode = `
-                (async () => {
-                    const { parentPort } = await import('node:worker_threads');
-                    const handler = msg => {
-                        if (!msg || typeof msg !== 'object') return;
-                        const level = msg.level;
-                        const message = msg.message;
-                        switch (level) {
-                            case 'Error':
-                                console.error(getDateTime() + " [Error]: " + String(message));
-                                break;
-                            case 'Warning':
-                                console.warn(getDateTime() + " [Warning]: " + String(message));
-                                break;
-                            case 'Info':
-                            default:
-                                console.info(getDateTime() + " [Info]: " + String(message));
-                                break;
-                        }
-
-                        function getDateTime() {
-                            const value = new Date().toISOString().replace('T', ' ');
-                            return value.substring(0, value.lastIndexOf('.'));
-                        }
-                    }
-
-                    parentPort.on('message', handler);
-                })();
-            `;
-
-            this.worker = new Worker(workerCode, { eval: true });
-            this.worker.on('error', (err: unknown) => {
-                console.error('Logger worker error:', err);
-            });
-
-            const terminate = (): void => {
-                if (this.worker) {
-                    this.worker.terminate?.();
-                    this.worker = undefined;
-                }
-            };
-
-            process.on('beforeExit', terminate);
-            process.on('exit', terminate);
-        } catch (e) {
-            console.error('Failed to initialize logger worker:', e);
-            this.worker = undefined;
-        }
     }
 
     private shouldLog(level: LogLevel): boolean {

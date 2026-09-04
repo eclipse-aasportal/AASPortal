@@ -11,8 +11,6 @@ import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { MainComponent } from './main/main.component';
-import { SessionCheck } from 'aas-lib';
-import { createSpyObj } from '../test/mocks';
 
 @Component({
     selector: 'fhg-main',
@@ -28,10 +26,7 @@ describe('AppComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            providers: [
-                { provide: SessionCheck, useValue: createSpyObj<SessionCheck>([]) },
-                provideZonelessChangeDetection(),
-            ],
+            providers: [provideZonelessChangeDetection()],
             imports: [AppComponent],
         }).compileComponents();
 

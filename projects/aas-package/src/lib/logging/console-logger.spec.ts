@@ -12,9 +12,12 @@ import { NextFunction, Request, Response } from 'express';
 import EventEmitter from 'events';
 import { createSpyObj } from '../../test/mocks.js';
 import { ConsoleLogger } from './console-logger.js';
-import { Logger, requestLogger } from './logger.js';
+import { LOG_LEVEL, Logger, requestLogger } from './logger.js';
+import { container } from 'tsyringe';
 
 describe('ConsoleLogger', () => {
+    let logger: ConsoleLogger;
+
     beforeEach(async () => {
         vi.spyOn(console, 'error').mockImplementation(() => undefined);
         vi.spyOn(console, 'warn').mockImplementation(() => undefined);
@@ -32,44 +35,88 @@ describe('ConsoleLogger', () => {
         vi.resetModules();
     });
 
-    it('falls back to console.* when worker cannot be started', async () => {
-        const logger = new ConsoleLogger('Info');
-        const infoSpy = vi.spyOn(console, 'info');
-        const warnSpy = vi.spyOn(console, 'warn');
-        const errorSpy = vi.spyOn(console, 'error');
+    describe('info', () => {
+        beforeEach(() => {
+            container.clearInstances();
+            container.registerInstance(LOG_LEVEL, 'Info');
+            container.registerSingleton(ConsoleLogger);
+            logger = container.resolve(ConsoleLogger);
+        });
 
-        infoSpy.mockClear();
-        warnSpy.mockClear();
-        errorSpy.mockClear();
+        it('falls back to console.* when worker cannot be started', async () => {
+            const infoSpy = vi.spyOn(console, 'info');
+            const warnSpy = vi.spyOn(console, 'warn');
+            const errorSpy = vi.spyOn(console, 'error');
 
-        await logger.info('i-msg');
-        expect(infoSpy).toHaveBeenCalledTimes(1);
+            infoSpy.mockClear();
+            warnSpy.mockClear();
+            errorSpy.mockClear();
 
-        await logger.warning('w-msg');
-        expect(warnSpy).toHaveBeenCalledTimes(1);
+            await logger.info('i-msg');
+            expect(infoSpy).toHaveBeenCalledTimes(1);
 
-        await logger.error('e-msg');
-        expect(errorSpy).toHaveBeenCalledTimes(1);
+            await logger.warning('w-msg');
+            expect(warnSpy).toHaveBeenCalledTimes(1);
+
+            await logger.error('e-msg');
+            expect(errorSpy).toHaveBeenCalledTimes(1);
+        });
     });
 
-    it('respects log level gating in fallback mode', async () => {
-        const logger = new ConsoleLogger('Warning');
-        const infoSpy = vi.spyOn(console, 'info');
-        const warnSpy = vi.spyOn(console, 'warn');
-        const errorSpy = vi.spyOn(console, 'error');
+    describe('warning', () => {
+        beforeEach(() => {
+            container.clearInstances();
+            container.registerInstance(LOG_LEVEL, 'Warning');
+            container.registerSingleton(ConsoleLogger);
+            logger = container.resolve(ConsoleLogger);
+        });
 
-        infoSpy.mockClear();
-        warnSpy.mockClear();
-        errorSpy.mockClear();
+        it('respects log level gating in fallback mode', async () => {
+            const infoSpy = vi.spyOn(console, 'info');
+            const warnSpy = vi.spyOn(console, 'warn');
+            const errorSpy = vi.spyOn(console, 'error');
 
-        await logger.info('skip-info');
-        expect(infoSpy).not.toHaveBeenCalled();
+            infoSpy.mockClear();
+            warnSpy.mockClear();
+            errorSpy.mockClear();
 
-        await logger.warning('ok-warning');
-        expect(warnSpy).toHaveBeenCalledTimes(1);
+            await logger.info('skip-info');
+            expect(infoSpy).not.toHaveBeenCalled();
 
-        await logger.error('ok-error');
-        expect(errorSpy).toHaveBeenCalledTimes(1);
+            await logger.warning('ok-warning');
+            expect(warnSpy).toHaveBeenCalledTimes(1);
+
+            await logger.error('ok-error');
+            expect(errorSpy).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('error', () => {
+        beforeEach(() => {
+            container.clearInstances();
+            container.registerInstance(LOG_LEVEL, 'Error');
+            container.registerSingleton(ConsoleLogger);
+            logger = container.resolve(ConsoleLogger);
+        });
+
+        it('respects log level gating in fallback mode', async () => {
+            const infoSpy = vi.spyOn(console, 'info');
+            const warnSpy = vi.spyOn(console, 'warn');
+            const errorSpy = vi.spyOn(console, 'error');
+
+            infoSpy.mockClear();
+            warnSpy.mockClear();
+            errorSpy.mockClear();
+
+            await logger.info('skip-info');
+            expect(infoSpy).not.toHaveBeenCalled();
+
+            await logger.warning('ok-warning');
+            expect(warnSpy).not.toHaveBeenCalled();
+
+            await logger.error('ok-error');
+            expect(errorSpy).toHaveBeenCalledTimes(1);
+        });
     });
 });
 

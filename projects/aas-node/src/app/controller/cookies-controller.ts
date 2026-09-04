@@ -11,14 +11,14 @@ import { Body, Controller, Delete, Get, OperationId, Path, Post, Route, Request,
 import express from 'express';
 import { ApplicationError } from 'aas-core';
 
-import { COOKIE_STORE, type CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { COOKIE_STORE, type CookieStore } from '../cookie-storage/cookie-store.js';
 import { ERRORS } from '../errors.js';
 
 @injectable()
 @Route('/api/v1/cookies')
 @Tags('Cookies')
 export class CookiesController extends Controller {
-    public constructor(@inject(COOKIE_STORE) private readonly storage: CookieStorage) {
+    public constructor(@inject(COOKIE_STORE) private readonly storage: CookieStore) {
         super();
     }
 
@@ -32,7 +32,7 @@ export class CookiesController extends Controller {
     public async getCookie(@Path() name: string, @Request() req: express.Request): Promise<string | undefined> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHENTICATED_ACCESS, {}, 401);
         }
 
         return await this.storage.getCookie(user.id, name);
@@ -48,7 +48,7 @@ export class CookiesController extends Controller {
     public async setCookie(@Request() req: express.Request, @Path() name: string, @Body() data: string): Promise<void> {
         const user = req.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHENTICATED_ACCESS, {}, 401);
         }
 
         await this.storage.setCookie(user.id, name, data);
@@ -63,7 +63,7 @@ export class CookiesController extends Controller {
     public async deleteCookie(@Path() name: string, @Request() request: express.Request): Promise<void> {
         const user = request.user;
         if (!user) {
-            throw new ApplicationError(ERRORS.UNAUTHORIZED, {}, 401);
+            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {}, 401);
         }
 
         await this.storage.deleteCookie(user.id, name);

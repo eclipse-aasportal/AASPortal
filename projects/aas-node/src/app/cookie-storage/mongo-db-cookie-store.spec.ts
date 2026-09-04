@@ -12,7 +12,7 @@ import { describe, beforeEach, it, expect, Mocked, vi } from 'vitest';
 import { Cookie } from 'aas-core';
 import { Logger, MongoDBConnectionProvider } from 'aas-package';
 
-import { MongoDBCookieStorage } from './mongo-db-cookie-storage.js';
+import { MongoDBCookieStore } from './mongo-db-cookie-store.js';
 import { createSpyObj } from '../../test/mocks.js';
 import { Variable } from '../variable.js';
 
@@ -27,7 +27,7 @@ vi.mock(import('mongoose'), () => {
 });
 
 describe('MongoDBCookieStorage', () => {
-    let storage: MongoDBCookieStorage;
+    let storage: MongoDBCookieStore;
     let variable: Mocked<Variable>;
     let logger: Mocked<Logger>;
     let connectionProvider: Mocked<MongoDBConnectionProvider>;
@@ -68,11 +68,11 @@ describe('MongoDBCookieStorage', () => {
 
         variable = createSpyObj<Variable>([], { COOKIE_STORE: 'mongodb://localhost:27017/cookies' });
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        storage = new MongoDBCookieStorage(logger, connectionProvider, variable);
+        storage = new MongoDBCookieStore(logger, connectionProvider, variable);
     });
 
     it('should created', () => {
-        expect(storage).toBeInstanceOf(MongoDBCookieStorage);
+        expect(storage).toBeInstanceOf(MongoDBCookieStore);
     });
 
     describe('getCookie', () => {

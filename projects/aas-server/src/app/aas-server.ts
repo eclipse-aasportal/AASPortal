@@ -8,7 +8,7 @@
 
 import 'reflect-metadata';
 import { container } from 'tsyringe';
-import { LOGGER, LoggerFactory } from 'aas-package';
+import { LOG_LEVEL, LOGGER, LoggerFactory } from 'aas-package';
 
 import { WSServer } from './ws-server.js';
 import { PackageRepository } from './package-repository.js';
@@ -17,7 +17,8 @@ import { Variable } from './variable.js';
 import { API_KEY_HANDLER } from './auth/api-key-handler.js';
 import { ApiKeyHandlerFactory } from './auth/api-key-handler-factory.js';
 
-container.register(LOGGER, { useFactory: c => LoggerFactory.getInstance(c.resolve(Variable).LOG_LEVEL) });
+container.register(LOG_LEVEL, { useValue: container.resolve(Variable).LOG_LEVEL });
+container.register(LOGGER, { useFactory: c => c.resolve(LoggerFactory).getInstance() });
 container.register(API_KEY_HANDLER, { useFactory: c => ApiKeyHandlerFactory.getInstance(c) });
 
 container.afterResolution(

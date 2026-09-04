@@ -6,15 +6,15 @@
  *
  *****************************************************************************/
 
-import { InjectionToken } from 'tsyringe';
+import { container, InjectionToken } from 'tsyringe';
 import crypto from 'crypto';
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { Session } from 'express-session';
 import { User, noop } from 'aas-core';
-import { Logger } from 'aas-package';
-import { CookieStorage } from '../cookie-storage/cookie-storage.js';
+import { LOGGER } from 'aas-package';
+import { COOKIE_STORE } from '../cookie-storage/cookie-store.js';
 import { ERRORS } from '../errors.js';
+import { Variable } from '../variable.js';
 
 /** Injection token. */
 export const IDENTITY_PROVIDER: InjectionToken<IdentityProviderClient> = 'IDENTITY_PROVIDER';
@@ -27,11 +27,10 @@ export interface RefreshTokenResponse {
 
 /** Defines an identifier provider client. */
 export abstract class IdentityProviderClient {
-    protected constructor(
-        protected readonly logger: Logger,
-        protected readonly cookies: CookieStorage,
-        protected readonly clientId: string,
-    ) {}
+    protected readonly logger = container.resolve(LOGGER);
+    protected readonly cookies = container.resolve(COOKIE_STORE);
+    protected readonly variable = container.resolve(Variable);
+    protected readonly clientId = this.variable.CLIENT_ID;
 
     /**
      * Retrieves the user information associated with the given request.
@@ -59,6 +58,13 @@ export abstract class IdentityProviderClient {
      * @param res The response.
      */
     public abstract callback(req: express.Request, res: express.Response): Promise<express.Response | void>;
+
+    /**
+     *
+     * @param req The request.
+     * @param res The response.
+     */
+    public abstract checkSession(req: express.Request, res: express.Response): Promise<express.Response | void>;
 
     /**
      * The logout method for the identity provider. This method is called when a user tries to log out.
@@ -102,62 +108,72 @@ export abstract class IdentityProviderClient {
     public middleware(): express.RequestHandler {
         return async (req, res, next) => {
             delete req.user;
-            const { access_token, refresh_token } = req.session;
+            const { access_token, refresh_token, expires_at } = req.session;
             if (access_token) {
                 try {
-                    const payload = await this.verifyAccessToken(access_token);
-                    const userId = String(payload.email);
-                    let endpoints = req.session.endpoints;
-                    if (!endpoints) {
-                        endpoints = await this.cookies.getEndpoints(userId);
-                        req.session.endpoints = endpoints;
+                    if (!expires_at || expires_at < Date.now()) {
+                        const payload = await this.verifyAccessToken(access_token);
+                        const userId = String(payload.email);
+                        let endpoints = req.session.endpoints;
+                        if (payload.exp) {
+                            req.session.expires_at = payload.exp * 1000;
+                        }
+
+                        if (!endpoints) {
+                            endpoints = await this.cookies.getEndpoints(userId);
+                            req.session.endpoints = endpoints;
+                        }
                     }
 
                     req.user = {
-                        id: userId,
-                        name: String(payload.name),
-                        role: 'editor',
+                        id: req.session.user_id!,
+                        name: req.session.name!,
+                        role: req.session.role!,
                         client_id: this.clientId,
                         session_state: req.session.session_state,
                         check_session_iframe: req.session.check_session_iframe,
                     };
                 } catch (error) {
                     if (error.name !== 'TokenExpiredError' || !refresh_token) {
-                        this.destroySession(req.session);
-                        return res.redirect('/api/login');
+                        this.destroySession(req, res);
+                        return res.redirect('/auth/login');
                     }
 
                     try {
+                        delete req.session.expires_at;
                         const tokenData = await this.refreshToken(refresh_token);
                         req.session.access_token = tokenData.access_token;
                         req.session.refresh_token = tokenData.refresh_token;
                         req.user = {
                             ...tokenData.user,
+                            role: req.session.role!,
                             client_id: this.clientId,
                             session_state: req.session.session_state,
                             check_session_iframe: req.session.check_session_iframe,
                         };
                     } catch (error) {
                         noop(error);
-                        this.destroySession(req.session);
-                        return res.redirect('/api/login');
+                        this.destroySession(req, res);
+                        return res.redirect('/auth/login');
                     }
                 }
             } else if (refresh_token) {
                 try {
+                    delete req.session.expires_at;
                     const tokenData = await this.refreshToken(refresh_token);
                     req.session.access_token = tokenData.access_token;
                     req.session.refresh_token = tokenData.refresh_token;
                     req.user = {
                         ...tokenData.user,
+                        role: req.session.role!,
                         client_id: this.clientId,
                         session_state: req.session.session_state,
                         check_session_iframe: req.session.check_session_iframe,
                     };
                 } catch (error) {
                     noop(error);
-                    this.destroySession(req.session);
-                    return res.redirect('/api/login');
+                    this.destroySession(req, res);
+                    return res.redirect('/auth/login');
                 }
             }
 
@@ -213,12 +229,14 @@ export abstract class IdentityProviderClient {
      * the promise will always resolve regardless of errors. This method is typically used during logout or
      * other flows where a clean session termination is required.
      *
-     * @param session The session object to be destroyed.
+     * @param req The request.
+     * @param res The response.
      * @returns A promise that resolves once the session has been destroyed, regardless of success or failure.
      */
-    protected destroySession(session: Session): Promise<void> {
+    protected destroySession(req: express.Request, res: express.Response): Promise<void> {
         return new Promise(resolve => {
-            session.destroy(err => {
+            noop(res);
+            req.session.destroy(err => {
                 if (err) {
                     this.logger.error(err);
                 }
@@ -230,6 +248,18 @@ export abstract class IdentityProviderClient {
 
     protected getVerifyOptions(): jwt.VerifyOptions | undefined {
         return undefined;
+    }
+
+    protected decodeAccessToken(token: string): User {
+        const payload = jwt.decode(token, { json: true });
+        if (!payload || typeof payload?.email !== 'string' || typeof payload?.name !== 'string') {
+            throw new Error('Invalid access token');
+        }
+
+        return {
+            id: payload.email,
+            name: payload.name,
+        };
     }
 
     private async verifyAccessToken(token: string): Promise<jwt.JwtPayload> {

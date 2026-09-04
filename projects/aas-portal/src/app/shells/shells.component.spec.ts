@@ -93,7 +93,7 @@ describe('ShellsComponent', () => {
         httpClient.get.mockReturnValue(of({}));
         httpClient.request.mockReturnValue(of({}));
 
-        auth = createSpyObj<AuthService>(['ensureAuthorized'], {
+        auth = createSpyObj<AuthService>(['checkAuthorized'], {
             ready: of(true),
             isAuthenticated: signal(false),
             name: signal(''),
