@@ -166,33 +166,56 @@ export class IdentityProvider extends IdentityProviderClient {
                         return;
                     }
 
-                    let status = 'changed';
-                    const opSessionId = getCookie(opCookieName);
-                    if (opSessionId) {
-                        const salt = sessionState.split('.')[1] || '';
-                        const hashInput = clientId + ' ' + clientOrigin + ' ' + opSessionId + ' ' + salt;
-                        const encoder = new TextEncoder();
-                        const data = encoder.encode(hashInput);
-                        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                        const hashArray = Array.from(new Uint8Array(hashBuffer));
-                        const hashBase64 = btoa(String.fromCharCode.apply(null, hashArray));
-                        const calculatedState =
-                            hashBase64
-                                .replace(/=/g, '')
-                                .replace(/\\+/g, '-')
-                                .replace(/\\//g, '_') +
-                            '.' +
-                            salt;
-
-                        if (calculatedState === sessionState) {
-                            status = 'unchanged';
-                        }
-                    }
-
+                    const status = await checkAccess(clientOrigin); 
                     e.source?.postMessage(status, clientOrigin);
                 },
                 false,
             );
+
+            async function checkAccess(clientOrigin) {
+                if (!(await hasStorageAccess())) {
+                    return 'error';
+                }
+                
+                const opSessionId = getCookie(opCookieName);
+                if (!opSessionId) {
+                    return 'changed';
+                }
+
+                const salt = sessionState.split('.')[1] || '';
+                const hashInput = clientId + ' ' + clientOrigin + ' ' + opSessionId + ' ' + salt;
+                const encoder = new TextEncoder();
+                const data = encoder.encode(hashInput);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashBase64 = btoa(String.fromCharCode.apply(null, hashArray));
+                const calculatedState =
+                    hashBase64
+                        .replace(/=/g, '')
+                        .replace(/\\+/g, '-')
+                        .replace(/\\//g, '_') +
+                    '.' +
+                    salt;
+
+                return calculatedState === sessionState ? 'unchanged' : 'changed';
+            }
+            
+            async function hasStorageAccess() {
+                if (!("hasStorageAccess" in document)) {
+                    return true;
+                }
+
+                if (await document.hasStorageAccess()) {
+                    return true;
+                }
+
+                try {
+                    await document.requestStorageAccess();
+                    return true;
+                } catch (error) {
+                    return false;
+                }
+            }
 
             function getCookie(name) {
                 const value = '; ' + document.cookie;
