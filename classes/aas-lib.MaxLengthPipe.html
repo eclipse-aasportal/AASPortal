@@ -16,7 +16,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="tsd-signature-type">PipeTransform</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/8173118a596473e7346f339e9393fab19f82c6d3/projects/aas-lib/src/lib/shared/pipes/max-length.pipe.ts#L16">shared/pipes/max-length.pipe.ts:16</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/b23cb4d053fb750e89e8416789a42a8556f03c24/projects/aas-lib/src/lib/shared/pipes/max-length.pipe.ts#L16">shared/pipes/max-length.pipe.ts:16</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -47,17 +47,22 @@
 <h3 class="tsd-anchor-link" id="transform"><span>transform</span><a href="#transform" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="transform-1"><span class="tsd-kind-call-signature">transform</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">max</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><a href="#transform-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="transform-1"><span class="tsd-kind-call-signature">transform</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">max</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">endBias</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><a href="#transform-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">value</span>: <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></span></li>
-<li><span><span class="tsd-kind-parameter">max</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 80</span></span></li></ul></div>
+<li><span><span class="tsd-kind-parameter">max</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 80</span></span></li>
+<li><span><span class="tsd-kind-parameter">endBias</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0.5</span></span>
+<div class="tsd-comment tsd-typography"><p>Share of the visible (non-&quot;...&quot;) characters kept from the end of the
+string, from 0 (all from the start) to 1 (all from the end). Defaults to 0.5, an even
+split between start and end, matching the previous fixed behavior.</p>
+</div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Implementation of PipeTransform.transform</p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/8173118a596473e7346f339e9393fab19f82c6d3/projects/aas-lib/src/lib/shared/pipes/max-length.pipe.ts#L19">shared/pipes/max-length.pipe.ts:19</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/b23cb4d053fb750e89e8416789a42a8556f03c24/projects/aas-lib/src/lib/shared/pipes/max-length.pipe.ts#L24">shared/pipes/max-length.pipe.ts:24</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
