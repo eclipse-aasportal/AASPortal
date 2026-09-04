@@ -64,8 +64,8 @@ export class Variable {
     /** The URL of the host */
     public readonly HOST_URL?: string = process.env.HOST_URL;
 
-    /** Specifies the identity provider issuer URL */
-    public readonly IDENTITY_PROVIDER: string = process.env.IDENTITY_PROVIDER ?? 'file:///users';
+    /** Specifies the identity provider issuer URL (default) */
+    public readonly IDENTITY_PROVIDER: string = process.env.IDENTITY_PROVIDER ?? 'file:///identity-provider';
 
     /** The client name or identifier. */
     public readonly CLIENT_ID: string = process.env.CLIENT_ID ?? 'aas-node';

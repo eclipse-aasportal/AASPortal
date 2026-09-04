@@ -6,10 +6,12 @@
  *
  *****************************************************************************/
 
+import { container, singleton } from 'tsyringe';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { nanoid } from 'nanoid';
+import { createHash, randomBytes } from 'crypto';
 import {
     isCredentials,
     User,
@@ -23,9 +25,7 @@ import {
 
 import { IdentityProviderClient, RefreshTokenResponse } from './identity-provider-client.js';
 import { ERRORS } from '../errors.js';
-import { createHash, randomBytes } from 'crypto';
 import { USER_STORE, UserData } from './user-store.js';
-import { container, singleton } from 'tsyringe';
 import { USER_RIGHTS_STORE } from './user-rights-store.js';
 
 const AAS_NODE_SESSION = 'AAS_NODE_SESSION';
