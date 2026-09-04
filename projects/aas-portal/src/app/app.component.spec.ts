@@ -26,9 +26,7 @@ describe('AppComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            providers: [
-                provideZonelessChangeDetection(),
-            ],
+            providers: [provideZonelessChangeDetection()],
             imports: [AppComponent],
         }).compileComponents();
 
