@@ -17,11 +17,13 @@ export class IdentityProviderFactory {
     private static instance: IdentityProviderClient;
 
     public getInstance(): IdentityProviderClient {
-        const value = container.resolve(Variable).IDENTITY_PROVIDER;
-        if (value.startsWith('https:') || value.startsWith('http:')) {
-            IdentityProviderFactory.instance = container.resolve(OidcClient);
-        } else {
-            IdentityProviderFactory.instance = container.resolve(IdentityProvider);
+        if (!IdentityProviderFactory.instance) {
+            const value = container.resolve(Variable).IDENTITY_PROVIDER;
+            if (value.startsWith('https:') || value.startsWith('http:')) {
+                IdentityProviderFactory.instance = container.resolve(OidcClient);
+            } else {
+                IdentityProviderFactory.instance = container.resolve(IdentityProvider);
+            }
         }
 
         return IdentityProviderFactory.instance;
