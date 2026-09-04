@@ -77,9 +77,14 @@ services:
         condition: service_started
     environment:
       - AAS_NODE_PORT=${AAS_NODE_PORT}
-      - USER_STORAGE=${USER_STORAGE}
+      - USER_STORE=${USER_STORE}
+      - USER_RIGHTS_STORE=${USER_RIGHTS_STORE}
+      - COOKIE_STORE=${COOKIE_STORE}
+      - SESSION_STORES={SESSION_STORE}
       - AAS_INDEX=${AAS_INDEX}
       - ENDPOINTS=${ENDPOINTS}
+      - REDIRECT_URI=${REDIRECT_URI}
+      - HOST_URL=${HOST_URL}
     ports:
       - 1337:1337
   

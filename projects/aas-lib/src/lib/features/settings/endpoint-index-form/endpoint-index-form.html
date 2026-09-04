@@ -30,41 +30,22 @@
                             <span class="ms-1">{{ 'EndpointIndexForm.SHELLS' | translate }}</span>
                         </div>
                     </div>
-                    
-                    @if (item.status === 'idle') {
 
-                        <div>
-                            @if (item.schedule === 'manual' || item.schedule === 'once') {
-                                <button
-                                    type="button"
-                                    class="btn btn-lg btn-outline-primary py-0 px-3 endpoint-index-icon-btn"
-                                    [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
-                                    [openDelay]="300"
-                                    placement="top"
-                                    container="body"
-                                    (click)="startScan(item.name).subscribe()"
-                                >
-                                    <i class="bi bi-play-fill"></i>
-                                    <span class="fw-light" style="font-size: 15px;">Scan</span>
-                                </button>
-                            }
-                        </div>
+                    @if (item.status === 'idle') {
                         @if (item.schedule === 'manual' || item.schedule === 'once') {
                             <button
                                 type="button"
-                                class="btn btn-lg btn-outline-primary border-0 endpoint-index-icon-btn"
+                                class="btn btn-lg btn-outline-primary py-0 px-3 endpoint-index-icon-btn"
                                 [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
                                 [openDelay]="300"
                                 placement="top"
                                 container="body"
                                 (click)="startScan(item.name).subscribe()"
                             >
-                                <i class="bi bi-caret-right-square"></i>
+                                <i class="bi bi-play-fill"></i>
+                                <span class="fw-light" style="font-size: 15px">Scan</span>
                             </button>
-                        } @else {
-                            <div class=""></div>
                         }
-
                         <button
                             type="button"
                             class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
@@ -116,7 +97,7 @@
             (click)="clearIndex()"
         >
             <i class="bi bi-trash3"></i>
-            <span class="fw-light" style="font-size: 15px;">Clear Entire Index</span>
+            <span class="fw-light" style="font-size: 15px">Clear Entire Index</span>
         </button>
         <button type="submit" class="btn btn-sm border rounded-2 px-4" translate="EndpointIndexForm.CLOSE"></button>
     </div>

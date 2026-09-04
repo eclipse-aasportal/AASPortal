@@ -10,6 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { catchError, concatMap, finalize, map, of, Subject } from 'rxjs';
+import { Router, RouterLinkWithHref } from '@angular/router';
+import * as d3 from 'd3-hierarchy';
 
 import {
     aas,
@@ -29,8 +31,6 @@ import { encodeBase64Url, findRouteForShell, findSubmodel, getDisplayName } from
 import { HIERARCHICAL_STRUCTURES_1_0, HIERARCHICAL_STRUCTURES_1_1 } from '../views-constants';
 import { VIEW_ROUTES } from '../views-routes';
 import { Tree, TreeComponent, TreeNode, TreeResult } from '../../components/tree/tree.component';
-import { Router, RouterLinkWithHref } from '@angular/router';
-import * as d3 from 'd3-hierarchy';
 
 export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
 

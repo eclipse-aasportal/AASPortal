@@ -17,7 +17,7 @@ import { ERRORS } from '../errors.js';
 import { Variable } from '../variable.js';
 
 /** Injection token. */
-export const IDENTITY_PROVIDER: InjectionToken<IdentityProviderClient> = 'IDENTITY_PROVIDER';
+export const IDENTITY_PROVIDER: InjectionToken<IdentityProviderClient> = Symbol('IDENTITY_PROVIDER');
 
 export interface RefreshTokenResponse {
     readonly access_token: string;
