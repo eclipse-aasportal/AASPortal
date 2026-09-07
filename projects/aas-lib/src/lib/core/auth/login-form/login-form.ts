@@ -14,6 +14,7 @@ import { Credentials } from 'aas-core';
 import { NotifyService } from '../../notify/notify.service';
 import { AuthService } from '../auth.service';
 import { FormError } from '../../../shared/components/form-error/form-error';
+import { finalize, tap } from 'rxjs';
 
 @Component({
     selector: 'fhg-login',
@@ -26,6 +27,7 @@ export class LoginForm {
     private readonly notify = inject(NotifyService);
     private readonly route = inject(Router);
     private readonly model = signal<Credentials>({ id: '', password: '' });
+    private inProgress = false;
 
     public readonly form = form(this.model, schemaPath => {
         required(schemaPath.id, { message: 'LoginForm.EMAIL_REQUIRED' });
@@ -39,12 +41,15 @@ export class LoginForm {
 
     public submit(event: Event): void {
         event.preventDefault();
-        if (this.form().invalid()) {
+        if (this.inProgress ||this.form().invalid()) {
             return;
         }
 
         const credentials = this.model();
-        this.auth.login(credentials).subscribe({
+        this.inProgress = true;
+        this.auth.login(credentials).pipe(
+            finalize(() => this.inProgress = false)
+        ).subscribe({
             next: () => {
                 this.route.navigateByUrl('/start');
             },

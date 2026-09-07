@@ -14,6 +14,7 @@ import { NotifyService } from '../../notify/notify.service';
 import { AuthService } from '../auth.service';
 import { WINDOW } from '../../../shared/services/window.service';
 import { FormError } from '../../../shared/components/form-error/form-error';
+import { finalize, tap } from 'rxjs';
 
 export interface RegistrationData {
     id: string;
@@ -33,6 +34,7 @@ export class RegisterForm {
     private readonly auth = inject(AuthService);
     private readonly notify = inject(NotifyService);
     private readonly model = signal<RegistrationData>({ id: '', name: '', password1: '', password2: '' });
+    private inProgress = false;
 
     public form = form(this.model, schemaPath => {
         required(schemaPath.id, { message: 'RegisterForm.EMAIL_REQUIRED' });
@@ -64,8 +66,15 @@ export class RegisterForm {
 
     public submit(event: Event): void {
         event.preventDefault();
+        if (this.inProgress || this.form().invalid()) {
+            return;
+        }
+
         const data = this.model();
-        this.auth.createAccount({ id: data.id, name: data.name, password: data.password1 }).subscribe({
+        this.inProgress = true;
+        this.auth.createAccount({ id: data.id, name: data.name, password: data.password1 }).pipe(
+            finalize(() => this.inProgress = false)
+        ).subscribe({
             next: () => {
                 this.window.location.href = '/auth/login';
             },

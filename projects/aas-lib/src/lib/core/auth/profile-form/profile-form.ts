@@ -12,7 +12,7 @@ import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 import { form, FormField, readonly, validate } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { ApplicationError, UserProfile } from 'aas-core';
-import { EMPTY, from, mergeMap, throwError } from 'rxjs';
+import { EMPTY, finalize, from, mergeMap, tap, throwError } from 'rxjs';
 
 import { AuthService } from '../auth.service';
 import { NotifyService } from '../../notify/notify.service';
@@ -46,6 +46,8 @@ export class ProfileForm {
         password1: '',
         password2: '',
     });
+
+    private inProgress = false;
 
     public constructor() {
         effect(() => {
@@ -144,7 +146,7 @@ export class ProfileForm {
     public submit(event: Event): void {
         event.preventDefault();
 
-        if (this.form().invalid()) {
+        if (this.inProgress || this.form().invalid()) {
             return;
         }
 
@@ -159,7 +161,10 @@ export class ProfileForm {
             profile.newPassword = data.password1;
         }
 
-        this.auth.updateAccount(profile).subscribe({
+        this.inProgress = true;
+        this.auth.updateAccount(profile).pipe(
+            finalize(() => this.inProgress = false)
+        ).subscribe({
             next: () => {
                 this.notify.info(this.translate.instant('ProfileForm.UPDATE_ACCOUNT_SUCCESS'));
                 this.form().reset({
