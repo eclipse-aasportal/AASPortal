@@ -160,21 +160,35 @@ export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
         }
 
         if (this.pool.size < this.variable.MAX_WORKERS) {
-            const workerName = `ScanApp Worker ${this.pool.size + 1}`;
-            const worker = new Worker(this.script, { env: SHARE_ENV, name: workerName });
+            const name = `ScanApp Worker ${this.pool.size + 1}`;
+            const worker = new Worker(this.script, { env: SHARE_ENV, name });
             this.pool.set(worker, task);
-            const { port1, port2 } = new MessageChannel();
+            const indexChannel = new MessageChannel();
             if (isConnectable(this.index)) {
-                this.index.connect(port1, workerName);
+                this.index.connect(indexChannel.port1, name);
+            }
+
+            const loggerChannel = new MessageChannel();
+            if (isConnectable(this.logger)) {
+                this.logger.connect(loggerChannel.port1, name);
             }
 
             worker.postMessage(
                 {
                     type: 'command',
                     name: 'ConnectIndex',
-                    args: { port: port2, name: workerName },
+                    args: { port: indexChannel.port2, name },
                 } satisfies CommandData,
-                [port2],
+                [indexChannel.port2, loggerChannel.port2],
+            );
+
+            worker.postMessage(
+                {
+                    type: 'command',
+                    name: 'ConnectLogger',
+                    args: { port: loggerChannel.port2, name },
+                } satisfies CommandData,
+                [loggerChannel.port2, loggerChannel.port2],
             );
 
             return worker;

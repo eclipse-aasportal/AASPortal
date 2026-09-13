@@ -44,6 +44,8 @@ export class ScanApp {
                 this.taskId = Number(data.args.taskId);
                 this.endpoint = String(data.args.endpoint);
                 await this.cancel();
+            } else if (data.name === 'ConnectLogger') {
+                this
             }
         } catch (error) {
             this.logger.error(error);

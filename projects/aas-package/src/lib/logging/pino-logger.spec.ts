@@ -7,21 +7,38 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
+import { container } from 'tsyringe';
 import { describe, beforeEach, it, expect, vi, afterEach, Mocked } from 'vitest';
 import { NextFunction, Request, Response } from 'express';
 import EventEmitter from 'events';
 import { createSpyObj } from '../../test/mocks.js';
-import { ConsoleLogger } from './console-logger.js';
+import { PinoLogger } from './pino-logger.js';
 import { LOG_LEVEL, Logger, requestLogger } from './logger.js';
-import { container } from 'tsyringe';
 
-describe('ConsoleLogger', () => {
-    let logger: ConsoleLogger;
+const pinoLogger = vi.hoisted(() => ({
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+}));
 
-    beforeEach(async () => {
-        vi.spyOn(console, 'error').mockImplementation(() => undefined);
-        vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-        vi.spyOn(console, 'info').mockImplementation(() => undefined);
+const isoTimeMock = vi.hoisted(() => vi.fn());
+const pinoMock = vi.hoisted(() => vi.fn(() => pinoLogger));
+
+vi.mock('pino', () => ({
+    default: Object.assign(pinoMock, {
+        stdTimeFunctions: { isoTime: isoTimeMock },
+    }),
+}));
+
+describe('PinoLogger', () => {
+    let logger: PinoLogger;
+
+    beforeEach(() => {
+        pinoMock.mockClear();
+        isoTimeMock.mockClear();
+        pinoLogger.error.mockClear();
+        pinoLogger.warn.mockClear();
+        pinoLogger.info.mockClear();
     });
 
     afterEach(() => {
@@ -30,36 +47,36 @@ describe('ConsoleLogger', () => {
         vi.clearAllMocks();
     });
 
-    afterEach(() => {
-        vi.restoreAllMocks();
-        vi.resetModules();
-    });
-
     describe('info', () => {
         beforeEach(() => {
             container.clearInstances();
             container.registerInstance(LOG_LEVEL, 'Info');
-            container.registerSingleton(ConsoleLogger);
-            logger = container.resolve(ConsoleLogger);
+            container.registerSingleton(PinoLogger);
+            logger = container.resolve(PinoLogger);
         });
 
-        it('falls back to console.* when worker cannot be started', () => {
-            const infoSpy = vi.spyOn(console, 'info');
-            const warnSpy = vi.spyOn(console, 'warn');
-            const errorSpy = vi.spyOn(console, 'error');
-
-            infoSpy.mockClear();
-            warnSpy.mockClear();
-            errorSpy.mockClear();
-
+        it('writes each log level through pino', () => {
             logger.info('i-msg');
-            expect(infoSpy).toHaveBeenCalledTimes(1);
-
             logger.warning('w-msg');
-            expect(warnSpy).toHaveBeenCalledTimes(1);
-
             logger.error('e-msg');
-            expect(errorSpy).toHaveBeenCalledTimes(1);
+
+            expect(pinoMock).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    level: 'info',
+                    timestamp: isoTimeMock,
+                    transport: {
+                        target: 'pino/file',
+                        options: { destination: 1 },
+                    },
+                    formatters: expect.objectContaining({
+                        level: expect.any(Function),
+                        bindings: expect.any(Function),
+                    }),
+                }),
+            );
+            expect(pinoLogger.info).toHaveBeenCalledWith('i-msg');
+            expect(pinoLogger.warn).toHaveBeenCalledWith('w-msg');
+            expect(pinoLogger.error).toHaveBeenCalledWith('e-msg');
         });
     });
 
@@ -67,27 +84,19 @@ describe('ConsoleLogger', () => {
         beforeEach(() => {
             container.clearInstances();
             container.registerInstance(LOG_LEVEL, 'Warning');
-            container.registerSingleton(ConsoleLogger);
-            logger = container.resolve(ConsoleLogger);
+            container.registerSingleton(PinoLogger);
+            logger = container.resolve(PinoLogger);
         });
 
-        it('respects log level gating in fallback mode', () => {
-            const infoSpy = vi.spyOn(console, 'info');
-            const warnSpy = vi.spyOn(console, 'warn');
-            const errorSpy = vi.spyOn(console, 'error');
-
-            infoSpy.mockClear();
-            warnSpy.mockClear();
-            errorSpy.mockClear();
-
+        it('initializes pino at the warning level and forwards messages', () => {
             logger.info('skip-info');
-            expect(infoSpy).not.toHaveBeenCalled();
-
             logger.warning('ok-warning');
-            expect(warnSpy).toHaveBeenCalledTimes(1);
-
             logger.error('ok-error');
-            expect(errorSpy).toHaveBeenCalledTimes(1);
+
+            expect(pinoMock).toHaveBeenCalledWith(expect.objectContaining({ level: 'warn' }));
+            expect(pinoLogger.info).toHaveBeenCalledWith('skip-info');
+            expect(pinoLogger.warn).toHaveBeenCalledWith('ok-warning');
+            expect(pinoLogger.error).toHaveBeenCalledWith('ok-error');
         });
     });
 
@@ -95,27 +104,19 @@ describe('ConsoleLogger', () => {
         beforeEach(() => {
             container.clearInstances();
             container.registerInstance(LOG_LEVEL, 'Error');
-            container.registerSingleton(ConsoleLogger);
-            logger = container.resolve(ConsoleLogger);
+            container.registerSingleton(PinoLogger);
+            logger = container.resolve(PinoLogger);
         });
 
-        it('respects log level gating in fallback mode', () => {
-            const infoSpy = vi.spyOn(console, 'info');
-            const warnSpy = vi.spyOn(console, 'warn');
-            const errorSpy = vi.spyOn(console, 'error');
-
-            infoSpy.mockClear();
-            warnSpy.mockClear();
-            errorSpy.mockClear();
-
+        it('initializes pino at the error level and forwards messages', () => {
             logger.info('skip-info');
-            expect(infoSpy).not.toHaveBeenCalled();
-
-            logger.warning('ok-warning');
-            expect(warnSpy).not.toHaveBeenCalled();
-
+            logger.warning('skip-warning');
             logger.error('ok-error');
-            expect(errorSpy).toHaveBeenCalledTimes(1);
+
+            expect(pinoMock).toHaveBeenCalledWith(expect.objectContaining({ level: 'error' }));
+            expect(pinoLogger.info).toHaveBeenCalledWith('skip-info');
+            expect(pinoLogger.warn).toHaveBeenCalledWith('skip-warning');
+            expect(pinoLogger.error).toHaveBeenCalledWith('ok-error');
         });
     });
 });

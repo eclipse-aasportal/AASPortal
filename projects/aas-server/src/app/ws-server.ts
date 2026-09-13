@@ -50,6 +50,13 @@ export class WSServer {
         this.wss.on('connection', this.onConnection);
         this.wss.on('close', this.onClose);
         this.wss.on('error', this.onError);
+
+        process.on('SIGTERM', this.shutdownHandler);
+        process.on('SIGINT', this.shutdownHandler);
+
+        this.server.listen(this.variable.AAS_SERVER_PORT, () => {
+            this.logger.info(`AAS-Server listening on ${this.variable.AAS_SERVER_PORT}`);
+        });
     }
 
     public on(event: 'message' | 'close' | 'error', listener: ListenerFn): EventEmitter {
@@ -58,15 +65,6 @@ export class WSServer {
 
     public off(event: 'message' | 'close' | 'error', listener: ListenerFn): EventEmitter {
         return this.emitter.off(event, listener);
-    }
-
-    public run(): void {
-        process.on('SIGTERM', this.shutdownHandler);
-        process.on('SIGINT', this.shutdownHandler);
-
-        this.server.listen(this.variable.AAS_SERVER_PORT, () => {
-            this.logger.info(`AAS-Server listening on ${this.variable.AAS_SERVER_PORT}`);
-        });
     }
 
     public notify(data: WebSocketData): void {

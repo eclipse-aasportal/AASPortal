@@ -6,14 +6,14 @@
  *
  *****************************************************************************/
 
-import { container, singleton } from 'tsyringe';
+import { container, singleton, Disposable } from 'tsyringe';
 import path from 'path';
-import { isMainThread, MessagePort, MessageChannel, parentPort, SHARE_ENV, Worker } from 'worker_threads';
+import { isMainThread, MessagePort, MessageChannel, SHARE_ENV, Worker } from 'worker_threads';
 import { aas, AASEndpoint, AASCursor, AASPagedResult, PagedResult, AASDocument } from 'aas-core';
 
 import { AASIndex, ChannelCommand, CommandName, ChannelResponse, isChannelError, ChannelError } from './aas-index.js';
 import { Variable } from '../variable.js';
-import { CommandData, isCommandData, isResponseData, WorkerData } from 'aas-package';
+import { CommandData, Connectable, isResponseData, WorkerData } from 'aas-package';
 
 type ResolvePending = {
     resolve: (value: unknown) => void;
@@ -25,7 +25,7 @@ type ResolvePending = {
  * Represents a client for the AAS index worker thread.
  */
 @singleton()
-export class AASIndexClient implements AASIndex {
+export class AASIndexClient implements AASIndex, Connectable, Disposable {
     private readonly variable = container.resolve(Variable);
     private readonly worker?: Worker;
     private readonly pending = new Map<number, ResolvePending>();
@@ -43,20 +43,22 @@ export class AASIndexClient implements AASIndex {
             this.worker.on('message', this.onWorkerMessage);
             this.connect(port1, name);
             this.port.on('message', this.onMessage);
-        } else {
-            parentPort?.on('message', this.onParentPortMessage);
         }
     }
 
-    public connect(port: MessagePort, name: string): void {
-        this.worker?.postMessage(
-            {
-                type: 'command',
-                name: 'ConnectIndex',
-                args: { port, name },
-            } satisfies CommandData,
-            [port],
-        );
+    public connect(port: MessagePort, name?: string): void {
+        if (this.worker) {
+            this.worker.postMessage(
+                {
+                    type: 'command',
+                    name: 'ConnectIndex',
+                    args: { port, name },
+                } satisfies CommandData,
+                [port],
+            );
+        } else {
+            this.port = port;
+        }
     }
 
     public getDocumentCount(endpoint?: string): Promise<number> {
@@ -167,13 +169,6 @@ export class AASIndexClient implements AASIndex {
             this.worker.once('exit', this.onWorkerExit);
         }
     }
-
-    private readonly onParentPortMessage = (data: WorkerData): void => {
-        if (isCommandData(data) && data.name === 'ConnectIndex') {
-            this.port = data.args.port as MessagePort;
-            this.port.on('message', this.onMessage);
-        }
-    };
 
     private readonly onWorkerMessage = (data: WorkerData): void => {
         if (isResponseData(data)) {

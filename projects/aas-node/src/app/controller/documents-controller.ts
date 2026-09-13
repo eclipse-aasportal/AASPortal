@@ -27,7 +27,7 @@ import {
 import { aas, AASDocument, AASPagedResult } from 'aas-core';
 import { decodeBase64Url } from 'aas-package';
 import { DocumentProvider } from '../provider/document-provider.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
 
 @injectable()
 @Route('/api/v1')
@@ -35,7 +35,7 @@ import { AASIndexClient } from '../index/aas-index-client.js';
 export class DocumentsController extends Controller {
     public constructor(
         @inject(DocumentProvider) private readonly provider: DocumentProvider,
-        @inject(AASIndexClient) private readonly index: AASIndexClient,
+        @inject(AAS_INDEX) private readonly index: AASIndex,
     ) {
         super();
     }

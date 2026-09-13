@@ -29,8 +29,8 @@ import { decodeBase64Url } from 'aas-package';
 
 import { EndpointProvider } from '../provider/endpoint-provider.js';
 import { ERRORS } from '../errors.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
 import { USER_RIGHTS_STORE, UserRightsStore } from '../auth/user-rights-store.js';
+import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
@@ -39,7 +39,7 @@ export class EndpointsController extends Controller {
     public constructor(
         @inject(EndpointProvider) private readonly provider: EndpointProvider,
         @inject(USER_RIGHTS_STORE) private readonly userRightsStore: UserRightsStore,
-        @inject(AASIndexClient) private readonly index: AASIndexClient,
+        @inject(AAS_INDEX) private readonly index: AASIndex,
     ) {
         super();
     }

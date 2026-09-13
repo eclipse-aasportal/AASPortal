@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { container, singleton } from 'tsyringe';
-import { ConsoleLogger } from './console-logger.js';
 import { Logger } from './logger.js';
+import { ConsoleLogger } from './console-logger.js';
 
 @singleton()
 export class LoggerFactory {

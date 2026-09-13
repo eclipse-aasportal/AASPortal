@@ -37,7 +37,7 @@ export interface Connectable {
      * @param port The message port used to connect to the worker thread.
      * @param name The name of the worker thread.
      */
-    connect(port: MessagePort, name: string): void;
+    connect(port: MessagePort, name?: string): void;
 }
 
 /** Checks if an object is connectable. */

@@ -29,7 +29,7 @@ import { WSNode } from '../ws-node.js';
 import { Task, TaskHandler } from './task-handler.js';
 import { urlToEndpoint } from '../configuration.js';
 import { MessageSender } from './message-sender.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
 
 @singleton()
 export class EndpointProvider {
@@ -41,7 +41,7 @@ export class EndpointProvider {
         @inject(LOGGER) private readonly logger: Logger,
         @inject(EndpointScanWorkerPool) private readonly workerPool: EndpointScanWorkerPool,
         @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
-        @inject(AASIndexClient) private readonly index: AASIndexClient,
+        @inject(AAS_INDEX) private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
         this.workerPool.on('message', this.workerPoolOnMessage);

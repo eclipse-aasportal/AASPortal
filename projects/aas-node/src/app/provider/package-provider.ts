@@ -14,7 +14,7 @@ import { ApplicationError } from 'aas-core';
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { ERRORS } from '../errors.js';
 import { MessageSender } from './message-sender.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
 
 @singleton()
 export class PackageProvider {
@@ -22,7 +22,7 @@ export class PackageProvider {
 
     public constructor(
         @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
-        @inject(AASIndexClient) private readonly index: AASIndexClient,
+        @inject(AAS_INDEX) private readonly index: AASIndex,
     ) {}
 
     /**

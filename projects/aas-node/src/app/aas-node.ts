@@ -8,7 +8,8 @@
 
 import 'reflect-metadata';
 import { container } from 'tsyringe';
-import { LoggerFactory, LOGGER, LOG_LEVEL } from 'aas-package';
+import path from 'path';
+import { LOGGER, LoggerProxy, LOGGER_SCRIPT } from 'aas-package';
 import { WSNode } from './ws-node.js';
 import { Variable } from './variable.js';
 import { IDENTITY_PROVIDER } from './auth/identity-provider-client.js';
@@ -25,8 +26,8 @@ import { USER_STORE } from './auth/user-store.js';
 import { AAS_INDEX } from './index/aas-index.js';
 import { AASIndexClient } from './index/aas-index-client.js';
 
-container.register(LOG_LEVEL, { useFactory: c => c.resolve(Variable).LOG_LEVEL });
-container.register(LOGGER, { useFactory: c => c.resolve(LoggerFactory).getInstance() });
+container.registerSingleton(LOGGER, LoggerProxy);
+container.register(LOGGER_SCRIPT, { useFactory: c => path.join(c.resolve(Variable).CONTENT_ROOT, 'aas-log.js') });
 container.register(COOKIE_STORE, { useFactory: c => c.resolve(CookieStorageFactory).getInstance() });
 container.register(IDENTITY_PROVIDER, { useFactory: c => c.resolve(IdentityProviderFactory).getInstance() });
 container.register(SESSION_STORE, { useFactory: c => c.resolve(SessionStoreFactory).getInstance() });
