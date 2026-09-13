@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { InjectionToken, Disposable } from 'tsyringe';
+import { InjectionToken } from 'tsyringe';
 import {
     AASCursor,
     AASDocument,
@@ -79,7 +79,7 @@ export function isChannelError(data: ChannelData): data is ChannelError {
 /**
  * Represents an index of Asset Administration Shells.
  */
-export interface AASIndex extends Disposable {
+export interface AASIndex {
     /**
      * Gets the total number of AAS documents in the AAS index or an AAS endpoint with the specified name.
      *

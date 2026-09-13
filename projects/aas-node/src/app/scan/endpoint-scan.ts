@@ -15,7 +15,7 @@ import { aas, AASDocument, AASEndpoint, convertToString, getSemanticId, PagedRes
 import { ScanController } from './scan-controller.js';
 import { Variable } from '../variable.js';
 import { EndpointScanDatabase } from './endpoint-scan-database.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AASIndex } from '../index/aas-index.js';
 
 /**
  * Defines an automate to scan an AAS endpoint for new, deleted or updated Asset Administration Shells.
@@ -41,7 +41,7 @@ export abstract class EndpointScan extends EventEmitter {
      * @param index The AAS index.
      * @param endpoint The endpoint.
      */
-    public async scan(index: AASIndexClient, endpoint: AASEndpoint): Promise<void> {
+    public async scan(index: AASIndex, endpoint: AASEndpoint): Promise<void> {
         this.scanDb.clear();
         this.shellCount = this.submodelCount = 0;
         this.done = 0;
@@ -122,7 +122,7 @@ export abstract class EndpointScan extends EventEmitter {
         this.scanDb.registerSubmodels(submodelRefs, b.id);
     }
 
-    private async scanForNewAndUpdatedShells(index: AASIndexClient, endpoint: string): Promise<void> {
+    private async scanForNewAndUpdatedShells(index: AASIndex, endpoint: string): Promise<void> {
         let cursor: string | undefined;
         do {
             const result = await this.getDocuments(cursor);
@@ -164,7 +164,7 @@ export abstract class EndpointScan extends EventEmitter {
         } while (cursor && !this.controller.cancelRequested);
     }
 
-    private async scanForDeletedShellsAndUpdateThumbnail(index: AASIndexClient, endpoint: string): Promise<void> {
+    private async scanForDeletedShellsAndUpdateThumbnail(index: AASIndex, endpoint: string): Promise<void> {
         let cursor: string | undefined;
         do {
             const result = await index.getEndpointDocuments(endpoint, cursor);
@@ -212,7 +212,7 @@ export abstract class EndpointScan extends EventEmitter {
         } while (cursor && !this.controller.cancelRequested);
     }
 
-    private async createOrUpdateSearchIndex(index: AASIndexClient, endpoint: string): Promise<void> {
+    private async createOrUpdateSearchIndex(index: AASIndex, endpoint: string): Promise<void> {
         let cursor: string | undefined;
         do {
             const result = await this.getSubmodels(cursor);

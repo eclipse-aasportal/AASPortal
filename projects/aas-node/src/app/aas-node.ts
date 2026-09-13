@@ -22,6 +22,8 @@ import { UserRightsStoreFactory } from './auth/user-rights-store-factory.js';
 import { USER_RIGHTS_STORE } from './auth/user-rights-store.js';
 import { UserStoreFactory } from './auth/user-store-factory.js';
 import { USER_STORE } from './auth/user-store.js';
+import { AAS_INDEX } from './index/aas-index.js';
+import { AASIndexClient } from './index/aas-index-client.js';
 
 container.register(LOG_LEVEL, { useFactory: c => c.resolve(Variable).LOG_LEVEL });
 container.register(LOGGER, { useFactory: c => c.resolve(LoggerFactory).getInstance() });
@@ -30,5 +32,6 @@ container.register(IDENTITY_PROVIDER, { useFactory: c => c.resolve(IdentityProvi
 container.register(SESSION_STORE, { useFactory: c => c.resolve(SessionStoreFactory).getInstance() });
 container.register(USER_RIGHTS_STORE, { useFactory: c => c.resolve(UserRightsStoreFactory).getInstance() });
 container.register(USER_STORE, { useFactory: c => c.resolve(UserStoreFactory).getInstance() });
+container.registerSingleton(AAS_INDEX, AASIndexClient);
 
 await container.resolve(EndpointProvider).start(container.resolve(WSNode));

@@ -9,10 +9,9 @@
 import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { LOGGER, Logger } from 'aas-package';
+import { CommandData, EventData, LOGGER, Logger } from 'aas-package';
 import { EndpointScanWorkerPool } from './endpoint-scan-worker-pool';
 import { createSpyObj } from '../../test/mocks';
-import { CommandData, EventData } from '../types';
 
 vi.mock(import('worker_threads'), () => {
     class WorkerMock {

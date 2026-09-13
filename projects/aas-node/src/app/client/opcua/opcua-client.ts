@@ -41,7 +41,7 @@ import { decodeOpaqueStructure } from './opaque-structure-decoder.js';
 import { OpcuaReader } from './opcua-reader.js';
 import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
 import { ClientFile, OpenFileMode } from './client-file.js';
-import { AASIndexClient } from '../../index/aas-index-client.js';
+import { AASIndex } from '../../index/aas-index.js';
 
 export class OpcuaClient extends EndpointClient {
     private readonly options: OPCUAClientOptions;
@@ -50,7 +50,7 @@ export class OpcuaClient extends EndpointClient {
     private session: ClientSession | null = null;
     private reentry = 0;
 
-    public constructor(logger: Logger, index: AASIndexClient, endpoint: AASEndpoint, options?: OPCUAClientOptions) {
+    public constructor(logger: Logger, index: AASIndex, endpoint: AASEndpoint, options?: OPCUAClientOptions) {
         super(logger, index, endpoint);
 
         if (options) {

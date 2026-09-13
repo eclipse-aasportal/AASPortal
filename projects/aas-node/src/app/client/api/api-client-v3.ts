@@ -14,7 +14,7 @@ import { aas, AASEndpoint, ApplicationError, PagedResult, AASDocument } from 'aa
 import { ApiClient } from './api-client.js';
 import { ERRORS } from '../../errors.js';
 import { HttpClient } from '../../http-client.js';
-import { AASIndexClient } from '../../index/aas-index-client.js';
+import { AASIndex } from '../../index/aas-index.js';
 
 interface PackageDescriptor {
     aasIds: string[];
@@ -59,7 +59,7 @@ function encodeIdShortPath(idShortPath: string): string {
 export class ApiClientV3 extends ApiClient {
     public constructor(
         logger: Logger,
-        index: AASIndexClient,
+        index: AASIndex,
         endpoint: AASEndpoint,
         auth: Record<string, string> | undefined,
         http: HttpClient,

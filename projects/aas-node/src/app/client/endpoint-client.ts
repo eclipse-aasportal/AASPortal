@@ -11,7 +11,7 @@ import { Logger } from 'aas-package';
 import { SocketClient } from '../live/socket-client.js';
 import { SocketSubscription } from '../live/socket-subscription.js';
 import { thumbnailToObjectUrl } from '../utilities.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AASIndex } from '../index/aas-index.js';
 
 /**
  * Represents a client of an endpoint or server that provides Asset Administration Shells.
@@ -19,7 +19,7 @@ import { AASIndexClient } from '../index/aas-index-client.js';
 export abstract class EndpointClient {
     protected constructor(
         protected readonly logger: Logger,
-        protected readonly index: AASIndexClient,
+        protected readonly index: AASIndex,
         public readonly endpoint: AASEndpoint,
         protected readonly auth?: Record<string, string>,
     ) {}

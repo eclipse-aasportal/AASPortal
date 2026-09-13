@@ -12,11 +12,10 @@ import { Worker, SHARE_ENV } from 'worker_threads';
 import fs from 'fs';
 import path from 'path/posix';
 import { noop } from 'aas-core';
-import { LOGGER } from 'aas-package';
+import { CommandData, EventData, isConnectable, isEventData, LOGGER, ResponseData } from 'aas-package';
 
-import { CommandData, EventData, isEventData, ResponseData } from '../types.js';
 import { Variable } from '../variable.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 /**
  * Represents a worker for scanning an endpoint.
@@ -77,7 +76,7 @@ class EndpointScanWorker extends EventEmitter {
 export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
     private readonly logger = container.resolve(LOGGER);
     private readonly variable = container.resolve(Variable);
-    private readonly index = container.resolve(AASIndexClient);
+    private readonly index = container.resolve(AAS_INDEX);
     private readonly script: string;
     private readonly waiting = new Array<EndpointScanWorker>();
     private readonly pool = new Map<Worker, EndpointScanWorker | null>();
@@ -165,11 +164,14 @@ export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
             const worker = new Worker(this.script, { env: SHARE_ENV, name: workerName });
             this.pool.set(worker, task);
             const { port1, port2 } = new MessageChannel();
-            this.index.connect(port1, workerName);
+            if (isConnectable(this.index)) {
+                this.index.connect(port1, workerName);
+            }
+
             worker.postMessage(
                 {
                     type: 'command',
-                    name: 'connect',
+                    name: 'ConnectIndex',
                     args: { port: port2, name: workerName },
                 } satisfies CommandData,
                 [port2],

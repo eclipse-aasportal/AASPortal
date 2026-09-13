@@ -20,7 +20,7 @@ import {
     fromConceptDescription,
 } from 'aas-core';
 
-import { FileResult, Logger, LOGGER } from 'aas-package';
+import { FileResult, type Logger, LOGGER } from 'aas-package';
 
 import { Database } from './db/database.js';
 import { Variable } from './variable.js';

@@ -8,18 +8,17 @@
 
 import { container, singleton } from 'tsyringe';
 import { parentPort } from 'worker_threads';
-import { LOGGER } from 'aas-package';
+import { CommandData, EventData, LOGGER } from 'aas-package';
 import { AASDocument, AASEndpoint } from 'aas-core';
 
 import { EndpointScanFactory } from './endpoint-scan-factory.js';
-import { CommandData, EventData } from '../types.js';
 import { ScanController } from './scan-controller.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 @singleton()
 export class ScanApp {
     private readonly logger = container.resolve(LOGGER);
-    private readonly index = container.resolve(AASIndexClient);
+    private readonly index = container.resolve(AAS_INDEX);
     private readonly factory = container.resolve(EndpointScanFactory);
     private endpoint = '';
     private taskId = 0;

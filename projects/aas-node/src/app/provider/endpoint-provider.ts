@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { LOGGER, type Logger } from 'aas-package';
+import { CommandData, EventData, LOGGER, WorkerData, type Logger } from 'aas-package';
 import {
     LiveRequest,
     WebSocketData,
@@ -19,7 +19,6 @@ import {
     UpdateIndexStatus,
 } from 'aas-core';
 
-import { CommandData, EventData, WorkerData } from '../types.js';
 import { EndpointScanWorkerPool } from '../scan/endpoint-scan-worker-pool.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';

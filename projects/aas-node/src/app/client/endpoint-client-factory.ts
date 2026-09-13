@@ -18,12 +18,12 @@ import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { ApiClientV1 } from './api/api-client-v1.js';
 import { HttpClient } from '../http-client.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 @singleton()
 export class EndpointClientFactory {
     private readonly logger = container.resolve<Logger>(LOGGER);
-    private readonly index = container.resolve(AASIndexClient);
+    private readonly index = container.resolve(AAS_INDEX);
     private readonly fileStorageProvider = container.resolve(FileStorageProvider);
     private readonly http = container.resolve(HttpClient);
 

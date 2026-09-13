@@ -9,9 +9,8 @@
 import { container, singleton } from 'tsyringe';
 import { parentPort, MessagePort } from 'worker_threads';
 import { aas, AASCursor, AASDocument, AASEndpoint } from 'aas-core';
-import { LOGGER } from 'aas-package';
+import { ErrorData, isCommandData, LOGGER, ResponseData, WorkerData } from 'aas-package';
 import { AAS_INDEX, ChannelCommand, ChannelError, ChannelResponse, AASIndex, CommandName } from './aas-index.js';
-import { ResponseData, ErrorData, isCommandData, WorkerData } from '../types.js';
 
 @singleton()
 export class IndexApp {
@@ -27,7 +26,7 @@ export class IndexApp {
     private readonly parentPortOnMessage = (data: WorkerData): void => {
         try {
             if (isCommandData(data)) {
-                if (data.name === 'connect') {
+                if (data.name === 'ConnectIndex') {
                     const port = data.args.port as MessagePort;
                     port.on('message', data => this.onMessage(port, data));
                     this.ports.push(port);

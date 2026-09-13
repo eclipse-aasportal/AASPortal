@@ -13,7 +13,7 @@ import { aas, AASEndpoint, AASCursor, AASPagedResult, PagedResult, AASDocument }
 
 import { AASIndex, ChannelCommand, CommandName, ChannelResponse, isChannelError, ChannelError } from './aas-index.js';
 import { Variable } from '../variable.js';
-import { CommandData, isCommandData, isResponseData, WorkerData } from '../types.js';
+import { CommandData, isCommandData, isResponseData, WorkerData } from 'aas-package';
 
 type ResolvePending = {
     resolve: (value: unknown) => void;
@@ -52,7 +52,7 @@ export class AASIndexClient implements AASIndex {
         this.worker?.postMessage(
             {
                 type: 'command',
-                name: 'connect',
+                name: 'ConnectIndex',
                 args: { port, name },
             } satisfies CommandData,
             [port],
@@ -169,7 +169,7 @@ export class AASIndexClient implements AASIndex {
     }
 
     private readonly onParentPortMessage = (data: WorkerData): void => {
-        if (isCommandData(data) && data.name === 'connect') {
+        if (isCommandData(data) && data.name === 'ConnectIndex') {
             this.port = data.args.port as MessagePort;
             this.port.on('message', this.onMessage);
         }

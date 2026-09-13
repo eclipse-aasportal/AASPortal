@@ -10,13 +10,13 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import multer from 'multer';
-import { inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import express, { Express, Request, Response, json, urlencoded } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
-import { Logger, LOGGER, requestLogger } from 'aas-package';
+import { LOGGER, requestLogger } from 'aas-package';
 
 import { Variable } from './variable.js';
 import { RegisterRoutes } from './routes/routes.js';
@@ -26,12 +26,11 @@ const shutdownTime = 15000;
 
 @singleton()
 export class App {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly variable: Variable = container.resolve(Variable);
     private swaggerHtml?: string;
 
-    public constructor(
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(Variable) private readonly variable: Variable,
-    ) {
+    public constructor() {
         this.app = express();
         this.setup();
     }
