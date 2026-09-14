@@ -31,9 +31,7 @@ describe('AppController', () => {
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, {});
-
-        applicationInfo = createSpyObj<ApplicationInfo>(['getAsync']);
-
+        applicationInfo = createSpyObj<ApplicationInfo>(['get']);
         authentication = createSpyObj<Authentication>(['authentication']);
         authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
 
@@ -71,7 +69,7 @@ describe('AppController', () => {
             ],
         };
 
-        applicationInfo.getAsync.mockReturnValue(new Promise<AppInfo>(resolve => resolve(data)));
+        applicationInfo.get.mockResolvedValue(data);
         const response = await request(app).get('/api/v1/app/info');
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(data);

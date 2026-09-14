@@ -29,12 +29,13 @@ import {
     toBoolean,
 } from 'aas-core';
 
-import { AASIndex } from '../aas-index.js';
+import { AASIndex, toAbbreviation, toDocumentId } from '../aas-index.js';
 import { KeywordDirectory } from '../keyword-directory.js';
 import { ERRORS } from '../../errors.js';
 import { SqliteQuery } from './sqlite-query.js';
 
 const LIMIT = 100;
+
 const initDatabase = `
 CREATE TABLE IF NOT EXISTS endpoints (
     name TEXT PRIMARY KEY,
@@ -77,7 +78,7 @@ CREATE TABLE IF NOT EXISTS submodelConceptDescriptions (
 );
 `;
 
-export class SqliteIndex extends AASIndex {
+export class SqliteIndex implements AASIndex {
     private readonly db: DatabaseSync;
     private readonly getCountAll: StatementSync;
     private readonly getCountEndpoint: StatementSync;
@@ -110,11 +111,9 @@ export class SqliteIndex extends AASIndex {
 
     public constructor(
         private readonly logger: Logger,
-        keywords: KeywordDirectory,
+        private readonly keywords: KeywordDirectory,
         file: string,
     ) {
-        super(keywords);
-
         this.db = new DatabaseSync(file, { timeout: 5000 });
         this.db.exec(initDatabase);
         this.db.exec('PRAGMA journal_mode = WAL');
@@ -180,7 +179,7 @@ export class SqliteIndex extends AASIndex {
         this.logger.info(`AAS index connected to ${file} (SQLite).`);
     }
 
-    public override getDocumentCount(endpoint?: string): Promise<number> {
+    public getDocumentCount(endpoint?: string): Promise<number> {
         return new Promise((resolve, reject) => {
             try {
                 const value = endpoint ? this.getCountEndpoint.get(endpoint) : this.getCountAll.get();
@@ -196,7 +195,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override getEndpoints(): Promise<AASEndpoint[]> {
+    public getEndpoints(): Promise<AASEndpoint[]> {
         return new Promise((resolve, reject) => {
             try {
                 const values = this.getEndpointsSql.all();
@@ -207,7 +206,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override getEndpointCount(): Promise<number> {
+    public getEndpointCount(): Promise<number> {
         return new Promise((resolve, reject) => {
             try {
                 const value = this.getEndpointCountSql.get();
@@ -222,7 +221,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override getEndpoint(name: string): Promise<AASEndpoint> {
+    public getEndpoint(name: string): Promise<AASEndpoint> {
         return new Promise((resolve, reject) => {
             try {
                 const value = this.getEndpointSql.get(name);
@@ -237,7 +236,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override findEndpoint(name: string): Promise<AASEndpoint | undefined> {
+    public findEndpoint(name: string): Promise<AASEndpoint | undefined> {
         return new Promise((resolve, reject) => {
             try {
                 const value = this.getEndpointSql.get(name);
@@ -252,7 +251,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override insertEndpoint(endpoint: AASEndpoint): Promise<void> {
+    public insertEndpoint(endpoint: AASEndpoint): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             try {
                 this.insertEndpointSql.run(
@@ -271,7 +270,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
+    public updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
         return new Promise((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
@@ -299,7 +298,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override deleteEndpoint(endpoint: string): Promise<boolean> {
+    public deleteEndpoint(endpoint: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
@@ -314,7 +313,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override getDocuments(cursor: AASCursor, expression?: string, language?: string): Promise<AASPagedResult> {
+    public getDocuments(cursor: AASCursor, expression?: string, language?: string): Promise<AASPagedResult> {
         return new Promise((resolve, reject) => {
             try {
                 let query: SqliteQuery | undefined;
@@ -340,7 +339,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override getEndpointDocuments(
+    public getEndpointDocuments(
         endpoint: string,
         cursor: string | undefined,
         limit: number = LIMIT,
@@ -373,7 +372,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override update(document: AASDocument): Promise<void> {
+    public update(document: AASDocument): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
@@ -408,7 +407,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override insert(document: AASDocument): Promise<void> {
+    public insert(document: AASDocument): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
@@ -437,7 +436,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override find(
+    public find(
         endpoint: string | undefined,
         modelType: 'AssetAdministrationShell' | 'Asset',
         id: string,
@@ -459,7 +458,20 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override delete(endpoint: string, id: string): Promise<boolean> {
+    public async get(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument> {
+        const document = await this.find(endpoint, modelType, id);
+        if (!document) {
+            throw new ApplicationError(ERRORS.AAS_NOT_FOUND, { modelType, id }, 404);
+        }
+
+        return document;
+    }
+
+    public delete(endpoint: string, id: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
@@ -481,7 +493,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override create(endpoint: string, id: string, env: aas.Environment): Promise<void> {
+    public create(endpoint: string, id: string, env: aas.Environment): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
@@ -499,7 +511,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override clear(endpoint?: string, id?: string): Promise<void> {
+    public clear(endpoint?: string, id?: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
@@ -525,7 +537,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]> {
+    public getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
             try {
                 const value = this.getConceptDescriptionIdsSql.get(endpoint, id);
@@ -540,7 +552,7 @@ export class SqliteIndex extends AASIndex {
         });
     }
 
-    public override setSubmodelConceptDescriptionIds(
+    public setSubmodelConceptDescriptionIds(
         endpoint: string,
         id: string,
         conceptDescriptionIds: string[],
@@ -570,7 +582,7 @@ export class SqliteIndex extends AASIndex {
         }
     }
 
-    public override dispose(): void {
+    public dispose(): void {
         if (this.db.isOpen) {
             this.db.close();
         }
@@ -613,7 +625,7 @@ export class SqliteIndex extends AASIndex {
         return {
             previous: null,
             documents: documents.slice(0, limit),
-            next: documents.length >= limit + 1 ? this.toDocumentId(documents[limit]) : null,
+            next: documents.length >= limit + 1 ? toDocumentId(documents[limit]) : null,
         };
     }
 
@@ -648,7 +660,7 @@ export class SqliteIndex extends AASIndex {
         return {
             previous: current,
             documents: documents.slice(0, limit),
-            next: documents.length >= limit + 1 ? this.toDocumentId(documents[limit]) : null,
+            next: documents.length >= limit + 1 ? toDocumentId(documents[limit]) : null,
         };
     }
 
@@ -681,7 +693,7 @@ export class SqliteIndex extends AASIndex {
         const documents = values.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[limit - 1]) : null,
+            previous: documents.length >= limit + 1 ? toDocumentId(documents[limit - 1]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: current,
         };
@@ -713,7 +725,7 @@ export class SqliteIndex extends AASIndex {
         const documents = values.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[limit - 1]) : null,
+            previous: documents.length >= limit + 1 ? toDocumentId(documents[limit - 1]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: null,
         };
@@ -736,7 +748,7 @@ export class SqliteIndex extends AASIndex {
     private writeElement(uuid: string, referable: aas.Referable): void {
         this.insertElementSql.run(
             uuid,
-            this.toAbbreviation(referable),
+            toAbbreviation(referable),
             isIdentifiable(referable) ? referable.id : null,
             referable.idShort,
             this.toStringValue(referable),
@@ -771,13 +783,13 @@ export class SqliteIndex extends AASIndex {
             case 'Property': {
                 const property = referable as aas.Property;
                 if (baseType(property.valueType) === 'string') {
-                    return this.preprocessString(property.value, max) ?? null;
+                    return this.keywords.preprocessString(property.value, max) ?? null;
                 }
 
                 return null;
             }
             case 'MultiLanguageProperty':
-                return this.preprocessString((referable as aas.MultiLanguageProperty).value) ?? null;
+                return this.keywords.preprocessString((referable as aas.MultiLanguageProperty).value) ?? null;
             case 'File':
                 return (referable as aas.File).value ?? null;
             case 'Blob':

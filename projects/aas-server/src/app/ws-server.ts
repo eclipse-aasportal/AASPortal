@@ -6,13 +6,13 @@
  *
  *****************************************************************************/
 
-import { container, inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import { WebSocket, WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
 import EventEmitter from 'events';
 import fs from 'fs';
-import { Logger, LOGGER } from 'aas-package';
+import { LOGGER } from 'aas-package';
 
 import { App } from './app.js';
 import { ListenerFn, WebSocketData } from './types.js';
@@ -21,16 +21,15 @@ import { SocketClient } from './socket-client.js';
 
 @singleton()
 export class WSServer {
+    private readonly app = container.resolve(App);
+    private readonly variable = container.resolve(Variable);
+    private readonly logger = container.resolve(LOGGER);
     private readonly wss: WebSocketServer;
     private readonly clients: Set<SocketClient> = new Set<SocketClient>();
     private readonly server: http.Server | https.Server;
     private readonly emitter = new EventEmitter();
 
-    public constructor(
-        @inject(App) private readonly app: App,
-        @inject(Variable) private readonly variable: Variable,
-        @inject(LOGGER) private readonly logger: Logger,
-    ) {
+    public constructor() {
         if (this.variable.HTTPS_KEY_FILE && this.variable.HTTPS_CERT_FILE) {
             this.server = https.createServer({
                 key: fs.readFileSync(this.variable.HTTPS_KEY_FILE),
@@ -46,11 +45,18 @@ export class WSServer {
         }
 
         this.wss = new WebSocketServer({ server: this.server });
-        this.server.on('request', app.app);
+        this.server.on('request', this.app.app);
 
         this.wss.on('connection', this.onConnection);
         this.wss.on('close', this.onClose);
         this.wss.on('error', this.onError);
+
+        process.on('SIGTERM', this.shutdownHandler);
+        process.on('SIGINT', this.shutdownHandler);
+
+        this.server.listen(this.variable.AAS_SERVER_PORT, () => {
+            this.logger.info(`AAS-Server listening on ${this.variable.AAS_SERVER_PORT}`);
+        });
     }
 
     public on(event: 'message' | 'close' | 'error', listener: ListenerFn): EventEmitter {
@@ -59,15 +65,6 @@ export class WSServer {
 
     public off(event: 'message' | 'close' | 'error', listener: ListenerFn): EventEmitter {
         return this.emitter.off(event, listener);
-    }
-
-    public run(): void {
-        process.on('SIGTERM', this.shutdownHandler);
-        process.on('SIGINT', this.shutdownHandler);
-
-        this.server.listen(this.variable.AAS_SERVER_PORT, () => {
-            this.logger.info(`AAS-Server listening on ${this.variable.AAS_SERVER_PORT}`);
-        });
     }
 
     public notify(data: WebSocketData): void {

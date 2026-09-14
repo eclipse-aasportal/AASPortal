@@ -10,7 +10,7 @@ import { container, singleton } from 'tsyringe';
 import path from 'path/posix';
 import { LOGGER, Logger } from 'aas-package';
 
-import { IAASIndex } from './aas-index.js';
+import { AASIndex } from './aas-index.js';
 import { Variable } from '../variable.js';
 import { MySqlIndex } from './mysql/mysql-index.js';
 import { urlToString } from '../utilities.js';
@@ -22,9 +22,9 @@ export class AASIndexFactory {
     private readonly variable = container.resolve(Variable);
     private readonly logger = container.resolve<Logger>(LOGGER);
     private readonly keywordDirectory = container.resolve(KeywordDirectory);
-    private static instance?: IAASIndex;
+    private static instance?: AASIndex;
 
-    public getInstance(): IAASIndex {
+    public getInstance(): AASIndex {
         if (!AASIndexFactory.instance) {
             if (this.variable.AAS_INDEX) {
                 try {

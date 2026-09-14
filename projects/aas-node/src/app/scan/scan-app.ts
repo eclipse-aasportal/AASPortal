@@ -6,33 +6,26 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
-import { parentPort } from 'worker_threads';
-import { LOGGER, Logger } from 'aas-package';
-
+import { container, singleton } from 'tsyringe';
+import { parentPort, MessagePort } from 'worker_threads';
+import { CommandData, EventData, isConnectable, LOGGER } from 'aas-package';
 import { AASDocument, AASEndpoint } from 'aas-core';
 
 import { EndpointScanFactory } from './endpoint-scan-factory.js';
-import { Variable } from '../variable.js';
-import { CommandData, EventData } from '../types.js';
 import { ScanController } from './scan-controller.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 @singleton()
 export class ScanApp {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly index = container.resolve(AAS_INDEX);
+    private readonly factory = container.resolve(EndpointScanFactory);
     private endpoint = '';
     private taskId = 0;
     private start = 0;
     private readonly controller: ScanController = new ScanController();
 
-    public constructor(
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(AASIndexClient) private readonly index: AASIndexClient,
-        @inject(EndpointScanFactory) private readonly factory: EndpointScanFactory,
-        @inject(Variable) private readonly variable: Variable,
-    ) {}
-
-    public run(): void {
+    public constructor() {
         parentPort?.on('message', this.parentPortOnMessage);
     }
 
@@ -51,6 +44,14 @@ export class ScanApp {
                 this.taskId = Number(data.args.taskId);
                 this.endpoint = String(data.args.endpoint);
                 await this.cancel();
+            } else if (data.name === 'ConnectIndex') {
+                if (isConnectable(this.index)) {
+                    this.index.connect(data.args.port as MessagePort);
+                }
+            } else if (data.name === 'ConnectLogger') {
+                if (isConnectable(this.logger)) {
+                    this.logger.connect(data.args.port as MessagePort);
+                }
             }
         } catch (error) {
             this.logger.error(error);
@@ -93,7 +94,6 @@ export class ScanApp {
 
     private postStart(): void {
         const data: EventData = {
-            application: 'ScanApp',
             type: 'event',
             name: 'Start',
             args: { taskId: this.taskId, endpoint: this.endpoint, start: this.start },
@@ -102,20 +102,18 @@ export class ScanApp {
         parentPort?.postMessage(data);
     }
 
-    private postUpdate(document: AASDocument): void {
+    private readonly postUpdate = (document: AASDocument): void => {
         const data: EventData = {
-            application: 'ScanApp',
             type: 'event',
             name: 'Updated',
             args: { taskId: this.taskId, endpoint: this.endpoint, document: document, start: this.start },
         };
 
         parentPort?.postMessage(data);
-    }
+    };
 
     private readonly postRemove = (document: AASDocument): void => {
         const data: EventData = {
-            application: 'ScanApp',
             type: 'event',
             name: 'Removed',
             args: { taskId: this.taskId, endpoint: this.endpoint, document: document, start: this.start },
@@ -126,7 +124,6 @@ export class ScanApp {
 
     private readonly postAdd = (document: AASDocument): void => {
         const data: EventData = {
-            application: 'ScanApp',
             type: 'event',
             name: 'Added',
             args: { taskId: this.taskId, endpoint: this.endpoint, document: document, start: this.start },
@@ -137,7 +134,6 @@ export class ScanApp {
 
     private readonly postProgress = (progress: number, shellCount: number, submodelCount: number): void => {
         const data: EventData = {
-            application: 'ScanApp',
             type: 'event',
             name: 'Progress',
             args: {
@@ -155,7 +151,6 @@ export class ScanApp {
 
     private postEnd(): void {
         const data: EventData = {
-            application: 'ScanApp',
             type: 'event',
             name: 'End',
             args: { taskId: this.taskId, endpoint: this.endpoint, start: this.start },

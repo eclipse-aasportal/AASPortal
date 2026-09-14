@@ -12,11 +12,10 @@ import { Worker, SHARE_ENV } from 'worker_threads';
 import fs from 'fs';
 import path from 'path/posix';
 import { noop } from 'aas-core';
-import { LOGGER } from 'aas-package';
+import { CommandData, EventData, isConnectable, isEventData, LOGGER, ResponseData } from 'aas-package';
 
-import { CommandData, EventData, isEventData, ResponseData } from '../types.js';
 import { Variable } from '../variable.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 /**
  * Represents a worker for scanning an endpoint.
@@ -77,7 +76,7 @@ class EndpointScanWorker extends EventEmitter {
 export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
     private readonly logger = container.resolve(LOGGER);
     private readonly variable = container.resolve(Variable);
-    private readonly index = container.resolve(AASIndexClient);
+    private readonly index = container.resolve(AAS_INDEX);
     private readonly script: string;
     private readonly waiting = new Array<EndpointScanWorker>();
     private readonly pool = new Map<Worker, EndpointScanWorker | null>();
@@ -135,7 +134,6 @@ export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
             });
 
             task.worker.postMessage({
-                application: 'ScanApp',
                 type: 'command',
                 name: 'CancelScan',
                 args: { taskId, endpoint },
@@ -162,19 +160,35 @@ export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
         }
 
         if (this.pool.size < this.variable.MAX_WORKERS) {
-            const workerName = `ScanApp Worker ${this.pool.size + 1}`;
-            const worker = new Worker(this.script, { env: SHARE_ENV, name: workerName });
+            const name = `ScanApp Worker ${this.pool.size + 1}`;
+            const worker = new Worker(this.script, { env: SHARE_ENV, name });
             this.pool.set(worker, task);
-            const { port1, port2 } = new MessageChannel();
-            this.index.connect(port1, workerName);
+            const indexChannel = new MessageChannel();
+            if (isConnectable(this.index)) {
+                this.index.connect(indexChannel.port1, name);
+            }
+
+            const loggerChannel = new MessageChannel();
+            if (isConnectable(this.logger)) {
+                this.logger.connect(loggerChannel.port1, name);
+            }
+
             worker.postMessage(
                 {
-                    application: 'ScanApp',
                     type: 'command',
-                    name: 'connect',
-                    args: { port: port2, name: workerName },
+                    name: 'ConnectIndex',
+                    args: { port: indexChannel.port2, name },
                 } satisfies CommandData,
-                [port2],
+                [indexChannel.port2],
+            );
+
+            worker.postMessage(
+                {
+                    type: 'command',
+                    name: 'ConnectLogger',
+                    args: { port: loggerChannel.port2, name },
+                } satisfies CommandData,
+                [loggerChannel.port2],
             );
 
             return worker;

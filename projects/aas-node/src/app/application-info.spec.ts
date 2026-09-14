@@ -7,15 +7,16 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { describe, beforeEach, it, expect, Mocked } from 'vitest';
+import { container } from 'tsyringe';
+import { describe, beforeEach, it, expect } from 'vitest';
 import { AppInfo } from 'aas-core';
-import { Logger } from 'aas-package';
+import { LOGGER, Logger } from 'aas-package';
 
 import { ApplicationInfo } from './application-info.js';
 import { Variable } from './variable.js';
 import { createSpyObj } from '../test/mocks.js';
 
-const appInfo = {
+const appInfo: AppInfo = {
     name: 'aas-portal-project',
     version: '2.0.0',
     description: 'Web-based visualization and control of asset administration shells.',
@@ -35,17 +36,18 @@ const appInfo = {
 };
 
 describe('Application Info service', () => {
-    let logger: Mocked<Logger>;
-    let variable: Mocked<Variable>;
     let applicationInfo: ApplicationInfo;
 
     beforeEach(() => {
-        logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        variable = createSpyObj<Variable>({}, { ASSETS: './' });
-        applicationInfo = new ApplicationInfo(logger, variable, appInfo as AppInfo);
+        container.clearInstances();
+        container.registerInstance(LOGGER, createSpyObj<Logger>(['error', 'warning', 'info']));
+        container.registerInstance(Variable, createSpyObj<Variable>({}, { ASSETS: './' }));
+
+        applicationInfo = container.resolve(ApplicationInfo);
+        applicationInfo['data'] = appInfo as AppInfo;
     });
 
     it('gets the AASNode package info', async () => {
-        await expect(applicationInfo.getAsync()).resolves.toEqual(appInfo);
+        await expect(applicationInfo.get()).resolves.toEqual(appInfo);
     });
 });

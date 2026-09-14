@@ -6,14 +6,14 @@
  *
  *****************************************************************************/
 
-import { container, singleton } from 'tsyringe';
+import { container, singleton, Disposable } from 'tsyringe';
 import path from 'path';
-import { isMainThread, MessagePort, MessageChannel, parentPort, SHARE_ENV, Worker } from 'worker_threads';
+import { isMainThread, MessagePort, MessageChannel, SHARE_ENV, Worker } from 'worker_threads';
 import { aas, AASEndpoint, AASCursor, AASPagedResult, PagedResult, AASDocument } from 'aas-core';
-import { IAASIndex, ChannelCommand, CommandName, ChannelResponse, isChannelError, ChannelError } from './aas-index.js';
 
+import { AASIndex, ChannelCommand, CommandName, ChannelResponse, isChannelError, ChannelError } from './aas-index.js';
 import { Variable } from '../variable.js';
-import { CommandData, isCommandData, isResponseData, WorkerData } from '../types.js';
+import { CommandData, Connectable, isConnectable, isResponseData, LOGGER, WorkerData } from 'aas-package';
 
 type ResolvePending = {
     resolve: (value: unknown) => void;
@@ -25,11 +25,11 @@ type ResolvePending = {
  * Represents a client for the AAS index worker thread.
  */
 @singleton()
-export class AASIndexClient implements IAASIndex {
+export class AASIndexClient implements AASIndex, Connectable, Disposable {
     private readonly variable = container.resolve(Variable);
     private readonly worker?: Worker;
     private readonly pending = new Map<number, ResolvePending>();
-    private port!: MessagePort;
+    private port?: MessagePort;
     private id = 0;
 
     public constructor() {
@@ -37,36 +37,48 @@ export class AASIndexClient implements IAASIndex {
             const { port1, port2 } = new MessageChannel();
             this.port = port2;
             const script = path.resolve(this.variable.CONTENT_ROOT, 'aas-idx.js');
-            const workerName = 'AASNode Worker';
-            this.worker = new Worker(script, { env: SHARE_ENV, name: workerName });
+            const name = 'AASIndex Worker';
+            this.worker = new Worker(script, { env: SHARE_ENV, name });
             this.worker.on('error', this.onWorkerError);
             this.worker.on('message', this.onWorkerMessage);
+            this.connect(port1, name);
+            this.port.on('message', this.onMessage);
+
+            const loggerChannel = new MessageChannel();
+            const logger = container.resolve(LOGGER);
+            if (isConnectable(logger)) {
+                logger.connect(loggerChannel.port2, name);
+            }
+
             this.worker.postMessage(
                 {
-                    application: 'IndexApp',
                     type: 'command',
-                    name: 'connect',
-                    args: { port: port1, name: workerName },
-                } satisfies CommandData,
-                [port1],
+                    name: 'ConnectLogger',
+                    args: { port: loggerChannel.port1, name: 'Logger' },
+                },
+                [loggerChannel.port1],
             );
-
-            this.port.on('message', this.onMessage);
-        } else {
-            parentPort?.on('message', this.onParentPortMessage);
         }
     }
 
-    public connect(port: MessagePort, name: string): void {
-        this.worker?.postMessage(
-            {
-                application: 'IndexApp',
-                type: 'command',
-                name: 'connect',
-                args: { port, name },
-            } satisfies CommandData,
-            [port],
-        );
+    public connect(port: MessagePort, name?: string): void {
+        if (this.worker) {
+            this.worker.postMessage(
+                {
+                    type: 'command',
+                    name: 'ConnectIndex',
+                    args: { port, name },
+                } satisfies CommandData,
+                [port],
+            );
+        } else {
+            if (this.port) {
+                throw new Error('Port is already connected');
+            }
+
+            this.port = port;
+            this.port.on('message', this.onMessage);
+        }
     }
 
     public getDocumentCount(endpoint?: string): Promise<number> {
@@ -166,10 +178,9 @@ export class AASIndexClient implements IAASIndex {
     }
 
     public dispose(): void {
-        this.port.off('message', this.onMessage);
+        this.port?.off('message', this.onMessage);
         if (this.worker) {
             this.worker.postMessage({
-                application: 'IndexApp',
                 type: 'command',
                 name: 'shutdown',
                 args: {},
@@ -178,13 +189,6 @@ export class AASIndexClient implements IAASIndex {
             this.worker.once('exit', this.onWorkerExit);
         }
     }
-
-    private readonly onParentPortMessage = (data: WorkerData): void => {
-        if (isCommandData(data) && data.name === 'connect') {
-            this.port = data.args.port as MessagePort;
-            this.port.on('message', this.onMessage);
-        }
-    };
 
     private readonly onWorkerMessage = (data: WorkerData): void => {
         if (isResponseData(data)) {
@@ -196,6 +200,11 @@ export class AASIndexClient implements IAASIndex {
 
     private invoke(name: CommandName, args: Record<string, unknown>): Promise<unknown> {
         return new Promise((resolve, reject) => {
+            if (!this.port) {
+                reject(new Error('No message port available'));
+                return;
+            }
+
             const id = this.nextId();
             const handle = setTimeout(() => {
                 const entry = this.pending.get(id);

@@ -25,33 +25,33 @@ import {
     isValidDate,
     parseDate,
     parseNumber,
+    ApplicationError,
 } from 'aas-core';
 
-import { AASIndex } from '../aas-index.js';
+import { AASIndex, toAbbreviation, toDocumentId } from '../aas-index.js';
 import { Variable } from '../../variable.js';
 import { MySqlQuery } from './mysql-query.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint, MySqlConceptDescriptionIds } from './mysql-types.js';
 import { KeywordDirectory } from '../keyword-directory.js';
 import { urlToString } from '../../utilities.js';
+import { ERRORS } from '../../errors.js';
 
 const LIMIT = 100;
 
-export class MySqlIndex extends AASIndex {
+export class MySqlIndex implements AASIndex {
     private pool?: mysql.Pool;
 
     public constructor(
         private readonly logger: Logger,
         private readonly variable: Variable,
-        keywordDirectory: KeywordDirectory,
-    ) {
-        super(keywordDirectory);
-    }
+        private readonly keywordDirectory: KeywordDirectory,
+    ) {}
 
-    public override async dispose(): Promise<void> {
+    public async dispose(): Promise<void> {
         await this.pool?.end();
     }
 
-    public override async getDocumentCount(endpoint?: string): Promise<number> {
+    public async getDocumentCount(endpoint?: string): Promise<number> {
         const connection = await this.getConnection();
         try {
             if (endpoint === undefined) {
@@ -70,7 +70,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async getEndpointCount(): Promise<number> {
+    public async getEndpointCount(): Promise<number> {
         const connection = await this.getConnection();
         try {
             const [results] = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `endpoints` AS count;');
@@ -80,7 +80,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async getEndpoints(): Promise<AASEndpoint[]> {
+    public async getEndpoints(): Promise<AASEndpoint[]> {
         const connection = await this.getConnection();
         try {
             const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints`;');
@@ -90,7 +90,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async getEndpoint(name: string): Promise<AASEndpoint> {
+    public async getEndpoint(name: string): Promise<AASEndpoint> {
         const connection = await this.getConnection();
         try {
             const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
@@ -107,7 +107,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async findEndpoint(name: string): Promise<AASEndpoint | undefined> {
+    public async findEndpoint(name: string): Promise<AASEndpoint | undefined> {
         const connection = await this.getConnection();
         try {
             const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
@@ -124,7 +124,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async insertEndpoint(endpoint: AASEndpoint): Promise<void> {
+    public async insertEndpoint(endpoint: AASEndpoint): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.query<mysql.ResultSetHeader>(
@@ -143,7 +143,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
+    public async updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -176,7 +176,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async deleteEndpoint(endpointName: string): Promise<boolean> {
+    public async deleteEndpoint(endpointName: string): Promise<boolean> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -195,11 +195,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async getDocuments(
-        cursor: AASCursor,
-        expression?: string,
-        language?: string,
-    ): Promise<AASPagedResult> {
+    public async getDocuments(cursor: AASCursor, expression?: string, language?: string): Promise<AASPagedResult> {
         let query: MySqlQuery | undefined;
         if (expression) {
             query = new MySqlQuery(expression, language ?? 'en');
@@ -225,7 +221,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async getEndpointDocuments(
+    public async getEndpointDocuments(
         endpoint: string,
         cursor: string | undefined,
         limit: number = LIMIT,
@@ -255,7 +251,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async update(document: AASDocument): Promise<void> {
+    public async update(document: AASDocument): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -296,7 +292,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async insert(document: AASDocument): Promise<void> {
+    public async insert(document: AASDocument): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -328,7 +324,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async find(
+    public async find(
         endpoint: string | undefined,
         modelType: 'AssetAdministrationShell' | 'Asset',
         id: string,
@@ -349,7 +345,19 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async delete(endpointName: string, id: string): Promise<boolean> {
+    public async get(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument> {
+        const document = await this.find(endpoint, modelType, id);
+        if (!document) {
+            throw new ApplicationError(ERRORS.AAS_NOT_FOUND, { modelType, id }, 404);
+        }
+
+        return document;
+    }
+    public async delete(endpointName: string, id: string): Promise<boolean> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -371,7 +379,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async create(endpoint: string, id: string, env: aas.Environment): Promise<void> {
+    public async create(endpoint: string, id: string, env: aas.Environment): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -389,7 +397,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async clear(endpoint?: string, id?: string): Promise<void> {
+    public async clear(endpoint?: string, id?: string): Promise<void> {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
@@ -415,7 +423,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]> {
+    public async getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]> {
         const connection = await this.getConnection();
         try {
             const [results] = await connection.query<MySqlConceptDescriptionIds[]>(
@@ -433,7 +441,7 @@ export class MySqlIndex extends AASIndex {
         }
     }
 
-    public override async setSubmodelConceptDescriptionIds(
+    public async setSubmodelConceptDescriptionIds(
         endpoint: string,
         id: string,
         conceptDescriptionIds: string[],
@@ -538,7 +546,7 @@ export class MySqlIndex extends AASIndex {
         return {
             previous: null,
             documents: documents.slice(0, limit),
-            next: documents.length >= limit + 1 ? this.toDocumentId(documents[limit]) : null,
+            next: documents.length >= limit + 1 ? toDocumentId(documents[limit]) : null,
         };
     }
 
@@ -575,7 +583,7 @@ export class MySqlIndex extends AASIndex {
         return {
             previous: current,
             documents: documents.slice(0, limit),
-            next: documents.length >= limit + 1 ? this.toDocumentId(documents[limit]) : null,
+            next: documents.length >= limit + 1 ? toDocumentId(documents[limit]) : null,
         };
     }
 
@@ -610,7 +618,7 @@ export class MySqlIndex extends AASIndex {
         const documents = results.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[limit - 1]) : null,
+            previous: documents.length >= limit + 1 ? toDocumentId(documents[limit - 1]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: current,
         };
@@ -644,7 +652,7 @@ export class MySqlIndex extends AASIndex {
         const documents = results.map(result => this.toDocument(result));
 
         return {
-            previous: documents.length >= limit + 1 ? this.toDocumentId(documents[limit - 1]) : null,
+            previous: documents.length >= limit + 1 ? toDocumentId(documents[limit - 1]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: null,
         };
@@ -712,7 +720,7 @@ export class MySqlIndex extends AASIndex {
             'INSERT INTO `elements` (uuid, modelType, id, idShort, stringValue, numberValue, dateValue, booleanValue, bigintValue) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
             [
                 uuid,
-                this.toAbbreviation(referable),
+                toAbbreviation(referable),
                 isIdentifiable(referable) ? referable.id : undefined,
                 referable.idShort,
                 this.toStringValue(referable, 512),
@@ -729,13 +737,13 @@ export class MySqlIndex extends AASIndex {
             case 'Property': {
                 const property = referable as aas.Property;
                 if (baseType(property.valueType) === 'string') {
-                    return this.preprocessString(property.value, max);
+                    return this.keywordDirectory.preprocessString(property.value, max);
                 }
 
                 return undefined;
             }
             case 'MultiLanguageProperty':
-                return this.preprocessString((referable as aas.MultiLanguageProperty).value);
+                return this.keywordDirectory.preprocessString((referable as aas.MultiLanguageProperty).value, 512);
             case 'File':
                 return (referable as aas.File).value;
             case 'Blob':

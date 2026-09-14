@@ -14,32 +14,32 @@ export const LOGGER: InjectionToken<Logger> = Symbol('LOGGER');
 
 export const LOG_LEVEL: InjectionToken<LogLevel> = Symbol('LOG_LEVEL');
 
+export const LOGGER_SCRIPT: InjectionToken<string> = Symbol('LOGGER_SCRIPT');
+
 /** The logging levels. */
 export type LogLevel = 'Error' | 'Warning' | 'Info';
 
 /**
  * Defines a logger interface.
  */
-export abstract class Logger {
-    protected constructor(public readonly logLevel: LogLevel) {}
-
+export interface Logger {
     /**
      * Logs an error.
      * @param error The error to log.
      */
-    public abstract error(error: Error | string): Promise<void>;
+    error(error: Error | string): void;
 
     /**
      * Logs a warning.
      * @param message The message.
      */
-    public abstract warning(message: string): Promise<void>;
+    warning(message: string): void;
 
     /**
      * Logs an information.
      * @param message The message.
      */
-    public abstract info(message: string): Promise<void>;
+    info(message: string): void;
 }
 
 /**

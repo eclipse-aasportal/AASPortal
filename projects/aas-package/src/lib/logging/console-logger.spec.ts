@@ -43,7 +43,7 @@ describe('ConsoleLogger', () => {
             logger = container.resolve(ConsoleLogger);
         });
 
-        it('falls back to console.* when worker cannot be started', async () => {
+        it('falls back to console.* when worker cannot be started', () => {
             const infoSpy = vi.spyOn(console, 'info');
             const warnSpy = vi.spyOn(console, 'warn');
             const errorSpy = vi.spyOn(console, 'error');
@@ -52,13 +52,13 @@ describe('ConsoleLogger', () => {
             warnSpy.mockClear();
             errorSpy.mockClear();
 
-            await logger.info('i-msg');
+            logger.info('i-msg');
             expect(infoSpy).toHaveBeenCalledTimes(1);
 
-            await logger.warning('w-msg');
+            logger.warning('w-msg');
             expect(warnSpy).toHaveBeenCalledTimes(1);
 
-            await logger.error('e-msg');
+            logger.error('e-msg');
             expect(errorSpy).toHaveBeenCalledTimes(1);
         });
     });
@@ -71,7 +71,7 @@ describe('ConsoleLogger', () => {
             logger = container.resolve(ConsoleLogger);
         });
 
-        it('respects log level gating in fallback mode', async () => {
+        it('respects log level gating in fallback mode', () => {
             const infoSpy = vi.spyOn(console, 'info');
             const warnSpy = vi.spyOn(console, 'warn');
             const errorSpy = vi.spyOn(console, 'error');
@@ -80,13 +80,13 @@ describe('ConsoleLogger', () => {
             warnSpy.mockClear();
             errorSpy.mockClear();
 
-            await logger.info('skip-info');
+            logger.info('skip-info');
             expect(infoSpy).not.toHaveBeenCalled();
 
-            await logger.warning('ok-warning');
+            logger.warning('ok-warning');
             expect(warnSpy).toHaveBeenCalledTimes(1);
 
-            await logger.error('ok-error');
+            logger.error('ok-error');
             expect(errorSpy).toHaveBeenCalledTimes(1);
         });
     });
@@ -99,7 +99,7 @@ describe('ConsoleLogger', () => {
             logger = container.resolve(ConsoleLogger);
         });
 
-        it('respects log level gating in fallback mode', async () => {
+        it('respects log level gating in fallback mode', () => {
             const infoSpy = vi.spyOn(console, 'info');
             const warnSpy = vi.spyOn(console, 'warn');
             const errorSpy = vi.spyOn(console, 'error');
@@ -108,13 +108,13 @@ describe('ConsoleLogger', () => {
             warnSpy.mockClear();
             errorSpy.mockClear();
 
-            await logger.info('skip-info');
+            logger.info('skip-info');
             expect(infoSpy).not.toHaveBeenCalled();
 
-            await logger.warning('ok-warning');
+            logger.warning('ok-warning');
             expect(warnSpy).not.toHaveBeenCalled();
 
-            await logger.error('ok-error');
+            logger.error('ok-error');
             expect(errorSpy).toHaveBeenCalledTimes(1);
         });
     });

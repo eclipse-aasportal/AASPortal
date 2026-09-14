@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
-import { LOGGER, Logger } from 'aas-package';
+import { container, singleton } from 'tsyringe';
+import { LOGGER } from 'aas-package';
 
 import { FileStorage } from './file-storage.js';
 import { LocalFileStorage } from './local-file-storage.js';
@@ -17,12 +17,9 @@ import { urlToString } from '../utilities.js';
 
 @singleton()
 export class FileStorageProvider {
+    private readonly variable = container.resolve(Variable);
+    private readonly logger = container.resolve(LOGGER);
     private readonly instances = new Map<string, FileStorage>();
-
-    public constructor(
-        @inject(Variable) private readonly variable: Variable,
-        @inject(LOGGER) private readonly logger: Logger,
-    ) {}
 
     /**
      * Gets a FileStorage for the specified URL.

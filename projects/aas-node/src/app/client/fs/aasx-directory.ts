@@ -26,7 +26,7 @@ import { FileStorage } from '../../file-storage/file-storage.js';
 import { EndpointClient } from '../endpoint-client.js';
 import { AasxPackage } from './aasx-package.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
-import { AASIndexClient } from '../../index/aas-index-client.js';
+import { AASIndex } from '../../index/aas-index.js';
 
 /**
  * Provides a file system based endpoint.
@@ -37,7 +37,7 @@ export class AasxDirectory extends EndpointClient {
 
     public constructor(
         logger: Logger,
-        index: AASIndexClient,
+        index: AASIndex,
         endpoint: AASEndpoint,
         private readonly fileStorage: FileStorage,
     ) {

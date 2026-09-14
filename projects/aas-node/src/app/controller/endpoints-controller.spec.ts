@@ -22,6 +22,7 @@ import { errorHandler } from '../../test/assets/error-handler.js';
 import { EndpointProvider } from '../provider/endpoint-provider.js';
 import { AASIndexClient } from '../index/aas-index-client.js';
 import { USER_RIGHTS_STORE, UserRightsStore } from '../auth/user-rights-store.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 describe('EndpointsController', () => {
     let app: Express;
@@ -47,7 +48,7 @@ describe('EndpointsController', () => {
 
         container.registerInstance(EndpointProvider, provider);
         container.registerInstance(Authentication, authentication);
-        container.registerInstance(AASIndexClient, index);
+        container.registerInstance(AAS_INDEX, index);
         container.registerInstance(USER_RIGHTS_STORE, userRightsStore);
 
         app = express();

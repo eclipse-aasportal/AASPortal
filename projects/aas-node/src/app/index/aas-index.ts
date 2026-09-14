@@ -6,21 +6,17 @@
  *
  *****************************************************************************/
 
-import { InjectionToken, Disposable } from 'tsyringe';
+import { InjectionToken } from 'tsyringe';
 import {
     AASCursor,
     AASDocument,
     AASDocumentId,
     AASEndpoint,
     AASPagedResult,
-    ApplicationError,
     PagedResult,
     aas,
     getAbbreviation,
 } from 'aas-core';
-
-import { KeywordDirectory } from './keyword-directory.js';
-import { ERRORS } from '../errors.js';
 
 /** Injection token. */
 export const AAS_INDEX: InjectionToken<AASIndex> = Symbol('AAS_INDEX');
@@ -83,7 +79,7 @@ export function isChannelError(data: ChannelData): data is ChannelError {
 /**
  * Represents an index of Asset Administration Shells.
  */
-export interface IAASIndex extends Disposable {
+export interface AASIndex {
     /**
      * Gets the total number of AAS documents in the AAS index or an AAS endpoint with the specified name.
      *
@@ -251,109 +247,10 @@ export interface IAASIndex extends Disposable {
     setSubmodelConceptDescriptionIds(endpoint: string, id: string, conceptDescriptionIds: string[]): Promise<void>;
 }
 
-/**
- * Provides common functionality for AAS index implementations.
- */
-export abstract class AASIndex implements IAASIndex {
-    protected constructor(private readonly keywordDirectory: KeywordDirectory) {}
+export function toAbbreviation(referable: aas.Referable): string {
+    return getAbbreviation(referable.modelType)!.toLowerCase();
+}
 
-    public abstract getDocumentCount(endpoint?: string): Promise<number>;
-
-    public abstract getEndpoints(): Promise<AASEndpoint[]>;
-
-    public abstract getEndpointCount(): Promise<number>;
-
-    public abstract getEndpoint(name: string): Promise<AASEndpoint>;
-
-    public abstract findEndpoint(name: string): Promise<AASEndpoint | undefined>;
-
-    public abstract insertEndpoint(endpoint: AASEndpoint): Promise<void>;
-
-    public abstract updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint>;
-
-    public abstract deleteEndpoint(endpoint: string): Promise<boolean>;
-
-    public abstract getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult>;
-
-    public abstract getEndpointDocuments(
-        endpoint: string,
-        cursor: string | undefined,
-        limit?: number,
-    ): Promise<PagedResult<AASDocument>>;
-
-    public abstract update(document: AASDocument): Promise<void>;
-
-    public abstract insert(document: AASDocument): Promise<void>;
-
-    public abstract create(endpoint: string, id: string, env: aas.Environment): Promise<void>;
-
-    public abstract find(
-        endpoint: string | undefined,
-        modelType: 'AssetAdministrationShell' | 'Asset',
-        id: string,
-    ): Promise<AASDocument | undefined>;
-
-    public async get(
-        endpoint: string | undefined,
-        modelType: 'AssetAdministrationShell' | 'Asset',
-        id: string,
-    ): Promise<AASDocument> {
-        const document = await this.find(endpoint, modelType, id);
-        if (!document) {
-            throw new ApplicationError(ERRORS.AAS_NOT_FOUND, { modelType, id }, 404);
-        }
-
-        return document;
-    }
-
-    public abstract delete(endpoint?: string, id?: string): Promise<boolean>;
-
-    public abstract clear(endpoint?: string, id?: string): Promise<void>;
-
-    public abstract getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]>;
-
-    public abstract setSubmodelConceptDescriptionIds(
-        endpoint: string,
-        id: string,
-        conceptDescriptionIds: string[],
-    ): Promise<void>;
-
-    /**
-     * Destroys the AAS index.
-     * @returns A promise that resolves when the index is destroyed.
-     */
-    public abstract dispose(): Promise<void> | void;
-
-    protected toAbbreviation(referable: aas.Referable): string {
-        return getAbbreviation(referable.modelType)!.toLowerCase();
-    }
-
-    protected toDocumentId(document: AASDocument): AASDocumentId {
-        return { endpoint: document.endpoint, id: document.id };
-    }
-
-    protected preprocessString(value: string | aas.LangString[] | undefined, max: number = 512): string | undefined {
-        if (value === undefined) {
-            return undefined;
-        }
-
-        if (typeof value === 'string') {
-            if (value.length < 128) {
-                return value;
-            }
-
-            return this.keywordDirectory.toString(this.keywordDirectory.containedKeyword(value), ';', max);
-        }
-
-        const keywords: string[] = [];
-        for (const item of value) {
-            if (item.text.length < 32) {
-                keywords.push(item.text);
-            } else {
-                keywords.push(...this.keywordDirectory.containedKeyword(item.text, item.language));
-            }
-        }
-
-        return this.keywordDirectory.toString(keywords, ';', max);
-    }
+export function toDocumentId(document: AASDocument): AASDocumentId {
+    return { endpoint: document.endpoint, id: document.id };
 }

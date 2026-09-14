@@ -9,7 +9,7 @@
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import express, { Express, Request, Response, json, text, urlencoded } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
@@ -18,24 +18,23 @@ import multer from 'multer';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 
-import { LOGGER, Logger, requestLogger } from 'aas-package';
+import { LOGGER, requestLogger } from 'aas-package';
 
 import { RegisterRoutes } from './routes/routes.js';
 import { Variable } from './variable.js';
 import { errorHandler } from './error-handler.js';
-import { IDENTITY_PROVIDER, IdentityProviderClient } from './auth/identity-provider-client.js';
-import { SESSION_STORE, SessionStore } from './session/session-store.js';
+import { IDENTITY_PROVIDER } from './auth/identity-provider-client.js';
+import { SESSION_STORE } from './session/session-store.js';
 
 @singleton()
 export class App {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly variable = container.resolve(Variable);
+    private readonly identityProvider = container.resolve(IDENTITY_PROVIDER);
+    private readonly sessionStore = container.resolve(SESSION_STORE);
     private swaggerHtml?: string;
 
-    public constructor(
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(Variable) private readonly variable: Variable,
-        @inject(IDENTITY_PROVIDER) private readonly identityProvider: IdentityProviderClient,
-        @inject(SESSION_STORE) private readonly sessionStore: SessionStore,
-    ) {
+    public constructor() {
         this.app = express();
         this.setup();
     }

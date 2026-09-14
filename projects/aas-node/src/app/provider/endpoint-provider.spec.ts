@@ -9,7 +9,7 @@
 import 'reflect-metadata';
 import { describe, beforeEach, afterEach, it, expect, Mocked, vi } from 'vitest';
 import { AASEndpoint } from 'aas-core';
-import { Logger } from 'aas-package';
+import { CommandData, Logger } from 'aas-package';
 
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { createSpyObj } from '../../test/mocks.js';
@@ -19,7 +19,6 @@ import { TaskHandler } from './task-handler.js';
 import { Variable } from '../variable.js';
 import { MessageSender } from './message-sender.js';
 import { AASIndexClient } from '../index/aas-index-client.js';
-import { CommandData } from '../types.js';
 
 describe('EndpointController', () => {
     let provider: EndpointProvider;
@@ -103,7 +102,6 @@ describe('EndpointController', () => {
                 type: 'command',
                 name: 'ScanEndpoint',
                 args: { endpoint: configuredEndpoint, taskId: task?.id },
-                application: 'ScanApp',
             } satisfies CommandData);
         });
 
@@ -162,7 +160,6 @@ describe('EndpointController', () => {
                 type: 'command',
                 name: 'ScanEndpoint',
                 args: { endpoint: recurringEndpoint, taskId: task?.id },
-                application: 'ScanApp',
             } satisfies CommandData);
         });
     });
@@ -228,7 +225,6 @@ describe('EndpointController', () => {
                 type: 'command',
                 name: 'ScanEndpoint',
                 args: { endpoint: { ...endpoint, schedule: { type: 'manual' } }, taskId: task?.id },
-                application: 'ScanApp',
             } satisfies CommandData);
         });
     });

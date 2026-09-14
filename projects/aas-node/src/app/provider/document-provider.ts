@@ -9,7 +9,7 @@
 import { inject, singleton } from 'tsyringe';
 import path from 'path';
 import { Readable } from 'stream';
-import { LOGGER, Logger } from 'aas-package';
+import { LOGGER, type Logger } from 'aas-package';
 import {
     AASDocument,
     aas,
@@ -25,13 +25,13 @@ import { ImageProcessing } from '../image-processing.js';
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { ERRORS } from '../errors.js';
 import { thumbnailToObjectUrl } from '../utilities.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
 
 @singleton()
 export class DocumentProvider {
     public constructor(
         @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
-        @inject(AASIndexClient) private readonly index: AASIndexClient,
+        @inject(AAS_INDEX) private readonly index: AASIndex,
         @inject(LOGGER) private readonly logger: Logger,
     ) {}
 

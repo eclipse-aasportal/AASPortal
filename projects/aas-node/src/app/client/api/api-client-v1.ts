@@ -15,7 +15,7 @@ import { aasV2, encodeBase64Url, JsonReaderV2, JsonReaderV3, JsonWriterV2, Logge
 import { ApiClient } from './api-client.js';
 import { ERRORS } from '../../errors.js';
 import { HttpClient } from '../../http-client.js';
-import { AASIndexClient } from '../../index/aas-index-client.js';
+import { AASIndex } from '../../index/aas-index.js';
 
 interface PackageDescriptor {
     aasIds: string[];
@@ -51,7 +51,7 @@ interface OperationResult {
 export class ApiClientV1 extends ApiClient {
     public constructor(
         logger: Logger,
-        index: AASIndexClient,
+        index: AASIndex,
         endpoint: AASEndpoint,
         auth: Record<string, string> | undefined,
         http: HttpClient,

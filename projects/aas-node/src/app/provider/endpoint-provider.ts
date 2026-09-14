@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { inject, singleton } from 'tsyringe';
-import { LOGGER, Logger } from 'aas-package';
+import { CommandData, EventData, LOGGER, WorkerData, type Logger } from 'aas-package';
 import {
     LiveRequest,
     WebSocketData,
@@ -19,7 +19,6 @@ import {
     UpdateIndexStatus,
 } from 'aas-core';
 
-import { CommandData, EventData, WorkerData } from '../types.js';
 import { EndpointScanWorkerPool } from '../scan/endpoint-scan-worker-pool.js';
 import { SocketClient } from '../live/socket-client.js';
 import { EmptySubscription } from '../live/empty-subscription.js';
@@ -30,7 +29,7 @@ import { WSNode } from '../ws-node.js';
 import { Task, TaskHandler } from './task-handler.js';
 import { urlToEndpoint } from '../configuration.js';
 import { MessageSender } from './message-sender.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
 
 @singleton()
 export class EndpointProvider {
@@ -42,7 +41,7 @@ export class EndpointProvider {
         @inject(LOGGER) private readonly logger: Logger,
         @inject(EndpointScanWorkerPool) private readonly workerPool: EndpointScanWorkerPool,
         @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
-        @inject(AASIndexClient) private readonly index: AASIndexClient,
+        @inject(AAS_INDEX) private readonly index: AASIndex,
         @inject(TaskHandler) private readonly taskHandler: TaskHandler,
     ) {
         this.workerPool.on('message', this.workerPoolOnMessage);
@@ -53,13 +52,16 @@ export class EndpointProvider {
      * Starts the AAS provider.
      * @param wsServer The web socket server instance.
      */
-    public start(wsServer: WSNode): void {
-        this.wsServer = wsServer;
-        this.sender = new MessageSender(wsServer);
-        this.wsServer.on('message', this.onClientMessage);
-        this.initializeIndex()
-            .then(() => setTimeout(this.startScan, 100))
-            .catch(error => this.logger.error(error));
+    public async start(wsServer: WSNode): Promise<void> {
+        try {
+            this.wsServer = wsServer;
+            this.sender = new MessageSender(wsServer);
+            this.wsServer.on('message', this.onClientMessage);
+            await this.initializeIndex();
+            setTimeout(this.startScan, 100);
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 
     /**
@@ -316,7 +318,6 @@ export class EndpointProvider {
 
     private scanEndpoint = (task: Task, endpoint: AASEndpoint): void => {
         const data: CommandData = {
-            application: 'ScanApp',
             type: 'command',
             name: 'ScanEndpoint',
             args: { taskId: task.id, endpoint },

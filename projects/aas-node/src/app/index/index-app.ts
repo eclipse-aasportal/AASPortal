@@ -9,13 +9,12 @@
 import { container, singleton } from 'tsyringe';
 import { parentPort, MessagePort } from 'worker_threads';
 import { aas, AASCursor, AASDocument, AASEndpoint } from 'aas-core';
-import { LOGGER } from 'aas-package';
-import { AAS_INDEX, ChannelCommand, ChannelError, ChannelResponse, IAASIndex, CommandName } from './aas-index.js';
-import { ResponseData, ErrorData, isCommandData, WorkerData } from '../types.js';
+import { ErrorData, isCommandData, LOGGER, LoggerProxy, ResponseData, WorkerData } from 'aas-package';
+import { AAS_INDEX, ChannelCommand, ChannelError, ChannelResponse, CommandName } from './aas-index.js';
 
 @singleton()
 export class IndexApp {
-    private readonly index: IAASIndex = container.resolve(AAS_INDEX);
+    private readonly index = container.resolve(AAS_INDEX);
     private readonly logger = container.resolve(LOGGER);
     private readonly messageQueue: [MessagePort, ChannelCommand][] = [];
     private readonly ports: MessagePort[] = [];
@@ -27,11 +26,15 @@ export class IndexApp {
     private readonly parentPortOnMessage = (data: WorkerData): void => {
         try {
             if (isCommandData(data)) {
-                if (data.name === 'connect') {
+                if (data.name === 'ConnectIndex') {
                     const port = data.args.port as MessagePort;
                     port.on('message', data => this.onMessage(port, data));
                     this.ports.push(port);
-                    this.logger.info(`Client ${data.args.name} connected.`);
+                } else if (data.name === 'ConnectLogger') {
+                    const port = data.args.port as MessagePort;
+                    if (this.logger instanceof LoggerProxy) {
+                        this.logger.connect(port);
+                    }
                 } else if (data.name === 'shutdown') {
                     this.ports.forEach(port => {
                         port.removeAllListeners('message');
@@ -39,7 +42,6 @@ export class IndexApp {
                     });
 
                     parentPort?.postMessage({
-                        application: 'IndexApp',
                         type: 'response',
                         command: 'shutdown',
                         result: 'IndexApp shutdown complete.',
@@ -50,7 +52,6 @@ export class IndexApp {
             }
         } catch (error) {
             parentPort?.postMessage({
-                application: 'IndexApp',
                 type: 'error',
                 message: error.message,
                 stack: error.stack,

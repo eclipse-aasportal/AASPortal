@@ -23,14 +23,14 @@ import { ApiClientV1 } from '../client/api/api-client-v1.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { HttpClient } from '../http-client.js';
 import { ScanController } from './scan-controller.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 @singleton()
 export class EndpointScanFactory {
     private readonly logger = container.resolve(LOGGER);
     private readonly fileStorageProvider = container.resolve(FileStorageProvider);
     private readonly http = container.resolve(HttpClient);
-    private readonly index = container.resolve(AASIndexClient);
+    private readonly index = container.resolve(AAS_INDEX);
 
     public create(endpoint: AASEndpoint, controller: ScanController): EndpointScan {
         switch (endpoint.type) {

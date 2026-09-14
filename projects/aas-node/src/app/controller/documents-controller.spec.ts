@@ -23,6 +23,7 @@ import { RegisterRoutes } from '../routes/routes.js';
 import { Authentication } from './authentication.js';
 import { errorHandler } from '../../test/assets/error-handler.js';
 import { AASIndexClient } from '../index/aas-index-client.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 describe('DocumentsController', () => {
     let app: Express;
@@ -41,7 +42,7 @@ describe('DocumentsController', () => {
         authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
 
         container.registerInstance(LOGGER, logger);
-        container.registerInstance(AASIndexClient, index);
+        container.registerInstance(AAS_INDEX, index);
         container.registerInstance(Variable, variable);
         container.registerInstance(DocumentProvider, provider);
         container.registerInstance(Authentication, authentication);

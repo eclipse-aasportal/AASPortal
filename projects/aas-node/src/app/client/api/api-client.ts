@@ -15,7 +15,7 @@ import { SocketClient } from '../../live/socket-client.js';
 import { EndpointClient } from '../endpoint-client.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
 import { AasxPackage } from '../fs/aasx-package.js';
-import { AASIndexClient } from '../../index/aas-index-client.js';
+import { AASIndex } from '../../index/aas-index.js';
 
 interface PropertyValue {
     value: string;
@@ -35,7 +35,7 @@ export abstract class ApiClient extends EndpointClient {
      */
     public constructor(
         logger: Logger,
-        index: AASIndexClient,
+        index: AASIndex,
         endpoint: AASEndpoint,
         auth: Record<string, string> | undefined,
         protected readonly http: HttpClient,

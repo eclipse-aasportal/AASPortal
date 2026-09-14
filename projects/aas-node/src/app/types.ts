@@ -29,52 +29,5 @@ declare module 'express-session' {
     }
 }
 
-/** The data sent to and from a worker thread. */
-export interface WorkerData {
-    /** The application for which the data is intended. */
-    application: string;
-    /** The type of the data. */
-    type: 'command' | 'response' | 'event' | 'error';
-}
-
-export interface EventData extends WorkerData {
-    type: 'event';
-    name: string;
-    args: Record<string, unknown>;
-}
-
-export interface CommandData extends WorkerData {
-    type: 'command';
-    name: string;
-    args: Record<string, unknown>;
-}
-
-export interface ResponseData extends WorkerData {
-    type: 'response';
-    command: string;
-    result: unknown;
-}
-
-export interface ErrorData extends WorkerData {
-    type: 'error';
-    message: string;
-    stack?: string;
-}
-
-export function isCommandData(data: WorkerData): data is CommandData {
-    return data.type === 'command';
-}
-
-export function isResponseData(data: WorkerData): data is ResponseData {
-    return data.type === 'response';
-}
-
-export function isEventData(data: WorkerData): data is EventData {
-    return data.type === 'event';
-}
-
-export function isErrorData(data: WorkerData): data is ErrorData {
-    return data.type === 'error';
-}
 
 export type EventListener = (...args: unknown[]) => void;

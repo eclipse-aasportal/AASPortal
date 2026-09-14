@@ -9,10 +9,12 @@
 import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { LOGGER, Logger } from 'aas-package';
+import { CommandData, EventData, LOGGER, Logger } from 'aas-package';
 import { EndpointScanWorkerPool } from './endpoint-scan-worker-pool';
 import { createSpyObj } from '../../test/mocks';
-import { CommandData, EventData } from '../types';
+import { AAS_INDEX } from '../index/aas-index';
+import { Variable } from '../variable';
+import { AASIndexClient } from '../index/aas-index-client';
 
 vi.mock(import('worker_threads'), () => {
     class WorkerMock {
@@ -24,7 +26,6 @@ vi.mock(import('worker_threads'), () => {
                     type: 'event',
                     name: 'End',
                     args: {},
-                    application: 'ScanApp',
                 } satisfies EventData);
             }
         });
@@ -91,8 +92,8 @@ describe('EndpointScanWorkerPool', () => {
         container.clearInstances();
         container.registerSingleton(EndpointScanWorkerPool, EndpointScanWorkerPool);
         container.registerInstance(LOGGER, createSpyObj<Logger>(['info', 'warning', 'error']));
-        container.registerInstance('Variable', { CONTENT_ROOT: '/tmp' });
-        container.registerInstance('AASIndexClient', createSpyObj(['connect', 'execute', 'cancel']));
+        container.registerInstance(Variable, createSpyObj<Variable>([], { CONTENT_ROOT: '/tmp', MAX_WORKERS: 2 }));
+        container.registerInstance(AAS_INDEX, createSpyObj<AASIndexClient>(['connect', 'execute', 'cancel']));
         workerPool = container.resolve(EndpointScanWorkerPool);
     });
 
@@ -110,7 +111,6 @@ describe('EndpointScanWorkerPool', () => {
                 type: 'command',
                 name: 'scan',
                 args: { endpoint: 'Endpoint 1' },
-                application: 'test-app',
             };
 
             workerPool.execute(commandData);
@@ -124,7 +124,6 @@ describe('EndpointScanWorkerPool', () => {
                 type: 'command',
                 name: 'scan',
                 args: { taskId: 1, endpoint: 'Endpoint 1' },
-                application: 'test-app',
             };
 
             workerPool.execute(commandData);
@@ -136,21 +135,18 @@ describe('EndpointScanWorkerPool', () => {
                 type: 'command',
                 name: 'scan',
                 args: { taskId: 1, endpoint: 'Endpoint 1' },
-                application: 'test-app',
             } satisfies CommandData);
 
             workerPool.execute({
                 type: 'command',
                 name: 'scan',
                 args: { taskId: 2, endpoint: 'Endpoint 2' },
-                application: 'test-app',
             } satisfies CommandData);
 
             workerPool.execute({
                 type: 'command',
                 name: 'scan',
                 args: { taskId: 3, endpoint: 'Endpoint 3' },
-                application: 'test-app',
             } satisfies CommandData);
 
             expect(workerPool['waiting'].length).toBe(1);
@@ -169,14 +165,12 @@ describe('EndpointScanWorkerPool', () => {
                 type: 'command',
                 name: 'scan',
                 args: { taskId: 1, endpoint: 'Endpoint 1' },
-                application: 'test-app',
             } satisfies CommandData);
 
             workerPool.execute({
                 type: 'command',
                 name: 'scan',
                 args: { taskId: 2, endpoint: 'Endpoint 2' },
-                application: 'test-app',
             } satisfies CommandData);
 
             await expect(workerPool.dispose()).resolves.toBe(void 0);

@@ -26,6 +26,6 @@ export class AppController extends Controller {
     @Get('info')
     @OperationId('getInfo')
     public async getInfo(): Promise<AppInfo> {
-        return await this.applicationInfo.getAsync();
+        return await this.applicationInfo.get();
     }
 }

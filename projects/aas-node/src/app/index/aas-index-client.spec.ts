@@ -14,7 +14,8 @@ import { aas, AASCursor } from 'aas-core';
 import { AASIndexClient } from './aas-index-client.js';
 import { Variable } from '../variable.js';
 import { createSpyObj } from '../../test/mocks.js';
-import { ChannelCommand, ChannelError, ChannelResponse } from './aas-index.js';
+import { AAS_INDEX, ChannelCommand, ChannelError, ChannelResponse } from './aas-index.js';
+import { Logger, LOGGER } from 'aas-package';
 
 vi.mock(import('worker_threads'), () => {
     class WorkerMock implements Partial<Worker> {
@@ -122,8 +123,10 @@ describe('AASIndexClient', () => {
         container.clearInstances();
         variable = createSpyObj<Variable>([], { CONTENT_ROOT: 'content-root' });
         container.registerInstance(Variable, variable);
+        container.registerSingleton(AAS_INDEX, AASIndexClient);
+        container.registerInstance(LOGGER, createSpyObj<Logger>(['info', 'warning', 'error']));
 
-        client = container.resolve(AASIndexClient);
+        client = container.resolve(AAS_INDEX) as AASIndexClient;
     });
 
     it('should be created', () => {
@@ -136,9 +139,8 @@ describe('AASIndexClient', () => {
 
         expect(client['worker']?.postMessage).toHaveBeenCalledWith(
             {
-                application: 'IndexApp',
                 type: 'command',
-                name: 'connect',
+                name: 'ConnectIndex',
                 args: { port, name: 'worker-name' },
             },
             [port],
@@ -411,7 +413,6 @@ describe('AASIndexClient', () => {
 
         expect(port.off).toHaveBeenCalledWith('message', client['onMessage']);
         expect(worker.postMessage).toHaveBeenCalledWith({
-            application: 'IndexApp',
             type: 'command',
             name: 'shutdown',
             args: {},

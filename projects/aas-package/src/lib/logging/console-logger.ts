@@ -7,70 +7,41 @@
  *****************************************************************************/
 
 import { container, singleton } from 'tsyringe';
-import { Worker } from 'worker_threads';
 import { LOG_LEVEL, Logger, LogLevel } from './logger.js';
-
-interface LoggerMessage {
-    level: LogLevel;
-    message: string;
-}
 
 /** Provides a logger that writes messages to `stdout` and `stderr`. */
 @singleton()
-export class ConsoleLogger extends Logger {
-    private worker?: Worker;
+export class ConsoleLogger implements Logger {
+    private readonly logLevel = container.isRegistered(LOG_LEVEL) ? container.resolve(LOG_LEVEL) : 'Info';
 
-    public constructor() {
-        super(container.isRegistered(LOG_LEVEL) ? container.resolve(LOG_LEVEL) : 'Info');
-    }
-
-    public override error(error: Error | string): Promise<void> {
+    public error(error: Error | string): void {
         if (!this.shouldLog('Error')) {
-            return Promise.resolve();
+            return;
         }
 
         const message = typeof error === 'string' ? error : error.stack || error.message || String(error);
-        return this.postMessage({ level: 'Error', message });
+        console.error(this.getDateTime() + ' [Error]: ' + message);
     }
 
-    public override warning(message: string): Promise<void> {
+    public warning(message: string): void {
         if (!this.shouldLog('Warning')) {
-            return Promise.resolve();
+            return;
         }
 
-        return this.postMessage({ level: 'Warning', message });
+        console.warn(this.getDateTime() + ' [Warning]: ' + message);
     }
 
-    public override info(message: string): Promise<void> {
+    public info(message: string): void {
         if (!this.shouldLog('Info')) {
-            return Promise.resolve();
+            return;
         }
 
-        return this.postMessage({ level: 'Info', message });
+        console.info(this.getDateTime() + ' [Info]: ' + message);
     }
 
     private shouldLog(level: LogLevel): boolean {
         const order: Record<LogLevel, number> = { Error: 0, Warning: 1, Info: 2 };
         return order[level] <= order[this.logLevel];
-    }
-
-    private async postMessage(message: LoggerMessage): Promise<void> {
-        if (this.worker) {
-            this.worker.postMessage(message);
-        } else {
-            switch (message.level) {
-                case 'Error':
-                    console.error(this.getDateTime() + ' [Error]: ' + message.message);
-                    break;
-                case 'Warning':
-                    console.warn(this.getDateTime() + ' [Warning]: ' + message.message);
-                    break;
-                case 'Info':
-                default:
-                    console.info(this.getDateTime() + ' [Info]: ' + message.message);
-                    break;
-            }
-        }
     }
 
     private getDateTime(): string {

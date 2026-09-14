@@ -9,9 +9,10 @@
 import fs from 'fs';
 import path from 'path';
 import { inject, singleton } from 'tsyringe';
-import { LOGGER, Logger } from 'aas-package';
+import { LOGGER, type Logger } from 'aas-package';
 
 import { Variable } from '../variable.js';
+import { aas } from 'aas-core';
 
 @singleton()
 export class KeywordDirectory {
@@ -72,5 +73,30 @@ export class KeywordDirectory {
         }
 
         return s;
+    }
+
+    public preprocessString(value: string | aas.LangString[] | undefined, max: number = 512): string | undefined {
+        if (value === undefined) {
+            return undefined;
+        }
+
+        if (typeof value === 'string') {
+            if (value.length < 128) {
+                return value;
+            }
+
+            return this.toString(this.containedKeyword(value), ';', max);
+        }
+
+        const keywords: string[] = [];
+        for (const item of value) {
+            if (item.text.length < 32) {
+                keywords.push(item.text);
+            } else {
+                keywords.push(...this.containedKeyword(item.text, item.language));
+            }
+        }
+
+        return this.toString(keywords, ';', max);
     }
 }

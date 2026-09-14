@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import { WebSocket, WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
@@ -15,7 +15,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { WebSocketData } from 'aas-core';
-import { LOGGER, Logger } from 'aas-package';
+import { LOGGER } from 'aas-package';
 
 import { App } from './app.js';
 import { Variable } from './variable.js';
@@ -24,15 +24,14 @@ import { SocketClient } from './live/socket-client.js';
 /* istanbul ignore next */
 @singleton()
 export class WSNode extends EventEmitter {
+    private readonly app = container.resolve(App);
+    private readonly variable = container.resolve(Variable);
+    private readonly logger = container.resolve(LOGGER);
     private readonly wss: WebSocketServer;
     private readonly clients: Set<SocketClient> = new Set<SocketClient>();
     private readonly server: http.Server | https.Server;
 
-    public constructor(
-        @inject(App) app: App,
-        @inject(Variable) private readonly variable: Variable,
-        @inject(LOGGER) private readonly logger: Logger,
-    ) {
+    public constructor() {
         super();
 
         if (this.variable.HTTPS_KEY_FILE && this.variable.HTTPS_CERT_FILE) {
@@ -50,14 +49,12 @@ export class WSNode extends EventEmitter {
         }
 
         this.wss = new WebSocketServer({ server: this.server });
-        this.server.on('request', app.app);
+        this.server.on('request', this.app.app);
 
         this.wss.on('connection', this.onConnection);
         this.wss.on('close', this.onClose);
         this.wss.on('error', this.onError);
-    }
 
-    public run(): void {
         process.on('SIGTERM', () => {
             this.logger.info('Shutting down AASNode');
             this.server.close(() => {

@@ -9,7 +9,7 @@
 import { inject, singleton } from 'tsyringe';
 import mongoose from 'mongoose';
 import { Cookie } from 'aas-core';
-import { Logger, LOGGER, MongoDBConnectionProvider } from 'aas-package';
+import { type Logger, LOGGER, MongoDBConnectionProvider } from 'aas-package';
 import { Variable } from '../variable.js';
 import { CookieStore } from './cookie-store.js';
 
