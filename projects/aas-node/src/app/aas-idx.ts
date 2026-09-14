@@ -9,8 +9,7 @@
 import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { parentPort } from 'worker_threads';
-import { LOG_LEVEL, LOGGER, LoggerFactory } from 'aas-package';
-import { Variable } from './variable.js';
+import { LOGGER, LoggerProxy } from 'aas-package';
 import { IndexApp } from './index/index-app.js';
 import { AAS_INDEX } from './index/aas-index.js';
 import { AASIndexFactory } from './index/aas-index-factory.js';
@@ -19,8 +18,7 @@ parentPort?.on('close', () => {
     container.dispose();
 });
 
-container.register(LOG_LEVEL, { useValue: container.resolve(Variable).LOG_LEVEL });
-container.register(LOGGER, { useFactory: c => c.resolve(LoggerFactory).getInstance() });
+container.registerSingleton(LOGGER, LoggerProxy);
 container.register(AAS_INDEX, { useFactory: c => c.resolve(AASIndexFactory).getInstance() });
 
 container.resolve(IndexApp);

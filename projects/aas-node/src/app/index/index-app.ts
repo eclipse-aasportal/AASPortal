@@ -11,7 +11,6 @@ import { parentPort, MessagePort } from 'worker_threads';
 import { aas, AASCursor, AASDocument, AASEndpoint } from 'aas-core';
 import { ErrorData, isCommandData, LOGGER, LoggerProxy, ResponseData, WorkerData } from 'aas-package';
 import { AAS_INDEX, ChannelCommand, ChannelError, ChannelResponse, CommandName } from './aas-index.js';
-import { AASIndexClient } from './aas-index-client.js';
 
 @singleton()
 export class IndexApp {
@@ -29,14 +28,13 @@ export class IndexApp {
             if (isCommandData(data)) {
                 if (data.name === 'ConnectIndex') {
                     const port = data.args.port as MessagePort;
-                    (this.index as AASIndexClient).connect(port);
                     port.on('message', data => this.onMessage(port, data));
                     this.ports.push(port);
                 } else if (data.name === 'ConnectLogger') {
                     const port = data.args.port as MessagePort;
-                    (this.logger as LoggerProxy).connect(port);
-                    port.on('message', data => this.onMessage(port, data));
-                    this.ports.push(port);
+                    if (this.logger instanceof LoggerProxy) {
+                        this.logger.connect(port);
+                    }
                 } else if (data.name === 'shutdown') {
                     this.ports.forEach(port => {
                         port.removeAllListeners('message');

@@ -13,7 +13,7 @@ import { aas, AASEndpoint, AASCursor, AASPagedResult, PagedResult, AASDocument }
 
 import { AASIndex, ChannelCommand, CommandName, ChannelResponse, isChannelError, ChannelError } from './aas-index.js';
 import { Variable } from '../variable.js';
-import { CommandData, Connectable, isResponseData, WorkerData } from 'aas-package';
+import { CommandData, Connectable, isConnectable, isResponseData, LOGGER, WorkerData } from 'aas-package';
 
 type ResolvePending = {
     resolve: (value: unknown) => void;
@@ -29,7 +29,7 @@ export class AASIndexClient implements AASIndex, Connectable, Disposable {
     private readonly variable = container.resolve(Variable);
     private readonly worker?: Worker;
     private readonly pending = new Map<number, ResolvePending>();
-    private port!: MessagePort;
+    private port?: MessagePort;
     private id = 0;
 
     public constructor() {
@@ -43,6 +43,21 @@ export class AASIndexClient implements AASIndex, Connectable, Disposable {
             this.worker.on('message', this.onWorkerMessage);
             this.connect(port1, name);
             this.port.on('message', this.onMessage);
+
+            const loggerChannel = new MessageChannel();
+            const logger = container.resolve(LOGGER);
+            if (isConnectable(logger)) {
+                logger.connect(loggerChannel.port2, name);
+            }
+
+            this.worker.postMessage(
+                {
+                    type: 'command',
+                    name: 'ConnectLogger',
+                    args: { port: loggerChannel.port1, name: 'Logger' },
+                },
+                [loggerChannel.port1],
+            );
         }
     }
 
@@ -57,7 +72,12 @@ export class AASIndexClient implements AASIndex, Connectable, Disposable {
                 [port],
             );
         } else {
+            if (this.port) {
+                throw new Error('Port is already connected');
+            }
+
             this.port = port;
+            this.port.on('message', this.onMessage);
         }
     }
 
@@ -158,7 +178,7 @@ export class AASIndexClient implements AASIndex, Connectable, Disposable {
     }
 
     public dispose(): void {
-        this.port.off('message', this.onMessage);
+        this.port?.off('message', this.onMessage);
         if (this.worker) {
             this.worker.postMessage({
                 type: 'command',
@@ -180,6 +200,11 @@ export class AASIndexClient implements AASIndex, Connectable, Disposable {
 
     private invoke(name: CommandName, args: Record<string, unknown>): Promise<unknown> {
         return new Promise((resolve, reject) => {
+            if (!this.port) {
+                reject(new Error('No message port available'));
+                return;
+            }
+
             const id = this.nextId();
             const handle = setTimeout(() => {
                 const entry = this.pending.get(id);

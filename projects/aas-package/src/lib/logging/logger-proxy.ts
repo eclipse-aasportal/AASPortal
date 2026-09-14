@@ -14,7 +14,8 @@ import { CommandData, Connectable, isResponseData, WorkerData } from '../types.j
 @singleton()
 export class LoggerProxy implements Logger, Disposable, Connectable {
     private readonly worker?: Worker;
-    private port!: MessagePort;
+    private readonly pendingMessages: CommandData[] = [];
+    private port?: MessagePort;
 
     public constructor() {
         if (isMainThread) {
@@ -39,32 +40,35 @@ export class LoggerProxy implements Logger, Disposable, Connectable {
                 [port],
             );
         } else {
+            if (this.port) {
+                throw new Error('LoggerProxy already connected to a port.');
+            }
+
             this.port = port;
+            if (this.pendingMessages.length > 0) {
+                for (const msg of this.pendingMessages) {
+                    this.port.postMessage(msg);
+                }
+
+                this.pendingMessages.length = 0;
+            }
         }
     }
 
     public error(error: Error | string): void {
-        this.port.postMessage({
+        this.postMessage({
             type: 'command',
             name: 'Error',
             args: typeof error === 'string' ? { message: error } : { message: error.message, stack: error.stack },
-        } satisfies CommandData);
+        });
     }
 
     public warning(message: string): void {
-        this.port.postMessage({
-            type: 'command',
-            name: 'Warning',
-            args: { message },
-        } satisfies CommandData);
+        this.postMessage({ type: 'command', name: 'Warning', args: { message } });
     }
 
     public info(message: string): void {
-        this.port.postMessage({
-            type: 'command',
-            name: 'Info',
-            args: { message },
-        } satisfies CommandData);
+        this.postMessage({ type: 'command', name: 'Info', args: { message } });
     }
 
     public dispose(): Promise<void> | void {
@@ -74,8 +78,19 @@ export class LoggerProxy implements Logger, Disposable, Connectable {
             this.worker.terminate();
         }
 
-        this.port.removeAllListeners();
-        this.port.close();
+        if (this.port) {
+            this.port.removeAllListeners();
+            this.port.close();
+            this.port = undefined;
+        }
+    }
+
+    private postMessage(message: CommandData): void {
+        if (this.port) {
+            this.port.postMessage(message);
+        } else {
+            this.pendingMessages.push(message);
+        }
     }
 
     private readonly onWorkerMessage = (data: WorkerData): void => {

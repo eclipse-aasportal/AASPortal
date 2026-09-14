@@ -179,7 +179,7 @@ export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
                     name: 'ConnectIndex',
                     args: { port: indexChannel.port2, name },
                 } satisfies CommandData,
-                [indexChannel.port2, loggerChannel.port2],
+                [indexChannel.port2],
             );
 
             worker.postMessage(
@@ -188,7 +188,7 @@ export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
                     name: 'ConnectLogger',
                     args: { port: loggerChannel.port2, name },
                 } satisfies CommandData,
-                [loggerChannel.port2, loggerChannel.port2],
+                [loggerChannel.port2],
             );
 
             return worker;
