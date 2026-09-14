@@ -18,6 +18,7 @@ import { AASIndexClient } from '../index/aas-index-client.js';
 import { EndpointScan } from './endpoint-scan.js';
 import { EndpointScanFactory } from './endpoint-scan-factory.js';
 import { ScanApp } from './scan-app.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 const { parentPort } = vi.hoisted(() => ({
     parentPort: {
@@ -37,7 +38,7 @@ describe('ScanApp', () => {
         vi.spyOn(Date, 'now').mockReturnValue(1234567890);
         factory = createSpyObj<EndpointScanFactory>(['create']);
         container.registerInstance(LOGGER, createSpyObj<Logger>(['info', 'warning', 'error']));
-        container.registerInstance(AASIndexClient, createSpyObj<AASIndexClient>([]));
+        container.registerInstance(AAS_INDEX, createSpyObj<AASIndexClient>([]));
         container.registerInstance(EndpointScanFactory, factory);
         container.registerSingleton(ScanApp, ScanApp);
     });

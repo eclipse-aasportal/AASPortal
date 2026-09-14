@@ -15,6 +15,7 @@ import { AASIndexClient } from './aas-index-client.js';
 import { Variable } from '../variable.js';
 import { createSpyObj } from '../../test/mocks.js';
 import { AAS_INDEX, ChannelCommand, ChannelError, ChannelResponse } from './aas-index.js';
+import { Logger, LOGGER } from 'aas-package';
 
 vi.mock(import('worker_threads'), () => {
     class WorkerMock implements Partial<Worker> {
@@ -122,6 +123,8 @@ describe('AASIndexClient', () => {
         container.clearInstances();
         variable = createSpyObj<Variable>([], { CONTENT_ROOT: 'content-root' });
         container.registerInstance(Variable, variable);
+        container.registerSingleton(AAS_INDEX, AASIndexClient);
+        container.registerInstance(LOGGER, createSpyObj<Logger>(['info', 'warning', 'error']));
 
         client = container.resolve(AAS_INDEX) as AASIndexClient;
     });

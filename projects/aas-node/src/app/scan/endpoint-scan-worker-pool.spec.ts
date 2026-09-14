@@ -12,6 +12,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CommandData, EventData, LOGGER, Logger } from 'aas-package';
 import { EndpointScanWorkerPool } from './endpoint-scan-worker-pool';
 import { createSpyObj } from '../../test/mocks';
+import { AAS_INDEX } from '../index/aas-index';
+import { Variable } from '../variable';
+import { AASIndexClient } from '../index/aas-index-client';
 
 vi.mock(import('worker_threads'), () => {
     class WorkerMock {
@@ -89,8 +92,8 @@ describe('EndpointScanWorkerPool', () => {
         container.clearInstances();
         container.registerSingleton(EndpointScanWorkerPool, EndpointScanWorkerPool);
         container.registerInstance(LOGGER, createSpyObj<Logger>(['info', 'warning', 'error']));
-        container.registerInstance('Variable', { CONTENT_ROOT: '/tmp' });
-        container.registerInstance('AASIndexClient', createSpyObj(['connect', 'execute', 'cancel']));
+        container.registerInstance(Variable, createSpyObj<Variable>([], { CONTENT_ROOT: '/tmp', MAX_WORKERS: 2 }));
+        container.registerInstance(AAS_INDEX, createSpyObj<AASIndexClient>(['connect', 'execute', 'cancel']));
         workerPool = container.resolve(EndpointScanWorkerPool);
     });
 
