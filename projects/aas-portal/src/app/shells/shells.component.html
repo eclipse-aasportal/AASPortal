@@ -45,9 +45,14 @@
     <div class="w-100 d-none d-sm-block">
         <div class="w-100 mb-1 d-flex flex-row">
             <h2>Shells</h2>
-            
+
             <div class="ms-auto">
-                <button class="btn btn-outline-primary ms-2" type="button" id="AID_OPEN_FILE" (click)="inputFiles.click()">
+                <button
+                    class="btn btn-outline-primary ms-2"
+                    type="button"
+                    id="AID_OPEN_FILE"
+                    (click)="inputFiles.click()"
+                >
                     <i class="bi bi-upload"></i>
                     <span class="ms-2">Upload shell</span>
                 </button>
@@ -62,7 +67,6 @@
                     hidden
                 />
             </div>
-
         </div>
 
         <div class="w-100 d-flex flex-row">
@@ -73,11 +77,15 @@
                 <input
                     #textInput
                     type="search"
-                    class="form-control"
+                    [ngClass]="invalidFilter() ? 'form-control text-danger' : 'form-control'"
                     [placeholder]="'Shells.PLACEHOLDER_FILTER' | translate"
                     [ngModel]="filterText()"
                     (ngModelChange)="setFilterText($event)"
                     (search)="setFilterText('')"
+                    [ngbTooltip]="filterTooltip()"
+                    placement="bottom"
+                    [openDelay]="300"
+                    [closeDelay]="500"
                 />
             </div>
 
@@ -88,7 +96,11 @@
                         <i class="bi bi-star"></i>
                     </button>
                     <select
-                        [ngClass]="activeFavoritesList() ? 'form-select flex-grow-0 w-auto fst-normal fw-normal' : 'form-select flex-grow-0 w-auto fst-italic fw-light'"
+                        [ngClass]="
+                            activeFavoritesList()
+                                ? 'form-select flex-grow-0 w-auto fst-normal fw-normal'
+                                : 'form-select flex-grow-0 w-auto fst-italic fw-light'
+                        "
                         [ngModel]="activeFavoritesList()"
                         (ngModelChange)="setActiveFavoriteList($event)"
                     >
@@ -116,7 +128,13 @@
                 <div ngbDropdown class="btn-group" role="group">
                     <div>
                         <i class="bi bi-view-stacked text-primary me-0"></i>
-                        <button type="button" class="btn ms-0 fw-semibold btn-views" ngbDropdownToggle id="selectEndpoints" translate="Shells.VIEWS"></button>
+                        <button
+                            type="button"
+                            class="btn ms-0 fw-semibold btn-views"
+                            ngbDropdownToggle
+                            id="selectEndpoints"
+                            translate="Shells.VIEWS"
+                        ></button>
                     </div>
                     <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
                         @for (view of views(); track view.path) {
@@ -150,42 +168,41 @@
     </div>
 
     <div [hidden]="someSelected() === false" class="hidden-selected-bar">
-            <div class="d-flex flex-row align-items-center px-3 bg-secondary-subtle me-2 my-1 border border-black border-opacity-25 rounded-3">
-
-                <div class="d-flex flex-row align-items-center text-white mx-2">
-                    <button
-                        type="button"
-                        class="btn text-primary"
-                        (click)="emptySelected()"
-                        [disabled]="someSelected() === false"
-                    >
-                        <i class="bi bi-x fs-3"></i>
-                    </button>
-                    <span>{{selected().length}} selected</span>
-                </div>
-
-                 <div class="vr vertical-line text-white"></div>
-
+        <div
+            class="d-flex flex-row align-items-center px-3 bg-secondary-subtle me-2 my-1 border border-black border-opacity-25 rounded-3"
+        >
+            <div class="d-flex flex-row align-items-center text-white mx-2">
                 <button
                     type="button"
-                    class="btn text-primary bg-primary-subtle mx-2"
-                    (click)="downloadPackages().subscribe()"
+                    class="btn text-primary"
+                    (click)="emptySelected()"
                     [disabled]="someSelected() === false"
                 >
-                    <i class="bi bi-download"></i>
-                    <span class="ms-2">Download</span>
+                    <i class="bi bi-x fs-3"></i>
                 </button>
-                <button
-                    type="button"
-                    class="btn text-danger bg-danger-subtle"
-                    (click)="deletePackages().subscribe()"
-                    [disabled]="someSelected() === false"
-                >
-                    <i class="bi bi-trash"></i>
-                    <span class="ms-2">Delete</span>
-                </button>
+                <span>{{ selected().length }} selected</span>
             </div>
-    
-        </div>
 
+            <div class="vr vertical-line text-white"></div>
+
+            <button
+                type="button"
+                class="btn text-primary bg-primary-subtle mx-2"
+                (click)="downloadPackages().subscribe()"
+                [disabled]="someSelected() === false"
+            >
+                <i class="bi bi-download"></i>
+                <span class="ms-2">Download</span>
+            </button>
+            <button
+                type="button"
+                class="btn text-danger bg-danger-subtle"
+                (click)="deletePackages().subscribe()"
+                [disabled]="someSelected() === false"
+            >
+                <i class="bi bi-trash"></i>
+                <span class="ms-2">Delete</span>
+            </button>
+        </div>
+    </div>
 </ng-template>

@@ -27,6 +27,7 @@ type ResolvePending = {
 @singleton()
 export class AASIndexClient implements AASIndex, Connectable, Disposable {
     private readonly variable = container.resolve(Variable);
+    private readonly logger = container.resolve(LOGGER);
     private readonly worker?: Worker;
     private readonly pending = new Map<number, ResolvePending>();
     private port?: MessagePort;
@@ -43,21 +44,11 @@ export class AASIndexClient implements AASIndex, Connectable, Disposable {
             this.worker.on('message', this.onWorkerMessage);
             this.connect(port1, name);
             this.port.on('message', this.onMessage);
+            this.port.once('close', () => {
+                this.port = undefined;
+            });
 
-            const loggerChannel = new MessageChannel();
-            const logger = container.resolve(LOGGER);
-            if (isConnectable(logger)) {
-                logger.connect(loggerChannel.port2, name);
-            }
-
-            this.worker.postMessage(
-                {
-                    type: 'command',
-                    name: 'ConnectLogger',
-                    args: { port: loggerChannel.port1, name: 'Logger' },
-                },
-                [loggerChannel.port1],
-            );
+            this.connectLogger(this.worker, name);
         }
     }
 
@@ -78,6 +69,9 @@ export class AASIndexClient implements AASIndex, Connectable, Disposable {
 
             this.port = port;
             this.port.on('message', this.onMessage);
+            this.port.once('close', () => {
+                this.port = undefined;
+            });
         }
     }
 
@@ -178,16 +172,35 @@ export class AASIndexClient implements AASIndex, Connectable, Disposable {
     }
 
     public dispose(): void {
-        this.port?.off('message', this.onMessage);
+        if (this.port) {
+            this.port?.off('message', this.onMessage);
+            this.port.close();
+        }
+
         if (this.worker) {
+            this.worker.once('exit', this.onWorkerExit);
             this.worker.postMessage({
                 type: 'command',
                 name: 'shutdown',
                 args: {},
             } satisfies CommandData);
-
-            this.worker.once('exit', this.onWorkerExit);
         }
+    }
+
+    private connectLogger(worker: Worker, name: string): void {
+        const loggerChannel = new MessageChannel();
+        if (isConnectable(this.logger)) {
+            this.logger.connect(loggerChannel.port2, name);
+        }
+
+        worker.postMessage(
+            {
+                type: 'command',
+                name: 'ConnectLogger',
+                args: { port: loggerChannel.port1, name: 'Logger' },
+            },
+            [loggerChannel.port1],
+        );
     }
 
     private readonly onWorkerMessage = (data: WorkerData): void => {

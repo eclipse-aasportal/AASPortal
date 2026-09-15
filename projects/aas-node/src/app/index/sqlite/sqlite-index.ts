@@ -318,7 +318,11 @@ export class SqliteIndex implements AASIndex {
             try {
                 let query: SqliteQuery | undefined;
                 if (expression) {
-                    query = new SqliteQuery(expression, language ?? 'en');
+                    try {
+                        query = new SqliteQuery(expression, language ?? 'en');
+                    } catch {
+                        return resolve({ previous: null, next: null, documents: [] });
+                    }
                 }
 
                 let result: AASPagedResult;

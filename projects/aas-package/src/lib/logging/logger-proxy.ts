@@ -26,6 +26,9 @@ export class LoggerProxy implements Logger, Disposable, Connectable {
             this.worker.on('error', this.onWorkerError);
             this.worker.on('message', this.onWorkerMessage);
             this.connect(port1, name);
+            this.port.once('close', () => {
+                this.port = undefined;
+            });
         }
     }
 
@@ -45,6 +48,10 @@ export class LoggerProxy implements Logger, Disposable, Connectable {
             }
 
             this.port = port;
+            this.port.once('close', () => {
+                this.port = undefined;
+            });
+
             if (this.pendingMessages.length > 0) {
                 for (const msg of this.pendingMessages) {
                     this.port.postMessage(msg);

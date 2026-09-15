@@ -19,11 +19,7 @@ export class SqliteQuery extends AASIndexQuery {
     }
 
     public createSql(values: unknown[]): string {
-        try {
-            return this.evaluate(this.queryParser.ast, values);
-        } catch {
-            return '';
-        }
+        return this.evaluate(this.queryParser.ast, values);
     }
 
     private evaluate(expression: OrExpression[], values: unknown[]): string {
@@ -49,7 +45,7 @@ export class SqliteQuery extends AASIndexQuery {
     }
 
     private createSqlTerm(query: AASQuery, values: unknown[]): string {
-        let s = `elements.modelType = "${query.modelType.toLowerCase()}"`;
+        let s = `elements.modelType = '${query.modelType.toLowerCase()}'`;
         if (query.name) {
             s += ` AND elements.idShort LIKE '%${query.name}%'`;
         }
@@ -126,14 +122,14 @@ export class SqliteQuery extends AASIndexQuery {
 
     private createBooleanSqlTerm(operator: AASQueryOperator, value: boolean, values: unknown[]): string {
         if (operator === '=') {
-            return ` AND elements.booleanValue ?`;
+            values.push(value);
+            return ` AND elements.booleanValue ? <> 0`;
         }
 
         if (operator === '!=') {
-            return ` AND elements.booleanValue ?`;
+            values.push(value);
+            return ` AND elements.booleanValue ? = 0`;
         }
-
-        values.push(value);
 
         throw new Error('Invalid operator.');
     }
@@ -144,7 +140,7 @@ export class SqliteQuery extends AASIndexQuery {
         }
 
         if (operator === '!=') {
-            return `  AND elements.stringValue NOT LIKE '%${value}%'`;
+            return ` AND elements.stringValue NOT LIKE '%${value}%'`;
         }
 
         throw new Error('Invalid operator.');

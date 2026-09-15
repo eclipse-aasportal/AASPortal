@@ -353,7 +353,7 @@ export class QueryParser {
         if (QueryParser.operatorChars.has(c)) {
             throw new ApplicationError('QueryParser.INVALID_OPERATOR', {
                 operator: c,
-                currentPositin: this.currentPosition,
+                currentPosition: this.currentPosition,
             });
         }
 

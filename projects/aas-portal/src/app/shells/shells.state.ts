@@ -62,7 +62,7 @@ export class ShellsState {
             };
 
             let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
-            if (filter) {
+            if (filter?.length >= 3) {
                 url += `&filter=${encodeBase64Url(filter)}`;
                 url += `&language=${this.translate.getCurrentLang()}`;
             }

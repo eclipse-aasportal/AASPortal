@@ -223,6 +223,6 @@ export class IndexApp {
     private postError(port: MessagePort, id: number, error: Error): void {
         port.postMessage({ id, type: 'error', message: error.message } satisfies ChannelError);
         this.messageQueue.shift();
-        setImmediate(() => this.execute);
+        setImmediate(this.execute);
     }
 }
