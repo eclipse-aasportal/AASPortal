@@ -6,7 +6,7 @@ export default defineConfig({
             enabled: true,
             include: ['src/app'],
             reportsDirectory: './coverage',
-            reporter: ['text', 'json', 'html', 'clover', 'json-summary'],
+            reporter: ['text-summary', 'json'],
             exclude: ['src/app/aas-idx.ts', 'src/app/aas-node.ts', 'src/app/aas-scan.ts'],
         },
         environment: 'node',
