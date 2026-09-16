@@ -318,7 +318,11 @@ export class SqliteIndex implements AASIndex {
             try {
                 let query: SqliteQuery | undefined;
                 if (expression) {
-                    query = new SqliteQuery(expression, language ?? 'en');
+                    try {
+                        query = new SqliteQuery(expression, language ?? 'en');
+                    } catch {
+                        return resolve({ previous: null, next: null, documents: [] });
+                    }
                 }
 
                 let result: AASPagedResult;
@@ -605,7 +609,7 @@ export class SqliteIndex implements AASIndex {
                 sql = this.db.prepare(
                     'SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ' +
                         query.createSql(params) +
-                        ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?',
+                        ' ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?',
                 );
             } else {
                 sql = this.db.prepare(

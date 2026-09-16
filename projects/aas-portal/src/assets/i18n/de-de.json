@@ -10,7 +10,7 @@
         "VERSION": "Version",
         "AAS_ID": "AAS ID",
         "ASSET_ID": "Asset ID",
-        "OVERVIEW": "AAS-Übersicht",
+        "OVERVIEW": "AAS-Übersicht"
     },
     "AASContent": {
         "TITLE": "AAS-Baum",
@@ -314,18 +314,18 @@
         "OK": "Index leeren"
     },
     "QueryParser": {
-        "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {0} erwartet.",
-        "END_OF_TEXT_NOT_FOUND": "Das Ende des Textes, beginnend an Position {0}, wurde nicht gefunden.",
-        "INVALID_ABBREVIATION": "'{0}' ist eine ungültige Modelltyp-Abkürzung an Position {1}.",
-        "INVALID_DATE_EXPRESSION": "'{0}' ist ein ungültiger Datumsausdruck an Position {1}.",
+        "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {{currentPosition}} erwartet.",
+        "END_OF_TEXT_NOT_FOUND": "Das Ende des Textes, beginnend an Position {{currentPosition}}, wurde nicht gefunden.",
+        "INVALID_ABBREVIATION": "'{{modelType}}' ist eine ungültige Modelltyp-Abkürzung an Position {{currentPosition}}.",
+        "INVALID_DATE_EXPRESSION": "'{{expression}}' ist ein ungültiger Datumsausdruck an Position {{currentPosition}}.",
         "INVALID_NESTED_EXPRESSION": "Ungültiger geschachtelter Ausdruck.",
-        "INVALID_OPERATOR": "'{0}' ist ein ungültiger Operator an Position {1}.",
-        "INVALID_RANGE_EXPRESSION": "'{0}' ist ein ungültiger Bereichsausdruck an Position {1}.",
-        "LINK_EXPECTED": "'||' or '&&' erwartet an Position {0}",
-        "MIN_LENGTH": "Ein Abfrageausdruck muss mindestens {0} Zeichen enthalten.",
-        "MODEL_TYPE_EXPECTED": "Modelltypabkürzung an Position {0} erwartet.",
-        "TERM_EXPECTED": "Term erwartet an Position {0}.",
-        "UNEXPECTED_CLOSING_BRACKET": "Unerwartete schließende Klammer an Position ${0}."
+        "INVALID_OPERATOR": "'{{operator}}' ist ein ungültiger Operator an Position {{currentPosition}}.",
+        "INVALID_RANGE_EXPRESSION": "'{{expression}}' ist ein ungültiger Bereichsausdruck an Position {{currentPosition}}.",
+        "LINK_EXPECTED": "'||' or '&&' erwartet an Position {{currentPosition}}",
+        "MIN_LENGTH": "Ein Abfrageausdruck muss mindestens {{minLength}} Zeichen enthalten.",
+        "MODEL_TYPE_EXPECTED": "Modelltypabkürzung an Position {{currentPosition}} erwartet.",
+        "TERM_EXPECTED": "Term erwartet an Position {{currentPosition}}.",
+        "UNEXPECTED_CLOSING_BRACKET": "Unerwartete schließende Klammer an Position {{currentPosition}}."
     },
     "RegisterForm": {
         "CAPTION": "Registration",

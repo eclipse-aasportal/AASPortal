@@ -97,11 +97,8 @@
                             "src/app/**/*.spec.ts"
                         ],
                         "coverageReporters": [
-                            "text",
-                            "json",
-                            "html",
-                            "lcov",
-                            "json-summary"
+                            "text-summary",
+                            "json"
                         ],
                         "include": [
                             "projects/aas-portal/src/**/*.spec.ts"
@@ -222,11 +219,8 @@
                             "src/app/**/*.spec.ts"
                         ],
                         "coverageReporters": [
-                            "text",
-                            "json",
-                            "html",
-                            "lcov",
-                            "json-summary"
+                            "text-summary",
+                            "json"
                         ],
                         "include": [
                             "projects/aas-browser/src/**/*.spec.ts"
@@ -295,11 +289,8 @@
                             "src/lib/**/*.spec.ts"
                         ],
                         "coverageReporters": [
-                            "text",
-                            "json",
-                            "html",
-                            "lcov",
-                            "json-summary"
+                            "text-summary",
+                            "json"
                         ],
                         "include": [
                             "projects/aas-lib/src/**/*.spec.ts"

@@ -40,7 +40,10 @@ const initialData: ShellsData = {
     providedIn: 'root',
 })
 export class ShellsState {
-    private readonly filterText$ = signal(initialData.filterText);
+    private readonly filterText$ = signal(initialData.filterText, {
+        equal: (a, b) => (a.length < 3 && b.length < 3) || a === b,
+    });
+
     private readonly cookies = inject(CookieService);
     private readonly auth = inject(AuthService);
     private readonly translate = inject(TranslateService);

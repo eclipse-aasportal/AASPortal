@@ -7,7 +7,7 @@ export default defineConfig({
             include: ['src/lib/**/*.ts'],
             exclude: ['src/lib/aas-core/**.*'],
             reportsDirectory: './coverage',
-            reporter: ['text', 'json', 'html', 'clover', 'json-summary'],
+            reporter: ['text-summary', 'json'],
         },
         environment: 'node',
         include: ['src/**/*.{test,spec}.ts'],

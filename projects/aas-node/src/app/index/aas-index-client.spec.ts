@@ -85,6 +85,20 @@ vi.mock(import('worker_threads'), () => {
             return this as unknown as MessagePort;
         });
 
+        public once = vi.fn((event: string, handler: (...args: unknown[]) => void) => {
+            if (!this.handlers.has(event)) {
+                this.handlers.set(event, []);
+            }
+
+            const onceHandler = (...args: unknown[]): void => {
+                handler(...args);
+                this.off(event, onceHandler);
+            };
+
+            this.handlers.get(event)!.push(onceHandler);
+            return this as unknown as MessagePort;
+        });
+
         public off = vi.fn((event: string, handler: (...args: unknown[]) => void) => {
             if (this.handlers.has(event)) {
                 const handlers = this.handlers.get(event)!;
@@ -96,6 +110,8 @@ vi.mock(import('worker_threads'), () => {
 
             return this as unknown as MessagePort;
         });
+
+        public close = vi.fn();
     }
 
     return {
@@ -109,6 +125,7 @@ vi.mock(import('worker_threads'), () => {
         isMainThread: true,
         parentPort: {
             on: vi.fn(),
+            once: vi.fn(),
         },
         SHARE_ENV: {},
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

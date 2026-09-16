@@ -23,7 +23,7 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, concatMap, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
 import { AASDocument, AASEndpoint, QueryParser } from 'aas-core';
@@ -37,6 +37,7 @@ import {
     StartService,
     ToolbarService,
     encodeBase64Url,
+    messageToString,
     viewRoutes,
 } from 'aas-lib';
 
@@ -50,7 +51,7 @@ import { INFO } from '../messages';
     selector: 'fhg-shells',
     templateUrl: './shells.component.html',
     styleUrls: ['./shells.component.scss'],
-    imports: [AASTable, NgClass, TranslateDirective, TranslatePipe, NgbModule, FormsModule],
+    imports: [AASTable, NgClass, TranslateDirective, TranslatePipe, NgbModule, NgbTooltip, FormsModule],
 })
 /**
  * Component responsible for managing AAS (Asset Administration Shell) documents and endpoints.
@@ -83,6 +84,8 @@ export class ShellsComponent implements OnDestroy {
     private readonly favorites = inject(FavoritesService);
     private readonly start = inject(StartService);
     private readonly progress = inject(ProgressService);
+    private readonly _filterTooltip = signal('');
+    private readonly _invalidFilter = signal(false);
 
     public constructor() {
         effect(() => {
@@ -194,6 +197,10 @@ export class ShellsComponent implements OnDestroy {
      * Provides a list of available views.
      */
     public readonly views = signal(viewRoutes).asReadonly();
+
+    public readonly filterTooltip = this._filterTooltip.asReadonly();
+
+    public readonly invalidFilter = this._invalidFilter.asReadonly();
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
@@ -316,11 +323,11 @@ export class ShellsComponent implements OnDestroy {
 
     public setFilterText(filterText: string): void {
         try {
+            this._invalidFilter.set(false);
+            this._filterTooltip.set('');
             filterText = filterText.trim();
             if (filterText.length >= 3) {
                 new QueryParser(filterText).check();
-            } else {
-                filterText = '';
             }
 
             this.state.update({ filterText });
@@ -328,7 +335,8 @@ export class ShellsComponent implements OnDestroy {
                 this.state.getFirstPage();
             }
         } catch (error) {
-            this.notify.error(error);
+            this._invalidFilter.set(true);
+            this._filterTooltip.set(messageToString(error, this.translate));
         }
     }
 

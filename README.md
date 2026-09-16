@@ -201,7 +201,6 @@ You can find the detailed changelog [here](read-the-docs/source/changelog/change
 | :------------------ | ----------------------------------------------------------- |
 | Ralf Aron           | [ralfaron](https://github.com/ralfaron)                     |
 | Alexander Wollbrink | [AlexanderWollbrink](https://github.com/AlexanderWollbrink) |
-| Juilee Tikekar      | [juileetikekar](https://github.com/juileetikekar)           |
 | Florian Pethig      | [fpethig](https://github.com/fpethig)                       |
 
 ## Contact

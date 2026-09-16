@@ -61,10 +61,12 @@ vi.mock(import('worker_threads'), () => {
         MessageChannel: class {
             public port1 = {
                 on: vi.fn(),
+                once: vi.fn(),
                 postMessage: vi.fn(),
             };
             public port2 = {
                 on: vi.fn(),
+                once: vi.fn(),
                 postMessage: vi.fn(),
             };
         },

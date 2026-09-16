@@ -29,5 +29,4 @@ declare module 'express-session' {
     }
 }
 
-
 export type EventListener = (...args: unknown[]) => void;
