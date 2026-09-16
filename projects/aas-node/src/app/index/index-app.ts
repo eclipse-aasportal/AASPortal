@@ -126,6 +126,7 @@ export class IndexApp {
                 this.index
                     .getDocuments(
                         data.args.cursor as AASCursor,
+                        data.args.endpoints as string[],
                         data.args.query as string,
                         data.args.language as string,
                     )

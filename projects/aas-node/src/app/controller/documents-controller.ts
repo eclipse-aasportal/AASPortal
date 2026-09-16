@@ -58,7 +58,7 @@ export class DocumentsController extends Controller {
             filter = decodeBase64Url(filter);
         }
 
-        return await this.index.getDocuments(JSON.parse(decodeBase64Url(cursor)), filter, language);
+        return await this.index.getDocuments(JSON.parse(decodeBase64Url(cursor)), [], filter, language);
     }
 
     /**

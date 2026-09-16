@@ -361,6 +361,7 @@
         "CustomerFeedback": "User feedback",
         "DigitalProductPassport": "Product passport",
         "FAVORITES": "All shells",
+        "FILTER_TOOLTIP": "Filter AAS documents.",
         "GenericSubmodel": "Generic view",
         "HandoverDocumentation": "Handover documentation",
         "HierarchicalStructure": "Hierarchical Structures",

@@ -294,7 +294,7 @@ describe('MySqlIndex', () => {
             ];
 
             connection.query.mockResolvedValue([result, []]);
-            await expect(index.getDocuments({ limit: 10 })).resolves.toEqual({
+            await expect(index.getDocuments({ limit: 10 }, [])).resolves.toEqual({
                 documents: [
                     {
                         endpoint: 'Endpoint 1',

@@ -144,10 +144,11 @@ export interface AASIndex {
      * Gets a page of AAS documents.
      *
      * @param cursor The cursor that specifies the page to get (first, previous, next, last).
+     * @param endpoints A list of AAS endpoint names to filter the documents.
      * @param query An optional query expression.
      * @param language Optional the language.
      */
-    getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult>;
+    getDocuments(cursor: AASCursor, endpoints?: string[], query?: string, language?: string): Promise<AASPagedResult>;
 
     /**
      * Gets the documents of the specified endpoint.
