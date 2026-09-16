@@ -609,7 +609,7 @@ export class SqliteIndex implements AASIndex {
                 sql = this.db.prepare(
                     'SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ' +
                         query.createSql(params) +
-                        ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?',
+                        ' ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?',
                 );
             } else {
                 sql = this.db.prepare(

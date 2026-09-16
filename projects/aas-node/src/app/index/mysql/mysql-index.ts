@@ -357,6 +357,7 @@ export class MySqlIndex implements AASIndex {
 
         return document;
     }
+
     public async delete(endpointName: string, id: string): Promise<boolean> {
         const connection = await this.getConnection();
         try {
@@ -528,7 +529,7 @@ export class MySqlIndex implements AASIndex {
                 sql =
                     'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
                     query.createSql(values) +
-                    ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
+                    ' ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
             } else {
                 sql =
                     'SELECT * FROM `documents` WHERE ' +

@@ -40,7 +40,10 @@ const initialData: ShellsData = {
     providedIn: 'root',
 })
 export class ShellsState {
-    private readonly filterText$ = signal(initialData.filterText);
+    private readonly filterText$ = signal(initialData.filterText, {
+        equal: (a, b) => (a.length < 3 && b.length < 3) || a === b,
+    });
+
     private readonly cookies = inject(CookieService);
     private readonly auth = inject(AuthService);
     private readonly translate = inject(TranslateService);
@@ -62,7 +65,7 @@ export class ShellsState {
             };
 
             let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
-            if (filter?.length >= 3) {
+            if (filter) {
                 url += `&filter=${encodeBase64Url(filter)}`;
                 url += `&language=${this.translate.getCurrentLang()}`;
             }
