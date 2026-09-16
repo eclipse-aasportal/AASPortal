@@ -6,7 +6,7 @@ export default defineConfig({
             enabled: true,
             include: ['src/lib/**/*.ts'],
             reportsDirectory: './coverage',
-            reporter: ['text', 'json', 'html', 'clover', 'json-summary'],
+            reporter: ['text-summary', 'json'],
         },
         environment: 'node',
         include: ['src/**/*.spec.ts'],
