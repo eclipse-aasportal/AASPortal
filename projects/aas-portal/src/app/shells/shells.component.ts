@@ -23,7 +23,7 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { NgbModal, NgbModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdown, NgbModal, NgbModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, concatMap, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
 import { AASDocument, AASEndpoint, QueryParser } from 'aas-core';
@@ -38,20 +38,19 @@ import {
     ToolbarService,
     encodeBase64Url,
     messageToString,
-    viewRoutes,
 } from 'aas-lib';
 
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
-import { ShellsState } from './shells.state';
+import { EndpointItem, ShellsState } from './shells.state';
 import { INFO } from '../messages';
 
 @Component({
     selector: 'fhg-shells',
     templateUrl: './shells.component.html',
     styleUrls: ['./shells.component.scss'],
-    imports: [AASTable, NgClass, TranslateDirective, TranslatePipe, NgbModule, NgbTooltip, FormsModule],
+    imports: [AASTable, NgClass, TranslateDirective, TranslatePipe, NgbModule, NgbTooltip, NgbDropdown, FormsModule],
 })
 /**
  * Component responsible for managing AAS (Asset Administration Shell) documents and endpoints.
@@ -60,7 +59,6 @@ import { INFO } from '../messages';
  * - Endpoint management (add, update, remove)
  * - Favorites management
  * - Document filtering and pagination
- * - View navigation
  * - Toolbar integration
  *
  * Key features:
@@ -194,13 +192,16 @@ export class ShellsComponent implements OnDestroy {
     public readonly someSelected = computed(() => this.selected().length > 0);
 
     /**
-     * Provides a list of available views.
+     * Provides the tooltip text for the current filter expression.
      */
-    public readonly views = signal(viewRoutes).asReadonly();
-
     public readonly filterTooltip = this._filterTooltip.asReadonly();
 
+    /**
+     * Indicates whether the current filter expression is invalid.
+     */
     public readonly invalidFilter = this._invalidFilter.asReadonly();
+
+    public readonly endpoints = this.state.endpoints;
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
@@ -246,7 +247,8 @@ export class ShellsComponent implements OnDestroy {
      * @returns An Observable that completes when the download request(s) complete.
      */
     public downloadPackages(): Observable<void> {
-        return from(this.state.selected()).pipe(
+        const documents = this.state.selected();
+        return from(documents).pipe(
             mergeMap(document => this.api.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx')),
             catchError(error => of(this.notify.error(error))),
         );
@@ -265,14 +267,15 @@ export class ShellsComponent implements OnDestroy {
      * @returns Observable that completes when the operation finishes (or EMPTY if there was nothing to delete).
      */
     public deletePackages(): Observable<void> {
-        if (this.state.selected().length === 0) {
+        const documents = this.state.selected();
+        if (documents.length === 0) {
             return EMPTY;
         }
 
         return of(this.favorites.active()).pipe(
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
-                    this.favorites.remove(this.state.selected(), activeFavorites);
+                    this.favorites.remove(documents, activeFavorites);
                     return this.favorites.save();
                 } else {
                     return this.auth.checkAuthorized('user').pipe(
@@ -280,14 +283,11 @@ export class ShellsComponent implements OnDestroy {
                             ConfirmDialog.open(
                                 this.modal,
                                 this.translate.instant('Shells.CONFIRM_DELETE_DOCUMENT', {
-                                    documents: this.state
-                                        .selected()
-                                        .map(item => item.idShort)
-                                        .join(', '),
+                                    documents: documents.map(item => item.idShort).join(', '),
                                 }),
                             ),
                         ),
-                        mergeMap(result => from(result ? this.state.selected() : [])),
+                        mergeMap(result => from(result ? documents : [])),
                         mergeMap(document => this.api.deletePackage(document.id, document.endpoint)),
                         catchError(error => {
                             this.notify.error(error);
@@ -357,9 +357,10 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public addToFavorites(): Observable<void> {
+        const documents = this.state.selected();
         return of(this.modal.open(FavoritesFormComponent, { backdrop: 'static', scrollable: true })).pipe(
             mergeMap(modalRef => {
-                modalRef.componentInstance.documents = [...this.state.selected()];
+                modalRef.componentInstance.documents = [...documents];
                 return from(modalRef.result);
             }),
             map(() => {
@@ -369,7 +370,8 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public addToStart(): Observable<void> {
-        for (const document of this.state.selected()) {
+        const documents = this.state.selected();
+        for (const document of documents) {
             this.start.add('Favorite', `${document.endpoint}.${document.id}`, {
                 href: `/aas;endpoint=${encodeBase64Url(document.endpoint)};id=${encodeBase64Url(document.id)}`,
                 id: document.id,
@@ -378,6 +380,10 @@ export class ShellsComponent implements OnDestroy {
         }
 
         return this.start.save();
+    }
+
+    public toggleCheckEndpoint(checked: boolean, item: EndpointItem): void {
+        this.state.update({ endpoints: [{ ...item, checked }] });
     }
 
     private uploadPackages(files: File[]): Observable<void> {

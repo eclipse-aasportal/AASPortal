@@ -70,12 +70,37 @@
         </div>
 
         <div class="w-100 d-flex flex-row">
-            <div class="input-group me-2 my-1 w-25">
-                <div class="input-group-text">
-                    <i class="bi bi-search"></i>
+            <div class="btn-group input-group me-2 my-1 w-25">
+                <div class="btn-group" ngbDropdown role="group">
+                    <button type="button" class="btn btn-outline-primary" ngbDropdownToggle>
+                        <i class="bi bi-search"></i>
+                    </button>
+                    <div class="dropdown-menu" ngbDropdownMenu>
+                        @for (endpoint of endpoints(); track endpoint.name) {
+                            <div class="form-check ms-3">
+                                <input
+                                    class="form-check-input"
+                                    [id]="'AID_CHECK_ENDPOINT_' + endpoint.name"
+                                    type="checkbox"
+                                    [ngModel]="endpoint.checked"
+                                    (ngModelChange)="toggleCheckEndpoint($event, endpoint)"
+                                />
+                                <label
+                                    class="form-check-label d-flex justify-content-between"
+                                    [for]="'AID_CHECK_ENDPOINT_' + endpoint.name"
+                                >
+                                    <span>{{ endpoint.name }}</span>
+                                    @if (endpoint.locked) {
+                                        <span class="text-body-tertiary">
+                                            <i class="bi bi-lock-fill me-2"></i>
+                                        </span>
+                                    }
+                                </label>
+                            </div>
+                        }
+                    </div>
                 </div>
                 <input
-                    #textInput
                     type="search"
                     [ngClass]="invalidFilter() ? 'form-control text-danger' : 'form-control'"
                     [placeholder]="'Shells.PLACEHOLDER_FILTER' | translate"
@@ -123,28 +148,6 @@
                     </button>
                 </div>
             </div>
-
-            <div class="btn-group me-2 my-1 ms-auto">
-                <div ngbDropdown class="btn-group" role="group">
-                    <div>
-                        <i class="bi bi-view-stacked text-primary me-0"></i>
-                        <button
-                            type="button"
-                            class="btn ms-0 fw-semibold btn-views"
-                            ngbDropdownToggle
-                            id="selectEndpoints"
-                            translate="Shells.VIEWS"
-                        ></button>
-                    </div>
-                    <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
-                        @for (view of views(); track view.path) {
-                            <button ngbDropdownItem (click)="openView(view)" [disabled]="someSelected() === false">
-                                {{ 'Shells.' + view.path | translate }}
-                            </button>
-                        }
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -154,15 +157,16 @@
                 <i class="bi bi-search"></i>
             </div>
             <input
-                #textInput
                 type="search"
-                class="form-control"
+                [ngClass]="invalidFilter() ? 'form-control text-danger' : 'form-control'"
                 [placeholder]="'Shells.PLACEHOLDER_FILTER' | translate"
                 [ngModel]="filterText()"
                 (ngModelChange)="setFilterText($event)"
-                [ngModelOptions]="{ updateOn: 'blur' }"
-                (keydown.enter)="textInput.blur()"
                 (search)="setFilterText('')"
+                [ngbTooltip]="filterTooltip()"
+                placement="bottom"
+                [openDelay]="300"
+                [closeDelay]="500"
             />
         </div>
     </div>
