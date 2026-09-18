@@ -54,8 +54,10 @@ describe('EndpointController', () => {
             'findEndpoint',
             'getEndpoints',
             'getEndpointCount',
+            'getDocumentCount',
             'deleteEndpoint',
         ]);
+
         index.clear.mockResolvedValue();
         index.getEndpoints.mockResolvedValue([]);
         index.getEndpointCount.mockResolvedValue(1);
@@ -75,6 +77,38 @@ describe('EndpointController', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.clearAllMocks();
+    });
+
+    describe('getEndpointCount', () => {
+        it('returns the number of endpoints', async () => {
+            index.getEndpoints.mockResolvedValue([endpoint]);
+            const count = await provider.getEndpointCount();
+            expect(count).toBe(1);
+        });
+    });
+
+    describe('getEndpoints', () => {
+        it('returns all current available endpoints', async () => {
+            index.getEndpoints.mockResolvedValue([endpoint]);
+            const endpoints = await provider.getEndpoints();
+            expect(endpoints).toEqual([endpoint]);
+        });
+    });
+
+    describe('getDocumentCount', () => {
+        it('returns the total number of AAS documents', async () => {
+            index.getDocumentCount.mockResolvedValue(5);
+            const count = await provider.getDocumentCount();
+            expect(count).toBe(5);
+        });
+    });
+
+    describe('getEndpointDocumentCount', () => {
+        it('returns the number of documents for the specified AAS endpoint', async () => {
+            index.getDocumentCount.mockResolvedValue(3);
+            const count = await provider.getEndpointDocumentCount('endpointName');
+            expect(count).toBe(3);
+        });
     });
 
     describe('addEndpoint', () => {

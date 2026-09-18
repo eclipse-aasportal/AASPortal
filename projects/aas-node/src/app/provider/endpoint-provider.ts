@@ -65,6 +65,39 @@ export class EndpointProvider {
     }
 
     /**
+     * Gets the number of AAS endpoints.
+     * @returns The number of AAS endpoints.
+     */
+    public getEndpointCount(): Promise<number> {
+        return this.index.getEndpointCount();
+    }
+
+    /**
+     * Gets all current available AAS endpoints.
+     * @returns The AAS endpoints.
+     */
+    public getEndpoints(): Promise<AASEndpoint[]> {
+        return this.index.getEndpoints();
+    }
+
+    /**
+     * Gets the total number of AAS documents.
+     * @returns The total number of AAS documents.
+     */
+    public getDocumentCount(): Promise<number> {
+        return this.index.getDocumentCount();
+    }
+
+    /**
+     * Gets the number of documents for the specified AAS endpoint.
+     * @param name The AAS endpoint name.
+     * @returns The number of documents for the specified AAS endpoint.
+     */
+    public async getEndpointDocumentCount(name: string): Promise<number> {
+        return this.index.getDocumentCount(name);
+    }
+
+    /**
      * Adds a new endpoint.
      * @param endpoint The endpoint to add.
      */

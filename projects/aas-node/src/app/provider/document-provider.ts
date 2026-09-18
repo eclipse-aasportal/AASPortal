@@ -19,6 +19,8 @@ import {
     selectReferable,
     AASEndpointAuth,
     isLoadedEnvironment,
+    AASCursor,
+    AASPagedResult,
 } from 'aas-core';
 
 import { ImageProcessing } from '../image-processing.js';
@@ -34,6 +36,23 @@ export class DocumentProvider {
         @inject(AAS_INDEX) private readonly index: AASIndex,
         @inject(LOGGER) private readonly logger: Logger,
     ) {}
+
+    /**
+     * Gets a limited number of AAS documents from a given position. Limit and position are stored in a cursor object.
+     * @param cursor The current cursor.
+     * @param endpoints A list of endpoint names (Base64-URL encoded).
+     * @param filter A filter expression.
+     * @param language The language of the filter expression.
+     * @returns A page of AAS documents.
+     */
+    public async getDocuments(
+        cursor: AASCursor,
+        endpoints?: string[],
+        filter?: string,
+        language?: string,
+    ): Promise<AASPagedResult> {
+        return await this.index.getDocuments(cursor, endpoints, filter, language);
+    }
 
     /**
      * Gets the AAS document with the specified identifier.
