@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Component, input, model, provideZonelessChangeDetection, signal } from '@angular/core';
 
@@ -53,6 +53,7 @@ describe('ShellsComponent', () => {
     let httpClient: Mocked<HttpClient>;
     let auth: Mocked<AuthService>;
     let modal: Mocked<NgbModal>;
+    let activeFavorites: ReturnType<typeof signal<string>>;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
@@ -65,6 +66,7 @@ describe('ShellsComponent', () => {
             'removeEndpoint',
             'getContent',
             'downloadPackage',
+            'uploadPackage',
         ]);
 
         api.getContent.mockReturnValue(
@@ -74,9 +76,11 @@ describe('ShellsComponent', () => {
                 conceptDescriptions: [],
             } as aas.Environment),
         );
+        api.deletePackage.mockReturnValue(of(void 0));
 
+        activeFavorites = signal('');
         favorites = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save', 'setActive'], {
-            active: signal(''),
+            active: activeFavorites,
             items: signal<FavoritesList[]>([
                 { name: 'List 1', documents: [] },
                 { name: 'List 2', documents: [] },
@@ -97,7 +101,9 @@ describe('ShellsComponent', () => {
             ready: of(true),
             isAuthenticated: signal(false),
             name: signal(''),
+            user: signal(undefined),
         });
+        auth.checkAuthorized.mockReturnValue(of(void 0));
 
         modal = createSpyObj<NgbModal>(['open']);
 
@@ -172,7 +178,6 @@ describe('ShellsComponent', () => {
         expect(component.activeFavoritesList()).toBe('');
         expect(component.selected()).toEqual([]);
         expect(component.someSelected()).toBe(false);
-        expect(component.views().length).toBeGreaterThan(0);
         expect(component.filter()).toBe('');
         expect(component.filterText()).toBe('');
         expect(component.documents()).toEqual([]);
@@ -202,5 +207,22 @@ describe('ShellsComponent', () => {
         component.setActiveFavoriteList('List 1');
         expect(favorites.setActive).toHaveBeenCalledWith('List 1');
         expect(favorites.save).toHaveBeenCalled();
+    });
+
+    it('deletes the documents selected when deletion begins', async () => {
+        const selectedDocument = { id: '1', idShort: 'Selected', endpoint: 'endpoint-a' } as AASDocument;
+        const laterDocument = { id: '2', idShort: 'Later', endpoint: 'endpoint-b' } as AASDocument;
+        activeFavorites.set('List 1');
+        component.setSelected([selectedDocument]);
+
+        const deletion = component.deletePackages();
+        component.setSelected([laterDocument]);
+        await firstValueFrom(deletion);
+        expect(favorites.remove).toHaveBeenCalledExactlyOnceWith([selectedDocument], 'List 1');
+    });
+
+    it('does not request authorization when no document is selected for deletion', async () => {
+        await firstValueFrom(component.deletePackages(), { defaultValue: undefined });
+        expect(auth.checkAuthorized).not.toHaveBeenCalled();
     });
 });

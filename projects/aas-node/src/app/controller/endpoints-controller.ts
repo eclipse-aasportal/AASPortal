@@ -43,11 +43,10 @@ export class EndpointsController extends Controller {
     }
 
     /**
-     * @summary Gets the endpoints.
-     * @returns All current available endpoints.
+     * @summary Gets the current registered AAS endpoints.
+     * @returns All current registered endpoints.
      */
     @Get('')
-    @Security('oauth2', ['user', 'admin'])
     @OperationId('GetEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
         return (await this.provider.getEndpoints()).map(endpoint => {
