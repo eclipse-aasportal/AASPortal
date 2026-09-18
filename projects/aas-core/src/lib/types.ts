@@ -87,7 +87,9 @@ export type UpdateIndexStatus = {
 
 /** Authentication of a user for an AAS endpoint. */
 export interface AASEndpointAuth {
+    /** The name of the AAS endpoint. */
     name: string;
+    /** The HTTP request headers to use for authenticating requests.  */
     headers: Record<string, string>;
 }
 
@@ -95,7 +97,7 @@ export interface AASEndpointAuth {
 export interface AASDocumentId {
     /** The identification of the Asset Administration Shell. */
     id: string;
-    /** The name of the endpoint. */
+    /** The name of the AAS endpoint. */
     endpoint: string;
 }
 
@@ -125,8 +127,11 @@ export interface AASPagedResult {
 
 /** Represents a cursor in the collection of Asset Administration Shells. */
 export interface AASCursor {
+    /** The previous page in the collection, or `null` if at the beginning */
     previous?: AASDocumentId | null;
+    /** The maximum items in the page returned. */
     limit: number;
+    /** The next page in the collection, or `null` if at the end */
     next?: AASDocumentId | null;
 }
 

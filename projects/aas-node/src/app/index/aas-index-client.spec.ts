@@ -451,12 +451,12 @@ describe('AASIndexClient', () => {
         });
 
         const cursor: AASCursor = { limit: 42 };
-        const result = await client.getDocuments(cursor, 'query1', 'en');
+        const result = await client.getDocuments(cursor, [], 'query1', 'en');
         expect(result).toEqual({ items: [{ id: 'doc1' }, { id: 'doc2' }], totalCount: 2 });
         expect(port.postMessage).toHaveBeenCalledWith({
             type: 'command',
             name: 'GetDocuments',
-            args: { cursor: { limit: 42 }, query: 'query1', language: 'en' },
+            args: { cursor: { limit: 42 }, query: 'query1', endpoints: [], language: 'en' },
             id: 0,
         });
     });

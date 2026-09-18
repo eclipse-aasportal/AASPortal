@@ -20,35 +20,34 @@ import { RegisterRoutes } from '../routes/routes.js';
 import { Authentication } from './authentication.js';
 import { errorHandler } from '../../test/assets/error-handler.js';
 import { EndpointProvider } from '../provider/endpoint-provider.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
 import { USER_RIGHTS_STORE, UserRightsStore } from '../auth/user-rights-store.js';
-import { AAS_INDEX } from '../index/aas-index.js';
 
 describe('EndpointsController', () => {
     let app: Express;
     let provider: Mocked<EndpointProvider>;
     let authentication: Mocked<Authentication>;
-    let index: Mocked<AASIndexClient>;
     let userRightsStore: Mocked<UserRightsStore>;
 
     beforeEach(() => {
         provider = createSpyObj<EndpointProvider>([
             'addEndpoint',
-            'updateEndpoint',
+            'cancelEndpointScan',
+            'getDocumentCount',
+            'getEndpointCount',
+            'getEndpointDocumentCount',
+            'getEndpoints',
+            'getUpdateStatus',
             'removeEndpoint',
             'startEndpointScan',
-            'cancelEndpointScan',
-            'getUpdateStatus',
+            'updateEndpoint',
         ]);
 
-        index = createSpyObj<AASIndexClient>(['getEndpoints', 'getEndpointCount', 'getDocumentCount']);
         authentication = createSpyObj<Authentication>(['authentication']);
         authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
         userRightsStore = createSpyObj<UserRightsStore>(['getEndpoints', 'update']);
 
         container.registerInstance(EndpointProvider, provider);
         container.registerInstance(Authentication, authentication);
-        container.registerInstance(AAS_INDEX, index);
         container.registerInstance(USER_RIGHTS_STORE, userRightsStore);
 
         app = express();
@@ -75,35 +74,35 @@ describe('EndpointsController', () => {
             type: 'AAS_API',
         };
 
-        index.getEndpoints.mockResolvedValue([endpoints]);
+        provider.getEndpoints.mockResolvedValue([endpoints]);
         const response = await request(app).get('/api/v1/endpoints');
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual([endpoints]);
-        expect(index.getEndpoints).toHaveBeenCalled();
+        expect(provider.getEndpoints).toHaveBeenCalled();
     });
 
     it('GET: /api/v1/endpoints/endpoint-count', async () => {
-        index.getEndpointCount.mockResolvedValue(42);
+        provider.getEndpointCount.mockResolvedValue(42);
         const response = await request(app).get('/api/v1/endpoints/endpoint-count');
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(42);
-        expect(index.getEndpointCount).toHaveBeenCalled();
+        expect(provider.getEndpointCount).toHaveBeenCalled();
     });
 
     it('GET: /api/v1/endpoints/document-count', async () => {
-        index.getDocumentCount.mockResolvedValue(42);
+        provider.getDocumentCount.mockResolvedValue(42);
         const response = await request(app).get('/api/v1/endpoints/document-count');
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(42);
-        expect(index.getDocumentCount).toHaveBeenCalledWith();
+        expect(provider.getDocumentCount).toHaveBeenCalledWith();
     });
 
     it('GET: /api/v1/endpoints/{name}/document-count', async () => {
-        index.getDocumentCount.mockResolvedValue(42);
+        provider.getEndpointDocumentCount.mockResolvedValue(42);
         const response = await request(app).get('/api/v1/endpoints/U2FtcGxlcw/document-count');
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(42);
-        expect(index.getDocumentCount).toHaveBeenCalledWith('Samples');
+        expect(provider.getEndpointDocumentCount).toHaveBeenCalledWith('Samples');
     });
 
     it('POST: /api/v1/endpoints', async () => {

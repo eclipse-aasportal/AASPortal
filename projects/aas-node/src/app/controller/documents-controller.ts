@@ -27,22 +27,19 @@ import {
 import { aas, AASDocument, AASPagedResult } from 'aas-core';
 import { decodeBase64Url } from 'aas-package';
 import { DocumentProvider } from '../provider/document-provider.js';
-import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
 
 @injectable()
 @Route('/api/v1')
 @Tags('Documents')
 export class DocumentsController extends Controller {
-    public constructor(
-        @inject(DocumentProvider) private readonly provider: DocumentProvider,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
-    ) {
+    public constructor(@inject(DocumentProvider) private readonly provider: DocumentProvider) {
         super();
     }
 
     /**
      * @summary Returns a limited number of AAS documents from a given position. Limit and position are stored in a cursor object.
      * @param cursor The current cursor.
+     * @param endpoints A list of endpoint names (Base-64-URL encoded)
      * @param filter A filter expression.
      * @param language The filter expression language.
      * @returns A page of AAS documents.
@@ -51,14 +48,16 @@ export class DocumentsController extends Controller {
     @OperationId('getDocuments')
     public async getDocuments(
         @Query() cursor: string,
+        @Query('endpoint') endpoints?: string[],
         @Query() filter?: string,
         @Query() language?: string,
     ): Promise<AASPagedResult> {
-        if (filter) {
-            filter = decodeBase64Url(filter);
-        }
-
-        return await this.index.getDocuments(JSON.parse(decodeBase64Url(cursor)), filter, language);
+        return await this.provider.getDocuments(
+            JSON.parse(decodeBase64Url(cursor)),
+            endpoints?.map(decodeBase64Url),
+            filter ? decodeBase64Url(filter) : undefined,
+            language,
+        );
     }
 
     /**

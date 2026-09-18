@@ -84,7 +84,7 @@ export class ShellsComponent implements OnDestroy {
     private readonly favorites = inject(FavoritesService);
     private readonly start = inject(StartService);
     private readonly progress = inject(ProgressService);
-    private readonly _filterTooltip = signal('');
+    private readonly _filterTooltip = signal(this.translate.instant('Shells.FILTER_TOOLTIP'));
     private readonly _invalidFilter = signal(false);
 
     public constructor() {
@@ -324,7 +324,7 @@ export class ShellsComponent implements OnDestroy {
     public setFilterText(filterText: string): void {
         try {
             this._invalidFilter.set(false);
-            this._filterTooltip.set('');
+            this._filterTooltip.set(this.translate.instant('Shells.FILTER_TOOLTIP'));
             filterText = filterText.trim();
             if (filterText.length >= 3) {
                 new QueryParser(filterText).check();

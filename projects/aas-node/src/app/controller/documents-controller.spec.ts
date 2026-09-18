@@ -22,27 +22,29 @@ import { Variable } from '../variable.js';
 import { RegisterRoutes } from '../routes/routes.js';
 import { Authentication } from './authentication.js';
 import { errorHandler } from '../../test/assets/error-handler.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
-import { AAS_INDEX } from '../index/aas-index.js';
 
 describe('DocumentsController', () => {
     let app: Express;
     let logger: Logger;
     let provider: Mocked<DocumentProvider>;
-    let index: Mocked<AASIndexClient>;
     let variable: Mocked<Variable>;
     let authentication: Mocked<Authentication>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         variable = createSpyObj<Variable>({}, {});
-        index = createSpyObj<AASIndexClient>(['getDocuments', 'getEndpoints', 'getEndpoint', 'find', 'getCount'], {});
-        provider = createSpyObj<DocumentProvider>(['updateDocument', 'getDocument', 'getDataElementValue', 'invoke']);
+        provider = createSpyObj<DocumentProvider>([
+            'getDocuments',
+            'updateDocument',
+            'getDocument',
+            'getDataElementValue',
+            'invoke',
+        ]);
+
         authentication = createSpyObj<Authentication>(['authentication']);
         authentication.authentication.mockResolvedValue({ id: 'john.doe@email.com', name: 'John Doe' });
 
         container.registerInstance(LOGGER, logger);
-        container.registerInstance(AAS_INDEX, index);
         container.registerInstance(Variable, variable);
         container.registerInstance(DocumentProvider, provider);
         container.registerInstance(Authentication, authentication);
@@ -80,13 +82,28 @@ describe('DocumentsController', () => {
 
     it('getDocuments: /api/v1/documents?cursor=<cursor>&filter=<filter>', async () => {
         const page: AASPagedResult = { previous: null, documents: [sampleDocument], next: null };
-        index.getDocuments.mockResolvedValue(page);
+        provider.getDocuments.mockResolvedValue(page);
         const cursor = encodeBase64Url(JSON.stringify({ previous: null, limit: 10 } as AASCursor));
         const filter = encodeBase64Url('#prop:Name=Value');
         const response = await request(app).get(`/api/v1/documents?cursor=${cursor}&filter=${filter}`);
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual(page);
-        expect(index.getDocuments).toHaveBeenCalled();
+        expect(provider.getDocuments).toHaveBeenCalled();
+    });
+
+    it('getDocuments: /api/v1/documents?cursor=<cursor>&endpoint=<endpoint>', async () => {
+        const page: AASPagedResult = { previous: null, documents: [sampleDocument], next: null };
+        provider.getDocuments.mockResolvedValue(page);
+        const cursor = encodeBase64Url(JSON.stringify({ previous: null, limit: 10 } as AASCursor));
+        const endpoint1 = encodeBase64Url('Endpoint 1');
+        const endpoint2 = encodeBase64Url('Endpoint 2');
+        const response = await request(app).get(
+            `/api/v1/documents?cursor=${cursor}&endpoint=${endpoint1}&endpoint=${endpoint2}`,
+        );
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual(page);
+        expect(provider.getDocuments).toHaveBeenCalled();
     });
 
     it('GET: /api/v1/endpoints/{name}/documents/{id}', async () => {

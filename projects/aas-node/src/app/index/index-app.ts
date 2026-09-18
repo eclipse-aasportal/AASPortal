@@ -10,7 +10,15 @@ import { container, singleton } from 'tsyringe';
 import { parentPort, MessagePort } from 'worker_threads';
 import { aas, AASCursor, AASDocument, AASEndpoint } from 'aas-core';
 import { ErrorData, isCommandData, LOGGER, LoggerProxy, ResponseData, WorkerData } from 'aas-package';
-import { AAS_INDEX, ChannelCommand, ChannelError, ChannelResponse, CommandName } from './aas-index.js';
+import {
+    AAS_INDEX,
+    ChannelCommand,
+    ChannelData,
+    ChannelError,
+    ChannelResponse,
+    CommandName,
+    isChannelCommand,
+} from './aas-index.js';
 
 @singleton()
 export class IndexApp {
@@ -59,10 +67,12 @@ export class IndexApp {
         }
     };
 
-    private readonly onMessage = (port: MessagePort, data: ChannelCommand): void => {
-        this.messageQueue.push([port, data]);
-        if (this.messageQueue.length === 1) {
-            setImmediate(this.execute);
+    private readonly onMessage = (port: MessagePort, data: ChannelData): void => {
+        if (isChannelCommand(data)) {
+            this.messageQueue.push([port, data]);
+            if (this.messageQueue.length === 1) {
+                setImmediate(this.execute);
+            }
         }
     };
 
@@ -126,6 +136,7 @@ export class IndexApp {
                 this.index
                     .getDocuments(
                         data.args.cursor as AASCursor,
+                        data.args.endpoints as string[],
                         data.args.query as string,
                         data.args.language as string,
                     )

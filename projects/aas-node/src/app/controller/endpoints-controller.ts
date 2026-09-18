@@ -30,7 +30,6 @@ import { decodeBase64Url } from 'aas-package';
 import { EndpointProvider } from '../provider/endpoint-provider.js';
 import { ERRORS } from '../errors.js';
 import { USER_RIGHTS_STORE, UserRightsStore } from '../auth/user-rights-store.js';
-import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
@@ -39,7 +38,6 @@ export class EndpointsController extends Controller {
     public constructor(
         @inject(EndpointProvider) private readonly provider: EndpointProvider,
         @inject(USER_RIGHTS_STORE) private readonly userRightsStore: UserRightsStore,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
     ) {
         super();
     }
@@ -52,7 +50,7 @@ export class EndpointsController extends Controller {
     @Security('oauth2', ['user', 'admin'])
     @OperationId('GetEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
-        return (await this.index.getEndpoints()).map(endpoint => {
+        return (await this.provider.getEndpoints()).map(endpoint => {
             if (endpoint.headers) {
                 const headers: Record<string, string> = {};
                 for (const key in endpoint.headers) {
@@ -73,7 +71,7 @@ export class EndpointsController extends Controller {
     @Get('endpoint-count')
     @OperationId('GetEndpointCount')
     public async getEndpointCount(): Promise<number> {
-        return await this.index.getEndpointCount();
+        return await this.provider.getEndpointCount();
     }
 
     /**
@@ -83,7 +81,7 @@ export class EndpointsController extends Controller {
     @Get('document-count')
     @OperationId('GetDocumentCount')
     public async getDocumentCount(): Promise<number> {
-        return await this.index.getDocumentCount();
+        return await this.provider.getDocumentCount();
     }
 
     /**
@@ -94,7 +92,7 @@ export class EndpointsController extends Controller {
     @Get('{name}/document-count')
     @OperationId('GetEndpointDocumentCount')
     public async getEndpointDocumentCount(@Path() name: string): Promise<number> {
-        return await this.index.getDocumentCount(decodeBase64Url(name));
+        return await this.provider.getEndpointDocumentCount(decodeBase64Url(name));
     }
 
     /**

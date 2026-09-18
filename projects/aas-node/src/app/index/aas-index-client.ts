@@ -107,8 +107,13 @@ export class AASIndexClient implements AASIndex, Connectable, Disposable {
         return this.invoke('DeleteEndpoint', { endpoint }) as Promise<boolean>;
     }
 
-    public getDocuments(cursor: AASCursor, query?: string, language?: string): Promise<AASPagedResult> {
-        return this.invoke('GetDocuments', { cursor, query, language }) as Promise<AASPagedResult>;
+    public getDocuments(
+        cursor: AASCursor,
+        endpoints?: string[],
+        query?: string,
+        language?: string,
+    ): Promise<AASPagedResult> {
+        return this.invoke('GetDocuments', { cursor, endpoints, query, language }) as Promise<AASPagedResult>;
     }
 
     public getEndpointDocuments(

@@ -24,15 +24,15 @@ describe('SqliteIndex', () => {
         index = new SqliteIndex(logger, keywords, ':memory:');
     });
 
-    function createDocument(assetId: string = 'asset-1'): AASDocument {
+    function createDocument(index: number = 1, endpoint = 'Endpoint 1'): AASDocument {
         return {
-            address: 'https://example.com/aas-1',
-            endpoint: 'Endpoint 1',
-            id: 'aas-1',
-            idShort: 'AAS 1',
-            assetId,
+            address: `https://example.com/aas-${index}`,
+            endpoint,
+            id: `aas-${index}`,
+            idShort: `AAS ${index}`,
+            assetId: `asset-${index}`,
             thumbnail: null,
-            timestamp: 1,
+            timestamp: index,
             content: null,
         };
     }
@@ -42,15 +42,6 @@ describe('SqliteIndex', () => {
             name,
             url: `https://example.com/${name}`,
             type: 'AAS_API',
-        };
-    }
-
-    function createDocumentWithId(id: string, endpoint: string = 'Endpoint 1'): AASDocument {
-        return {
-            ...createDocument(`asset-${id}`),
-            endpoint,
-            id,
-            idShort: `AAS ${id}`,
         };
     }
 
@@ -73,9 +64,9 @@ describe('SqliteIndex', () => {
     });
 
     it('counts documents and returns endpoint pages in identifier order', async () => {
-        await index.insert(createDocumentWithId('aas-2'));
-        await index.insert(createDocumentWithId('aas-1'));
-        await index.insert(createDocumentWithId('aas-3', 'Endpoint 2'));
+        await index.insert(createDocument(2));
+        await index.insert(createDocument(1));
+        await index.insert(createDocument(3, 'Endpoint 2'));
 
         await expect(index.getDocumentCount()).resolves.toBe(3);
         await expect(index.getDocumentCount('Endpoint 1')).resolves.toBe(2);
@@ -99,8 +90,8 @@ describe('SqliteIndex', () => {
     });
 
     it('clears documents and concept descriptions for an endpoint', async () => {
-        await index.insert(createDocumentWithId('aas-1'));
-        await index.insert(createDocumentWithId('aas-2', 'Endpoint 2'));
+        await index.insert(createDocument(1));
+        await index.insert(createDocument(2, 'Endpoint 2'));
         await index.setSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1', ['concept-description-1']);
 
         await index.clear('Endpoint 1');
@@ -119,8 +110,9 @@ describe('SqliteIndex', () => {
     });
 
     it('updates the indexed asset identifier', async () => {
-        await index.insert(createDocument());
-        await index.update(createDocument('asset-2'));
+        const doc = createDocument(1);
+        await index.insert(doc);
+        await index.update({ ...doc, assetId: 'asset-2' });
 
         await expect(index.find('Endpoint 1', 'Asset', 'asset-1')).resolves.toBeUndefined();
         await expect(index.find('Endpoint 1', 'Asset', 'asset-2')).resolves.toMatchObject({ id: 'aas-1' });
@@ -136,5 +128,91 @@ describe('SqliteIndex', () => {
             'concept-description-1',
             'concept-description-2',
         ]);
+    });
+
+    describe('getDocuments forward', () => {
+        beforeEach(async () => {
+            for (let i = 1; i <= 5; ++i) {
+                await index.insert(createDocument(i, `Endpoint ${1}`));
+            }
+
+            for (let i = 6; i <= 10; ++i) {
+                await index.insert(createDocument(i, `Endpoint ${2}`));
+            }
+        });
+
+        it('returns all documents', async () => {
+            const page1 = await index.getDocuments({ previous: null, limit: 4 });
+            const page2 = await index.getDocuments({ limit: 4, next: page1.next });
+            const page3 = await index.getDocuments({ limit: 4, next: page2.next });
+            expect(page1.documents.map(item => item.id)).toEqual(['aas-1', 'aas-2', 'aas-3', 'aas-4']);
+            expect(page2.documents.map(item => item.id)).toEqual(['aas-5', 'aas-10', 'aas-6', 'aas-7']);
+            expect(page3.documents.map(item => item.id)).toEqual(['aas-8', 'aas-9']);
+        });
+
+        it('returns all documents overall endpoints', async () => {
+            const page1 = await index.getDocuments({ previous: null, limit: 4 }, ['Endpoint 1', 'Endpoint 2']);
+            const page2 = await index.getDocuments({ limit: 4, next: page1.next }, ['Endpoint 1', 'Endpoint 2']);
+            const page3 = await index.getDocuments({ limit: 4, next: page2.next }, ['Endpoint 1', 'Endpoint 2']);
+            expect(page1.documents.map(item => item.id)).toEqual(['aas-1', 'aas-2', 'aas-3', 'aas-4']);
+            expect(page2.documents.map(item => item.id)).toEqual(['aas-5', 'aas-10', 'aas-6', 'aas-7']);
+            expect(page3.documents.map(item => item.id)).toEqual(['aas-8', 'aas-9']);
+        });
+
+        it('returns all documents of Endpoint 1', async () => {
+            const page1 = await index.getDocuments({ previous: null, limit: 2 }, ['Endpoint 1']);
+            const page2 = await index.getDocuments({ limit: 2, next: page1.next }, ['Endpoint 1']);
+            const page3 = await index.getDocuments({ limit: 2, next: page2.next }, ['Endpoint 1']);
+            expect(page1.documents.map(item => item.id)).toEqual(['aas-1', 'aas-2']);
+            expect(page2.documents.map(item => item.id)).toEqual(['aas-3', 'aas-4']);
+            expect(page3.documents.map(item => item.id)).toEqual(['aas-5']);
+        });
+    });
+
+    describe('getDocuments reward', () => {
+        beforeEach(async () => {
+            for (let i = 1; i <= 5; ++i) {
+                await index.insert(createDocument(i, `Endpoint ${1}`));
+            }
+
+            for (let i = 6; i <= 10; ++i) {
+                await index.insert(createDocument(i, `Endpoint ${2}`));
+            }
+        });
+
+        it('returns all documents', async () => {
+            const page1 = await index.getDocuments({ limit: 4, next: null });
+            const page2 = await index.getDocuments({ previous: page1.previous, limit: 4 });
+            const page3 = await index.getDocuments({ previous: page2.previous, limit: 4 });
+            expect(page1.documents.map(item => item.id)).toEqual(['aas-6', 'aas-7', 'aas-8', 'aas-9']);
+            expect(page2.documents.map(item => item.id)).toEqual(['aas-3', 'aas-4', 'aas-5', 'aas-10']);
+            expect(page3.documents.map(item => item.id)).toEqual(['aas-1', 'aas-2']);
+        });
+
+        it('returns all documents overall endpoints', async () => {
+            const page1 = await index.getDocuments({ limit: 4, next: null }, ['Endpoint 1', 'Endpoint 2']);
+            const page2 = await index.getDocuments({ previous: page1.previous, limit: 4 }, [
+                'Endpoint 1',
+                'Endpoint 2',
+            ]);
+
+            const page3 = await index.getDocuments({ previous: page2.previous, limit: 4 }, [
+                'Endpoint 1',
+                'Endpoint 2',
+            ]);
+
+            expect(page1.documents.map(item => item.id)).toEqual(['aas-6', 'aas-7', 'aas-8', 'aas-9']);
+            expect(page2.documents.map(item => item.id)).toEqual(['aas-3', 'aas-4', 'aas-5', 'aas-10']);
+            expect(page3.documents.map(item => item.id)).toEqual(['aas-1', 'aas-2']);
+        });
+
+        it('returns all documents of Endpoint 2', async () => {
+            const page1 = await index.getDocuments({ limit: 2, next: null }, ['Endpoint 2']);
+            const page2 = await index.getDocuments({ previous: page1.previous, limit: 2 }, ['Endpoint 2']);
+            const page3 = await index.getDocuments({ previous: page2.previous, limit: 2 }, ['Endpoint 2']);
+            expect(page1.documents.map(item => item.id)).toEqual(['aas-8', 'aas-9']);
+            expect(page2.documents.map(item => item.id)).toEqual(['aas-6', 'aas-7']);
+            expect(page3.documents.map(item => item.id)).toEqual(['aas-10']);
+        });
     });
 });
