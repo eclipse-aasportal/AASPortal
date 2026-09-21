@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Route, Router } from '@angular/router';
-import { NgClass } from '@angular/common';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
 import {
@@ -25,7 +25,7 @@ import {
 
 import { NgbDropdown, NgbModal, NgbModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { catchError, concatMap, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
+import { catchError, concatMap, EMPTY, from, map, mergeMap, Observable, of, tap } from 'rxjs';
 import { AASDocument, AASEndpoint, QueryParser } from 'aas-core';
 import {
     AASTable,
@@ -50,7 +50,17 @@ import { INFO } from '../messages';
     selector: 'fhg-shells',
     templateUrl: './shells.component.html',
     styleUrls: ['./shells.component.scss'],
-    imports: [AASTable, NgClass, TranslateDirective, TranslatePipe, NgbModule, NgbTooltip, NgbDropdown, FormsModule],
+    imports: [
+        AASTable,
+        NgClass,
+        TranslateDirective,
+        TranslatePipe,
+        NgbModule,
+        NgbTooltip,
+        NgbDropdown,
+        FormsModule,
+        NgTemplateOutlet,
+    ],
 })
 /**
  * Component responsible for managing AAS (Asset Administration Shell) documents and endpoints.
@@ -247,8 +257,11 @@ export class ShellsComponent implements OnDestroy {
      * @returns An Observable that completes when the download request(s) complete.
      */
     public downloadPackages(): Observable<void> {
-        const documents = this.state.selected();
-        return from(documents).pipe(
+        if (!this.auth.isAuthenticated()) {
+            return this.auth.login();
+        }
+
+        return from(this.state.selected()).pipe(
             mergeMap(document => this.api.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx')),
             catchError(error => of(this.notify.error(error))),
         );
@@ -269,7 +282,7 @@ export class ShellsComponent implements OnDestroy {
     public deletePackages(): Observable<void> {
         const documents = this.state.selected();
         if (documents.length === 0) {
-            return EMPTY;
+            return of(void 0);
         }
 
         return of(this.favorites.active()).pipe(
@@ -278,7 +291,11 @@ export class ShellsComponent implements OnDestroy {
                     this.favorites.remove(documents, activeFavorites);
                     return this.favorites.save();
                 } else {
-                    return this.auth.checkAuthorized('user').pipe(
+                    if (!this.auth.isAuthenticated()) {
+                        return this.auth.login();
+                    }
+
+                    return this.auth.checkAuthorized('editor').pipe(
                         mergeMap(() =>
                             ConfirmDialog.open(
                                 this.modal,
@@ -386,9 +403,16 @@ export class ShellsComponent implements OnDestroy {
         this.state.update({ endpoints: [{ ...item, checked }] });
     }
 
+    public selectFiles(): Observable<void> {
+        if (!this.auth.isAuthenticated()) {
+            return this.auth.login();
+        }
+
+        return this.auth.checkAuthorized('editor').pipe(tap(() => this.inputFiles()?.nativeElement.click()));
+    }
+
     private uploadPackages(files: File[]): Observable<void> {
-        return this.auth.checkAuthorized('user').pipe(
-            mergeMap(() => this.api.getEndpoints()),
+        return this.api.getEndpoints().pipe(
             mergeMap(endpoints => {
                 if (endpoints.length <= 1) {
                     return of(endpoints.at(0));

@@ -16,7 +16,7 @@
         "TITLE": "AAS-Baum",
         "EMPTY": "Kein AAS-Document verfügbar."
     },
-     "AASTable": {
+    "AASTable": {
         "COLUMN_NAME": "Name",
         "COLUMN_ID": "ID",
         "COLUMN_ENDPOINT": "Endpunkt",
@@ -258,6 +258,7 @@
         "ABOUT": "Über",
         "DASHBOARD": "Dashboard",
         "DATA_PROTECTION_POLICY": "Datenschutzerklärung",
+        "DATA_PROTECTION_POLICY_ABBR": "DSE",
         "DATA_PROTECTION_POLICY_URL": "https://www.fraunhofer.de/de/datenschutzerklaerung.html",
         "ENDPOINTS": "Endpunkte",
         "GTC": "AGB",
@@ -265,6 +266,7 @@
         "PUBLISHING_NOTES": "Impressum",
         "PUBLISHING_NOTES_URL": "https://www.fraunhofer.de/de/impressum.html",
         "SHELLS": "Verwaltungsschalen",
+        "SHELLS_ABBR": "VWS",
         "START": "Start",
         "VIEW": "Sicht"
     },
@@ -352,13 +354,16 @@
         "AAS_ENDPOINT_DELETED": "Endpunkt '{{endpoint}}' erfolgreich entfernt."
     },
     "Shells": {
+        "ADD_TO_START_TOOLTIP": "Ausgewählte Verwaltungschalen zur Startseite hinzufügen.",
         "AssetStatus": "Asset-Status",
         "Browser": "Browser",
         "CarbonFootprint": "CO2-Fußabdruck",
         "CONFIRM_DELETE_DOCUMENT": "Möchten Sie wirklich die Dokumente {{documents}} löschen?",
         "ContactInformation": "Kontaktinformationen",
         "CustomerFeedback": "Nutzer-Feedback",
+        "DELETE_TOOLTIP": "Ausgewählte Verwaltungsschalen from AAS-Endpunt löschen.",
         "DigitalProductPassport": "Produktpass",
+        "DOWNLOAD_TOOLTIP": "Verwaltungsschale als AASX-Package-Datei herunterladen.",
         "FAVORITES": "Alle Verwaltungsschalen",
         "FILTER_TOOLTIP": "AAS Dokumente filtern.",
         "GenericSubmodel": "Generische Ansicht",
@@ -369,7 +374,9 @@
         "PLACEHOLDER_FILTER": "Filter",
         "ServiceRequestNotification": "Serviceanfrage",
         "TechnicalData": "Technische Daten",
-        "VIEWS": "Sichten"
+        "UPLOAD_TOOLTIP": "AASX-Package-Datei zu einem AAS-Endpunkt hochladen.",
+        "FAVORITES_TOOLTIP": "Favoriten verwalten.",
+        "VISIBLE_ENDPOINTS_TOOLTIP": "Sichtbare AAS-Endpunkte auswählen."
     },
     "Start": {
         "EMPTY": "Die START-Seite ist leer.",
@@ -425,6 +432,7 @@
     },
     "UserRole": {
         "admin": "Administrator",
-        "user": "registrierter Anwender"
+        "viewer": "Betrachter",
+        "editor": "Editor"
     }
 }

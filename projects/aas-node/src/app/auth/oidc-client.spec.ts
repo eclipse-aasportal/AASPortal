@@ -164,7 +164,7 @@ describe('OidcClient', () => {
                 name: 'John Doe',
             });
 
-            userRights.getRole.mockResolvedValue('user');
+            userRights.getRole.mockResolvedValue('viewer');
 
             await identityProvider.callback(req, res);
             expect(req.session.state).toBeUndefined();

@@ -33,7 +33,7 @@ describe('ProfileForm', () => {
             user: signal<SessionUser | null>({
                 id: 'john.doe@email.com',
                 name: 'John',
-                role: 'user',
+                role: 'viewer',
                 client_id: 'client-123',
             }),
         });

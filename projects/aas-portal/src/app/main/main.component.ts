@@ -128,8 +128,6 @@ export class MainComponent {
 
     public readonly documentCount = this.indexChange.documentCount;
 
-    public readonly changedDocuments = this.indexChange.changedDocuments;
-
     public readonly isMenuCollapsed = signal(true);
 
     public readonly year = signal(new Date().getFullYear());

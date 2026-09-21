@@ -71,20 +71,20 @@ describe('MongoDBUserRightsStore', () => {
         vitest.restoreAllMocks();
     });
 
-    it('returns "user" rights when no persisted rights exist', async () => {
+    it('returns "viewer" rights when no persisted rights exist', async () => {
         findOneMock.mockReturnValue({ exec: vi.fn().mockResolvedValue(null) });
-        await expect(store.getRole('missing@example.com')).resolves.toEqual('user');
+        await expect(store.getRole('missing@example.com')).resolves.toEqual('viewer');
     });
 
     it('adds, retrieves, updates, and deletes user rights', async () => {
-        const userRights: UserRights = { id: 'user@example.com', role: 'user', endpoints: [] };
+        const userRights: UserRights = { id: 'user@example.com', role: 'viewer', endpoints: [] };
 
         findOneMock.mockReturnValue({ exec: vi.fn().mockResolvedValue(userRights) });
         updateOneMock.mockReturnValue({ exec: vi.fn().mockResolvedValue({}) });
         deleteOneMock.mockReturnValue({ exec: vi.fn().mockResolvedValue({}) });
 
         await store.add(userRights.id, { role: userRights.role, endpoints: [] });
-        await expect(store.getRole(userRights.id)).resolves.toBe('user');
+        await expect(store.getRole(userRights.id)).resolves.toBe('viewer');
         await store.update(userRights.id, { role: 'admin' });
         await store.delete(userRights.id);
 
@@ -95,14 +95,14 @@ describe('MongoDBUserRightsStore', () => {
     });
 
     it('should add, retrieve, update user specific AAS Endpoint authentication', async () => {
-        const userRights: UserRights = { id: 'user@example.com', role: 'user', endpoints: [] };
+        const userRights: UserRights = { id: 'user@example.com', role: 'viewer', endpoints: [] };
 
         findOneMock.mockReturnValue({ exec: vi.fn().mockResolvedValue(userRights) });
         updateOneMock.mockReturnValue({ exec: vi.fn().mockResolvedValue({}) });
         deleteOneMock.mockReturnValue({ exec: vi.fn().mockResolvedValue({}) });
 
         await store.add(userRights.id, { role: userRights.role, endpoints: [] });
-        await expect(store.getRole(userRights.id)).resolves.toBe('user');
+        await expect(store.getRole(userRights.id)).resolves.toBe('viewer');
         await store.update(userRights.id, { endpoints: [{ name: 'Endpoint 1', headers: { header: 'value' } }] });
 
         expect(userRightsModelMock).toHaveBeenCalledWith(userRights);

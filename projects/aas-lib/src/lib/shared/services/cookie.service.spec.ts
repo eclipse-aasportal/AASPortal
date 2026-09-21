@@ -24,7 +24,7 @@ describe('CookieService', () => {
     let window: Mocked<WindowService>;
     let storage: Mocked<Storage>;
 
-    describe('user', () => {
+    describe('viewer', () => {
         beforeEach(() => {
             http = createSpyObj<HttpClient>(['get', 'delete', 'post']);
             auth = createSpyObj<AuthService>([], { isAuthenticated: signal(true) });

@@ -41,7 +41,7 @@ export class MongoDBUserRightsStore extends UserRightsStore {
     public override async getRole(userId: string): Promise<UserRole> {
         const value = await this.model.findOne({ id: userId }).exec();
         if (!value) {
-            return 'user';
+            return 'viewer';
         }
 
         return value.role;

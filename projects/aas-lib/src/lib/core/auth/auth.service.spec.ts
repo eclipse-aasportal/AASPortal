@@ -93,7 +93,7 @@ describe('AuthService', () => {
             const mockUser: SessionUser = {
                 id: 'john.dow@email.com',
                 name: 'John Dow',
-                role: 'user',
+                role: 'viewer',
                 client_id: 'client-123',
             };
 
@@ -109,7 +109,7 @@ describe('AuthService', () => {
             const mockUser: SessionUser = {
                 id: 'john.dow@email.com',
                 name: 'John Dow',
-                role: 'user',
+                role: 'viewer',
                 client_id: 'client-123',
             };
 
@@ -130,7 +130,7 @@ describe('AuthService', () => {
             const mockUser: SessionUser = {
                 id: 'john.dow@email.com',
                 name: 'John Dow',
-                role: 'user',
+                role: 'viewer',
                 client_id: 'client-123',
             };
 

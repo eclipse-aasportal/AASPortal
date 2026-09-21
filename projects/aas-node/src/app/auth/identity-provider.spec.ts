@@ -94,7 +94,7 @@ describe('IdentityProvider', () => {
     describe('me', () => {
         it('should prevent caching the current user', async () => {
             const req = createSpyObj<express.Request>([], {
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
             });
             const res = createSpyObj<express.Response>(['set', 'json']);
 
@@ -149,7 +149,7 @@ describe('IdentityProvider', () => {
             });
 
             userStore.get.mockResolvedValue(await createUserData());
-            userRightsStore.getRole.mockResolvedValue('user');
+            userRightsStore.getRole.mockResolvedValue('viewer');
             const res = createSpyObj<express.Response>(['cookie', 'json', 'redirect', 'status', 'sendStatus']);
             identityProvider['isValidCodeChallenge'] = vi.fn().mockReturnValue(true);
             await identityProvider.callback(req, res);
@@ -157,7 +157,7 @@ describe('IdentityProvider', () => {
                 expect.objectContaining({
                     id: 'john.doe@email.com',
                     name: 'John Doe',
-                    role: 'user',
+                    role: 'viewer',
                     client_id: 'test-client-id',
                 }),
             );
@@ -284,12 +284,12 @@ describe('IdentityProvider', () => {
             const session = createSessionMock();
             session.user_id = 'john.doe@email.com';
             session.name = 'John Doe';
-            session.role = 'user';
+            session.role = 'viewer';
             session.access_token = 'test-access-token';
             session.refresh_token = 'test-refresh-token';
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
             });
 
             const res = createSpyObj<express.Response>(['clearCookie', 'setHeader']);
@@ -307,7 +307,7 @@ describe('IdentityProvider', () => {
             expect(req.user).toEqual({
                 id: 'john.doe@email.com',
                 name: 'John Doe',
-                role: 'user',
+                role: 'viewer',
                 client_id: 'test-client-id',
             });
         });
@@ -318,10 +318,10 @@ describe('IdentityProvider', () => {
             session.refresh_token = 'test-refresh-token';
             session.user_id = 'john.doe@email.com';
             session.name = 'John Doe';
-            session.role = 'user';
+            session.role = 'viewer';
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
             });
 
             const res = createSpyObj<express.Response>(['clearCookie', 'cookie', 'redirect', 'setHeader']);
@@ -329,7 +329,7 @@ describe('IdentityProvider', () => {
             identityProvider['refreshToken'] = vi.fn().mockResolvedValue({
                 access_token: 'new-access-token',
                 refresh_token: 'test-refresh-token',
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
             });
 
             const next = vi.fn();
@@ -340,7 +340,7 @@ describe('IdentityProvider', () => {
             expect(req.user).toEqual({
                 id: 'john.doe@email.com',
                 name: 'John Doe',
-                role: 'user',
+                role: 'viewer',
                 client_id: 'test-client-id',
             } as SessionUser);
 
@@ -353,10 +353,10 @@ describe('IdentityProvider', () => {
             session.refresh_token = 'test-refresh-token';
             session.user_id = 'john.doe@email.com';
             session.name = 'John Doe';
-            session.role = 'user';
+            session.role = 'viewer';
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
             });
 
             const res = createSpyObj<express.Response>(['clearCookie', 'cookie', 'setHeader']);
@@ -364,7 +364,7 @@ describe('IdentityProvider', () => {
             identityProvider['refreshToken'] = vi.fn().mockResolvedValue({
                 access_token: 'new-access-token',
                 refresh_token: 'test-refresh-token',
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
             });
 
             const next = vi.fn();
@@ -374,7 +374,7 @@ describe('IdentityProvider', () => {
             expect(req.user).toEqual({
                 id: 'john.doe@email.com',
                 name: 'John Doe',
-                role: 'user',
+                role: 'viewer',
                 client_id: 'test-client-id',
             });
 
@@ -407,7 +407,7 @@ describe('IdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
                 body: {
                     name: 'John Doe Updated',
                     id: 'john.doe@email.com',
@@ -418,7 +418,7 @@ describe('IdentityProvider', () => {
 
             userStore.get.mockResolvedValue(await createUserData());
 
-            userRightsStore.getRole.mockResolvedValue('user');
+            userRightsStore.getRole.mockResolvedValue('viewer');
 
             const res = createSpyObj<express.Response>(['json', 'status']);
             res.status.mockReturnThis();
@@ -428,7 +428,7 @@ describe('IdentityProvider', () => {
                 expect.objectContaining({
                     id: 'john.doe@email.com',
                     name: 'John Doe Updated',
-                    role: 'user',
+                    role: 'viewer',
                     client_id: 'test-client-id',
                 }),
             );
@@ -438,7 +438,7 @@ describe('IdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
                 body: {
                     name: 'John Doe Updated',
                     id: 'john.doe@email.com',
@@ -477,7 +477,7 @@ describe('IdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
                 body: {
                     name: 'John Doe Updated',
                     id: 'john.doe@email.com',
@@ -497,7 +497,7 @@ describe('IdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
                 body: {
                     name: 'John Doe Updated',
                     id: 'john.doe@email.com',
@@ -519,7 +519,7 @@ describe('IdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
             });
 
             const res = createSpyObj<express.Response>(['clearCookie', 'sendStatus', 'status']);
@@ -532,7 +532,7 @@ describe('IdentityProvider', () => {
             const session = createSessionMock();
             const req = createSpyObj<express.Request>([], {
                 session,
-                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'test-client-id' },
+                user: { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'test-client-id' },
             });
 
             const res = createSpyObj<express.Response>(['json', 'status']);
