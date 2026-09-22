@@ -6,24 +6,17 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import fs from 'fs';
 import path from 'path';
-import { ApplicationError } from 'aas-core';
 
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
-import { ERRORS } from '../errors.js';
-import { MessageSender } from './message-sender.js';
-import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 @singleton()
 export class PackageProvider {
-    private sender!: MessageSender;
-
-    public constructor(
-        @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
-    ) {}
+    private readonly clientFactory = container.resolve(EndpointClientFactory);
+    private readonly index = container.resolve(AAS_INDEX);
 
     /**
      * Downloads an AASX package.
@@ -61,10 +54,6 @@ export class PackageProvider {
         headers?: Record<string, string>,
     ): Promise<void> {
         const endpoint = await this.index.getEndpoint(name);
-        if (!endpoint) {
-            throw new ApplicationError(ERRORS.ENDPOINT_DOES_NOT_EXIST, { endpoint: name }, 404);
-        }
-
         const client = this.clientFactory.create(endpoint, headers);
         try {
             await client.open();
@@ -79,7 +68,6 @@ export class PackageProvider {
             if (address) {
                 const document = await client.getDocument(address);
                 await this.index.insert(document);
-                this.sender.send({ type: 'Added', document, start: Date.now() });
             }
         } finally {
             await client.close();
@@ -100,7 +88,6 @@ export class PackageProvider {
             try {
                 await client.deletePackage(document.id, document.address);
                 await this.index.delete(endpointName, id);
-                this.sender.send({ type: 'Removed', document: { ...document, content: null }, start: Date.now() });
             } finally {
                 await client.close();
             }

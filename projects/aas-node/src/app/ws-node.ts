@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { container, singleton } from 'tsyringe';
+import { container, singleton, Disposable } from 'tsyringe';
 import { WebSocket, WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
@@ -14,22 +14,26 @@ import EventEmitter from 'events';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { WebSocketData } from 'aas-core';
+import { AASNodeMessage, WebSocketData } from 'aas-core';
 import { LOGGER } from 'aas-package';
 
 import { App } from './app.js';
 import { Variable } from './variable.js';
 import { SocketClient } from './live/socket-client.js';
 
+const DELAY_MS = 1000;
+
 /* istanbul ignore next */
 @singleton()
-export class WSNode extends EventEmitter {
+export class WSNode extends EventEmitter implements Disposable {
     private readonly app = container.resolve(App);
     private readonly variable = container.resolve(Variable);
     private readonly logger = container.resolve(LOGGER);
     private readonly wss: WebSocketServer;
     private readonly clients: Set<SocketClient> = new Set<SocketClient>();
     private readonly server: http.Server | https.Server;
+    private messages: AASNodeMessage[] = [];
+    private handle?: NodeJS.Timeout;
 
     public constructor() {
         super();
@@ -76,6 +80,20 @@ export class WSNode extends EventEmitter {
                     this.logger.info(`AASNode v${version} listening on ${this.variable.AAS_NODE_PORT}`);
                 });
         });
+
+        this.handle = setInterval(() => {
+            if (this.messages.length === 0) {
+                return;
+            }
+
+            const messagesToSend = this.messages;
+            this.messages = [];
+
+            this.notify('IndexChange', {
+                type: 'AASNodeMessage[]',
+                data: messagesToSend,
+            });
+        }, DELAY_MS);
     }
 
     public notify(name: string, data: WebSocketData): void {
@@ -84,6 +102,10 @@ export class WSNode extends EventEmitter {
                 client.notify(data);
             }
         }
+    }
+
+    public send(message: AASNodeMessage): void {
+        this.messages.push(message);
     }
 
     public close(): Promise<void> {
@@ -97,6 +119,13 @@ export class WSNode extends EventEmitter {
                 }
             });
         });
+    }
+
+    public dispose(): void {
+        if (this.handle) {
+            clearInterval(this.handle);
+            this.handle = undefined;
+        }
     }
 
     private onConnection = (ws: WebSocket): void => {

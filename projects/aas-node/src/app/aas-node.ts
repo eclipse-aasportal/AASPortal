@@ -10,7 +10,6 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 import path from 'path';
 import { LOGGER, LoggerProxy, LOGGER_SCRIPT } from 'aas-package';
-import { WSNode } from './ws-node.js';
 import { Variable } from './variable.js';
 import { IDENTITY_PROVIDER } from './auth/identity-provider-client.js';
 import { COOKIE_STORE } from './cookie-storage/cookie-store.js';
@@ -35,4 +34,4 @@ container.register(USER_RIGHTS_STORE, { useFactory: c => c.resolve(UserRightsSto
 container.register(USER_STORE, { useFactory: c => c.resolve(UserStoreFactory).getInstance() });
 container.registerSingleton(AAS_INDEX, AASIndexClient);
 
-await container.resolve(EndpointProvider).start(container.resolve(WSNode));
+await container.resolve(EndpointProvider).start();

@@ -6,8 +6,8 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
-import { CommandData, EventData, LOGGER, WorkerData, type Logger } from 'aas-package';
+import { container, Disposable, singleton } from 'tsyringe';
+import { CommandData, EventData, LOGGER, WorkerData } from 'aas-package';
 import {
     LiveRequest,
     WebSocketData,
@@ -28,22 +28,19 @@ import { Variable } from '../variable.js';
 import { WSNode } from '../ws-node.js';
 import { Task, TaskHandler } from './task-handler.js';
 import { urlToEndpoint } from '../configuration.js';
-import { MessageSender } from './message-sender.js';
-import { AAS_INDEX, type AASIndex } from '../index/aas-index.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 @singleton()
-export class EndpointProvider {
+export class EndpointProvider implements Disposable {
+    private readonly variable = container.resolve(Variable);
+    private readonly logger = container.resolve(LOGGER);
+    private readonly workerPool = container.resolve(EndpointScanWorkerPool);
+    private readonly clientFactory = container.resolve(EndpointClientFactory);
+    private readonly index = container.resolve(AAS_INDEX);
+    private readonly taskHandler = container.resolve(TaskHandler);
     private wsServer!: WSNode;
-    private sender!: MessageSender;
 
-    public constructor(
-        @inject(Variable) private readonly variable: Variable,
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(EndpointScanWorkerPool) private readonly workerPool: EndpointScanWorkerPool,
-        @inject(EndpointClientFactory) private readonly clientFactory: EndpointClientFactory,
-        @inject(AAS_INDEX) private readonly index: AASIndex,
-        @inject(TaskHandler) private readonly taskHandler: TaskHandler,
-    ) {
+    public constructor() {
         this.workerPool.on('message', this.workerPoolOnMessage);
         this.workerPool.on('end', this.workerPoolOnEnd);
     }
@@ -52,10 +49,9 @@ export class EndpointProvider {
      * Starts the AAS provider.
      * @param wsServer The web socket server instance.
      */
-    public async start(wsServer: WSNode): Promise<void> {
+    public async start(): Promise<void> {
         try {
-            this.wsServer = wsServer;
-            this.sender = new MessageSender(wsServer);
+            this.wsServer = container.resolve(WSNode);
             this.wsServer.on('message', this.onClientMessage);
             await this.initializeIndex();
             setTimeout(this.startScan, 100);
@@ -104,7 +100,7 @@ export class EndpointProvider {
     public async addEndpoint(endpoint: AASEndpoint): Promise<void> {
         await this.clientFactory.testAsync(endpoint, endpoint.headers);
         await this.index.insertEndpoint(endpoint);
-        this.sender.send({
+        this.wsServer.send({
             type: 'EndpointAdded',
             endpoint: endpoint,
         });
@@ -124,7 +120,7 @@ export class EndpointProvider {
      */
     public async updateEndpoint(endpoint: AASEndpoint): Promise<void> {
         await this.index.updateEndpoint(endpoint);
-        this.sender.send({
+        this.wsServer.send({
             type: 'EndpointUpdate',
             endpoint: endpoint,
         });
@@ -161,7 +157,7 @@ export class EndpointProvider {
             }
 
             this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) removed.`);
-            this.sender.send({
+            this.wsServer.send({
                 type: 'EndpointRemoved',
                 endpoint: endpoint,
             });
@@ -181,7 +177,7 @@ export class EndpointProvider {
 
             await this.index.clear(endpoint);
             await this.startScan(endpoint);
-            this.sender.send({ type: 'Cleared', endpoint });
+            this.wsServer.send({ type: 'Cleared', endpoint });
             this.logger.info(`Index of endpoint "${endpoint}" cleared.`);
         } else {
             const endpoints = (await this.index.getEndpoints()).map(endpoint => endpoint.name);
@@ -196,7 +192,7 @@ export class EndpointProvider {
             await Promise.all(promises);
             await this.index.clear();
             await this.startScan();
-            this.sender.send({ type: 'Cleared' });
+            this.wsServer.send({ type: 'Cleared' });
             this.logger.info('Index cleared.');
         }
     }
@@ -251,10 +247,10 @@ export class EndpointProvider {
         return { name, status: 'scanning', start: task.start };
     }
 
-    public destroy(): void {
+    public dispose(): void {
         this.workerPool.off('message', this.workerPoolOnMessage);
         this.workerPool.off('end', this.workerPoolOnEnd);
-        this.sender.destroy();
+        this.wsServer.on('message', this.onClientMessage);
     }
 
     private async initializeIndex(): Promise<void> {
@@ -266,7 +262,7 @@ export class EndpointProvider {
             try {
                 await this.index.insertEndpoint(endpoint);
                 this.logger.info(`Endpoint ${endpoint.name} (${endpoint.url}) added.`);
-                this.sender.send({
+                this.wsServer.send({
                     type: 'EndpointAdded',
                     endpoint: endpoint,
                 });
@@ -366,7 +362,7 @@ export class EndpointProvider {
             const event = data as EventData;
             switch (event.name) {
                 case 'Start':
-                    this.sender.send({
+                    this.wsServer.send({
                         type: 'Start',
                         endpoint: String(event.args.endpoint),
                         start: Number(event.args.start),
@@ -406,7 +402,7 @@ export class EndpointProvider {
         if (endpoint !== undefined) {
             task.state = 'idle';
             task.end = Date.now();
-            this.sender.send({ type: 'End', endpoint: endpoint.name, start: Number(data.args.start) });
+            this.wsServer.send({ type: 'End', endpoint: endpoint.name, start: Number(data.args.start) });
             const type = endpoint.schedule?.type;
             if (type === 'once' || type === 'manual' || type === 'disabled') {
                 return;
@@ -422,15 +418,15 @@ export class EndpointProvider {
     };
 
     private onUpdate(document: AASDocument, start: number): void {
-        this.sender.send({ type: 'Updated', document: { ...document, content: null }, start });
+        this.wsServer.send({ type: 'Updated', document: { ...document, content: null }, start });
     }
 
     private onAdded(document: AASDocument, start: number): void {
-        this.sender.send({ type: 'Added', document, start });
+        this.wsServer.send({ type: 'Added', document, start });
     }
 
     private onRemoved(document: AASDocument, start: number): void {
-        this.sender.send({ type: 'Removed', document: { ...document, content: null }, start });
+        this.wsServer.send({ type: 'Removed', document: { ...document, content: null }, start });
     }
 
     private onProgress(
@@ -440,6 +436,6 @@ export class EndpointProvider {
         submodelCount: number,
         progress: number,
     ): void {
-        this.sender.send({ type: 'Progress', endpoint, start, shellCount, submodelCount, progress });
+        this.wsServer.send({ type: 'Progress', endpoint, start, shellCount, submodelCount, progress });
     }
 }
