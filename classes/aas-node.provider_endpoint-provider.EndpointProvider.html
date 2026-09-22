@@ -11,9 +11,13 @@
 <li><a href="../modules/aas-node.html">aas-node</a></li>
 <li><a href="../modules/aas-node.provider_endpoint-provider.html">provider/endpoint-provider</a></li>
 <li><a href="" aria-current="page">EndpointProvider</a></li></ul>
-<h1>Class EndpointProvider</h1></div><aside class="tsd-sources">
+<h1>Class EndpointProvider</h1></div>
+<section class="tsd-panel">
+<h4>Implements</h4>
+<ul class="tsd-hierarchy">
+<li><span class="tsd-signature-type">default</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L35">projects/aas-node/src/app/provider/endpoint-provider.ts:35</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L34">projects/aas-node/src/app/provider/endpoint-provider.ts:34</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -28,14 +32,13 @@
 <div class="tsd-index-list"><a href="#addendpoint" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Endpoint</span></a>
 <a href="#cancelendpointscan" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>cancel<wbr/>Endpoint<wbr/>Scan</span></a>
 <a href="#clearindex" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>clear<wbr/>Index</span></a>
-<a href="#destroy" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a>
+<a href="#dispose" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>dispose</span></a>
 <a href="#getdocumentcount" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Document<wbr/>Count</span></a>
 <a href="#getendpointcount" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Count</span></a>
 <a href="#getendpointdocumentcount" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Document<wbr/>Count</span></a>
 <a href="#getendpoints" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoints</span></a>
 <a href="#getupdatestatus" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Update<wbr/>Status</span></a>
 <a href="#removeendpoint" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Endpoint</span></a>
-<a href="#start" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>start</span></a>
 <a href="#startendpointscan" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>start<wbr/>Endpoint<wbr/>Scan</span></a>
 <a href="#updateendpoint" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>update<wbr/>Endpoint</span></a>
 </div></section></div></details></section></section>
@@ -46,20 +49,11 @@
 <h3 class="tsd-anchor-link" id="constructor"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="constructorendpointprovider"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">EndpointProvider</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">variable</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.variable.Variable.html" class="tsd-signature-type tsd-kind-class">Variable</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">logger</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Logger</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">workerPool</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.scan_endpoint-scan-worker-pool.EndpointScanWorkerPool.html" class="tsd-signature-type tsd-kind-class">EndpointScanWorkerPool</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">clientFactory</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.client_endpoint-client-factory.EndpointClientFactory.html" class="tsd-signature-type tsd-kind-class">EndpointClientFactory</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">index</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/aas-node.index_aas-index.AASIndex.html" class="tsd-signature-type tsd-kind-interface">AASIndex</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">taskHandler</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.provider_task-handler.TaskHandler.html" class="tsd-signature-type tsd-kind-class">TaskHandler</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">EndpointProvider</a><a href="#constructorendpointprovider" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="constructorendpointprovider"><span class="tsd-signature-keyword">new</span> <span class="tsd-kind-constructor-signature">EndpointProvider</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type tsd-kind-class">EndpointProvider</a><a href="#constructorendpointprovider" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">variable</span>: <a href="aas-node.variable.Variable.html" class="tsd-signature-type tsd-kind-class">Variable</a></span></li>
-<li><span><span class="tsd-kind-parameter">logger</span>: <span class="tsd-signature-type">Logger</span></span></li>
-<li><span><span class="tsd-kind-parameter">workerPool</span>: <a href="aas-node.scan_endpoint-scan-worker-pool.EndpointScanWorkerPool.html" class="tsd-signature-type tsd-kind-class">EndpointScanWorkerPool</a></span></li>
-<li><span><span class="tsd-kind-parameter">clientFactory</span>: <a href="aas-node.client_endpoint-client-factory.EndpointClientFactory.html" class="tsd-signature-type tsd-kind-class">EndpointClientFactory</a></span></li>
-<li><span><span class="tsd-kind-parameter">index</span>: <a href="../interfaces/aas-node.index_aas-index.AASIndex.html" class="tsd-signature-type tsd-kind-interface">AASIndex</a></span></li>
-<li><span><span class="tsd-kind-parameter">taskHandler</span>: <a href="aas-node.provider_task-handler.TaskHandler.html" class="tsd-signature-type tsd-kind-class">TaskHandler</a></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">EndpointProvider</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L39">projects/aas-node/src/app/provider/endpoint-provider.ts:39</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L43">projects/aas-node/src/app/provider/endpoint-provider.ts:43</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -79,7 +73,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L104">projects/aas-node/src/app/provider/endpoint-provider.ts:104</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L90">projects/aas-node/src/app/provider/endpoint-provider.ts:90</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="cancelendpointscan"><span>cancel<wbr/>Endpoint<wbr/>Scan</span><a href="#cancelendpointscan" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -97,7 +91,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves when the scan is canceled or if no scan was in progress.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L236">projects/aas-node/src/app/provider/endpoint-provider.ts:236</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L222">projects/aas-node/src/app/provider/endpoint-provider.ts:222</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="clearindex"><span>clear<wbr/>Index</span><a href="#clearindex" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -114,16 +108,17 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L175">projects/aas-node/src/app/provider/endpoint-provider.ts:175</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L161">projects/aas-node/src/app/provider/endpoint-provider.ts:161</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
-<h3 class="tsd-anchor-link" id="destroy"><span>destroy</span><a href="#destroy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<h3 class="tsd-anchor-link" id="dispose"><span>dispose</span><a href="#dispose" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="destroy-1"><span class="tsd-kind-call-signature">destroy</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#destroy-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="dispose-1"><span class="tsd-kind-call-signature">dispose</span><span class="tsd-signature-symbol">()</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><a href="#dispose-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Implementation of Disposable.dispose</p>
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L254">projects/aas-node/src/app/provider/endpoint-provider.ts:254</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L240">projects/aas-node/src/app/provider/endpoint-provider.ts:240</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getdocumentcount"><span>get<wbr/>Document<wbr/>Count</span><a href="#getdocumentcount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -135,7 +130,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The total number of AAS documents.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L87">projects/aas-node/src/app/provider/endpoint-provider.ts:87</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L73">projects/aas-node/src/app/provider/endpoint-provider.ts:73</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getendpointcount"><span>get<wbr/>Endpoint<wbr/>Count</span><a href="#getendpointcount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -147,7 +142,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The number of AAS endpoints.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L71">projects/aas-node/src/app/provider/endpoint-provider.ts:71</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L57">projects/aas-node/src/app/provider/endpoint-provider.ts:57</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getendpointdocumentcount"><span>get<wbr/>Endpoint<wbr/>Document<wbr/>Count</span><a href="#getendpointdocumentcount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -165,7 +160,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The number of documents for the specified AAS endpoint.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L96">projects/aas-node/src/app/provider/endpoint-provider.ts:96</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L82">projects/aas-node/src/app/provider/endpoint-provider.ts:82</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getendpoints"><span>get<wbr/>Endpoints</span><a href="#getendpoints" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -177,7 +172,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/aas-core.AASEndpoint.html" class="tsd-signature-type tsd-kind-interface">AASEndpoint</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The AAS endpoints.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L79">projects/aas-node/src/app/provider/endpoint-provider.ts:79</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L65">projects/aas-node/src/app/provider/endpoint-provider.ts:65</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getupdatestatus"><span>get<wbr/>Update<wbr/>Status</span><a href="#getupdatestatus" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -190,7 +185,7 @@
 <li><span><span class="tsd-kind-parameter">name</span>: <span class="tsd-signature-type">string</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="../types/aas-core.UpdateIndexStatus.html" class="tsd-signature-type tsd-kind-type-alias">UpdateIndexStatus</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L245">projects/aas-node/src/app/provider/endpoint-provider.ts:245</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L231">projects/aas-node/src/app/provider/endpoint-provider.ts:231</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="removeendpoint"><span>remove<wbr/>Endpoint</span><a href="#removeendpoint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -207,24 +202,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L154">projects/aas-node/src/app/provider/endpoint-provider.ts:154</a></li></ul></aside></div></li></ul></section>
-<section class="tsd-panel tsd-member">
-<h3 class="tsd-anchor-link" id="start"><span>start</span><a href="#start" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="">
-<div class="tsd-signature tsd-anchor-link" id="start-1"><span class="tsd-kind-call-signature">start</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">wsServer</span><span class="tsd-signature-symbol">:</span> <a href="aas-node.ws-node.WSNode.html" class="tsd-signature-type tsd-kind-class">WSNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#start-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
-<div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Starts the AAS provider.</p>
-</div>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">wsServer</span>: <a href="aas-node.ws-node.WSNode.html" class="tsd-signature-type tsd-kind-class">WSNode</a></span>
-<div class="tsd-comment tsd-typography"><p>The web socket server instance.</p>
-</div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L55">projects/aas-node/src/app/provider/endpoint-provider.ts:55</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L140">projects/aas-node/src/app/provider/endpoint-provider.ts:140</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="startendpointscan"><span>start<wbr/>Endpoint<wbr/>Scan</span><a href="#startendpointscan" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -241,7 +219,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L208">projects/aas-node/src/app/provider/endpoint-provider.ts:208</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L194">projects/aas-node/src/app/provider/endpoint-provider.ts:194</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="updateendpoint"><span>update<wbr/>Endpoint</span><a href="#updateendpoint" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -258,7 +236,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/6ac5e9e9853bb7a261a333a3e704f5bf844b1e8b/projects/aas-node/src/app/provider/endpoint-provider.ts#L125">projects/aas-node/src/app/provider/endpoint-provider.ts:125</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/eclipse-aasportal/AASPortal/blob/d0a8a83052169681859953c2053d526641a8660c/projects/aas-node/src/app/provider/endpoint-provider.ts#L111">projects/aas-node/src/app/provider/endpoint-provider.ts:111</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -277,7 +255,7 @@
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Constructors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Constructors</summary>
 <div><a href="#constructor"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Constructor"><use href="../assets/icons.svg#icon-512"></use></svg><span>constructor</span></a></div></details>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Methods</summary>
-<div><a href="#addendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Endpoint</span></a><a href="#cancelendpointscan"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>cancel<wbr/>Endpoint<wbr/>Scan</span></a><a href="#clearindex"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>clear<wbr/>Index</span></a><a href="#destroy"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>destroy</span></a><a href="#getdocumentcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Document<wbr/>Count</span></a><a href="#getendpointcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Count</span></a><a href="#getendpointdocumentcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Document<wbr/>Count</span></a><a href="#getendpoints"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoints</span></a><a href="#getupdatestatus"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Update<wbr/>Status</span></a><a href="#removeendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Endpoint</span></a><a href="#start"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>start</span></a><a href="#startendpointscan"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>start<wbr/>Endpoint<wbr/>Scan</span></a><a href="#updateendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>update<wbr/>Endpoint</span></a></div></details></div></details></div>
+<div><a href="#addendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>add<wbr/>Endpoint</span></a><a href="#cancelendpointscan"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>cancel<wbr/>Endpoint<wbr/>Scan</span></a><a href="#clearindex"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>clear<wbr/>Index</span></a><a href="#dispose"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>dispose</span></a><a href="#getdocumentcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Document<wbr/>Count</span></a><a href="#getendpointcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Count</span></a><a href="#getendpointdocumentcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoint<wbr/>Document<wbr/>Count</span></a><a href="#getendpoints"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Endpoints</span></a><a href="#getupdatestatus"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>get<wbr/>Update<wbr/>Status</span></a><a href="#removeendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>remove<wbr/>Endpoint</span></a><a href="#startendpointscan"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>start<wbr/>Endpoint<wbr/>Scan</span></a><a href="#updateendpoint"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Method"><use href="../assets/icons.svg#icon-2048"></use></svg><span>update<wbr/>Endpoint</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">AASPortal</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
