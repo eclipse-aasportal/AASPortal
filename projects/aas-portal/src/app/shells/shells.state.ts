@@ -192,7 +192,11 @@ export class ShellsState {
             if (position.next !== newState.position?.next || position.previous !== newState.position?.previous) {
                 this.position$.set(newState.position);
             }
-        } else if (newState.limit !== undefined || newState.filterText !== undefined) {
+        } else if (
+            newState.limit !== undefined ||
+            newState.filterText !== undefined ||
+            newState.endpoints !== undefined
+        ) {
             const position = this.position$();
             if (position.next !== undefined || position.previous !== null) {
                 this.position$.set({ next: undefined, previous: null });

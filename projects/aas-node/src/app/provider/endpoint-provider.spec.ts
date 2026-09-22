@@ -70,7 +70,7 @@ describe('EndpointController', () => {
         });
 
         taskHandler = new TaskHandler();
-        wsServer = createSpyObj<WSNode>(['notify', 'send']);
+        wsServer = createSpyObj<WSNode>(['notify', 'send', 'on']);
 
         container.clearInstances();
         container.registerInstance(Variable, variable);
@@ -83,7 +83,7 @@ describe('EndpointController', () => {
         container.registerInstance(WSNode, wsServer);
 
         provider = container.resolve(EndpointProvider);
-        await provider.start();
+        provider['initializeIndex'] = vi.fn().mockResolvedValue(void 0);
     });
 
     afterEach(() => {

@@ -262,8 +262,14 @@ export class ShellsComponent implements OnDestroy {
         }
 
         return from(this.state.selected()).pipe(
-            mergeMap(document => this.api.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx')),
-            catchError(error => of(this.notify.error(error))),
+            mergeMap(document =>
+                this.api.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx').pipe(
+                    catchError(error => {
+                        this.notify.error(error);
+                        return EMPTY;
+                    }),
+                ),
+            ),
         );
     }
 
@@ -289,7 +295,7 @@ export class ShellsComponent implements OnDestroy {
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
                     this.favorites.remove(documents, activeFavorites);
-                    return this.favorites.save();
+                    return this.favorites.save().pipe(tap(() => this.emptySelected()));
                 } else {
                     if (!this.auth.isAuthenticated()) {
                         return this.auth.login();
@@ -305,11 +311,15 @@ export class ShellsComponent implements OnDestroy {
                             ),
                         ),
                         mergeMap(result => from(result ? documents : [])),
-                        mergeMap(document => this.api.deletePackage(document.id, document.endpoint)),
-                        catchError(error => {
-                            this.notify.error(error);
-                            return of(void 0);
-                        }),
+                        mergeMap(document =>
+                            this.api.deletePackage(document.id, document.endpoint).pipe(
+                                catchError(error => {
+                                    this.notify.error(error);
+                                    return EMPTY;
+                                }),
+                            ),
+                        ),
+                        tap(() => this.emptySelected()),
                     );
                 }
             }),
@@ -441,8 +451,8 @@ export class ShellsComponent implements OnDestroy {
                                 return of();
                             }),
                             map(event => {
-                                if (event.type === HttpEventType.UploadProgress) {
-                                    this.progress.set(Math.round((event.loaded / event.total!) * 100), file.name);
+                                if (event.type === HttpEventType.UploadProgress && event.total && event.total > 0) {
+                                    this.progress.set(Math.round((event.loaded / event.total) * 100), file.name);
                                 } else if (event.type === HttpEventType.Response) {
                                     this.notify.info(INFO.FILE_SUCCESSFULLY_UPLOADED, { file: file.name });
                                 }

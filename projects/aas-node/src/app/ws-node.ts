@@ -76,6 +76,9 @@ export class WSNode extends EventEmitter implements Disposable {
                     const packageJson = JSON.parse(data);
                     version = packageJson.version ?? version;
                 })
+                .catch(error => {
+                    this.logger.error(`Failed to read package.json: ${error?.message}`);
+                })
                 .finally(() => {
                     this.logger.info(`AASNode v${version} listening on ${this.variable.AAS_NODE_PORT}`);
                 });

@@ -10,9 +10,9 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Component, input, model, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, model, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 
 import { AASDocument, aas } from 'aas-core';
 import {
@@ -28,6 +28,7 @@ import {
 
 import { ShellsComponent } from './shells.component';
 import { FavoritesList, FavoritesService } from './favorites.service';
+import { ShellsState } from './shells.state';
 import { createSpyObj, FakeLoader } from '../../test/mocks';
 
 @Component({
@@ -54,6 +55,8 @@ describe('ShellsComponent', () => {
     let auth: Mocked<AuthService>;
     let modal: Mocked<NgbModal>;
     let activeFavorites: ReturnType<typeof signal<string>>;
+    let isAuthenticated: WritableSignal<boolean>;
+    let state: ShellsState;
 
     beforeEach(async () => {
         start = createSpyObj<StartService>(['add', 'getType', 'remove', 'save']);
@@ -97,9 +100,10 @@ describe('ShellsComponent', () => {
         httpClient.get.mockReturnValue(of({}));
         httpClient.request.mockReturnValue(of({}));
 
+        isAuthenticated = signal(false);
         auth = createSpyObj<AuthService>(['checkAuthorized'], {
             ready: of(true),
-            isAuthenticated: signal(false),
+            isAuthenticated,
             name: signal(''),
             user: signal(undefined),
         });
@@ -167,6 +171,7 @@ describe('ShellsComponent', () => {
 
         fixture = TestBed.createComponent(ShellsComponent);
         component = fixture.componentInstance;
+        state = TestBed.inject(ShellsState);
         fixture.detectChanges();
     });
 
@@ -219,6 +224,29 @@ describe('ShellsComponent', () => {
         component.setSelected([laterDocument]);
         await firstValueFrom(deletion);
         expect(favorites.remove).toHaveBeenCalledExactlyOnceWith([selectedDocument], 'List 1');
+        expect(component.selected()).toEqual([]);
+    });
+
+    it('resets pagination when endpoint visibility changes', () => {
+        state.update({ position: { next: 'next' as never, previous: undefined } });
+
+        component.toggleCheckEndpoint(true, { name: 'endpoint-a', checked: false, locked: false });
+
+        expect(state.position()).toEqual({ next: undefined, previous: null });
+    });
+
+    it('continues downloading after an individual package download fails', async () => {
+        const firstDocument = { id: '1', idShort: 'First', endpoint: 'endpoint-a' } as AASDocument;
+        const secondDocument = { id: '2', idShort: 'Second', endpoint: 'endpoint-a' } as AASDocument;
+        isAuthenticated.set(true);
+        api.downloadPackage.mockImplementation((_, id) =>
+            id === firstDocument.id ? throwError(() => new Error('Download failed')) : of(void 0),
+        );
+        component.setSelected([firstDocument, secondDocument]);
+
+        await firstValueFrom(component.downloadPackages(), { defaultValue: undefined });
+
+        expect(api.downloadPackage).toHaveBeenCalledTimes(2);
     });
 
     it('does not request authorization when no document is selected for deletion', async () => {

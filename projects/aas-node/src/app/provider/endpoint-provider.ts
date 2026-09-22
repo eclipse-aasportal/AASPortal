@@ -38,26 +38,16 @@ export class EndpointProvider implements Disposable {
     private readonly clientFactory = container.resolve(EndpointClientFactory);
     private readonly index = container.resolve(AAS_INDEX);
     private readonly taskHandler = container.resolve(TaskHandler);
-    private wsServer!: WSNode;
+    private readonly wsServer = container.resolve(WSNode);
 
     public constructor() {
         this.workerPool.on('message', this.workerPoolOnMessage);
         this.workerPool.on('end', this.workerPoolOnEnd);
-    }
+        this.wsServer.on('message', this.onClientMessage);
 
-    /**
-     * Starts the AAS provider.
-     * @param wsServer The web socket server instance.
-     */
-    public async start(): Promise<void> {
-        try {
-            this.wsServer = container.resolve(WSNode);
-            this.wsServer.on('message', this.onClientMessage);
-            await this.initializeIndex();
-            setTimeout(this.startScan, 100);
-        } catch (error) {
-            this.logger.error(error);
-        }
+        this.initializeIndex()
+            .then(() => this.startScan())
+            .catch(error => this.logger.error(error));
     }
 
     /**
@@ -250,7 +240,7 @@ export class EndpointProvider implements Disposable {
     public dispose(): void {
         this.workerPool.off('message', this.workerPoolOnMessage);
         this.workerPool.off('end', this.workerPoolOnEnd);
-        this.wsServer.on('message', this.onClientMessage);
+        this.wsServer.off('message', this.onClientMessage);
     }
 
     private async initializeIndex(): Promise<void> {
