@@ -28,7 +28,6 @@ export class PackagesController extends Controller {
      * @returns A readable stream.
      */
     @Get('{endpoint}/packages/{id}')
-    @Security('oauth2', ['reader', 'user', 'admin'])
     @OperationId('getPackage')
     public async getPackage(
         @Path() endpoint: string,
@@ -45,7 +44,7 @@ export class PackagesController extends Controller {
      * @param file The AASX package file.
      */
     @Post('{endpoint}/packages')
-    @Security('oauth2', ['user', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('insertPackages')
     public async insertPackages(
         @Path() endpoint: string,
@@ -62,7 +61,7 @@ export class PackagesController extends Controller {
      * @param id The AAS identifier (Base64-URL encoded).
      */
     @Delete('{endpoint}/packages/{id}')
-    @Security('oauth2', ['user', 'admin'])
+    @Security('oauth2', ['editor', 'admin'])
     @OperationId('deletePackage')
     public async deletePackage(
         @Path() endpoint: string,

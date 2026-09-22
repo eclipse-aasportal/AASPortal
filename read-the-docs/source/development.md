@@ -457,7 +457,7 @@ app.get('/download/:id', (req, res) => {
 // Connection pooling
 const pool = mysql.createPool({
     host: 'localhost',
-    user: 'user',
+    user: 'viewer',
     database: 'aas',
     connectionLimit: 10,
     acquireTimeout: 60000,

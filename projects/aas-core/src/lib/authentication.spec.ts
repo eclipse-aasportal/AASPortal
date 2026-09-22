@@ -33,20 +33,28 @@ describe('authentication', () => {
             expect(isUserAuthorized(undefined, undefined)).toBeTruthy();
         });
 
-        it('false for actual: undefined, minimalRequired: "user"', () => {
+        it('false for actual: undefined, minimalRequired: "viewer"', () => {
             expect(isUserAuthorized(undefined, undefined)).toBeTruthy();
         });
 
-        it('true for actual: "user", minimalRequired: "user"', () => {
-            expect(isUserAuthorized('user', 'user')).toBeTruthy();
+        it('true for actual: "viewer", minimalRequired: "viewer"', () => {
+            expect(isUserAuthorized('viewer', 'viewer')).toBeTruthy();
         });
 
-        it('false for actual: "user", minimalRequired: "admin"', () => {
-            expect(isUserAuthorized('user', 'admin')).toBeFalsy();
+        it('false for actual: "viewer", minimalRequired: "editor"', () => {
+            expect(isUserAuthorized('viewer', 'admin')).toBeFalsy();
+        });
+
+        it('false for actual: "viewer", minimalRequired: "admin"', () => {
+            expect(isUserAuthorized('viewer', 'admin')).toBeFalsy();
+        });
+
+        it('false for actual: "editor", minimalRequired: "admin"', () => {
+            expect(isUserAuthorized('editor', 'admin')).toBeFalsy();
         });
 
         it('true for actual: "admin", minimalRequired: "admin"', () => {
-            expect(isUserAuthorized('user', 'admin')).toBeFalsy();
+            expect(isUserAuthorized('viewer', 'admin')).toBeFalsy();
         });
     });
 

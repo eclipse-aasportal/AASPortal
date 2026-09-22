@@ -81,14 +81,17 @@ export class FavoritesFormComponent {
         }
 
         if (this.documents.length === 0) {
-            return stringFormat(this.translate.instant('FavoritesForm.COUNT'), selectedItem.length);
+            return this.translate.instant('FavoritesForm.COUNT', { count: selectedItem.length });
         }
 
         if (this.documents.length === 1) {
-            return stringFormat(this.translate.instant('TEXT_ADD_FAVORITE'), selectedItem.length);
+            return this.translate.instant('FavoritesForm.ADD_FAVORITE', { count: selectedItem.length });
         }
 
-        return stringFormat(this.translate.instant('TEXT_ADD_FAVORITES'), this.documents.length, selectedItem.length);
+        return this.translate.instant('FavoritesForm.ADD_FAVORITES', {
+            length: this.documents.length,
+            count: selectedItem.length,
+        });
     });
 
     public delete(item: FavoritesItem): void {

@@ -110,6 +110,7 @@ export class ScanApp {
         };
 
         parentPort?.postMessage(data);
+        this.logger.info(`Document ${document.idShort} (${document.id}) updated in endpoint ${this.endpoint}.`);
     };
 
     private readonly postRemove = (document: AASDocument): void => {
@@ -120,6 +121,7 @@ export class ScanApp {
         };
 
         parentPort?.postMessage(data);
+        this.logger.info(`Document ${document.idShort} (${document.id}) removed from endpoint ${this.endpoint}.`);
     };
 
     private readonly postAdd = (document: AASDocument): void => {
@@ -130,6 +132,7 @@ export class ScanApp {
         };
 
         parentPort?.postMessage(data);
+        this.logger.info(`Document ${document.idShort} (${document.id}) added to endpoint ${this.endpoint}.`);
     };
 
     private readonly postProgress = (progress: number, shellCount: number, submodelCount: number): void => {

@@ -53,7 +53,7 @@ export class SqliteUserRightsStore extends UserRightsStore {
     public override async getRole(userId: string): Promise<UserRole> {
         const value = this.getUserRoleSql.get(userId);
         if (!value) {
-            return 'user';
+            return 'viewer';
         }
 
         return value.role as UserRole;

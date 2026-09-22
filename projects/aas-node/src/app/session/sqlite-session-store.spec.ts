@@ -68,7 +68,7 @@ describe('SqliteSessionStore', () => {
             },
             user_id: 'user-id',
             name: 'John Doe',
-            role: 'user',
+            role: 'viewer',
             state: 'state',
             code_verifier: 'code-verifier',
             endpoints: [],

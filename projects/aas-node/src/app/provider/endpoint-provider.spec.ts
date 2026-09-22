@@ -9,7 +9,7 @@
 import 'reflect-metadata';
 import { describe, beforeEach, afterEach, it, expect, Mocked, vi } from 'vitest';
 import { AASEndpoint } from 'aas-core';
-import { CommandData, Logger } from 'aas-package';
+import { CommandData, LOGGER, Logger } from 'aas-package';
 
 import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { createSpyObj } from '../../test/mocks.js';
@@ -17,17 +17,19 @@ import { EndpointProvider } from './endpoint-provider.js';
 import { EndpointScanWorkerPool } from '../scan/endpoint-scan-worker-pool.js';
 import { TaskHandler } from './task-handler.js';
 import { Variable } from '../variable.js';
-import { MessageSender } from './message-sender.js';
 import { AASIndexClient } from '../index/aas-index-client.js';
+import { container } from 'tsyringe';
+import { AAS_INDEX } from '../index/aas-index.js';
+import { WSNode } from '../ws-node.js';
 
 describe('EndpointController', () => {
     let provider: EndpointProvider;
     let index: Mocked<AASIndexClient>;
     let logger: Mocked<Logger>;
     let workerPool: Mocked<EndpointScanWorkerPool>;
-    let sender: Mocked<MessageSender>;
     let clientFactory: Mocked<EndpointClientFactory>;
     let variable: Mocked<Variable>;
+    let wsServer: Mocked<WSNode>;
     let taskHandler: TaskHandler;
 
     const endpoint: AASEndpoint = {
@@ -36,7 +38,7 @@ describe('EndpointController', () => {
         type: 'FileSystem',
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
         vi.useFakeTimers();
 
         logger = createSpyObj<Logger>(['info', 'error']);
@@ -68,10 +70,20 @@ describe('EndpointController', () => {
         });
 
         taskHandler = new TaskHandler();
+        wsServer = createSpyObj<WSNode>(['notify', 'send', 'on']);
 
-        provider = new EndpointProvider(variable, logger, workerPool, clientFactory, index, taskHandler);
-        sender = createSpyObj<MessageSender>(['send', 'destroy']);
-        (provider as unknown as { sender: MessageSender }).sender = sender;
+        container.clearInstances();
+        container.registerInstance(Variable, variable);
+        container.registerInstance(LOGGER, logger);
+        container.registerInstance(EndpointScanWorkerPool, workerPool);
+        container.registerInstance(EndpointClientFactory, clientFactory);
+        container.registerInstance(AAS_INDEX, index);
+        container.registerInstance(TaskHandler, taskHandler);
+        container.registerSingleton(EndpointProvider);
+        container.registerInstance(WSNode, wsServer);
+
+        provider = container.resolve(EndpointProvider);
+        provider['initializeIndex'] = vi.fn().mockResolvedValue(void 0);
     });
 
     afterEach(() => {
@@ -122,7 +134,7 @@ describe('EndpointController', () => {
 
             expect(clientFactory.testAsync).toHaveBeenCalledWith(configuredEndpoint, undefined);
             expect(index.insertEndpoint).toHaveBeenCalledWith(configuredEndpoint);
-            expect(sender.send).toHaveBeenCalledWith({
+            expect(wsServer.send).toHaveBeenCalledWith({
                 type: 'EndpointAdded',
                 endpoint: configuredEndpoint,
             });
@@ -209,7 +221,7 @@ describe('EndpointController', () => {
 
             expect(index.deleteEndpoint).toHaveBeenCalledWith(endpoint.name);
             expect(deleteTaskSpy).toHaveBeenCalledWith(task.id);
-            expect(sender.send).toHaveBeenCalledWith({
+            expect(wsServer.send).toHaveBeenCalledWith({
                 type: 'EndpointRemoved',
                 endpoint,
             });
@@ -283,7 +295,7 @@ describe('EndpointController', () => {
             await provider.clearIndex();
 
             expect(index.clear).toHaveBeenCalled();
-            expect(sender.send).toHaveBeenCalledWith({
+            expect(wsServer.send).toHaveBeenCalledWith({
                 type: 'Cleared',
             });
         });
@@ -292,7 +304,7 @@ describe('EndpointController', () => {
             await provider.clearIndex(endpoint.name);
 
             expect(index.clear).toHaveBeenCalledWith(endpoint.name);
-            expect(sender.send).toHaveBeenCalledWith({
+            expect(wsServer.send).toHaveBeenCalledWith({
                 type: 'Cleared',
                 endpoint: endpoint.name,
             });

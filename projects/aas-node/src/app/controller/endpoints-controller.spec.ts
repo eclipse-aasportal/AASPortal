@@ -55,7 +55,7 @@ describe('EndpointsController', () => {
         app.use(urlencoded({ extended: true }));
         app.set('trust proxy', 1);
         app.use((req, res, next) => {
-            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'user', client_id: 'client-123' };
+            req.user = { id: 'john.doe@email.com', name: 'John Doe', role: 'viewer', client_id: 'client-123' };
             next();
         });
 

@@ -215,10 +215,12 @@
         "CANCEL": "Cancel",
         "CAPTION": "Favorites",
         "ADD_NEW": "New favorites list",
-        "COUNT": "{0} favorite(s)",
+        "COUNT": "{{count}} favorite(s)",
         "ERROR_FAVORITES_LIST_NAME_USED_SEVERAL_TIMES": "'{0}' is used several times.",
         "ERROR_INVALID_EMPTY_FAVORITES_LIST_NAME": "Invalid empty name.",
-        "OK": "OK"
+        "OK": "OK",
+        "ADD_FAVORITE": "Add 1 AAS document. {{count}} favorites",
+        "ADD_FAVORITES": "Add {{length}} AAS document. {{count}} favorites"
     },
     "HandoverDocumentation": {
         "TITLE": "Handover Documentation",
@@ -259,6 +261,7 @@
         "ABOUT": "About",
         "DASHBOARD": "Dashboard",
         "DATA_PROTECTION_POLICY": "Data protection policy",
+        "DATA_PROTECTION_POLICY_ABBR": "DPP",
         "DATA_PROTECTION_POLICY_URL": "https://www.fraunhofer.de/en/data-protection-policy.html",
         "ENDPOINTS": "Endpoints",
         "GTC": "GTC",
@@ -266,6 +269,7 @@
         "PUBLISHING_NOTES": "Publishing notes",
         "PUBLISHING_NOTES_URL": "https://www.fraunhofer.de/en/publishing-notes.html",
         "SHELLS": "Shells",
+        "SHELLS_ABBR": "Shells",
         "START": "Start",
         "VIEW": "View"
     },
@@ -353,13 +357,16 @@
         "AAS_ENDPOINT_DELETED": "Endpoint '{{endpoint}}' successfully removed."
     },
     "Shells": {
+        "ADD_TO_START_TOOLTIP": "Add selected shells to the Start page.",
         "AssetStatus": "Asset status",
         "Browser": "Browser",
         "CarbonFootprint": "Carbon footprint",
         "CONFIRM_DELETE_DOCUMENT": "Do you really want to delete documents {{documents}}?",
         "ContactInformation": "Contact information",
         "CustomerFeedback": "User feedback",
+        "DELETE_TOOLTIP": "Delete selected shells from AAS endpoint.",
         "DigitalProductPassport": "Product passport",
+        "DOWNLOAD_TOOLTIP": "Download selected shells as AASX package file.",
         "FAVORITES": "All shells",
         "FILTER_TOOLTIP": "Filter AAS documents.",
         "GenericSubmodel": "Generic view",
@@ -370,7 +377,9 @@
         "PLACEHOLDER_FILTER": "Filter",
         "ServiceRequestNotification": "Service request notification",
         "TechnicalData": "Technical data",
-        "VIEWS": "Views"
+        "UPLOAD_TOOLTIP": "Upload AASX package file to an AAS Endpoint.",
+        "FAVORITES_TOOLTIP": "Manage favorites.",
+        "VISIBLE_ENDPOINTS_TOOLTIP": "Select visible AAS endpoints."
     },
     "Start": {
         "EMPTY": "The START page is empty.",
@@ -426,6 +435,7 @@
     },
     "UserRole": {
         "admin": "administrator",
-        "user": "user"
+        "viewer": "viewer",
+        "editor": "editor"
     }
 }
