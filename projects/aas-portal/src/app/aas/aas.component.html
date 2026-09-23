@@ -14,12 +14,14 @@
                 <div class="d-flex flex-column w-75">
                     <div class="py-2 my-2 fs-5">
                         <div class="d-flex flex-column data-entry">
-                            <h3 translate="AAS.OVERVIEW"></h3>
                             <h2 style="overflow-wrap: anywhere; word-break: break-word">{{ idShort() }}</h2>
                         </div>
                     </div>
                 </div>
-                <div style="min-width: 30%;" class="d-flex flex-md-column flex-row flex-wrap justify-content-start justify-content-md-center align-items-end mb-md-0 mb-4 ms-md-auto">
+                <div
+                    style="min-width: 30%"
+                    class="d-flex flex-md-column flex-row flex-wrap justify-content-start justify-content-md-center align-items-end mb-md-0 mb-4 ms-md-auto"
+                >
                     <div class="mt-1 mx-1 mx-md-4 d-flex flex-row">
                         <button
                             [routerLink]="openContentView()"
@@ -46,7 +48,9 @@
             </div>
             <div class="bg-body-tertiary border border-black border-opacity-50 rounded-2 p-4">
                 <!-- Header of the header -->
-                <div class="d-flex flex-column flex-sm-row flex-wrap align-items-center justify-content-around md-justify-content-start">
+                <div
+                    class="d-flex flex-column flex-sm-row flex-wrap align-items-center justify-content-around md-justify-content-start"
+                >
                     <div class="left-side border border-secondary rounded p-1 thumbnail">
                         <img
                             class="img-fluid thumbnail-img"
@@ -58,15 +62,21 @@
                     <div class="right-side d-flex flex-column flex-grow information">
                         <div class="p-1 d-flex flex-column mt-0">
                             <label class="label" translate="AAS.VERSION"></label>
-                            <label class="ms-2" style="overflow-wrap: anywhere; word-break: break-all">{{ version() }}</label>
+                            <label class="ms-2" style="overflow-wrap: anywhere; word-break: break-all">{{
+                                version()
+                            }}</label>
                         </div>
                         <div class="p-1 d-flex flex-column mt-0">
                             <label class="label" translate="AAS.AAS_ID"></label>
-                            <label class="ms-2" style="overflow-wrap: anywhere; word-break: break-all">{{ id() }}</label>
+                            <label class="ms-2" style="overflow-wrap: anywhere; word-break: break-all">{{
+                                id()
+                            }}</label>
                         </div>
                         <div class="p-1 d-flex flex-column mt-0">
                             <label class="label" translate="AAS.ASSET_ID"></label>
-                            <label class="ms-2" style="overflow-wrap: anywhere; word-break: break-all">{{ assetId() }}</label>
+                            <label class="ms-2" style="overflow-wrap: anywhere; word-break: break-all">{{
+                                assetId()
+                            }}</label>
                         </div>
                     </div>
                 </div>
@@ -81,13 +91,15 @@
                         [routerLink]="openSubmodelView(submodel)"
                         class="fhg-submodel-card d-flex flex-row mx-2 my-1 py-2 px-3 border border-1 border-black border-opacity-50 rounded-3 align-items-center w-md-40 text-decoration-none text-body"
                     >
-                        <div class="me-4" style="font-size: 24px;">
+                        <div class="me-4" style="font-size: 24px">
                             <i class="bi" [ngClass]="getSubmodelIcon(submodel)"></i>
                         </div>
                         <div class="me-4">
-                            <label class="text-body-secondary" style="font-size: 14px; overflow-wrap: anywhere; word-break: break-word">{{
-                                getSubmodelSemanticId(submodel) | max: 55 : 0.55
-                            }}</label>
+                            <label
+                                class="text-body-secondary"
+                                style="font-size: 14px; overflow-wrap: anywhere; word-break: break-word"
+                                >{{ getSubmodelSemanticId(submodel) | max: 55 : 0.55 }}</label
+                            >
                             <h4 class="" style="overflow-wrap: anywhere; word-break: break-word">
                                 {{ submodel.idShort }}
                             </h4>
@@ -121,10 +133,22 @@
 
 <!-- Toolbar -->
 <ng-template #toolbar>
-    <div class="input-group me-2 my-1">
-        <button class="btn btn-outline-primary rounded-3" type="button" (click)="addToStart().subscribe()">
-            <span class="me-2">Add to Start</span>
-            <i class="bi bi-house-add"></i>
-        </button>
+    <div class="w-100 d-none d-sm-block">
+        <div class="mb-1 d-none d-lg-flex flex-row">
+            <h2 translate="AAS.CAPTION"></h2>
+        </div>
+        <div class="button-group me-2 my-1">
+            <button
+                class="btn btn-outline-primary my-1"
+                type="button"
+                (click)="addToStart().subscribe()"
+                ngbTooltip="{{ 'AAS.ADD_TO_START_TOOLTIP' | translate }}"
+                placement="bottom"
+                [openDelay]="300"
+                [closeDelay]="500"
+            >
+                <i class="bi bi-house-add"></i>
+            </button>
+        </div>
     </div>
 </ng-template>

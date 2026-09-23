@@ -1,16 +1,17 @@
 {
     "AAS": {
-        "BROWSER": "AAS Browser",
-        "CONTENT": "AAS Content",
-        "PLACEHOLDER_SEARCH": "Suche",
-        "EMPTY": "Kein AAS-Document verfügbar.",
-        "NO_PERMISSION": "Sie haben keine Berechtigung, diese AAS zu öffnen. Prüfen Sie, ob für diesen Endpunkt ein API-Schlüssel benötigt wird, und fügen Sie ihn unten hinzu.",
-        "ADD_API_KEY": "API-Schlüssel hinzufügen",
-        "LOAD_FAILED": "Diese AAS konnte nicht geladen werden.",
-        "VERSION": "Version",
         "AAS_ID": "AAS ID",
+        "ADD_API_KEY": "API-Schlüssel hinzufügen",
         "ASSET_ID": "Asset ID",
-        "OVERVIEW": "AAS-Übersicht"
+        "BROWSER": "AAS Browser",
+        "CAPTION": "AAS-Übersicht",
+        "CONTENT": "AAS Content",
+        "EMPTY": "Kein AAS-Document verfügbar.",
+        "LOAD_FAILED": "Diese AAS konnte nicht geladen werden.",
+        "NO_PERMISSION": "Sie haben keine Berechtigung, diese AAS zu öffnen. Prüfen Sie, ob für diesen Endpunkt ein API-Schlüssel benötigt wird, und fügen Sie ihn unten hinzu.",
+        "PLACEHOLDER_SEARCH": "Suche",
+        "ADD_TO_START_TOOLTIP": "Als Favorit zur Startseite hinzufügen.",
+        "VERSION": "Version"
     },
     "AASContent": {
         "TITLE": "AAS-Baum",
@@ -23,11 +24,12 @@
         "INFO_NO_SHELLS_AVAILABLE": "Keine Verwaltungsschalen verfügbar."
     },
     "About": {
-        "STATISTIC": "Statistik",
-        "VERSION": "Version",
+        "ADD_TO_START_TOOLTIP": "Fügt eine Verknüpfung zur Startseite hinzu.",
+        "CAPTION": "Über",
         "NUMBER_OF_ENDPOINTS": "Endpunkte",
         "NUMBER_OF_SHELLS": "Verwaltungsschalen",
-        "ABOUT": "Info über..."
+        "STATISTIC": "Statistik",
+        "VERSION": "Version"
     },
     "AddEndpointForm": {
         "AAS_API": "AAS API",
@@ -357,6 +359,7 @@
         "ADD_TO_START_TOOLTIP": "Ausgewählte Verwaltungschalen zur Startseite hinzufügen.",
         "AssetStatus": "Asset-Status",
         "Browser": "Browser",
+        "CAPTION": "Verwaltungsschalen",
         "CarbonFootprint": "CO2-Fußabdruck",
         "CONFIRM_DELETE_DOCUMENT": "Möchten Sie wirklich die Dokumente {{documents}} löschen?",
         "ContactInformation": "Kontaktinformationen",

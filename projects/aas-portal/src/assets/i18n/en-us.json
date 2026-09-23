@@ -1,20 +1,21 @@
 {
     "AAS": {
-        "BROWSER": "AAS Browser",
-        "CONTENT": "AAS Content",
-        "PLACEHOLDER_SEARCH": "Search",
-        "EMPTY": "No AAS document available.",
-        "NO_PERMISSION": "You don't have permission to open this AAS. Check whether this endpoint needs an API key and add it below.",
-        "ADD_API_KEY": "Add API key",
-        "LOAD_FAILED": "This AAS could not be loaded.",
-        "VERSION": "Version",
         "AAS_ID": "AAS ID",
+        "ADD_API_KEY": "Add API key",
         "ASSET_ID": "Asset ID",
-        "OVERVIEW": "AAS Overview"
+        "BROWSER": "AAS Browser",
+        "CAPTION": "AAS Overview",
+        "CONTENT": "AAS Content",
+        "EMPTY": "No AAS document available.",
+        "LOAD_FAILED": "This AAS could not be loaded.",
+        "NO_PERMISSION": "You don't have permission to open this AAS. Check whether this endpoint needs an API key and add it below.",
+        "PLACEHOLDER_SEARCH": "Search",
+        "ADD_TO_START_TOOLTIP": "Add as a favorite to the start page.",
+        "VERSION": "Version"
     },
     "AASContent": {
         "TITLE": "AAS Tree",
-        "EMPTY": "Kein AAS-Document verfügbar."
+        "EMPTY": "No AAS document available."
     },
     "AASTable": {
         "COLUMN_NAME": "Name",
@@ -23,11 +24,12 @@
         "INFO_NO_SHELLS_AVAILABLE": "No Asset Administration Shells available."
     },
     "About": {
-        "STATISTIC": "Statistic",
-        "VERSION": "Version",
+        "ADD_TO_START_TOOLTIP": "Add a short-cut to the start page.",
+        "CAPTION": "About",
         "NUMBER_OF_ENDPOINTS": "Endpoints",
         "NUMBER_OF_SHELLS": "Shells",
-        "ABOUT": "About..."
+        "STATISTIC": "Statistic",
+        "VERSION": "Version"
     },
     "AddEndpointForm": {
         "AAS_API": "AAS API",
@@ -360,6 +362,7 @@
         "ADD_TO_START_TOOLTIP": "Add selected shells to the Start page.",
         "AssetStatus": "Asset status",
         "Browser": "Browser",
+        "CAPTION": "Shells",
         "CarbonFootprint": "Carbon footprint",
         "CONFIRM_DELETE_DOCUMENT": "Do you really want to delete documents {{documents}}?",
         "ContactInformation": "Contact information",

@@ -9,7 +9,7 @@
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
 import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
-import { Component, Inject, OnDestroy, OnInit, computed, input, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, input, signal } from '@angular/core';
 
 import { CultureInfo } from './culture-info';
 import { WINDOW } from '../../shared/services/window.service';
@@ -21,13 +21,10 @@ import { WINDOW } from '../../shared/services/window.service';
     imports: [NgbModule],
 })
 export class LocalizeComponent implements OnInit, OnDestroy {
+    private readonly translate = inject(TranslateService);
+    private readonly window = inject(WINDOW);
     private readonly subscription = new Subscription();
     private readonly _culture = signal<CultureInfo | null>(null);
-
-    public constructor(
-        private readonly translate: TranslateService,
-        @Inject(WINDOW) private readonly window: Window,
-    ) {}
 
     public readonly languages = input<string[]>(['en-us']);
 

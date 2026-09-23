@@ -8,34 +8,45 @@
 
 <div class="overflow-auto h-100 p-2">
     <h1>AASPortal</h1>
-    <p>The AASPortal is a web portal for the visualization and management of Asset Administration Shells (AAS) licensed
-        under the Apache License 2.0.</p>
-    <p>The implementation uses the concepts of the document "Details of the Asset Administration Shell" published on
-        www.plattform-i40.de which is licensed under Creative Commons CC BY 4.0.</p>
-    <p>Copyright (c) 2019-2025 Fraunhofer IOSB-INA Lemgo, eine rechtlich nicht selbstaendige Einrichtung der
-        Fraunhofer-Gesellschaft
-        zur Foerderung der angewandten Forschung e.V.</p>
     <p>
-        <span>Internet:&nbsp;</span><a [href]="homepage()" target="_blank">{{homepage()}}</a><br>
+        The AASPortal is a web portal for the visualization and management of Asset Administration Shells (AAS) licensed
+        under the Apache License 2.0.
     </p>
-    <h2 translate="About.STATISTIC"></h2>
-    <div class="row row-col-2 card-subtitle mt-2 text-nowrap text-body-secondary">
-        <h6 class="col-6" translate="About.NUMBER_OF_ENDPOINTS"></h6>
-        <h6 class="col-6">{{endpoints()}}</h6>
-        <h6 class="col-6" translate="About.NUMBER_OF_SHELLS"></h6>
-        <h6 class="col-6">{{shells()}}</h6>
-    </div>
-
+    <p>
+        The implementation uses the concepts of the document "Details of the Asset Administration Shell" published on
+        www.plattform-i40.de which is licensed under Creative Commons CC BY 4.0.
+    </p>
+    <p>
+        Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo, eine rechtlich nicht selbstaendige Einrichtung der
+        Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e.V.
+    </p>
+    <p>
+        <span>Internet:&nbsp;</span><a [href]="homepage()" target="_blank">{{ homepage() }}</a
+        ><br />
+    </p>
     <h2>Third-party Libraries</h2>
-    <p>The application is based on some third-party libraries for which specific copyright statements and licenses
-        apply.</p>
+    <p>
+        The application is based on some third-party libraries for which specific copyright statements and licenses
+        apply.
+    </p>
     <fhg-license-info [libraries]="libraries()"></fhg-license-info>
 </div>
 
 <ng-template #aboutToolbar>
-    <div class="input-group me-2 my-1">
-        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
-            <i class="bi bi-house-add"></i>
-        </button>
+    <div class="w-100 d-none d-sm-block">
+        <h1 translate="About.CAPTION"></h1>
+        <div class="input-group me-2 my-1">
+            <button
+                class="btn btn-outline-primary my-1"
+                type="button"
+                (click)="addToStart().subscribe()"
+                ngbTooltip="{{ 'About.ADD_TO_START_TOOLTIP' | translate }}"
+                placement="bottom"
+                [openDelay]="300"
+                [closeDelay]="500"
+            >
+                <i class="bi bi-house-add"></i>
+            </button>
+        </div>
     </div>
 </ng-template>
