@@ -1,8 +1,6 @@
 {
     "AAS": {
-        "AAS_ID": "AAS ID",
         "ADD_API_KEY": "API-Schlüssel hinzufügen",
-        "ASSET_ID": "Asset ID",
         "BROWSER": "AAS Browser",
         "CAPTION": "AAS-Übersicht",
         "CONTENT": "AAS Content",
@@ -11,11 +9,8 @@
         "NO_PERMISSION": "Sie haben keine Berechtigung, diese AAS zu öffnen. Prüfen Sie, ob für diesen Endpunkt ein API-Schlüssel benötigt wird, und fügen Sie ihn unten hinzu.",
         "PLACEHOLDER_SEARCH": "Suche",
         "ADD_TO_START_TOOLTIP": "Als Favorit zur Startseite hinzufügen.",
-        "VERSION": "Version"
-    },
-    "AASContent": {
-        "TITLE": "AAS-Baum",
-        "EMPTY": "Kein AAS-Document verfügbar."
+        "OPEN_CONTENT_VIEW_TOOLTIP": "Struktursicht der Verwaltungsschale öffnen.",
+        "OPEN_BROWSER_VIEW_TOOLTIP": "Detailsicht der Verwaltungsschale öffnen."
     },
     "AASTable": {
         "COLUMN_NAME": "Name",
@@ -149,6 +144,27 @@
         "NAMEPLATE_DATA": "Typenschild",
         "SERIAL_NUMBER": "Seriennummer",
         "TYPE": "Type"
+    },
+    "DocumentBrowser": {
+        "ADD_TO_START_TOOLTIP": "Fügt eine Verknüpfung zur Startseite hinzu.",
+        "CAPTION": "Browser"
+    },
+    "DocumentContent": {
+        "ADD_TO_START_TOOLTIP": "Als Favorit zur Startseite hinzufügen.",
+        "CAPTION": "Struktur",
+        "EMPTY": "Kein AAS-Document verfügbar.",
+        "START_LIVE_TOOLTIP": "Starte die Anzeige von Livedaten.",
+        "STOP_LIVE_TOOLTIP": "Stoppe die Anzeige von Livedaten.",
+        "ADD_SELECTED_TO_LINE_CHART_DASHBOARD_TOOLTIP": "Ausgewählte Elemente zu einem Linien-Diagramm hinzufügen.",
+        "ADD_SELECTED_TO_BAR_CHART_DASHBOARD_TOOLTIP": "Ausgewählte Elemente zu einem Balkendiagramm hinzufügen.",
+        "DOWNLOAD_TOOLTIP": "Lade das aktuelle Dokument als JSON-Datei herunter.",
+        "FIND_NEXT_TOOLTIP": "Gehe zum nächsten Treffer.",
+        "FIND_PREVIOUS_TOOLTIP": "Gehe zum voherigen Treffer."
+    },
+    "DcoumentHeader": {
+        "AAS_ID": "AAS ID",
+        "ASSET_ID": "Asset ID",
+        "VERSION": "Version"
     },
     "EndpointAuthForm": {
         "API_KEY": "API Key",
@@ -382,8 +398,12 @@
         "VISIBLE_ENDPOINTS_TOOLTIP": "Sichtbare AAS-Endpunkte auswählen."
     },
     "Start": {
+        "CAPTION": "Start",
         "EMPTY": "Die START-Seite ist leer.",
-        "TILE_ADDED": "Zu Start hinzugefügt."
+        "TILE_ADDED": "Zu Start hinzugefügt.",
+        "REMOVE_TOOLTIP": "Ausgewählte Kacheln löschen.",
+        "MOVE_LEFT_TOOLTIP": "Ausgewählte Kacheln eine Position nach links schieben.",
+        "MOVE_RIGHT_TOOLTIP": "Ausgewählte Kacheln eine Position nach rechts schieben."
     },
     "TechnicalData": {
         "TITLE": "Technische Daten"

@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-<div id="start-page" class="overflow-auto h-100 px-2">
+<div class="overflow-auto h-100 px-2">
     @if (isEmpty()) {
         @let html = welcome();
         @if (html) {
@@ -19,9 +19,9 @@
             </div>
         }
     } @else {
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+        <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-2 row-cols-xl-3 row-cols-xxl-4">
             @for (item of items(); track item; let i = $index) {
-                <div class="p-2 rounded col" [class.bg-info-subtle]="item.selected()" style="min-width: 380px">
+                <div class="p-2 rounded col" [class.bg-info-subtle]="item.selected()">
                     <div class="card overflow-hidden" (click)="toggleSelected($event, item)" tabindex="0">
                         <ng-container
                             [ngComponentOutlet]="item.component"
@@ -35,35 +35,53 @@
 </div>
 
 <ng-template #toolbar>
-    @if (!isEmpty()){
-    <div class="input-group me-2 my-1">
-        <button
-            id="AID_REMOVE"
-            class="btn btn-outline-primary"
-            type="button"
-            (click)="remove().subscribe()"
-            [disabled]="!someSelected()"
-        >
-            <i class="bi bi-trash"></i>
-        </button>
-        <button
-            id="AID_MOVE_LEFT"
-            class="btn btn-outline-primary"
-            type="button"
-            (click)="moveLeft().subscribe()"
-            [disabled]="!canMoveLeft()"
-        >
-            <i class="bi bi-arrow-left"></i>
-        </button>
-        <button
-            id="AID_MOVE_RIGHT"
-            class="btn btn-outline-primary"
-            type="button"
-            (click)="moveRight().subscribe()"
-            [disabled]="!canMoveRight()"
-        >
-            <i class="bi bi-arrow-right"></i>
-        </button>
+    <div class="w-100">
+        <div class="mb-1 d-none d-lg-flex flex-row">
+            <h2 translate="Start.CAPTION"></h2>
+        </div>
+
+        <div class="d-flex flex-row">
+            <div class="input-group me-2 my-1">
+                <button
+                    id="AID_REMOVE"
+                    class="btn btn-outline-primary"
+                    type="button"
+                    (click)="remove().subscribe()"
+                    [disabled]="!someSelected()"
+                    ngbTooltip="{{ 'Start.REMOVE_TOOLTIP' | translate }}"
+                    placement="bottom"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-trash"></i>
+                </button>
+                <button
+                    id="AID_MOVE_LEFT"
+                    class="btn btn-outline-primary"
+                    type="button"
+                    (click)="moveLeft().subscribe()"
+                    [disabled]="!canMoveLeft()"
+                    ngbTooltip="{{ 'Start.MOVE_LEFT_TOOLTIP' | translate }}"
+                    placement="bottom"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <button
+                    id="AID_MOVE_RIGHT"
+                    class="btn btn-outline-primary"
+                    type="button"
+                    (click)="moveRight().subscribe()"
+                    [disabled]="!canMoveRight()"
+                    ngbTooltip="{{ 'Start.MOVE_RIGHT_TOOLTIP' | translate }}"
+                    placement="bottom"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
     </div>
-    }
 </ng-template>

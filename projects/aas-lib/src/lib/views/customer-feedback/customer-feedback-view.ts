@@ -12,7 +12,7 @@ import { EMPTY, Observable, Subscription } from 'rxjs';
 import { Component, OnDestroy, TemplateRef, computed, effect, inject, viewChild } from '@angular/core';
 
 import { aas, AASDocument } from 'aas-core';
-import { ScoreComponent } from '../../components/score/score.component';
+import { ScoreComponent } from '../../shared/components/score/score.component';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';

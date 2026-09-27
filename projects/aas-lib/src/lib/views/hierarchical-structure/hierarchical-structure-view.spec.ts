@@ -17,7 +17,7 @@ import { aas, AASDocument } from 'aas-core';
 import { HierarchicalStructureView } from './hierarchical-structure-view';
 import { HierarchicalStructure } from './hierarchical-structure';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { StartService } from '../../shared/services/start.service';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { EndpointsApi } from '../../shared/services/endpoints-api';
@@ -28,11 +28,11 @@ import { HIERARCHICAL_STRUCTURES_1_0, HIERARCHICAL_STRUCTURES_1_1 } from '../vie
 import hierarchicalStructures_1_1 from '../../../test/assets/hierarchical-structures-1-1.json';
 
 @Component({
-    selector: 'fhg-thumbnail-qrcode',
+    selector: 'fhg-doc-header',
     template: '<div></div>',
     styleUrls: [],
 })
-export class TestThumbnailQRCode {
+export class TestDocumentHeader {
     public readonly document = input<AASDocument>();
 }
 
@@ -119,8 +119,8 @@ describe('HierarchicalStructureView', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(HierarchicalStructureView, {
-            remove: { imports: [HierarchicalStructure, ThumbnailQRCode] },
-            add: { imports: [TestHierarchicalStructure, TestThumbnailQRCode] },
+            remove: { imports: [HierarchicalStructure, DocumentHeader] },
+            add: { imports: [TestHierarchicalStructure, TestDocumentHeader] },
         });
 
         fixture = TestBed.createComponent(HierarchicalStructureView);

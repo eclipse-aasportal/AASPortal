@@ -10,7 +10,7 @@ import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild 
 import { Observable, of } from 'rxjs';
 import { LeafView } from '../leaf-view';
 import { ToolbarService } from '../../shared/services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { encodeBase64Url, toString } from '../../utilities';
 import { StartService } from '../../shared/services/start.service';
 import { RouterLink } from '@angular/router';
@@ -18,7 +18,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 @Component({
     selector: 'fhg-service-request-notification',
-    imports: [ThumbnailQRCode, RouterLink],
+    imports: [DocumentHeader, RouterLink],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'ServiceRequestNotification' }],
     templateUrl: './service-request-notification.html',
     styleUrl: './service-request-notification.scss',

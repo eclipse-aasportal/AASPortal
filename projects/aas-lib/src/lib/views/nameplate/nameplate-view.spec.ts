@@ -20,7 +20,7 @@ import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { NameplateView } from './nameplate-view';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { Nameplate } from './nameplate';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { NameplateState } from './nameplate.state';
@@ -29,11 +29,11 @@ import { NAMEPLATE_2_0, NAMEPLATE_3_0, NAMEPLATE_FHG, NAMEPLATE_HSU } from '../v
 import nameplate_3_0 from '../../../test/assets/nameplate-3-0.json';
 
 @Component({
-    selector: 'fhg-thumbnail-qrcode',
+    selector: 'fhg-doc-header',
     template: '<div></div>',
     styleUrls: [],
 })
-export class TestThumbnailQRCode {
+export class TestDocumentHeader {
     public readonly document = input<AASDocument>();
 }
 
@@ -121,8 +121,8 @@ describe('NameplateView', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(NameplateView, {
-            remove: { imports: [Nameplate, ThumbnailQRCode] },
-            add: { imports: [TestNameplate, TestThumbnailQRCode] },
+            remove: { imports: [Nameplate, DocumentHeader] },
+            add: { imports: [TestNameplate, TestDocumentHeader] },
         });
 
         fixture = TestBed.createComponent(NameplateView);

@@ -13,7 +13,7 @@ import { of, Observable } from 'rxjs';
 import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { ToolbarService } from '../../shared/services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { CarbonFootprint } from './carbon-footprint';
 import { LeafView } from '../leaf-view';
 import { CarbonFootprintViewState } from './carbon-footprint-view.state';
@@ -31,7 +31,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
         TranslateDirective,
         NgbPaginationModule,
         NgbAccordionModule,
-        ThumbnailQRCode,
+        DocumentHeader,
         CarbonFootprint,
         RouterModule,
     ],

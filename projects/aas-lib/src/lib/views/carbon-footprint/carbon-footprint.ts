@@ -13,7 +13,7 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { CarbonFootprintState } from './carbon-footprint.state';
-import { ChildComponent } from '../../components/child-component';
+import { ChildComponent } from '../../shared/components/child-component';
 
 /**
  * Provides a component for a submodel that belongs to the IDTA specification "Carbon Footprint".

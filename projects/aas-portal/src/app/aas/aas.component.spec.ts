@@ -26,6 +26,7 @@ import {
     VIEW_ROUTES,
     DashboardService,
     DashboardPage,
+    DocumentHeader,
 } from 'aas-lib';
 
 import { AASComponent } from './aas.component';
@@ -53,6 +54,15 @@ class TestAASTreeComponent {
     public findPrevious(): void {
         noop();
     }
+}
+
+@Component({
+    selector: 'fhg-doc-header',
+    template: '<div></div>',
+    styleUrls: [],
+})
+class TestDocumentHeader {
+    public document = input<AASDocument | null>(null);
 }
 
 describe('AASComponent', () => {
@@ -127,10 +137,10 @@ describe('AASComponent', () => {
 
         TestBed.overrideComponent(AASComponent, {
             remove: {
-                imports: [AASTreeComponent],
+                imports: [AASTreeComponent, DocumentHeader],
             },
             add: {
-                imports: [TestAASTreeComponent],
+                imports: [TestAASTreeComponent, TestDocumentHeader],
             },
         });
 
@@ -147,17 +157,5 @@ describe('AASComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
-    });
-
-    it('shows the document assetId', () => {
-        expect(component.assetId()).toEqual('http://customer.com/assets/KHBVZJSQKIY');
-    });
-
-    it('shows the document id', () => {
-        expect(component.id()).toEqual(sampleDocument.id);
-    });
-
-    it('shows the document version', () => {
-        expect(component.version()).toEqual('-');
     });
 });

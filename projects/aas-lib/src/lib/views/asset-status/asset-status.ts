@@ -7,19 +7,19 @@
  *****************************************************************************/
 
 import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { aas, isProperty, isSubmodelElementCollection, isSubmodelElementList } from 'aas-core';
 import { LeafView } from '../leaf-view';
 import { ToolbarService } from '../../shared/services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { encodeBase64Url } from '../../utilities';
 import { StartService } from '../../shared/services/start.service';
-import { RouterLink } from '@angular/router';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
-import { aas, isProperty, isSubmodelElementCollection, isSubmodelElementList } from 'aas-core';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 
 @Component({
     selector: 'fhg-asset-status',
-    imports: [ThumbnailQRCode, RouterLink],
+    imports: [DocumentHeader, RouterLink],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'AssetStatus' }],
     templateUrl: './asset-status.html',
     styleUrl: './asset-status.scss',

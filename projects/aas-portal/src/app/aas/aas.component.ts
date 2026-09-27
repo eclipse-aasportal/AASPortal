@@ -41,6 +41,8 @@ import {
     VIEW_ROUTES,
     DashboardService,
     MaxLengthPipe,
+    getDisplayName,
+    DocumentHeader,
 } from 'aas-lib';
 
 import { AASState } from './aas.state';
@@ -49,7 +51,17 @@ import { AASState } from './aas.state';
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    imports: [TranslateDirective, TranslatePipe, FormsModule, NgClass, RouterModule, NgbNavModule, MaxLengthPipe, NgbTooltip],
+    imports: [
+        TranslateDirective,
+        TranslatePipe,
+        FormsModule,
+        NgClass,
+        RouterModule,
+        NgbNavModule,
+        MaxLengthPipe,
+        NgbTooltip,
+        DocumentHeader,
+    ],
 })
 /**
  * Component responsible for managing and displaying Asset Administration Shell (AAS) functionality.
@@ -74,7 +86,6 @@ export class AASComponent implements OnInit, OnDestroy {
     private readonly modal = inject(NgbModal);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
-    private readonly dom = inject(DOCUMENT);
     private readonly viewRoutes = inject(VIEW_ROUTES);
 
     public constructor() {
@@ -91,16 +102,6 @@ export class AASComponent implements OnInit, OnDestroy {
      * Accessed via ViewChild decorator targeting an element with the 'toolbar' template reference variable.
      */
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
-
-    public readonly idShort = computed(() => this.state.document()?.idShort ?? '-');
-
-    public readonly id = computed(() => this.state.document()?.id ?? '-');
-
-    public readonly assetId = computed(() => this.state.document()?.assetId ?? '-');
-
-    public readonly version = computed(() =>
-        this.versionToString(this.state.document()?.content?.assetAdministrationShells?.at(0)?.administration),
-    );
 
     public readonly document = this.state.document;
 
@@ -134,31 +135,6 @@ export class AASComponent implements OnInit, OnDestroy {
         this.toolbar.clear();
     }
 
-    /**
-     * Retrieves the thumbnail image URL for the current document.
-     *
-     * @returns {string} The URL of the thumbnail image. If no thumbnail is set in the document,
-     * returns the default AAS thumbnail path '/assets/resources/aas-idta.png'
-     */
-    public getThumbnail(): string {
-        const thumbnail = this.document()?.thumbnail;
-        if (thumbnail) {
-            return thumbnail;
-        }
-
-        return '/assets/resources/aas-idta.png';
-    }
-
-    /** The URL of the thumbnail. */
-    public readonly thumbnail = linkedSignal(() => {
-        const document = this.document();
-        if (!document) {
-            return '/assets/resources/aas-idta.png';
-        }
-
-        return `/api/v1/endpoints/${encodeBase64Url(document.endpoint)}/documents/${encodeBase64Url(document.id)}/thumbnail`;
-    });
-
     public addToStart(): Observable<void> {
         const document = this.document();
         if (
@@ -173,23 +149,6 @@ export class AASComponent implements OnInit, OnDestroy {
         }
 
         return EMPTY;
-    }
-
-    private getDocument(id: string, endpoint?: string): void {
-        this.api.getDocument('AssetAdministrationShell', id, endpoint).subscribe({
-            next: document => this.state.update({ document, error: null }),
-            error: error => {
-                // Without resetting `document` here, this AAS-independent, root-provided state
-                // would keep showing whichever shell was last successfully loaded, silently
-                // hiding the fact that loading *this* one just failed.
-                console.debug(error);
-                const status = error instanceof HttpErrorResponse ? error.status : undefined;
-                this.state.update({
-                    document: null,
-                    error: status === 401 || status === 403 ? 'permission' : 'other',
-                });
-            },
-        });
     }
 
     /**
@@ -213,6 +172,23 @@ export class AASComponent implements OnInit, OnDestroy {
         );
     }
 
+    private getDocument(id: string, endpoint?: string): void {
+        this.api.getDocument('AssetAdministrationShell', id, endpoint).subscribe({
+            next: document => this.state.update({ document, error: null }),
+            error: error => {
+                // Without resetting `document` here, this AAS-independent, root-provided state
+                // would keep showing whichever shell was last successfully loaded, silently
+                // hiding the fact that loading *this* one just failed.
+                console.debug(error);
+                const status = error instanceof HttpErrorResponse ? error.status : undefined;
+                this.state.update({
+                    document: null,
+                    error: status === 401 || status === 403 ? 'permission' : 'other',
+                });
+            },
+        });
+    }
+
     /** Reloads the AAS for the route's current params, e.g. after the user just added an API key. */
     private retry(): void {
         const routeParams = this.route.snapshot.params;
@@ -222,24 +198,6 @@ export class AASComponent implements OnInit, OnDestroy {
         }
 
         this.getDocument(decodeBase64Url(params.id), params.endpoint ? decodeBase64Url(params.endpoint) : undefined);
-    }
-
-    private versionToString(administration?: aas.AdministrativeInformation): string {
-        let version: string = administration?.version ?? '';
-        const revision: string = administration?.revision ?? '';
-        if (revision.length > 0) {
-            if (version.length > 0) {
-                version += ' (' + revision + ')';
-            } else {
-                version = revision;
-            }
-        }
-
-        if (version.length === 0) {
-            version = '-';
-        }
-
-        return version;
     }
 
     public getSubmodelSemanticId(submodel: aas.Submodel): string {

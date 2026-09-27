@@ -17,7 +17,7 @@ import { aas, AASDocument, getReferable } from 'aas-core';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { encodeBase64Url, getDisplayName, getDisplayValue } from '../../utilities';
 import { StartService } from '../../shared/services/start.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { Nameplate } from './nameplate';
 import { LeafView } from '../leaf-view';
 import { NameplateViewState } from './nameplate-view.state';
@@ -31,7 +31,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './nameplate-view.html',
     styleUrls: ['./nameplate-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'Nameplate' }],
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate, RouterModule],
+    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, DocumentHeader, Nameplate, RouterModule],
 })
 export class NameplateView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

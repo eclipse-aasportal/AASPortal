@@ -20,7 +20,7 @@ import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { DigitalProductPassportView } from './digital-product-passport-view';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { Nameplate } from '../nameplate/nameplate';
 import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
@@ -45,11 +45,11 @@ import {
 import sample from '../../../test/assets/dpp-sample.json';
 
 @Component({
-    selector: 'fhg-thumbnail-qrcode',
+    selector: 'fhg-doc-header',
     template: '<div></div>',
     styleUrls: [],
 })
-export class TestThumbnailQRCode {
+export class TestDocumentHeader {
     public readonly document = input<AASDocument>();
 }
 
@@ -170,8 +170,8 @@ describe('DigitalProductPassportView', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(DigitalProductPassportView, {
-            remove: { imports: [ThumbnailQRCode, Nameplate, CarbonFootprint, HandoverDocumentation] },
-            add: { imports: [TestThumbnailQRCode, TestNameplate, TestCarbonFootprint, TestHandoverDocumentation] },
+            remove: { imports: [DocumentHeader, Nameplate, CarbonFootprint, HandoverDocumentation] },
+            add: { imports: [TestDocumentHeader, TestNameplate, TestCarbonFootprint, TestHandoverDocumentation] },
         });
     });
 

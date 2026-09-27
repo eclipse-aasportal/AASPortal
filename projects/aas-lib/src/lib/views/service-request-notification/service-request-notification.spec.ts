@@ -20,15 +20,15 @@ import { StartService } from '../../shared/services/start.service';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { EndpointsApi } from '../../shared/services/endpoints-api';
 
 @Component({
-    selector: 'fhg-thumbnail-qrcode',
+    selector: 'fhg-doc-header',
     template: '<div></div>',
     styleUrls: [],
 })
-export class TestThumbnailQRCode {
+export class TestDocumentHeader {
     public readonly document = input<AASDocument>();
 }
 
@@ -119,8 +119,8 @@ describe('ServiceRequestNotification', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(ServiceRequestNotification, {
-            remove: { imports: [ThumbnailQRCode] },
-            add: { imports: [TestThumbnailQRCode] },
+            remove: { imports: [DocumentHeader] },
+            add: { imports: [TestDocumentHeader] },
         });
 
         fixture = TestBed.createComponent(ServiceRequestNotification);

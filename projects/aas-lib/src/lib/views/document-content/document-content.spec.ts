@@ -24,7 +24,7 @@ import { ToolbarService } from '../../shared/services/toolbar.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { VIEW_ROUTES } from '../views-routes';
 import { DocumentContent } from './document-content';
-import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
+import { AASTreeComponent } from '../../shared/components/aas-tree/aas-tree.component';
 import { encodeBase64Url } from '../../utilities';
 import { DashboardChartType, DashboardPage } from '../../features/dashboard/dashboard-types';
 

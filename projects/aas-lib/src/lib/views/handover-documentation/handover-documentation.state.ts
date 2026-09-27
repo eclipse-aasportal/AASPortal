@@ -22,7 +22,7 @@ import {
     toDisplayValue,
 } from 'aas-core';
 
-import { ChildState } from '../../components/child-state';
+import { ChildState } from '../../shared/components/child-state';
 import { basename, extension, findSubmodel, getUrl } from '../../utilities';
 import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views-constants';
 

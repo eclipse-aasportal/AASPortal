@@ -16,7 +16,7 @@ import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild 
 import { encodeBase64Url, getUrl, toString } from '../../utilities';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { StartService } from '../../shared/services/start.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
 import { Nameplate } from '../nameplate/nameplate';
 import { HandoverDocumentation } from '../handover-documentation/handover-documentation';
@@ -46,7 +46,7 @@ const emptyMainData: MainData = {
         TranslateDirective,
         NgbAccordionModule,
         NgbPaginationModule,
-        ThumbnailQRCode,
+        DocumentHeader,
         CarbonFootprint,
         Nameplate,
         HandoverDocumentation,

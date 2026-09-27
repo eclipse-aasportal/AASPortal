@@ -6,10 +6,10 @@
  !
  !---------------------------------------------------------------------------->
 
-<div id="shells-container" class="overflow-auto h-100 px-2">
+<div id="shells-container" class="container-fluid h-100 w-100 px-2 overflow-auto">
     <fhg-aas-table
         [documents]="documents()"
-        [selected]="selected()"
+        [selected]="selected()" 
         (selectedChange)="setSelected($event)"
         [expression]="filter()"
     ></fhg-aas-table>

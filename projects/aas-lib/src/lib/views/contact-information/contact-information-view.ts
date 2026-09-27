@@ -12,7 +12,7 @@ import { Observable, of } from 'rxjs';
 import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { ToolbarService } from '../../shared/services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { ContactInformation } from './contact-information';
 import { ContactInformationViewState } from './contact-information-view.state';
 import { LeafView } from '../leaf-view';
@@ -33,7 +33,7 @@ import { RouterModule } from '@angular/router';
         TranslateDirective,
         NgbPaginationModule,
         NgbAccordionModule,
-        ThumbnailQRCode,
+        DocumentHeader,
         ContactInformation,
         RouterModule,
     ],

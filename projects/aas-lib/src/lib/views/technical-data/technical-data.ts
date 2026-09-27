@@ -11,8 +11,8 @@ import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
 
-import { DataSheet } from '../../components/data-sheet/data-sheet';
-import { ChildComponent } from '../../components/child-component';
+import { DataSheet } from '../../shared/components/data-sheet/data-sheet';
+import { ChildComponent } from '../../shared/components/child-component';
 import { TechnicalDataState } from './technical-data.state';
 
 /**

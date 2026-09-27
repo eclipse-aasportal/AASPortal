@@ -33,7 +33,7 @@ import {
     isLoadedEnvironment,
 } from 'aas-core';
 
-import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
+import { AASTreeComponent } from '../../shared/components/aas-tree/aas-tree.component';
 import { NotifyService } from '../../core/notify/notify.service';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
 import { ToolbarService } from '../../shared/services/toolbar.service';
@@ -43,6 +43,7 @@ import { DashboardChartType, DashboardPage } from '../../features/dashboard/dash
 import { CompositeView } from '../composite-view';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 import { LiveState } from '../../types';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 export type DocumentContentData = {
     live: LiveState;
@@ -61,7 +62,7 @@ const initialState: DocumentContentData = {
     templateUrl: './document-content.html',
     styleUrls: ['./document-content.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'content' }],
-    imports: [TranslateDirective, TranslatePipe, FormsModule, AASTreeComponent],
+    imports: [TranslateDirective, TranslatePipe, FormsModule, AASTreeComponent, NgbTooltip],
 })
 /**
  * Represents the main content view for an Asset Administration Shell (AAS) document.

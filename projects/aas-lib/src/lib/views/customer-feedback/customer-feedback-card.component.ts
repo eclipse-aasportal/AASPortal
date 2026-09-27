@@ -10,7 +10,7 @@ import { Component, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 
-import { ScoreComponent } from '../../components/score/score.component';
+import { ScoreComponent } from '../../shared/components/score/score.component';
 import { GeneralItem } from './customer-feedback.types';
 
 @Component({

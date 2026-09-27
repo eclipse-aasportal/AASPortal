@@ -9,7 +9,7 @@
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getReferable, isSubmodelElementCollection } from 'aas-core';
-import { ChildState } from '../../components/child-state';
+import { ChildState } from '../../shared/components/child-state';
 import { DataSheetData } from '../../types';
 import { TECHNICAL_DATA_1_2 } from '../views-constants';
 import { createDataSheet, findSubmodel } from '../../utilities';

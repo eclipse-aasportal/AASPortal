@@ -30,7 +30,7 @@ import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { encodeBase64Url, findRouteForShell, findSubmodel, getDisplayName } from '../../utilities';
 import { HIERARCHICAL_STRUCTURES_1_0, HIERARCHICAL_STRUCTURES_1_1 } from '../views-constants';
 import { VIEW_ROUTES } from '../views-routes';
-import { Tree, TreeComponent, TreeNode, TreeResult } from '../../components/tree/tree.component';
+import { Tree, TreeComponent, TreeNode, TreeResult } from '../../shared/components/tree/tree.component';
 
 export type ArcheType = 'Full' | 'OneDown' | 'OneUp';
 

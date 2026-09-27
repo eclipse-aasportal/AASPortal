@@ -22,7 +22,7 @@ import {
 import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../views-constants';
 import { createDataSheet, findSubmodel } from '../../utilities';
 import { DataSheetData } from '../../types';
-import { ChildState } from '../../components/child-state';
+import { ChildState } from '../../shared/components/child-state';
 
 export type CarbonFootprintData = {
     document: AASDocument | null;
