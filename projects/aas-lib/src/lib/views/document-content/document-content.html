@@ -8,7 +8,9 @@
 
 <div class="container-fluid px-2">
     @let doc = document();
-    @if (doc) {
+    @if (loading()) {
+        <fhg-loading-spinner></fhg-loading-spinner>
+    } @else if (doc) {
         <div class="overflow-auto">
             <fhg-aas-tree
                 [live]="live()"

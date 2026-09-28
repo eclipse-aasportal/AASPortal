@@ -17,6 +17,7 @@ import { encodeBase64Url, getUrl, toString } from '../../utilities';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { StartService } from '../../shared/services/start.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
 import { Nameplate } from '../nameplate/nameplate';
 import { HandoverDocumentation } from '../handover-documentation/handover-documentation';
@@ -51,6 +52,7 @@ const emptyMainData: MainData = {
         Nameplate,
         HandoverDocumentation,
         RouterModule,
+        LoadingSpinner,
     ],
 })
 export class DigitalProductPassportView extends CompositeView implements OnDestroy {

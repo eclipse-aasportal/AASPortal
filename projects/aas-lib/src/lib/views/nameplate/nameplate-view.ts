@@ -18,6 +18,7 @@ import { ToolbarService } from '../../shared/services/toolbar.service';
 import { encodeBase64Url, getDisplayName, getDisplayValue } from '../../utilities';
 import { StartService } from '../../shared/services/start.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { Nameplate } from './nameplate';
 import { LeafView } from '../leaf-view';
 import { NameplateViewState } from './nameplate-view.state';
@@ -31,7 +32,15 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './nameplate-view.html',
     styleUrls: ['./nameplate-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'Nameplate' }],
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate, RouterModule],
+    imports: [
+        TranslateDirective,
+        NgbPaginationModule,
+        NgbAccordionModule,
+        ThumbnailQRCode,
+        Nameplate,
+        RouterModule,
+        LoadingSpinner,
+    ],
 })
 export class NameplateView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

@@ -148,6 +148,11 @@
         "SERIAL_NUMBER": "Serial No.",
         "TYPE": "Type"
     },
+    "DppMetadata": {
+        "TITLE": "Digital Product Passport",
+        "COMPLETE": "DPP complete",
+        "INCOMPLETE": "DPP incomplete"
+    },
     "EndpointAuthForm": {
         "API_KEY": "API Key",
         "AUTHORIZATION": "Authorization",
@@ -263,6 +268,7 @@
         "ENDPOINTS": "Endpoints",
         "GTC": "GTC",
         "GTC_URL": "https://www.fraunhofer.de/en/gtc.html",
+        "LOADING": "Loading…",
         "PUBLISHING_NOTES": "Publishing notes",
         "PUBLISHING_NOTES_URL": "https://www.fraunhofer.de/en/publishing-notes.html",
         "SHELLS": "Shells",

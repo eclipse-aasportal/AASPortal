@@ -18,6 +18,7 @@ export * from './lib/components/concept-description/concept-description.componen
 export * from './lib/components/data-sheet/data-sheet';
 export * from './lib/components/favorite/favorite.component';
 export * from './lib/components/license-info/license-info.component';
+export * from './lib/components/loading-spinner/loading-spinner';
 export * from './lib/components/localize/culture-info';
 export * from './lib/components/localize/localize.component';
 export * from './lib/components/progress/progress.component';

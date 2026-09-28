@@ -14,6 +14,7 @@ import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@a
 
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { TechnicalData } from './technical-data';
 import { TechnicalDataViewState } from './technical-data-view.state';
 import { LeafView } from '../leaf-view';
@@ -31,6 +32,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
         ThumbnailQRCode,
         TechnicalData,
         RouterModule,
+        LoadingSpinner,
     ],
     templateUrl: './technical-data-view.html',
     styleUrl: './technical-data-view.scss',

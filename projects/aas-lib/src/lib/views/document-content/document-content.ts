@@ -34,6 +34,7 @@ import {
 } from 'aas-core';
 
 import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { NotifyService } from '../../core/notify/notify.service';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
 import { ToolbarService } from '../../shared/services/toolbar.service';
@@ -61,7 +62,7 @@ const initialState: DocumentContentData = {
     templateUrl: './document-content.html',
     styleUrls: ['./document-content.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'content' }],
-    imports: [TranslateDirective, TranslatePipe, FormsModule, AASTreeComponent],
+    imports: [TranslateDirective, TranslatePipe, FormsModule, AASTreeComponent, LoadingSpinner],
 })
 /**
  * Represents the main content view for an Asset Administration Shell (AAS) document.

@@ -12,6 +12,7 @@ import { ContactInformationView } from './contact-information/contact-informatio
 import { CustomerFeedbackView } from './customer-feedback/customer-feedback-view';
 import { DigitalProductPassportView } from './digital-product-passport/digital-product-passport-view';
 import { DocumentBrowserView } from './document-browser/document-browser-view';
+import { DppMetadataView } from './dpp-metadata/dpp-metadata-view';
 import { GenericSubmodelView } from './generic-submodel/generic-submodel-view';
 import { HandoverDocumentationView } from './handover-documentation/handover-documentation-view';
 import { NameplateView } from './nameplate/nameplate-view';
@@ -24,6 +25,7 @@ import {
     CARBON_FOOTPRINT_1_0,
     CONTACT_INFORMATION_1_0,
     CUSTOMER_FEEDBACK,
+    DPP_METADATA_1,
     HANDOVER_DOCUMENTATION_1_2,
     HANDOVER_DOCUMENTATION_2_0,
     HIERARCHICAL_STRUCTURES_1_0,
@@ -91,6 +93,14 @@ export const viewRoutes: ViewRoute[] = [
         data: {
             type: 'Composition',
             routes: ['Nameplate', 'CarbonFootprint', 'HandoverDocumentation'],
+        },
+    },
+    {
+        path: 'DppMetadata',
+        component: DppMetadataView,
+        data: {
+            type: 'Leaf',
+            semanticIds: [DPP_METADATA_1],
         },
     },
     {

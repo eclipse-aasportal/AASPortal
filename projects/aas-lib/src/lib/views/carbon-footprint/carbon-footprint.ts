@@ -113,7 +113,11 @@ export class CarbonFootprint extends ChildComponent {
     }
 
     public getValueFromDataSheet(name: string): string | string[] | undefined {
+        // this.item() is undefined whenever the current AAS's CarbonFootprint submodel has no
+        // ProductCarbonFootprints entries at all -- a valid, empty result, not an error.
         const datasheet = this.item();
+        if (!datasheet) return '-1';
+
         const result = datasheet.items.find(element => element.idShort === name);
         if (!result) return '-1';
         return result.value;
@@ -121,6 +125,8 @@ export class CarbonFootprint extends ChildComponent {
 
     public getFilenameExplanation(): string | string[] | undefined {
         const datasheet = this.item();
+        if (!datasheet) return '';
+
         const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
         if (!result || !result.value) return '';
         return result.value;
@@ -128,6 +134,8 @@ export class CarbonFootprint extends ChildComponent {
 
     public openFile(): void {
         const datasheet = this.item();
+        if (!datasheet) return;
+
         const result = datasheet.items.find(element => element.idShort === 'ExplanatoryStatement');
         if (!result || !result.url) return;
 

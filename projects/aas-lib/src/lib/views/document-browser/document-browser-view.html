@@ -6,7 +6,9 @@
  !
  !---------------------------------------------------------------------------->
 
-@if (count() > 0) {
+@if (loading()) {
+    <fhg-loading-spinner></fhg-loading-spinner>
+} @else if (count() > 0) {
     <div class="container container-md container-lg h-100">
         <div class="d-flex flex-column text-center">
             <div class="bg-primary text-center py-2 my-2 fs-5">{{ 'Browser.TITLE' | translate }}</div>

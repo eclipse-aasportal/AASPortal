@@ -6,7 +6,9 @@
  !
  !---------------------------------------------------------------------------->
 
-@if (submodels()) {
+@if (loading()) {
+    <fhg-loading-spinner></fhg-loading-spinner>
+} @else if (submodels()) {
     <div class="container h-100">
 
         <div class="d-flex flex-column mt-2">

@@ -16,6 +16,7 @@ import { ToolbarService } from '../../shared/services/toolbar.service';
 import { StartService } from '../../shared/services/start.service';
 import { BrowserComponent } from '../../components/browser/browser.component';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { DocumentBrowserViewState } from './document-browser-view.state';
 import { CompositeView } from '../composite-view';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
@@ -25,7 +26,14 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './document-browser-view.html',
     styleUrl: './document-browser-view.scss',
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'Browser' }],
-    imports: [TranslateDirective, TranslatePipe, NgbPaginationModule, BrowserComponent, ThumbnailQRCode],
+    imports: [
+        TranslateDirective,
+        TranslatePipe,
+        NgbPaginationModule,
+        BrowserComponent,
+        ThumbnailQRCode,
+        LoadingSpinner,
+    ],
 })
 /**
  * The `DocumentBrowserView` component displays an AAS document in a hierarchical structure using the `BrowserComponent`.

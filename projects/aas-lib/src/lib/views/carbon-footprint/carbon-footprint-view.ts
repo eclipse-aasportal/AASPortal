@@ -14,6 +14,7 @@ import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@a
 
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { CarbonFootprint } from './carbon-footprint';
 import { LeafView } from '../leaf-view';
 import { CarbonFootprintViewState } from './carbon-footprint-view.state';
@@ -34,6 +35,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
         ThumbnailQRCode,
         CarbonFootprint,
         RouterModule,
+        LoadingSpinner,
     ],
     templateUrl: './carbon-footprint-view.html',
     styleUrl: './carbon-footprint-view.scss',

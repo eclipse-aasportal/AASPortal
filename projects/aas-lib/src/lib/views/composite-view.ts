@@ -6,10 +6,10 @@
  *
  *****************************************************************************/
 
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { Params } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, first, from, mergeMap, of, toArray, map, Observable } from 'rxjs';
+import { combineLatest, first, from, mergeMap, of, tap, toArray, map, Observable } from 'rxjs';
 
 import { aas, AASDocument, getDocumentStatus, getReferable, getSemanticId } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
@@ -64,6 +64,12 @@ export abstract class CompositeView extends View {
 
     public override readonly count = computed(() => this.tuples().length);
 
+    private readonly loading$ = signal(true);
+
+    /** True until {@link tuples} has resolved its first (and only, since it's route-driven and
+     *  never re-fetches) value -- lets a view tell "still loading" apart from "loaded but empty". */
+    public readonly loading = this.loading$.asReadonly();
+
     protected readonly tuples = toSignal(
         combineLatest([this.route.params.pipe(first()), this.route.queryParams.pipe(first())]).pipe(
             map(([routeParams, queryParams]) => {
@@ -73,6 +79,7 @@ export abstract class CompositeView extends View {
             map(documents => {
                 return [...this.filter(documents)];
             }),
+            tap(() => this.loading$.set(false)),
         ),
         { initialValue: [] },
     );

@@ -13,6 +13,7 @@ import { Component, OnDestroy, TemplateRef, computed, effect, inject, viewChild 
 
 import { aas, AASDocument } from 'aas-core';
 import { ScoreComponent } from '../../components/score/score.component';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';
@@ -28,7 +29,7 @@ const maxStars = 5;
     templateUrl: './customer-feedback-view.html',
     styleUrls: ['./customer-feedback-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'CustomerFeedback' }],
-    imports: [ScoreComponent, DecimalPipe, TranslateDirective],
+    imports: [ScoreComponent, DecimalPipe, TranslateDirective, LoadingSpinner],
 })
 export class CustomerFeedbackView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GeneralItem>();

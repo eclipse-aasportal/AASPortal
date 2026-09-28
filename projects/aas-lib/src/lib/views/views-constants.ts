@@ -9,7 +9,9 @@
 export const CARBON_FOOTPRINT_0_9 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/0/9';
 export const CARBON_FOOTPRINT_1_0 = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0';
 export const CONTACT_INFORMATION_1_0 = 'https://admin-shell.io/zvei/nameplate/1/0/ContactInformations';
+export const CONTENT_SPECIFICATION_IDS_1 = 'https://admin-shell.io/idta/cds/contentSpecificationIds/1';
 export const CUSTOMER_FEEDBACK = 'urn:IOSB:Fraunhofer:de:KIReallabor:CUNACup:SemId:Submodel:CustomerFeedback';
+export const DPP_METADATA_1 = 'https://admin-shell.io/idta/cds/dppMetadata/1';
 export const HANDOVER_DOCUMENTATION_1_2 = '0173-1#01-AHF578#001';
 export const HANDOVER_DOCUMENTATION_2_0 = '0173-1#01-AHF578#003';
 export const HIERARCHICAL_STRUCTURES_1_0 = 'https://admin-shell.io/idta/HierarchicalStructures/1/0/Submodel';

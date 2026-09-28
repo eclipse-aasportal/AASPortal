@@ -90,7 +90,11 @@
                                 getSubmodelSemanticId(submodel) | max: 55 : 0.55
                             }}</label>
                             <h4 class="" style="overflow-wrap: anywhere; word-break: break-word">
-                                {{ submodel.idShort }}
+                                @if (isDppMetadata(submodel)) {
+                                    {{ 'DppMetadata.TITLE' | translate }}
+                                } @else {
+                                    {{ submodel.idShort }}
+                                }
                             </h4>
                         </div>
                         <div class="ms-auto text-primary" style="font-size: 1.5rem">
@@ -100,6 +104,8 @@
                 }
             </div>
         </div>
+    } @else if (loading()) {
+        <fhg-loading-spinner></fhg-loading-spinner>
     } @else if (error() === 'permission') {
         <div class="alert alert-warning text-center mt-2" role="alert">
             <i class="bi bi-shield-lock me-2"></i>

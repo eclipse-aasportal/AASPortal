@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { Params } from '@angular/router';
-import { combineLatest, first, from, map, mergeMap, Observable, of, toArray } from 'rxjs';
+import { combineLatest, first, from, map, mergeMap, Observable, of, tap, toArray } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { aas, AASDocument, getDocumentStatus, getSemanticId, isEnvironment } from 'aas-core';
@@ -63,6 +63,12 @@ export abstract class LeafView extends View {
         return item ? item[1] : undefined;
     });
 
+    private readonly loading$ = signal(true);
+
+    /** True until {@link tuples} has resolved its first (and only, since it's route-driven and
+     *  never re-fetches) value -- lets a view tell "still loading" apart from "loaded but empty". */
+    public readonly loading = this.loading$.asReadonly();
+
     /**
      * A reactive signal containing an array of filtered document tuples.
      *
@@ -85,6 +91,7 @@ export abstract class LeafView extends View {
             map(documents => {
                 return [...this.filter(documents)];
             }),
+            tap(() => this.loading$.set(false)),
         ),
         { initialValue: [] },
     );

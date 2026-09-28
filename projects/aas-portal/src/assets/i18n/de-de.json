@@ -148,6 +148,11 @@
         "SERIAL_NUMBER": "Seriennummer",
         "TYPE": "Type"
     },
+    "DppMetadata": {
+        "TITLE": "Digitaler Produktpass",
+        "COMPLETE": "DPP vollständig",
+        "INCOMPLETE": "DPP unvollständig"
+    },
     "EndpointAuthForm": {
         "API_KEY": "API Key",
         "AUTHORIZATION": "Autorisierung",
@@ -262,6 +267,7 @@
         "ENDPOINTS": "Endpunkte",
         "GTC": "AGB",
         "GTC_URL": "https://www.fraunhofer.de/de/agb.html",
+        "LOADING": "Wird geladen…",
         "PUBLISHING_NOTES": "Impressum",
         "PUBLISHING_NOTES_URL": "https://www.fraunhofer.de/de/impressum.html",
         "SHELLS": "Verwaltungsschalen",

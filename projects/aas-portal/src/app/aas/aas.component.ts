@@ -9,7 +9,7 @@
 import { NgClass } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { TranslateDirective } from '@ngx-translate/core';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { catchError, EMPTY, from, map, mergeMap, Observable, of, tap, first, combineLatest } from 'rxjs';
 import { NgbModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
@@ -41,6 +41,8 @@ import {
     VIEW_ROUTES,
     DashboardService,
     MaxLengthPipe,
+    DPP_METADATA_1,
+    LoadingSpinner,
 } from 'aas-lib';
 
 import { AASState } from './aas.state';
@@ -49,7 +51,16 @@ import { AASState } from './aas.state';
     selector: 'fhg-aas',
     templateUrl: './aas.component.html',
     styleUrls: ['./aas.component.scss'],
-    imports: [TranslateDirective, FormsModule, NgClass, RouterModule, NgbNavModule, MaxLengthPipe],
+    imports: [
+        TranslateDirective,
+        TranslatePipe,
+        FormsModule,
+        NgClass,
+        RouterModule,
+        NgbNavModule,
+        MaxLengthPipe,
+        LoadingSpinner,
+    ],
 })
 /**
  * Component responsible for managing and displaying Asset Administration Shell (AAS) functionality.
@@ -107,8 +118,18 @@ export class AASComponent implements OnInit, OnDestroy {
     /** Set when the requested AAS failed to load, e.g. because of a missing/invalid endpoint API key. */
     public readonly error = this.state.error;
 
+    /** True while a document fetch is in flight. */
+    public readonly loading = this.state.loading;
+
     public getSubmodels(): aas.Submodel[] | undefined {
-        return this.state.document()?.content?.submodels ?? [];
+        const submodels = this.state.document()?.content?.submodels ?? [];
+        // Array.prototype.sort is stable, so this only pulls the DPP metadata submodel to the
+        // front -- every other submodel keeps its original relative order.
+        return [...submodels].sort((a, b) => Number(!this.isDppMetadata(a)) - Number(!this.isDppMetadata(b)));
+    }
+
+    public isDppMetadata(submodel: aas.Submodel): boolean {
+        return this.getSubmodelSemanticId(submodel) === DPP_METADATA_1;
     }
 
     public ngOnInit(): void {
@@ -126,6 +147,9 @@ export class AASComponent implements OnInit, OnDestroy {
                     } else {
                         this.getDocument(decodeBase64Url(params.id));
                     }
+                } else {
+                    // Nothing was requested -- this is a genuine "empty" state, not a load in progress.
+                    this.state.update({ loading: false });
                 }
             });
     }
@@ -176,8 +200,9 @@ export class AASComponent implements OnInit, OnDestroy {
     }
 
     private getDocument(id: string, endpoint?: string): void {
+        this.state.update({ loading: true });
         this.api.getDocument('AssetAdministrationShell', id, endpoint).subscribe({
-            next: document => this.state.update({ document, error: null }),
+            next: document => this.state.update({ document, error: null, loading: false }),
             error: error => {
                 // Without resetting `document` here, this AAS-independent, root-provided state
                 // would keep showing whichever shell was last successfully loaded, silently
@@ -187,6 +212,7 @@ export class AASComponent implements OnInit, OnDestroy {
                 this.state.update({
                     document: null,
                     error: status === 401 || status === 403 ? 'permission' : 'other',
+                    loading: false,
                 });
             },
         });
@@ -259,6 +285,7 @@ export class AASComponent implements OnInit, OnDestroy {
 
         const semId = this.getSubmodelSemanticId(submodel);
 
+        if (this.isDppMetadata(submodel)) return 'bi-passport';
         if (semId.toLowerCase().includes('document') || submodel.idShort.toLowerCase().includes('document'))
             return 'bi-file-earmark-richtext';
         if (semId.toLowerCase().includes('contact') || submodel.idShort.toLowerCase().includes('contact'))

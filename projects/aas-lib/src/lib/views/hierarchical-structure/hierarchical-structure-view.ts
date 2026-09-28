@@ -17,12 +17,20 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
 import { HierarchicalStructure } from './hierarchical-structure';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'fhg-hierarchical-structure-view',
-    imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HierarchicalStructure, RouterLink],
+    imports: [
+        TranslateDirective,
+        NgbPaginationModule,
+        ThumbnailQRCode,
+        HierarchicalStructure,
+        RouterLink,
+        LoadingSpinner,
+    ],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'HierarchicalStructure' }],
     templateUrl: './hierarchical-structure-view.html',
     styleUrl: './hierarchical-structure-view.scss',

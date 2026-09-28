@@ -11,6 +11,7 @@ import { Observable, of } from 'rxjs';
 import { LeafView } from '../leaf-view';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { encodeBase64Url } from '../../utilities';
 import { StartService } from '../../shared/services/start.service';
 import { RouterLink } from '@angular/router';
@@ -19,7 +20,7 @@ import { aas, isProperty, isSubmodelElementCollection, isSubmodelElementList } f
 
 @Component({
     selector: 'fhg-asset-status',
-    imports: [ThumbnailQRCode, RouterLink],
+    imports: [ThumbnailQRCode, RouterLink, LoadingSpinner],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'AssetStatus' }],
     templateUrl: './asset-status.html',
     styleUrl: './asset-status.scss',

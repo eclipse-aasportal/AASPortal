@@ -6,6 +6,9 @@
  !
  !---------------------------------------------------------------------------->
 
+@if (loading()) {
+    <fhg-loading-spinner></fhg-loading-spinner>
+} @else {
 <div class="container border rounded">
     <div class="row">
         <div class="col fs-3 text-start">
@@ -47,6 +50,7 @@
     </div>
     }
 </div>
+}
 
 <ng-template #customerFeedbackToolbar>
     <div class="input-group me-2 my-1">

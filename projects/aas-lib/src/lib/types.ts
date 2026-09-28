@@ -125,6 +125,7 @@ export type ViewRouteName =
     | 'content'
     | 'CustomerFeedback'
     | 'DigitalProductPassport'
+    | 'DppMetadata'
     | 'GenericSubmodel'
     | 'HandoverDocumentation'
     | 'HierarchicalStructure'
