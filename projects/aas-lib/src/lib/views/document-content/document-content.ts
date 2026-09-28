@@ -9,6 +9,7 @@
 import { Router } from '@angular/router';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { EMPTY, Observable } from 'rxjs';
 import {
     Component,
@@ -43,7 +44,6 @@ import { DashboardChartType, DashboardPage } from '../../features/dashboard/dash
 import { CompositeView } from '../composite-view';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 import { LiveState } from '../../types';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 export type DocumentContentData = {
     live: LiveState;
@@ -213,7 +213,7 @@ export class DocumentContent extends CompositeView implements OnDestroy {
             this.start.add('Favorite', `AAS#${document.endpoint}#${document.id}`, {
                 endpoint: document.endpoint,
                 id: document.id,
-                href: `/aas;endpoint=${encodeBase64Url(document.endpoint)};id=${encodeBase64Url(document.id)}`,
+                href: `views/content;endpoint=${encodeBase64Url(document.endpoint)};id=${encodeBase64Url(document.id)}`,
             })
         ) {
             return this.start.save();
