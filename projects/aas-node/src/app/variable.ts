@@ -16,10 +16,10 @@ export class Variable {
     public readonly AAS_EXPIRES_IN: number = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
 
     /** The AASIndex realization. */
-    public readonly AAS_INDEX?: string = process.env.AAS_INDEX;
+    public readonly AAS_INDEX: string = process.env.AAS_INDEX ?? 'file:///aas-index.db';
 
     /** The root password. */
-    public readonly AAS_NODE_PASSWORD: string = process.env.AAS_NODE_PASSWORD ?? 'aas-node';
+    public readonly AAS_NODE_PASSWORD?: string = process.env.AAS_NODE_PASSWORD;
 
     /** The port of the AASNode. */
     public readonly AAS_NODE_PORT: number = Number(process.env.AAS_NODE_PORT ?? '1337');
@@ -68,10 +68,10 @@ export class Variable {
     public readonly IDENTITY_PROVIDER: string = process.env.IDENTITY_PROVIDER ?? 'file:///identity-provider';
 
     /** The client name or identifier. */
-    public readonly CLIENT_ID: string = process.env.CLIENT_ID ?? 'aas-node';
+    public readonly CLIENT_ID?: string = process.env.CLIENT_ID;
 
     /** The client secret. */
-    public readonly CLIENT_SECRET: string = process.env.CLIENT_SECRET ?? 'aas-node-client-secret-for-development';
+    public readonly CLIENT_SECRET?: string = process.env.CLIENT_SECRET;
 
     /** The redirect URI after successful login. */
     public readonly REDIRECT_URI?: string = process.env.REDIRECT_URI;
@@ -88,7 +88,7 @@ export class Variable {
         : 3_600_000;
 
     /** The session secret. */
-    public readonly SESSION_SECRET: string = process.env.SESSION_SECRET ?? 'aas-portal-session-secret';
+    public readonly SESSION_SECRET?: string = process.env.SESSION_SECRET;
 
     /** The session store. */
     public readonly SESSION_STORE: string = process.env.SESSION_STORE ?? 'aasportal-users.db';

@@ -58,7 +58,6 @@ swagger.yaml
 /data
 app-info.json
 out-dir
-/.env
 
 # System files
 .DS_Store

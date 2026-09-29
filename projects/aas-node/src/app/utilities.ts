@@ -8,6 +8,7 @@
 
 import { streamToObjectUrl } from 'aas-package';
 import { ImageProcessing } from './image-processing.js';
+import { ApplicationError } from 'aas-core';
 
 /**
  * Converts a URL object or string to a sanitized string representation.
@@ -52,4 +53,18 @@ export async function thumbnailToObjectUrl(readable: NodeJS.ReadableStream | und
     } catch {
         return undefined;
     }
+}
+
+/**
+ * Checks if a value is defined (not undefined or null).
+ * Throws an ApplicationError if the value is not defined.
+ * @param value The value to check.
+ * @returns The value if it is defined.
+ */
+export function checkIsDefined<T>(value: T | undefined | null): T {
+    if (value === undefined || value === null) {
+        throw new ApplicationError('Value is not defined');
+    }
+
+    return value;
 }

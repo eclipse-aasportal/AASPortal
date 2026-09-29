@@ -25,6 +25,7 @@ import { Variable } from './variable.js';
 import { errorHandler } from './error-handler.js';
 import { IDENTITY_PROVIDER } from './auth/identity-provider-client.js';
 import { SESSION_STORE } from './session/session-store.js';
+import { checkIsDefined } from './utilities.js';
 
 @singleton()
 export class App {
@@ -64,7 +65,7 @@ export class App {
         this.app.use(
             session({
                 saveUninitialized: false,
-                secret: this.variable.SESSION_SECRET,
+                secret: checkIsDefined(this.variable.SESSION_SECRET),
                 resave: false,
                 store: this.sessionStore,
                 cookie: {

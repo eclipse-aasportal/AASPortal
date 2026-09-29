@@ -49,7 +49,7 @@ Then open http://localhost/ in your browser.
 
 3. **Build all workspaces:**
    ```bash
-   npm run build -ws
+   npm run build:debug -ws
    ```
 
 4. **Start the development server:**
@@ -147,6 +147,52 @@ spec:
 - Environment variables reference
 - High availability setup
 - Monitoring and troubleshooting
+
+## AASNode Environment Variables
+
+```.env
+# AAS Node environment configuration
+
+# AAS lifetime in milliseconds.
+AAS_EXPIRES_IN=86400000
+AAS_INDEX=
+AAS_NODE_PASSWORD=aas-node
+AAS_NODE_PORT=1337
+AAS_NODE_USERNAME=aas-node
+
+# Filesystem locations.
+ASSETS=./assets
+CONTENT_ROOT=./
+COOKIE_STORE=aasportal-users.db
+USER_STORE=aasportal-users.db
+USER_RIGHTS_STORE=aasportal-users.db
+SESSION_STORE=aasportal-users.db
+WEB_ROOT=./wwwroot
+
+# JSON arrays of permitted origins and initial AAS container endpoints.
+CORS_ORIGIN='["http://localhost:4200","http://localhost:1337"]'
+ENDPOINTS='["file:///endpoints/samples?name=Samples"]'
+
+# HTTPS configuration. Set one of HTTPS_KEY_FILE/HTTPS_CERT_FILE or HTTPS_PFX_FILE.
+HTTPS_CERT_FILE=
+HTTPS_KEY_FILE=
+HTTPS_PFX_FILE=
+
+# Identity provider configuration.
+IDENTITY_PROVIDER=file:///identity-provider
+CLIENT_ID=aas-node
+CLIENT_SECRET=aas-node-client-secret-for-development
+HOST_URL=
+REDIRECT_URI=
+
+LOG_LEVEL=Info
+MAX_WORKERS=2
+SCAN_ENDPOINT_TIMEOUT=3600000
+
+# Session configuration.
+SESSION_SECRET=aas-portal-session-secret
+SESSION_TTL=86400
+```
 
 ## Troubleshooting
 

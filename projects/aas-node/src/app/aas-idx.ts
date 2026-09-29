@@ -7,18 +7,32 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { container } from 'tsyringe';
+import { container, instanceCachingFactory } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { LOGGER, LoggerProxy } from 'aas-package';
 import { IndexApp } from './index/index-app.js';
 import { AAS_INDEX } from './index/aas-index.js';
-import { AASIndexFactory } from './index/aas-index-factory.js';
+import { MySqlIndex } from './index/mysql/mysql-index.js';
+import { Variable } from './variable.js';
+import { SqliteIndex } from './index/sqlite/sqlite-index.js';
+import { urlToString } from './utilities.js';
 
 parentPort?.on('close', () => {
     container.dispose();
 });
 
 container.registerSingleton(LOGGER, LoggerProxy);
-container.register(AAS_INDEX, { useFactory: c => c.resolve(AASIndexFactory).getInstance() });
+container.register(AAS_INDEX, {
+    useFactory: instanceCachingFactory(c => {
+        const url = c.resolve(Variable).AAS_INDEX.toLocaleLowerCase();
+        if (url.startsWith('mysql:')) {
+            return c.resolve(MySqlIndex);
+        } else if (!url || url.startsWith('file:')) {
+            return c.resolve(SqliteIndex);
+        } else {
+            throw new Error(`${urlToString(url)} is a not supported AAS index.`);
+        }
+    }),
+});
 
 container.resolve(IndexApp);

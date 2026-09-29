@@ -245,7 +245,7 @@ describe('IdentityProvider', () => {
 
     describe('refreshToken', () => {
         const createRefreshToken = (expiresIn?: number): string =>
-            jwt.sign({ email: 'john.doe@email.com', name: 'John Doe' }, variable.CLIENT_SECRET, {
+            jwt.sign({ email: 'john.doe@email.com', name: 'John Doe' }, variable.CLIENT_SECRET!, {
                 issuer: variable.IDENTITY_PROVIDER,
                 audience: variable.CLIENT_ID,
                 subject: 'john.doe@email.com',
