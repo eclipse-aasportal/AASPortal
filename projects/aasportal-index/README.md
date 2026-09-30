@@ -1,3 +1,5 @@
+# AASPortal Index Database
+
 MYSQL_ROOT_PASSWORD=root-password
 MYSQL_USER=aas-node
 MYSQL_PASSWORD=user-password
