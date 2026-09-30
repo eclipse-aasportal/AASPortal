@@ -477,8 +477,8 @@ export class MySqlIndex implements AASIndex {
     private async getConnection(): Promise<mysql.PoolConnection> {
         if (!this.pool) {
             const url = new URL(this.variable.AAS_INDEX!);
-            const username = url.username ?? this.variable.AAS_NODE_USERNAME;
-            const password = url.password ?? this.variable.AAS_NODE_PASSWORD;
+            const username = url.username;
+            const password = url.password;
             this.pool = await mysql.createPool({
                 host: url.hostname,
                 port: Number(url.port),

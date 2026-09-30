@@ -46,7 +46,7 @@ export class WSNode extends EventEmitter implements Disposable {
         } else if (this.variable.HTTPS_PFX_FILE) {
             this.server = https.createServer({
                 pfx: fs.readFileSync(this.variable.HTTPS_PFX_FILE),
-                passphrase: this.variable.AAS_NODE_PASSWORD,
+                passphrase: this.variable.FILE_STORAGE_PASSWORD,
             });
         } else {
             this.server = http.createServer();

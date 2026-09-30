@@ -13,7 +13,7 @@ import { FileStorage } from './file-storage.js';
 import { LocalFileStorage } from './local-file-storage.js';
 import { Variable } from '../variable.js';
 import { WebDAVStorage } from './webdav-storage.js';
-import { checkIsDefined, urlToString } from '../utilities.js';
+import { urlToString } from '../utilities.js';
 
 @singleton()
 export class FileStorageProvider {
@@ -47,14 +47,6 @@ export class FileStorageProvider {
             }
             case 'http:':
             case 'https:':
-                if (!url.username) {
-                    url.username = this.variable.AAS_NODE_USERNAME;
-                }
-
-                if (!url.password) {
-                    url.password = checkIsDefined(this.variable.AAS_NODE_PASSWORD);
-                }
-
                 url.pathname = '';
                 return new WebDAVStorage(url);
             default:

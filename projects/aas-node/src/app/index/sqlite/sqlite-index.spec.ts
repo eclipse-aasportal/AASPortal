@@ -6,22 +6,37 @@
  *
  *****************************************************************************/
 
+import 'reflect-metadata';
+import { container } from 'tsyringe';
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { AASDocument, AASEndpoint } from 'aas-core';
-import { Logger } from 'aas-package';
+import { LOGGER, Logger } from 'aas-package';
 import { KeywordDirectory } from '../keyword-directory.js';
 import { SqliteIndex } from './sqlite-index.js';
 import { createSpyObj } from '../../../test/mocks.js';
+import { SqliteConnectionProvider } from '../../sqlite-connection-provider.js';
+import { Variable } from '../../variable.js';
+import { DatabaseSync } from 'node:sqlite';
 
 describe('SqliteIndex', () => {
     let index: SqliteIndex;
     let logger: Mocked<Logger>;
     let keywords: Mocked<KeywordDirectory>;
+    let connectionProvider: Mocked<SqliteConnectionProvider>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'info']);
         keywords = createSpyObj<KeywordDirectory>(['containedKeyword', 'toString']);
-        index = new SqliteIndex(logger, keywords, ':memory:');
+        connectionProvider = createSpyObj<SqliteConnectionProvider>(['getConnection']);
+        connectionProvider.getConnection.mockReturnValue(new DatabaseSync(':memory:', { timeout: 5000 }));
+
+        container.clearInstances();
+        container.registerInstance(LOGGER, logger);
+        container.registerInstance(KeywordDirectory, keywords);
+        container.registerInstance(Variable, createSpyObj<Variable>([], { AAS_INDEX: ':memory:' }));
+        container.registerInstance(SqliteConnectionProvider, connectionProvider);
+        container.registerSingleton(SqliteIndex);
+        index = container.resolve(SqliteIndex);
     });
 
     function createDocument(index: number = 1, endpoint = 'Endpoint 1'): AASDocument {

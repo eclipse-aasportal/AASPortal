@@ -35,7 +35,7 @@ import { ERRORS } from '../../errors.js';
 import { SqliteQuery } from './sqlite-query.js';
 import { container, singleton } from 'tsyringe';
 import { Variable } from '../../variable.js';
-import path from 'path';
+import { SqliteConnectionProvider } from '../../sqlite-connection-provider.js';
 
 const LIMIT = 100;
 
@@ -86,6 +86,7 @@ export class SqliteIndex implements AASIndex {
     private readonly logger = container.resolve(LOGGER);
     private readonly keywords = container.resolve(KeywordDirectory);
     private readonly variable = container.resolve(Variable);
+    private readonly connectionProvider = container.resolve(SqliteConnectionProvider);
 
     private readonly db: DatabaseSync;
     private readonly getCountAll: StatementSync;
@@ -118,12 +119,7 @@ export class SqliteIndex implements AASIndex {
     private readonly deleteEndpointConceptDescriptionIdsSql: StatementSync;
 
     public constructor() {
-        const url = this.variable.AAS_INDEX;
-        const pathname = url.toLocaleLowerCase().startsWith('file:///')
-            ? path.join(this.variable.CONTENT_ROOT, url.substring('file:///'.length))
-            : ':memory:';
-
-        this.db = new DatabaseSync(pathname, { timeout: 5000 });
+        this.db = this.connectionProvider.getConnection(this.variable.AAS_INDEX);
         this.db.exec(initDatabase);
         this.db.exec('PRAGMA journal_mode = WAL');
 
@@ -185,7 +181,7 @@ export class SqliteIndex implements AASIndex {
             'DELETE FROM submodelConceptDescriptions WHERE endpoint = ?',
         );
 
-        this.logger.info(`AAS index connected to ${pathname} (SQLite).`);
+        this.logger.info(`AAS index connected to ${this.variable.AAS_INDEX} (SQLite).`);
     }
 
     public getDocumentCount(endpoint?: string): Promise<number> {

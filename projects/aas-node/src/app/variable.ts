@@ -18,14 +18,8 @@ export class Variable {
     /** The AASIndex realization. */
     public readonly AAS_INDEX: string = process.env.AAS_INDEX ?? 'file:///aas-index.db';
 
-    /** The root password. */
-    public readonly AAS_NODE_PASSWORD?: string = process.env.AAS_NODE_PASSWORD;
-
     /** The port of the AASNode. */
     public readonly AAS_NODE_PORT: number = Number(process.env.AAS_NODE_PORT ?? '1337');
-
-    /** The user name of AASNode (default: aas-node) */
-    public readonly AAS_NODE_USERNAME: string = process.env.AAS_NODE_USERNAME ?? 'aas-node';
 
     /** The assets directory. */
     public readonly ASSETS: string = path.resolve(process.env.ASSETS ?? './assets');

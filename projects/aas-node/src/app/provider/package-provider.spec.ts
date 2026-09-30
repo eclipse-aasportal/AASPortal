@@ -17,6 +17,7 @@ import { EndpointClientFactory } from '../client/endpoint-client-factory.js';
 import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
 import { createSpyObj } from '../../test/mocks.js';
 import { EndpointClient } from '../client/endpoint-client.js';
+import { resolve } from 'path';
 
 vi.mock('fs', () => ({
     default: {
@@ -103,8 +104,8 @@ describe('PackageProvider', () => {
     });
 
     describe('insertPackages', () => {
-        const file = { path: '/tmp/upload-123', originalname: 'test.aasx' } as Express.Multer.File;
-        const aasxFile = '/tmp/test.aasx';
+        const file = { path: resolve('/tmp/upload-123'), originalname: 'test.aasx' } as Express.Multer.File;
+        const aasxFile = resolve('/tmp/test.aasx');
 
         it('replaces an existing upload, inserts the package, and indexes its document', async () => {
             index.getEndpoint.mockResolvedValue(endpoint);

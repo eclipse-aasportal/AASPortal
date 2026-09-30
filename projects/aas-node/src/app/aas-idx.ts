@@ -15,7 +15,6 @@ import { AAS_INDEX } from './index/aas-index.js';
 import { MySqlIndex } from './index/mysql/mysql-index.js';
 import { Variable } from './variable.js';
 import { SqliteIndex } from './index/sqlite/sqlite-index.js';
-import { urlToString } from './utilities.js';
 
 parentPort?.on('close', () => {
     container.dispose();
@@ -27,11 +26,9 @@ container.register(AAS_INDEX, {
         const url = c.resolve(Variable).AAS_INDEX.toLocaleLowerCase();
         if (url.startsWith('mysql:')) {
             return c.resolve(MySqlIndex);
-        } else if (!url || url.startsWith('file:')) {
-            return c.resolve(SqliteIndex);
-        } else {
-            throw new Error(`${urlToString(url)} is a not supported AAS index.`);
         }
+
+        return c.resolve(SqliteIndex);
     }),
 });
 
