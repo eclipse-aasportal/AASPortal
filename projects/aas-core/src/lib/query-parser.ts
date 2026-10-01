@@ -397,14 +397,11 @@ export class QueryParser {
             }
 
             const date = parseDate(s, this.language);
-            if (!date) {
-                throw new ApplicationError('QueryParser.INVALID_DATE_EXPRESSION', {
-                    expression: s,
-                    currentPosition: this.currentPosition,
-                });
+            if (date) {
+                return date;
             }
 
-            return date;
+            return s;
         }
 
         if (minMax.length !== 2) {

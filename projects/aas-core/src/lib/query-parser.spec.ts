@@ -391,6 +391,35 @@ describe('QueryParser', () => {
                 },
             ]);
         });
+
+        it('#prop:max', () => {
+            parser = new QueryParser('#prop:max');
+            expect(parser.ast).toEqual([
+                {
+                    andExpressions: [
+                        {
+                            modelType: 'prop',
+                            name: 'max',
+                        },
+                    ],
+                },
+            ]);
+        });
+
+        it('#prop=manufacturer', () => {
+            parser = new QueryParser('#prop=manufacturer');
+            expect(parser.ast).toEqual([
+                {
+                    andExpressions: [
+                        {
+                            modelType: 'prop',
+                            operator: '=',
+                            value: 'manufacturer',
+                        },
+                    ],
+                },
+            ]);
+        });
     });
 
     describe('ast (with brackets)', () => {
