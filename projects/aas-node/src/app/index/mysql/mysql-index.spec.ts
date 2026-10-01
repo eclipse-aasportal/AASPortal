@@ -10,13 +10,14 @@ import 'reflect-metadata';
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { PoolConnection, ResultSetHeader } from 'mysql2/promise';
 import { AASDocument, AASEndpoint } from 'aas-core';
-import { Logger } from 'aas-package';
+import { LOGGER, Logger } from 'aas-package';
 
 import { MySqlIndex } from './mysql-index.js';
 import { Variable } from '../../variable.js';
 import { KeywordDirectory } from '../keyword-directory.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint, MySqlConceptDescriptionIds } from './mysql-types.js';
 import { createSpyObj } from '../../../test/mocks.js';
+import { container } from 'tsyringe';
 
 describe('MySqlIndex', () => {
     let index: MySqlIndex;
@@ -33,8 +34,14 @@ describe('MySqlIndex', () => {
         );
 
         keywords = createSpyObj<KeywordDirectory>(['containedKeyword', 'toString']);
-        index = new MySqlIndex(logger, variable, keywords);
         connection = createSpyObj<PoolConnection>(['query', 'beginTransaction', 'commit', 'rollback', 'release']);
+
+        container.clearInstances();
+        container.registerInstance(LOGGER, logger);
+        container.registerInstance(Variable, variable);
+        container.registerInstance(KeywordDirectory, keywords);
+        container.registerSingleton(MySqlIndex);
+        index = container.resolve(MySqlIndex);
         index['getConnection'] = vi.fn().mockResolvedValue(connection);
     });
 

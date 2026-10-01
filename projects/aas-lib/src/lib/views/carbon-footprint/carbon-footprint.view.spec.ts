@@ -22,17 +22,17 @@ import carbon_footprint_0_9 from '../../../test/assets/carbon-footprint-0-9.json
 import { VIEW_ROUTES } from '../views-routes';
 import { CarbonFootprintView } from './carbon-footprint-view';
 import { CarbonFootprint } from './carbon-footprint';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { CarbonFootprintState } from './carbon-footprint.state';
 import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../views-constants';
 
 @Component({
-    selector: 'fhg-thumbnail-qrcode',
+    selector: 'fhg-doc-header',
     template: '<div></div>',
     styleUrls: [],
 })
-export class TestThumbnailQRCode {
+export class TestDocumentHeader {
     public readonly document = input<AASDocument>();
 }
 
@@ -121,8 +121,8 @@ describe('CarbonFootprintView', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(CarbonFootprintView, {
-            remove: { imports: [CarbonFootprint, ThumbnailQRCode] },
-            add: { imports: [TestCarbonFootprint, TestThumbnailQRCode] },
+            remove: { imports: [CarbonFootprint, DocumentHeader] },
+            add: { imports: [TestCarbonFootprint, TestDocumentHeader] },
         });
 
         fixture = TestBed.createComponent(CarbonFootprintView);

@@ -8,7 +8,8 @@
 
 import { nanoid } from 'nanoid';
 import mysql from 'mysql2/promise';
-import { Logger } from 'aas-package';
+import { LOGGER } from 'aas-package';
+import { container, singleton } from 'tsyringe';
 import {
     AASEndpoint,
     AASCursor,
@@ -38,14 +39,12 @@ import { ERRORS } from '../../errors.js';
 
 const LIMIT = 100;
 
+@singleton()
 export class MySqlIndex implements AASIndex {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly variable = container.resolve(Variable);
+    private readonly keywordDirectory = container.resolve(KeywordDirectory);
     private pool?: mysql.Pool;
-
-    public constructor(
-        private readonly logger: Logger,
-        private readonly variable: Variable,
-        private readonly keywordDirectory: KeywordDirectory,
-    ) {}
 
     public async dispose(): Promise<void> {
         await this.pool?.end();
@@ -478,8 +477,8 @@ export class MySqlIndex implements AASIndex {
     private async getConnection(): Promise<mysql.PoolConnection> {
         if (!this.pool) {
             const url = new URL(this.variable.AAS_INDEX!);
-            const username = url.username ?? this.variable.AAS_NODE_USERNAME;
-            const password = url.password ?? this.variable.AAS_NODE_PASSWORD;
+            const username = url.username;
+            const password = url.password;
             this.pool = await mysql.createPool({
                 host: url.hostname,
                 port: Number(url.port),

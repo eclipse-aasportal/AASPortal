@@ -47,14 +47,6 @@ export class FileStorageProvider {
             }
             case 'http:':
             case 'https:':
-                if (!url.username) {
-                    url.username = this.variable.AAS_NODE_USERNAME;
-                }
-
-                if (!url.password) {
-                    url.password = this.variable.AAS_NODE_PASSWORD;
-                }
-
                 url.pathname = '';
                 return new WebDAVStorage(url);
             default:

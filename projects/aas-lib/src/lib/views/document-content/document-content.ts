@@ -9,6 +9,7 @@
 import { Router } from '@angular/router';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { EMPTY, Observable } from 'rxjs';
 import {
     Component,
@@ -33,7 +34,7 @@ import {
     isLoadedEnvironment,
 } from 'aas-core';
 
-import { AASTreeComponent } from '../../components/aas-tree/aas-tree.component';
+import { AASTreeComponent } from '../../shared/components/aas-tree/aas-tree.component';
 import { NotifyService } from '../../core/notify/notify.service';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
 import { ToolbarService } from '../../shared/services/toolbar.service';
@@ -61,7 +62,7 @@ const initialState: DocumentContentData = {
     templateUrl: './document-content.html',
     styleUrls: ['./document-content.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'content' }],
-    imports: [TranslateDirective, TranslatePipe, FormsModule, AASTreeComponent],
+    imports: [TranslateDirective, TranslatePipe, FormsModule, AASTreeComponent, NgbTooltip],
 })
 /**
  * Represents the main content view for an Asset Administration Shell (AAS) document.
@@ -212,7 +213,7 @@ export class DocumentContent extends CompositeView implements OnDestroy {
             this.start.add('Favorite', `AAS#${document.endpoint}#${document.id}`, {
                 endpoint: document.endpoint,
                 id: document.id,
-                href: `/aas;endpoint=${encodeBase64Url(document.endpoint)};id=${encodeBase64Url(document.id)}`,
+                href: `views/content;endpoint=${encodeBase64Url(document.endpoint)};id=${encodeBase64Url(document.id)}`,
             })
         ) {
             return this.start.save();

@@ -16,6 +16,7 @@ import { ApplicationError, ErrorData } from 'aas-core';
 
 import { IdentityProviderClient, RefreshTokenResponse } from './identity-provider-client.js';
 import { ERRORS } from '../errors.js';
+import { checkIsDefined } from '../utilities.js';
 
 export const AuthorizationServerSchema = z.object({
     issuer: z.url(),
@@ -54,15 +55,14 @@ export interface TokenEndpointResponse {
 export class OidcClient extends IdentityProviderClient {
     private configuration?: AuthorizationServer;
     private readonly server: string;
-    private readonly clientSecret: string;
     private readonly secure = process.env.NODE_ENV === 'production';
+    private readonly clientSecret = checkIsDefined(this.variable.CLIENT_SECRET);
     private jwksClient?: JwksClient;
 
     public constructor() {
         super();
 
         this.server = this.variable.IDENTITY_PROVIDER;
-        this.clientSecret = this.variable.CLIENT_SECRET;
         this.logger.info(`Using OIDC Client '${this.server}'`);
     }
 

@@ -13,8 +13,8 @@ import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild 
 
 import { getDisplayName } from '../../utilities';
 import { ToolbarService } from '../../shared/services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
-import { SubmodelTree } from '../../components/submodel-tree/submodel-tree';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
+import { SubmodelTree } from '../../shared/components/submodel-tree/submodel-tree';
 import { LeafView } from '../leaf-view';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 
@@ -29,7 +29,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './generic-submodel-view.html',
     styleUrl: './generic-submodel-view.scss',
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'GenericSubmodel' }],
-    imports: [ThumbnailQRCode, TranslateDirective, RouterLink, SubmodelTree],
+    imports: [DocumentHeader, TranslateDirective, RouterLink, SubmodelTree],
 })
 export class GenericSubmodelView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

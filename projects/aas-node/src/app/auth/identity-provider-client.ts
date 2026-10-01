@@ -15,6 +15,7 @@ import { LOGGER } from 'aas-package';
 import { ERRORS } from '../errors.js';
 import { Variable } from '../variable.js';
 import { USER_RIGHTS_STORE } from './user-rights-store.js';
+import { checkIsDefined } from '../utilities.js';
 
 /** Injection token. */
 export const IDENTITY_PROVIDER: InjectionToken<IdentityProviderClient> = Symbol('IDENTITY_PROVIDER');
@@ -30,7 +31,7 @@ export abstract class IdentityProviderClient {
     protected readonly logger = container.resolve(LOGGER);
     protected readonly userRights = container.resolve(USER_RIGHTS_STORE);
     protected readonly variable = container.resolve(Variable);
-    protected readonly clientId = this.variable.CLIENT_ID;
+    protected readonly clientId = checkIsDefined(this.variable.CLIENT_ID);
 
     /**
      * Retrieves the user information associated with the given request.

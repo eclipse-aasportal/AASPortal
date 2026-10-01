@@ -10,7 +10,7 @@ import 'reflect-metadata';
 import { describe, it, expect } from 'vitest';
 import { createReadStream } from 'fs';
 import { fileURLToPath } from 'url';
-import { thumbnailToObjectUrl, toUint8Array, urlToString } from './utilities';
+import { checkIsDefined, thumbnailToObjectUrl, toUint8Array, urlToString } from './utilities';
 
 describe('utilities', () => {
     describe('urlToString', () => {
@@ -41,6 +41,24 @@ describe('utilities', () => {
             const readable = createReadStream(fileURLToPath(new URL('../test/assets/thumbnail.jpg', import.meta.url)));
             const result = await thumbnailToObjectUrl(readable);
             expect(result?.startsWith('data:image/png;base64,')).toBe(true);
+        });
+    });
+
+    describe('checkIsDefined', () => {
+        it('should throw an error if value is undefined', () => {
+            const value = undefined;
+            expect(() => checkIsDefined(value)).toThrow('Value is not defined');
+        });
+
+        it('should throw an error if value is null', () => {
+            const value = null;
+            expect(() => checkIsDefined(value)).toThrow('Value is not defined');
+        });
+
+        it('should return the value if it is defined', () => {
+            const value = 42;
+            const result = checkIsDefined(value);
+            expect(result).toBe(value);
         });
     });
 });

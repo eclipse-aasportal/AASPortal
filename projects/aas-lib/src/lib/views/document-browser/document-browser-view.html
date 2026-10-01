@@ -8,10 +8,7 @@
 
 @if (count() > 0) {
     <div class="container container-md container-lg h-100">
-        <div class="d-flex flex-column text-center">
-            <div class="bg-primary text-center py-2 my-2 fs-5">{{ 'Browser.TITLE' | translate }}</div>
-            <fhg-thumbnail-qrcode [document]="document()"></fhg-thumbnail-qrcode>
-        </div>
+        <fhg-doc-header [document]="document()"></fhg-doc-header>
         <fhg-browser
             [env]="content()"
             [endpoint]="$safeNavigationMigration(document()?.endpoint)"
@@ -23,20 +20,34 @@
 }
 
 <ng-template #browserToolbar>
-    <div class="input-group me-2 my-1">
-        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
-            <i class="bi bi-house-add"></i>
-        </button>
-    </div>
-    @if (count() >= 2) {
-        <div class="input-group my-1">
-            <ngb-pagination
-                [collectionSize]="count()"
-                [(page)]="index"
-                [pageSize]="1"
-                [directionLinks]="count() > 5"
-                [ellipses]="true"
-            />
+    <div class="w-100 d-none d-sm-block">
+        <div class="mb-1 d-none d-lg-flex flex-row">
+            <h2 translate="DocumentBrowser.CAPTION"></h2>
         </div>
-    }
+
+        <div class="input-group me-2 my-1">
+                <button
+                    class="btn btn-outline-primary my-1"
+                    type="button"
+                    (click)="addToStart().subscribe()"
+                    ngbTooltip="{{ 'DocumentBrowser.ADD_TO_START_TOOLTIP' | translate }}"
+                    placement="bottom"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-house-add"></i>
+                </button>
+        </div>
+        @if (count() >= 2) {
+            <div class="input-group my-1">
+                <ngb-pagination
+                    [collectionSize]="count()"
+                    [(page)]="index"
+                    [pageSize]="1"
+                    [directionLinks]="count() > 5"
+                    [ellipses]="true"
+                />
+            </div>
+        }
+    </div>
 </ng-template>

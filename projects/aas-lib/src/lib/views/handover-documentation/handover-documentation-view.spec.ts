@@ -21,7 +21,7 @@ import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { HandoverDocumentationView } from './handover-documentation-view';
 import { HandoverDocumentation } from './handover-documentation';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { HandoverDocumentationState } from './handover-documentation.state';
 import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views-constants';
@@ -29,11 +29,11 @@ import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views
 import handoverDocumentation_1_2 from '../../../test/assets/handover-documentation-1-2.json';
 
 @Component({
-    selector: 'fhg-thumbnail-qrcode',
+    selector: 'fhg-doc-header',
     template: '<div></div>',
     styleUrls: [],
 })
-export class TestThumbnailQRCode {
+export class TestDocumentHeader {
     public readonly document = input<AASDocument>();
 }
 
@@ -121,8 +121,8 @@ describe('HandoverDocumentationView', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(HandoverDocumentationView, {
-            remove: { imports: [HandoverDocumentation, ThumbnailQRCode] },
-            add: { imports: [TestHandoverDocumentation, TestThumbnailQRCode] },
+            remove: { imports: [HandoverDocumentation, DocumentHeader] },
+            add: { imports: [TestHandoverDocumentation, TestDocumentHeader] },
         });
 
         fixture = TestBed.createComponent(HandoverDocumentationView);

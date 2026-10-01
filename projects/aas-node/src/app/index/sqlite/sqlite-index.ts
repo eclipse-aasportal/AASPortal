@@ -8,7 +8,7 @@
 
 import { DatabaseSync, SQLInputValue, SQLOutputValue, StatementSync } from 'node:sqlite';
 import { nanoid } from 'nanoid';
-import { Logger } from 'aas-package';
+import { LOGGER } from 'aas-package';
 import {
     AASEndpoint,
     AASCursor,
@@ -33,6 +33,9 @@ import { AASIndex, toAbbreviation, toDocumentId } from '../aas-index.js';
 import { KeywordDirectory } from '../keyword-directory.js';
 import { ERRORS } from '../../errors.js';
 import { SqliteQuery } from './sqlite-query.js';
+import { container, singleton } from 'tsyringe';
+import { Variable } from '../../variable.js';
+import { SqliteConnectionProvider } from '../../sqlite-connection-provider.js';
 
 const LIMIT = 100;
 
@@ -78,7 +81,13 @@ CREATE TABLE IF NOT EXISTS submodelConceptDescriptions (
 );
 `;
 
+@singleton()
 export class SqliteIndex implements AASIndex {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly keywords = container.resolve(KeywordDirectory);
+    private readonly variable = container.resolve(Variable);
+    private readonly connectionProvider = container.resolve(SqliteConnectionProvider);
+
     private readonly db: DatabaseSync;
     private readonly getCountAll: StatementSync;
     private readonly getCountEndpoint: StatementSync;
@@ -109,12 +118,8 @@ export class SqliteIndex implements AASIndex {
     private readonly deleteConceptDescriptionIdsSql: StatementSync;
     private readonly deleteEndpointConceptDescriptionIdsSql: StatementSync;
 
-    public constructor(
-        private readonly logger: Logger,
-        private readonly keywords: KeywordDirectory,
-        file: string,
-    ) {
-        this.db = new DatabaseSync(file, { timeout: 5000 });
+    public constructor() {
+        this.db = this.connectionProvider.getConnection(this.variable.AAS_INDEX);
         this.db.exec(initDatabase);
         this.db.exec('PRAGMA journal_mode = WAL');
 
@@ -176,7 +181,7 @@ export class SqliteIndex implements AASIndex {
             'DELETE FROM submodelConceptDescriptions WHERE endpoint = ?',
         );
 
-        this.logger.info(`AAS index connected to ${file} (SQLite).`);
+        this.logger.info(`AAS index connected to ${this.variable.AAS_INDEX} (SQLite).`);
     }
 
     public getDocumentCount(endpoint?: string): Promise<number> {

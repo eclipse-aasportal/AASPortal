@@ -20,7 +20,7 @@ import { StartService } from '../../shared/services/start.service';
 import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { ContactInformationView } from './contact-information-view';
 import { ContactInformation } from './contact-information';
 import { ContactInformationState } from './contact-information.state';
@@ -30,11 +30,11 @@ import { CONTACT_INFORMATION_1_0 } from '../views-constants';
 import contactInformation from '../../../test/assets/contact-information-1-0.json';
 
 @Component({
-    selector: 'fhg-thumbnail-qrcode',
+    selector: 'fhg-doc-header',
     template: '<div></div>',
     styleUrls: [],
 })
-export class TestThumbnailQRCode {
+export class TestDocumentHeader {
     public readonly document = input<AASDocument>();
 }
 
@@ -117,8 +117,8 @@ describe.skip('ContactInformationsView', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(ContactInformationView, {
-            remove: { imports: [ContactInformation, ThumbnailQRCode] },
-            add: { imports: [TestContactInformation, TestThumbnailQRCode] },
+            remove: { imports: [ContactInformation, DocumentHeader] },
+            add: { imports: [TestContactInformation, TestDocumentHeader] },
         });
 
         fixture = TestBed.createComponent(ContactInformationView);

@@ -13,7 +13,7 @@ import { Observable, of } from 'rxjs';
 import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { ToolbarService } from '../../shared/services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { TechnicalData } from './technical-data';
 import { TechnicalDataViewState } from './technical-data-view.state';
 import { LeafView } from '../leaf-view';
@@ -24,14 +24,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
 @Component({
     selector: 'fhg-technical-data-view',
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'TechnicalData' }],
-    imports: [
-        TranslateDirective,
-        NgbPaginationModule,
-        NgbAccordionModule,
-        ThumbnailQRCode,
-        TechnicalData,
-        RouterModule,
-    ],
+    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, DocumentHeader, TechnicalData, RouterModule],
     templateUrl: './technical-data-view.html',
     styleUrl: './technical-data-view.scss',
 })

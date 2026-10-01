@@ -16,23 +16,23 @@ import { Component, input, provideZonelessChangeDetection, signal } from '@angul
 import { aas, AASDocument } from 'aas-core';
 import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { encodeBase64Url } from '../../utilities';
-import { BrowserComponent } from '../../components/browser/browser.component';
+import { BrowserComponent } from '../../shared/components/browser/browser.component';
 import { StartService } from '../../shared/services/start.service';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { VIEW_ROUTES } from '../views-routes';
 import { DocumentBrowserView } from './document-browser-view';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
-import { BrowserState } from '../../components/browser/browser.state';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { BrowserState } from '../../shared/components/browser/browser.state';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 
 import content from '../../../test/assets/sample-document.json';
 
 @Component({
-    selector: 'fhg-thumbnail-qrcode',
+    selector: 'fhg-doc-header',
     template: '<div></div>',
     styleUrls: [],
 })
-export class TestThumbnailQRCode {
+export class TestDocumentHeader {
     public readonly document = input<AASDocument>();
 }
 
@@ -120,10 +120,10 @@ describe('DocumentBrowserView', () => {
 
         TestBed.overrideComponent(DocumentBrowserView, {
             remove: {
-                imports: [BrowserComponent, ThumbnailQRCode],
+                imports: [BrowserComponent, DocumentHeader],
             },
             add: {
-                imports: [TestBrowserComponent, TestThumbnailQRCode],
+                imports: [TestBrowserComponent, TestDocumentHeader],
             },
         });
 

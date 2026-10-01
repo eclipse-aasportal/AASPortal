@@ -8,10 +8,9 @@
 
 import 'reflect-metadata';
 import { container } from 'tsyringe';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { LOGGER, Logger } from 'aas-package';
 
-import { CookieStorageFactory } from './cookie-store-factory.js';
 import { SqliteCookieStore } from './sqlite-cookie-store.js';
 import { createSpyObj } from '../../test/mocks.js';
 import { Variable } from '../variable.js';
@@ -28,14 +27,8 @@ describe('SqliteCookieStore', () => {
             createSpyObj<Variable>([], { COOKIE_STORE: ':memory:', CONTENT_ROOT: '' }),
         );
 
-        container.registerSingleton(CookieStorageFactory);
-        container.registerSingleton(SqliteCookieStore);
-        container.register(COOKIE_STORE, { useFactory: c => c.resolve(CookieStorageFactory).getInstance() });
+        container.register(COOKIE_STORE, SqliteCookieStore);
         store = container.resolve(COOKIE_STORE);
-    });
-
-    afterEach(() => {
-        CookieStorageFactory['instance'] = undefined;
     });
 
     it('should add, retrieve, update, and delete cookies', async () => {
@@ -51,9 +44,5 @@ describe('SqliteCookieStore', () => {
         await expect(store.deleteCookie('user-1', 'theme')).resolves.toBeUndefined();
         await expect(store.getCookie('user-1', 'theme')).resolves.toBeUndefined();
         expect(await store.getCookie('user-2', 'theme')).toBe('light');
-    });
-
-    it('should create a SQLite store for a sqlite cookie storage URL', () => {
-        expect(container.resolve(CookieStorageFactory).getInstance()).toBeInstanceOf(SqliteCookieStore);
     });
 });

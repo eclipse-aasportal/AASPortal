@@ -25,6 +25,7 @@ import {
 import { IdentityProviderClient, RefreshTokenResponse } from './identity-provider-client.js';
 import { ERRORS } from '../errors.js';
 import { USER_STORE, UserData } from './user-store.js';
+import { checkIsDefined } from '../utilities.js';
 
 const AAS_NODE_SESSION = 'AAS_NODE_SESSION';
 const ACCESS_TOKEN_EXPIRES_IN = 5 * 60; // 5 minutes
@@ -33,6 +34,7 @@ const ACCESS_TOKEN_EXPIRES_IN = 5 * 60; // 5 minutes
 export class IdentityProvider extends IdentityProviderClient {
     private readonly userStore = container.resolve(USER_STORE);
     private readonly algorithm: jwt.Algorithm;
+    private readonly clientSecret = checkIsDefined(this.variable.CLIENT_SECRET);
 
     public constructor() {
         super();
@@ -49,7 +51,7 @@ export class IdentityProvider extends IdentityProviderClient {
         req.session.code_verifier = code_verifier;
 
         const url = new URL('login', this.variable.HOST_URL ?? `${req.protocol}://${req.host}`);
-        url.searchParams.set('client_id', this.variable.CLIENT_ID);
+        url.searchParams.set('client_id', this.clientId);
         url.searchParams.set('code_challenge', code_challenge);
         url.searchParams.set('code_challenge_method', 'S256');
         url.searchParams.set('redirect_uri', redirect_uri);
@@ -101,7 +103,7 @@ export class IdentityProvider extends IdentityProviderClient {
         req.session.refresh_token = this.createRefreshToken(user);
 
         res.json({
-            client_id: this.variable.CLIENT_ID,
+            client_id: this.clientId,
             id: req.session.user_id,
             name: req.session.name,
             role: req.session.role,
@@ -217,7 +219,7 @@ export class IdentityProvider extends IdentityProviderClient {
             id: data.id,
             name: data.name,
             role: await this.userRights.getRole(data.id),
-            client_id: this.variable.CLIENT_ID,
+            client_id: this.clientId,
         } satisfies SessionUser);
     }
 
@@ -244,11 +246,11 @@ export class IdentityProvider extends IdentityProviderClient {
     }
 
     protected override getPublicKey(): Promise<string> {
-        return Promise.resolve(this.variable.CLIENT_SECRET);
+        return Promise.resolve(this.clientSecret);
     }
 
     protected override async refreshToken(refresh_token: string): Promise<RefreshTokenResponse> {
-        const payload = jwt.verify(refresh_token, this.variable.CLIENT_SECRET, {
+        const payload = jwt.verify(refresh_token, this.clientSecret, {
             issuer: this.variable.IDENTITY_PROVIDER,
             audience: this.variable.CLIENT_ID,
             algorithms: [this.algorithm],
@@ -313,7 +315,7 @@ export class IdentityProvider extends IdentityProviderClient {
     }
 
     private createAccessToken(user: User): string {
-        return jwt.sign({ email: user.id, name: user.name }, this.variable.CLIENT_SECRET, {
+        return jwt.sign({ email: user.id, name: user.name }, this.clientSecret, {
             issuer: this.variable.IDENTITY_PROVIDER,
             audience: this.variable.CLIENT_ID,
             subject: user.id,
@@ -323,7 +325,7 @@ export class IdentityProvider extends IdentityProviderClient {
     }
 
     private createRefreshToken(user: User): string {
-        return jwt.sign({ email: user.id, name: user.name }, this.variable.CLIENT_SECRET, {
+        return jwt.sign({ email: user.id, name: user.name }, this.clientSecret, {
             issuer: this.variable.IDENTITY_PROVIDER,
             audience: this.variable.CLIENT_ID,
             subject: user.id,

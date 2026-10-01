@@ -20,7 +20,7 @@ import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { TechnicalDataView } from './technical-data-view';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { TechnicalData } from './technical-data';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 import { TechnicalDataState } from './technical-data.state';
@@ -29,11 +29,11 @@ import { TECHNICAL_DATA_1_2 } from '../views-constants';
 import technicalData from '../../../test/assets/technical-data-1-2.json';
 
 @Component({
-    selector: 'fhg-thumbnail-qrcode',
+    selector: 'fhg-doc-header',
     template: '<div></div>',
     styleUrls: [],
 })
-export class TestThumbnailQRCode {
+export class TestDocumentHeader {
     public readonly document = input<AASDocument>();
 }
 
@@ -120,8 +120,8 @@ describe('TechnicalDataView', () => {
         }).compileComponents();
 
         TestBed.overrideComponent(TechnicalDataView, {
-            remove: { imports: [TechnicalData, ThumbnailQRCode] },
-            add: { imports: [TestTechnicalData, TestThumbnailQRCode] },
+            remove: { imports: [TechnicalData, DocumentHeader] },
+            add: { imports: [TestTechnicalData, TestDocumentHeader] },
         });
 
         fixture = TestBed.createComponent(TechnicalDataView);

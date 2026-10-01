@@ -15,14 +15,14 @@ import { ToolbarService } from '../../shared/services/toolbar.service';
 import { StartService } from '../../shared/services/start.service';
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { HierarchicalStructure } from './hierarchical-structure';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'fhg-hierarchical-structure-view',
-    imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HierarchicalStructure, RouterLink],
+    imports: [TranslateDirective, NgbPaginationModule, DocumentHeader, HierarchicalStructure, RouterLink],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'HierarchicalStructure' }],
     templateUrl: './hierarchical-structure-view.html',
     styleUrl: './hierarchical-structure-view.scss',

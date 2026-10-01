@@ -13,7 +13,7 @@ import { Observable, of } from 'rxjs';
 import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { ToolbarService } from '../../shared/services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { HandoverDocumentation } from './handover-documentation';
 import { LeafView } from '../leaf-view';
 import { HandoverDocumentationViewState } from './handover-documentation-view.state';
@@ -29,7 +29,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './handover-documentation-view.html',
     styleUrls: ['./handover-documentation-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'HandoverDocumentation' }],
-    imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HandoverDocumentation, RouterModule],
+    imports: [TranslateDirective, NgbPaginationModule, DocumentHeader, HandoverDocumentation, RouterModule],
 })
 export class HandoverDocumentationView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

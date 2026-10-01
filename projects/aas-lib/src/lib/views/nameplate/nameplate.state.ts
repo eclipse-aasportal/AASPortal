@@ -10,7 +10,7 @@ import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getReferable, isSubmodelElementCollection, isSubmodelElementList } from 'aas-core';
 import { createDataSheet, findSubmodel, getDisplayName } from '../../utilities';
-import { ChildState } from '../../components/child-state';
+import { ChildState } from '../../shared/components/child-state';
 import { NAMEPLATE_2_0, NAMEPLATE_3_0, NAMEPLATE_FHG, NAMEPLATE_HSU } from '../views-constants';
 import { DataSheetData } from '../../types';
 

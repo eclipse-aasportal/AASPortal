@@ -13,7 +13,7 @@
             "name": "Launch aas-node",
             "type": "node",
             "args": [
-                "--experimental-sqlite",
+                "--experimental-sqlite"
             ],
             "request": "launch",
             "preLaunchTask": "build-aas-node",
@@ -28,8 +28,12 @@
             "outputCapture": "std",
             "env": {
                 "ASSETS": "projects/aas-node/src/assets",
+                "CLIENT_ID": "aas-node",
+                "CLIENT_SECRET": "aas-node-client-secret-for-development",
                 "CONTENT_ROOT": "projects/aas-node/build",
+                "IDENTITY_PROVIDER": "file:///identity-provider",
                 "NODE_ENV": "development",
+                "SESSION_SECRET": "aas-portal-session-secret",
                 "WEB_ROOT": "projects/aas-portal/dist/browser"
             }
         },
@@ -53,12 +57,15 @@
             "env": {
                 "AAS_NODE_PORT": "1337",
                 "ASSETS": "projects/aas-node/src/assets",
+                "CLIENT_ID": "aas-node",
+                "CLIENT_SECRET": "aas-node-client-secret-for-development",
                 "CONTENT_ROOT": "projects/aas-node/build",
                 "COOKIE_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
                 "HOST_URL": "http://localhost:4200",
                 "IDENTITY_PROVIDER": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "NODE_ENV": "development",
+                "SESSION_SECRET": "aas-portal-session-secret",
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_RIGHTS_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
@@ -86,6 +93,7 @@
             "env": {
                 "AAS_NODE_PORT": "1337",
                 "ASSETS": "projects/aas-node/src/assets",
+                "CLIENT_ID": "aas-node",
                 "CLIENT_SECRET": "7YiU4JXS4yaYHJrytrXNw7y71l3z12QN",
                 "CONTENT_ROOT": "projects/aas-node/build",
                 "COOKIE_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
@@ -95,6 +103,7 @@
                 "NODE_ENV": "development",
                 "NODE_TLS_REJECT_UNAUTHORIZED": "0",
                 "REDIRECT_URI": "http://localhost:4200/auth/callback",
+                "SESSION_SECRET": "aas-portal-session-secret",
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_RIGHTS_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "WEB_ROOT": "projects/aas-portal/dist/browser",
@@ -103,9 +112,7 @@
         {
             "name": "Launch aas-node (MariaDB)",
             "type": "node",
-            "args": [
-                "--experimental-sqlite"
-            ],
+            "args": [],
             "request": "launch",
             "preLaunchTask": "build-aas-node",
             "program": "${workspaceFolder}/projects/aas-node/build/aas-node.js",
@@ -121,11 +128,14 @@
                 "AAS_INDEX": "mysql://aas-node:user-password@localhost:3306",
                 "AAS_NODE_PORT": "1337",
                 "ASSETS": "projects/aas-node/src/assets",
+                "CLIENT_ID": "aas-node",
+                "CLIENT_SECRET": "aas-node-client-secret-for-development",
                 "CONTENT_ROOT": "projects/aas-node/build",
                 "COOKIE_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "ENDPOINTS": "[\"http://localhost:50010/api/v3/?name=AAS%20Server\"]",
                 "HOST_URL": "http://localhost:4200",
                 "NODE_ENV": "development",
+                "SESSION_SECRET": "aas-portal-session-secret",
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_RIGHTS_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
@@ -153,6 +163,7 @@
                 "AAS_INDEX": "mysql://aas-node:user-password@localhost:3306",
                 "AAS_NODE_PORT": "1337",
                 "ASSETS": "projects/aas-node/src/assets",
+                "CLIENT_ID": "aas-node",
                 "CLIENT_SECRET": "7YiU4JXS4yaYHJrytrXNw7y71l3z12QN",
                 "CONTENT_ROOT": "projects/aas-node/build",
                 "COOKIE_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",

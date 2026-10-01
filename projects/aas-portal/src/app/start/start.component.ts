@@ -12,6 +12,8 @@ import { Component, effect, OnDestroy, TemplateRef, viewChild, computed, inject 
 
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartState, StartTileItem } from './start.state';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 
 /**
  * The Start page. Provides a favorites page or, if no favorites are available, a welcome page.
@@ -20,7 +22,7 @@ import { StartState, StartTileItem } from './start.state';
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrl: './start.component.scss',
-    imports: [NgComponentOutlet],
+    imports: [NgComponentOutlet, NgbTooltip, TranslatePipe, TranslateDirective],
 })
 export class StartComponent implements OnDestroy {
     private readonly state = inject(StartState);

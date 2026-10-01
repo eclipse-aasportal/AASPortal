@@ -20,7 +20,7 @@ import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
 
-import { ChildComponent } from '../../components/child-component';
+import { ChildComponent } from '../../shared/components/child-component';
 import { DocumentationItem, HandoverDocumentationState } from './handover-documentation.state';
 import { DocumentPopupComponent } from './document-popup/document-popup.component';
 

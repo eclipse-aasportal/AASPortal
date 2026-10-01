@@ -11,6 +11,7 @@
     @if (doc) {
         <div class="overflow-auto">
             <fhg-aas-tree
+                #aasTree
                 [live]="live()"
                 [searchExpression]="searchExpression()"
                 [document]="doc"
@@ -26,62 +27,125 @@
 
     <!-- Toolbar -->
     <ng-template #toolbar>
-        <div class="input-group me-2 my-1">
-            <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
-                <i class="bi bi-house-add"></i>
-            </button>
-        </div>
-        <div class="btn-group me-2 my-1">
-            <button type="button" class="btn btn-primary" (click)="play()" [disabled]="canPlay() === false">
-                <i class="bi bi-play-fill"></i>
-            </button>
-            <button type="button" class="btn btn-primary" (click)="stop()" [disabled]="canStop() === false">
-                <i class="bi bi-stop-fill"></i>
-            </button>
-        </div>
-        <div class="input-group me-2 my-1">
-            <select class="form-select" [ngModel]="dashboardPage()" (ngModelChange)="setDashboardPage($event)">
-                @for (page of dashboardPages(); track page) {
-                    <option [ngValue]="page">{{ page.name }}</option>
-                }
-            </select>
-            <button
-                type="button"
-                class="btn btn-primary"
-                (click)="addToDashboard('Line')"
-                [disabled]="!canAddToDashboard()"
-            >
-                <i class="bi bi-graph-up"></i>
-            </button>
-            <button
-                type="button"
-                class="btn btn-primary"
-                (click)="addToDashboard('BarVertical')"
-                [disabled]="!canAddToDashboard()"
-            >
-                <i class="bi bi-bar-chart-line-fill"></i>
-            </button>
-        </div>
-        <div class="btn-group me-2 my-1">
-            <button type="button" class="btn btn-primary" (click)="download()">
-                <i class="bi bi-download"></i>
-            </button>
-        </div>
-        <div class="input-group flex-grow-1 me-2 my-1">
-            <div class="input-group-text"><i class="bi bi-search"></i></div>
-            <input
-                type="search"
-                class="form-control"
-                [ngModel]="searchExpression()"
-                (ngModelChange)="setSearchExpression($event)"
-                [placeholder]="'AAS.PLACEHOLDER_SEARCH' | translate"
-            />
-            <button type="button" class="btn btn-primary" (click)="findNext()">
-                <i class="bi bi-chevron-down"></i>
-            </button>
-            <button type="button" class="btn btn-primary" (click)="findPrevious()">
-                <i class="bi bi-chevron-up"></i>
-            </button>
+        <div class="w-100 d-none d-sm-block">
+            <h2 translate="DocumentContent.CAPTION"></h2>
+            <div class="d-flex flex-row">
+                <div class="me-2 my-1">
+                    <button
+                        class="btn btn-outline-primary"
+                        type="button"
+                        (click)="addToStart().subscribe()"
+                        ngbTooltip="{{ 'DocumentContent.ADD_TO_START_TOOLTIP' | translate }}"
+                        placement="bottom"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-house-add"></i>
+                    </button>
+                </div>
+                <div class="btn-group me-2 my-1">
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="play()"
+                        [disabled]="canPlay() === false"
+                        ngbTooltip="{{ 'DocumentContent.START_LIVE_TOOLTIP' | translate }}"
+                        placement="bottom"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="stop()"
+                        [disabled]="canStop() === false"
+                        ngbTooltip="{{ 'DocumentContent.STOP_LIVE_TOOLTIP' | translate }}"
+                        placement="bottom"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-stop-fill"></i>
+                    </button>
+                </div>
+                <div class="input-group me-2 my-1">
+                    <select class="form-select" [ngModel]="dashboardPage()" (ngModelChange)="setDashboardPage($event)">
+                        @for (page of dashboardPages(); track page) {
+                            <option [ngValue]="page">{{ page.name }}</option>
+                        }
+                    </select>
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="addToDashboard('Line')"
+                        [disabled]="!canAddToDashboard()"
+                        ngbTooltip="{{ 'DocumentContent.ADD_SELECTED_TO_LINE_CHART_DASHBOARD_TOOLTIP' | translate }}"
+                        placement="bottom"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-graph-up"></i>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="addToDashboard('BarVertical')"
+                        [disabled]="!canAddToDashboard()"
+                        ngbTooltip="{{ 'DocumentContent.ADD_SELECTED_TO_BAR_CHART_DASHBOARD_TOOLTIP' | translate }}"
+                        placement="bottom"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-bar-chart-line-fill"></i>
+                    </button>
+                </div>
+                <div class="me-2 my-1">
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="download()"
+                        ngbTooltip="{{ 'DocumentContent.DOWNLOAD_TOOLTIP' | translate }}"
+                        placement="bottom"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="input-group flex-grow-1 me-2 my-1">
+                    <div class="input-group-text"><i class="bi bi-search"></i></div>
+                    <input
+                        type="search"
+                        class="form-control"
+                        [ngModel]="searchExpression()"
+                        (ngModelChange)="setSearchExpression($event)"
+                        [placeholder]="'AAS.PLACEHOLDER_SEARCH' | translate"
+                    />
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="findNext()"
+                        ngbTooltip="{{ 'DocumentContent.FIND_NEXT_TOOLTIP' | translate }}"
+                        placement="bottom"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="findPrevious()"
+                        ngbTooltip="{{ 'DocumentContent.FIND_PREVIOUS_TOOLTIP' | translate }}"
+                        placement="bottom"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-chevron-up"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </ng-template>
 </div>

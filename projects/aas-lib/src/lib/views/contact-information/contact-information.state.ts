@@ -12,7 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AASDocument, getSemanticId } from 'aas-core';
 import { DataSheetData } from '../../types';
 import { createDataSheet, getDisplayName } from '../../utilities';
-import { ChildState } from '../../components/child-state';
+import { ChildState } from '../../shared/components/child-state';
 import { CONTACT_INFORMATION_1_0 } from '../views-constants';
 
 export type ContactInformationData = {

@@ -11,7 +11,7 @@ import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
 import { ContactInformationState } from './contact-information.state';
-import { ChildComponent } from '../../components/child-component';
+import { ChildComponent } from '../../shared/components/child-component';
 
 /**
  * Displays contact information for an AAS document.

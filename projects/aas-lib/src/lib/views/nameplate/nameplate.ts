@@ -13,7 +13,7 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { AASDocument } from 'aas-core';
 
 import { NameplateState } from './nameplate.state';
-import { ChildComponent } from '../../components/child-component';
+import { ChildComponent } from '../../shared/components/child-component';
 
 /**
  * Provides a component for submodels that belong to the IDTA specification "Digital Nameplate for industrial equipment".
