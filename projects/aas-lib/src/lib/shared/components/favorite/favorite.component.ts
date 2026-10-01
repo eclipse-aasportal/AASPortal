@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Component, computed, effect, input, signal } from '@angular/core';
-import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getLocaleValue } from 'aas-core';
 import { encodeBase64Url } from '../../../utilities';
 import { EndpointsApi } from '../../services/endpoints-api';
@@ -21,7 +21,7 @@ export type FavoriteDetail = {
     selector: 'fhg-favorite',
     templateUrl: './favorite.component.html',
     styleUrl: './favorite.component.scss',
-    imports: [TranslateDirective, TranslatePipe],
+    imports: [TranslatePipe],
 })
 export class FavoriteComponent {
     private readonly document$ = signal<AASDocument | undefined>(undefined);

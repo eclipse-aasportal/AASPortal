@@ -9,9 +9,9 @@
 import { EMPTY, Observable } from 'rxjs';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { Component, OnDestroy, OnInit, TemplateRef, signal, viewChild, effect, inject } from '@angular/core';
-    
+
 import { Library } from 'aas-core';
-import { IndexChange, LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
+import { LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
 import { AboutApiService } from './about-api.service';
 import { environment } from '../../environments/environment';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
@@ -25,7 +25,7 @@ import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 export class AboutComponent implements OnInit, OnDestroy {
     private readonly api = inject(AboutApiService);
     private readonly toolbar = inject(ToolbarService);
-    private readonly start = inject(StartService);  
+    private readonly start = inject(StartService);
     private readonly version$ = signal('');
     private readonly libraries$ = signal<Library[]>([]);
 

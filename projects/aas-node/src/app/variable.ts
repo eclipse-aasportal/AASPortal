@@ -16,7 +16,7 @@ export class Variable {
     public readonly AAS_EXPIRES_IN: number = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
 
     /** The AASIndex realization. */
-    public readonly AAS_INDEX: string = process.env.AAS_INDEX ?? 'file:///aas-index.db';
+    public readonly AAS_INDEX: string = process.env.AAS_INDEX ?? 'aas-index.db';
 
     /** The port of the AASNode. */
     public readonly AAS_NODE_PORT: number = Number(process.env.AAS_NODE_PORT ?? '1337');
@@ -54,6 +54,9 @@ export class Variable {
 
     /** The pfx file if AASNode supports HTTPS. */
     public readonly HTTPS_PFX_FILE?: string = process.env.HTTPS_PFX_FILE;
+
+    /** The password for the pfx file if AASNode supports HTTPS. */
+    public readonly HTTPS_PFX_PASSWORD?: string = process.env.HTTPS_PFX_PASSWORD;
 
     /** The URL of the host */
     public readonly HOST_URL?: string = process.env.HOST_URL;

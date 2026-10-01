@@ -13,18 +13,7 @@ import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { catchError, EMPTY, from, map, mergeMap, Observable, of, tap, first, combineLatest } from 'rxjs';
 import { NgbModal, NgbNavModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import {
-    Component,
-    DOCUMENT,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    computed,
-    effect,
-    inject,
-    linkedSignal,
-    viewChild,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, effect, inject, viewChild } from '@angular/core';
 
 import { aas, AASEndpointAuth } from 'aas-core';
 import {
@@ -41,7 +30,6 @@ import {
     VIEW_ROUTES,
     DashboardService,
     MaxLengthPipe,
-    getDisplayName,
     DocumentHeader,
 } from 'aas-lib';
 

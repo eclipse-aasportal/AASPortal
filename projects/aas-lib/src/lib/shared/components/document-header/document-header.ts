@@ -6,7 +6,17 @@
  *
  *****************************************************************************/
 
-import { Component, computed, effect, ElementRef, inject, InjectionToken, input, linkedSignal, viewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    effect,
+    ElementRef,
+    inject,
+    InjectionToken,
+    input,
+    linkedSignal,
+    viewChild,
+} from '@angular/core';
 import { TranslateDirective } from '@ngx-translate/core';
 import QRCode from 'qrcode';
 import { aas, AASDocument } from 'aas-core';
@@ -22,7 +32,7 @@ export const QR_CODE = new InjectionToken<typeof QRCode>('Draw QR code', { facto
     templateUrl: './document-header.html',
 })
 export class DocumentHeader {
-        public constructor() {
+    public constructor() {
         const window = inject(WINDOW);
         const qrCode = inject(QR_CODE);
 

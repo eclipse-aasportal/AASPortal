@@ -33,6 +33,7 @@ ENDPOINTS='["file:///endpoints/samples?name=Samples"]'
 HTTPS_CERT_FILE=
 HTTPS_KEY_FILE=
 HTTPS_PFX_FILE=
+HTTPS_PFX_PASSWORD=
 
 # Identity provider configuration.
 IDENTITY_PROVIDER=file:///identity-provider
