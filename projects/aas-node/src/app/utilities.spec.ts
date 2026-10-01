@@ -47,17 +47,17 @@ describe('utilities', () => {
     describe('checkIsDefined', () => {
         it('should throw an error if value is undefined', () => {
             const value = undefined;
-            expect(() => checkIsDefined(value)).toThrow('Value is not defined');
+            expect(() => checkIsDefined(value, 'value')).toThrow('Value is not defined');
         });
 
         it('should throw an error if value is null', () => {
             const value = null;
-            expect(() => checkIsDefined(value)).toThrow('Value is not defined');
+            expect(() => checkIsDefined(value, 'value')).toThrow('Value is not defined');
         });
 
         it('should return the value if it is defined', () => {
             const value = 42;
-            const result = checkIsDefined(value);
+            const result = checkIsDefined(value, 'value');
             expect(result).toBe(value);
         });
     });

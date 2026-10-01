@@ -56,7 +56,7 @@ export class OidcClient extends IdentityProviderClient {
     private configuration?: AuthorizationServer;
     private readonly server: string;
     private readonly secure = process.env.NODE_ENV === 'production';
-    private readonly clientSecret = checkIsDefined(this.variable.CLIENT_SECRET);
+    private readonly clientSecret = checkIsDefined(this.variable.CLIENT_SECRET, 'CLIENT_SECRET');
     private jwksClient?: JwksClient;
 
     public constructor() {

@@ -34,12 +34,13 @@ const ACCESS_TOKEN_EXPIRES_IN = 5 * 60; // 5 minutes
 export class IdentityProvider extends IdentityProviderClient {
     private readonly userStore = container.resolve(USER_STORE);
     private readonly algorithm: jwt.Algorithm;
-    private readonly clientSecret = checkIsDefined(this.variable.CLIENT_SECRET);
+    private readonly clientSecret: string;
 
     public constructor() {
         super();
 
         this.algorithm = 'HS256';
+        this.clientSecret = checkIsDefined(this.variable.CLIENT_SECRET, 'CLIENT_SECRET');
     }
 
     public override async login(req: express.Request, res: express.Response): Promise<void> {

@@ -65,7 +65,7 @@ export class App {
         this.app.use(
             session({
                 saveUninitialized: false,
-                secret: checkIsDefined(this.variable.SESSION_SECRET),
+                secret: checkIsDefined(this.variable.SESSION_SECRET, 'SESSION_SECRET'),
                 resave: false,
                 store: this.sessionStore,
                 cookie: {
