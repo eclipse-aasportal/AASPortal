@@ -31,7 +31,7 @@ export abstract class IdentityProviderClient {
     protected readonly logger = container.resolve(LOGGER);
     protected readonly userRights = container.resolve(USER_RIGHTS_STORE);
     protected readonly variable = container.resolve(Variable);
-    protected readonly clientId = checkIsDefined(this.variable.CLIENT_ID);
+    protected readonly clientId = checkIsDefined(this.variable.CLIENT_ID, 'CLIENT_ID');
 
     /**
      * Retrieves the user information associated with the given request.

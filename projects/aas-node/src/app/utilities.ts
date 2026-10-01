@@ -61,9 +61,9 @@ export async function thumbnailToObjectUrl(readable: NodeJS.ReadableStream | und
  * @param value The value to check.
  * @returns The value if it is defined.
  */
-export function checkIsDefined<T>(value: T | undefined | null): T {
+export function checkIsDefined<T>(value: T | undefined | null, name: string): T {
     if (value === undefined || value === null) {
-        throw new ApplicationError('Value is not defined');
+        throw new ApplicationError(`Value for "${name}" is not defined.`);
     }
 
     return value;
