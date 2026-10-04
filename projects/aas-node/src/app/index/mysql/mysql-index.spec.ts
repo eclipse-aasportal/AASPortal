@@ -14,7 +14,6 @@ import { LOGGER, Logger } from 'aas-package';
 
 import { MySqlIndex } from './mysql-index.js';
 import { Variable } from '../../variable.js';
-import { KeywordDirectory } from '../keyword-directory.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint, MySqlConceptDescriptionIds } from './mysql-types.js';
 import { createSpyObj } from '../../../test/mocks.js';
 import { container } from 'tsyringe';
@@ -24,7 +23,6 @@ describe('MySqlIndex', () => {
     let logger: Mocked<Logger>;
     let variable: Mocked<Variable>;
     let connection: Mocked<PoolConnection>;
-    let keywords: Mocked<KeywordDirectory>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'info']);
@@ -33,13 +31,11 @@ describe('MySqlIndex', () => {
             { ENDPOINTS: [], AAS_INDEX: 'mysql://user:password@localhost:3306/aas_index' },
         );
 
-        keywords = createSpyObj<KeywordDirectory>(['containedKeyword', 'toString']);
         connection = createSpyObj<PoolConnection>(['query', 'beginTransaction', 'commit', 'rollback', 'release']);
 
         container.clearInstances();
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
-        container.registerInstance(KeywordDirectory, keywords);
         container.registerSingleton(MySqlIndex);
         index = container.resolve(MySqlIndex);
         index['getConnection'] = vi.fn().mockResolvedValue(connection);

@@ -7,76 +7,76 @@
  *****************************************************************************/
 
 import { describe, it, expect } from 'vitest';
-import { OrExpression, QueryParser } from './query-parser.js';
+import { OrExpression, FilterExpressionParser } from './filter-expression-parser.js';
 
-describe('QueryParser', () => {
-    let parser: QueryParser;
+describe('FilterExpressionParser', () => {
+    let parser: FilterExpressionParser;
 
     it('should created', () => {
-        parser = new QueryParser('', 'en');
+        parser = new FilterExpressionParser('', 'en');
         expect(parser).toBeTruthy();
     });
 
     describe('ast (only text search)', () => {
         it('text no quotation marks', () => {
-            parser = new QueryParser('Hello World.');
+            parser = new FilterExpressionParser('Hello World.');
             expect(parser.ast[0].andExpressions[0]).toEqual('Hello World.');
         });
 
         it('text with double quotation marks', () => {
-            parser = new QueryParser('"Hello World."');
+            parser = new FilterExpressionParser('"Hello World."');
             expect(parser.ast[0].andExpressions[0]).toEqual('Hello World.');
         });
 
         it('throws an error if end double quotation marks is missing', () => {
-            parser = new QueryParser('"Hello World.');
+            parser = new FilterExpressionParser('"Hello World.');
             expect(() => parser.check()).toThrow();
         });
 
         it('text with quotation marks', () => {
-            parser = new QueryParser("'Hello World.'");
+            parser = new FilterExpressionParser("'Hello World.'");
             expect(parser.ast[0].andExpressions[0]).toEqual('Hello World.');
         });
 
         it('throws an error if end quotation marks is missing', () => {
-            parser = new QueryParser("'Hello World.");
+            parser = new FilterExpressionParser("'Hello World.");
             expect(() => parser.check()).toThrow();
         });
 
         it('A && B', () => {
-            parser = new QueryParser('A && B');
+            parser = new FilterExpressionParser('A && B');
             expect(parser.ast).toEqual([{ andExpressions: ['A', 'B'] }]);
         });
 
         it('A&&B', () => {
-            parser = new QueryParser('A&&B');
+            parser = new FilterExpressionParser('A&&B');
             expect(parser.ast).toEqual([{ andExpressions: ['A', 'B'] }]);
         });
 
         it('A || B', () => {
-            parser = new QueryParser('A || B');
+            parser = new FilterExpressionParser('A || B');
             expect(parser.ast).toEqual([{ andExpressions: ['A'] }, { andExpressions: ['B'] }]);
         });
 
         it('A && B || C && D', () => {
-            parser = new QueryParser('A && B || C && D');
+            parser = new FilterExpressionParser('A && B || C && D');
             expect(parser.ast).toEqual([{ andExpressions: ['A', 'B'] }, { andExpressions: ['C', 'D'] }]);
         });
 
         it('throws an error for invalid link "A = B"', () => {
-            parser = new QueryParser('A = B');
+            parser = new FilterExpressionParser('A = B');
             expect(() => parser.check()).toThrow();
         });
 
         it('throws an error for missing operand "A || "', () => {
-            parser = new QueryParser('A || ');
+            parser = new FilterExpressionParser('A || ');
             expect(() => parser.check()).toThrow();
         });
     });
 
     describe('ast (AAS element)', () => {
         it('#prop:name="John Doe"', () => {
-            parser = new QueryParser('#prop:name="John Doe"');
+            parser = new FilterExpressionParser('#prop:name="John Doe"');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -92,7 +92,7 @@ describe('QueryParser', () => {
         });
 
         it('# prop : name = "John Doe"', () => {
-            parser = new QueryParser('# prop : name = "John Doe"');
+            parser = new FilterExpressionParser('# prop : name = "John Doe"');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -108,7 +108,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:name', () => {
-            parser = new QueryParser('#prop:name');
+            parser = new FilterExpressionParser('#prop:name');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -122,7 +122,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop = "John Doe"', () => {
-            parser = new QueryParser('#prop= "John Doe"');
+            parser = new FilterExpressionParser('#prop= "John Doe"');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -137,7 +137,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:number=42', () => {
-            parser = new QueryParser('#prop:number=42');
+            parser = new FilterExpressionParser('#prop:number=42');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -153,7 +153,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:notEqual != 42', () => {
-            parser = new QueryParser('#prop:notEqual != 42');
+            parser = new FilterExpressionParser('#prop:notEqual != 42');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -169,7 +169,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:smaller<42', () => {
-            parser = new QueryParser('#prop:smaller<42');
+            parser = new FilterExpressionParser('#prop:smaller<42');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -185,7 +185,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:smallerOrEqual<= 42', () => {
-            parser = new QueryParser('#prop:smallerOrEqual<= 42');
+            parser = new FilterExpressionParser('#prop:smallerOrEqual<= 42');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -201,7 +201,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:greater >42', () => {
-            parser = new QueryParser('#prop:greater >42');
+            parser = new FilterExpressionParser('#prop:greater >42');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -217,7 +217,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:greaterOrEqual >= 42', () => {
-            parser = new QueryParser('#prop:greaterOrEqual >= 42');
+            parser = new FilterExpressionParser('#prop:greaterOrEqual >= 42');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -233,7 +233,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:boolean=False', () => {
-            parser = new QueryParser('#prop:boolean=False');
+            parser = new FilterExpressionParser('#prop:boolean=False');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -249,7 +249,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:boolean=true', () => {
-            parser = new QueryParser('#prop:boolean=true');
+            parser = new FilterExpressionParser('#prop:boolean=true');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -265,7 +265,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:bigint=1234567890n', () => {
-            parser = new QueryParser('#prop:bigint=1234567890n');
+            parser = new FilterExpressionParser('#prop:bigint=1234567890n');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -281,7 +281,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:date=12/31/2023', () => {
-            parser = new QueryParser('#prop:date=12/31/2023');
+            parser = new FilterExpressionParser('#prop:date=12/31/2023');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -297,7 +297,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:date=31.12.2023', () => {
-            parser = new QueryParser('#prop:date=31.12.2023', 'de');
+            parser = new FilterExpressionParser('#prop:date=31.12.2023', 'de');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -313,7 +313,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:date=31.12.2023 13:14', () => {
-            parser = new QueryParser('#prop:date=31.12.2023 13:14', 'de');
+            parser = new FilterExpressionParser('#prop:date=31.12.2023 13:14', 'de');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -329,7 +329,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:minMax = -42 ... 42', () => {
-            parser = new QueryParser('#prop:minMax = -42 ... 42');
+            parser = new FilterExpressionParser('#prop:minMax = -42 ... 42');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -345,7 +345,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:minMax = -42n ... 42n', () => {
-            parser = new QueryParser('#prop:minMax = -42n ... 42n');
+            parser = new FilterExpressionParser('#prop:minMax = -42n ... 42n');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -361,7 +361,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:fromUntil = 1/1/2023 ... 12/31/2023', () => {
-            parser = new QueryParser('#prop:fromUntil = 1/1/2023 ... 12/31/2023');
+            parser = new FilterExpressionParser('#prop:fromUntil = 1/1/2023 ... 12/31/2023');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -377,7 +377,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:fromUntil = 1.1.2023 ... 31.12.2023 (de)', () => {
-            parser = new QueryParser('#prop:fromUntil = 1.1.2023 ... 31.12.2023', 'de');
+            parser = new FilterExpressionParser('#prop:fromUntil = 1.1.2023 ... 31.12.2023', 'de');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -393,7 +393,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop:max', () => {
-            parser = new QueryParser('#prop:max');
+            parser = new FilterExpressionParser('#prop:max');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -407,7 +407,7 @@ describe('QueryParser', () => {
         });
 
         it('#prop=manufacturer', () => {
-            parser = new QueryParser('#prop=manufacturer');
+            parser = new FilterExpressionParser('#prop=manufacturer');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -424,7 +424,7 @@ describe('QueryParser', () => {
 
     describe('ast (with brackets)', () => {
         it('(A && B)', () => {
-            parser = new QueryParser('(A && B)');
+            parser = new FilterExpressionParser('(A && B)');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [[{ andExpressions: ['A', 'B'] }]],
@@ -433,7 +433,7 @@ describe('QueryParser', () => {
         });
 
         it('(A || B)', () => {
-            parser = new QueryParser('(A || B)');
+            parser = new FilterExpressionParser('(A || B)');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [[{ andExpressions: ['A'] }, { andExpressions: ['B'] }]],
@@ -442,7 +442,7 @@ describe('QueryParser', () => {
         });
 
         it('A && (B || C)', () => {
-            parser = new QueryParser('A && (B || C)');
+            parser = new FilterExpressionParser('A && (B || C)');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: ['A', [{ andExpressions: ['B'] }, { andExpressions: ['C'] }]],
@@ -451,7 +451,7 @@ describe('QueryParser', () => {
         });
 
         it('A && (B || (C && D))', () => {
-            parser = new QueryParser('A && (B || (C && D))');
+            parser = new FilterExpressionParser('A && (B || (C && D))');
             expect(parser.ast).toEqual([
                 {
                     andExpressions: [
@@ -468,24 +468,24 @@ describe('QueryParser', () => {
         });
 
         it('Missing closing bracket "(A && B"', () => {
-            parser = new QueryParser('(A && B');
+            parser = new FilterExpressionParser('(A && B');
             expect(() => parser.check()).toThrow();
         });
 
         it('Missing opening bracket "A && B)"', () => {
-            parser = new QueryParser('A && B)');
+            parser = new FilterExpressionParser('A && B)');
             expect(() => parser.check()).toThrow();
         });
     });
 
     describe('hasAASQueries', () => {
         it('#prop:number=42 is an AAS query', () => {
-            parser = new QueryParser('#prop:number=42');
+            parser = new FilterExpressionParser('#prop:number=42');
             expect(parser.hasAASQueries).toBeTruthy();
         });
 
         it('"Hello World" is not an AAS query', () => {
-            parser = new QueryParser('"Hello World"');
+            parser = new FilterExpressionParser('"Hello World"');
             expect(parser.hasAASQueries).toBeFalsy();
         });
     });

@@ -27,15 +27,17 @@ import {
     parseDate,
     parseNumber,
     ApplicationError,
+    isMultiLanguageProperty,
+    isFile,
+    isBlob,
 } from 'aas-core';
 
 import { AASIndex, toAbbreviation, toDocumentId } from '../aas-index.js';
 import { Variable } from '../../variable.js';
-import { MySqlQuery } from './mysql-query.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint, MySqlConceptDescriptionIds } from './mysql-types.js';
-import { KeywordDirectory } from '../keyword-directory.js';
 import { urlToString } from '../../utilities.js';
 import { ERRORS } from '../../errors.js';
+import { AASIndexQuery, SqlIndexQuery } from '../aas-index-query.js';
 
 const LIMIT = 100;
 
@@ -43,7 +45,6 @@ const LIMIT = 100;
 export class MySqlIndex implements AASIndex {
     private readonly logger = container.resolve(LOGGER);
     private readonly variable = container.resolve(Variable);
-    private readonly keywordDirectory = container.resolve(KeywordDirectory);
     private pool?: mysql.Pool;
 
     public async dispose(): Promise<void> {
@@ -200,9 +201,9 @@ export class MySqlIndex implements AASIndex {
         expression?: string,
         language?: string,
     ): Promise<AASPagedResult> {
-        let query: MySqlQuery | undefined;
+        let query: AASIndexQuery | undefined;
         if (expression) {
-            query = new MySqlQuery(expression, language ?? 'en');
+            query = new SqlIndexQuery(expression, language ?? 'en');
         }
 
         const connection = await this.getConnection();
@@ -525,7 +526,7 @@ export class MySqlIndex implements AASIndex {
         connection: mysql.Connection,
         limit: number,
         endpoints: string[],
-        query?: MySqlQuery,
+        query?: AASIndexQuery,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [];
@@ -547,14 +548,14 @@ export class MySqlIndex implements AASIndex {
             } else {
                 if (endpoints.length > 0) {
                     sql =
-                        "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND (" +
                         query.createSql(values) +
                         ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
                 } else {
                     sql =
-                        'SELECT * FROM `documents` WHERE ' +
+                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
                         query.createSql(values) +
                         ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
                 }
@@ -586,7 +587,7 @@ export class MySqlIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        query?: MySqlQuery,
+        query?: AASIndexQuery,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [current.endpoint + current.id];
@@ -609,14 +610,14 @@ export class MySqlIndex implements AASIndex {
             } else {
                 if (endpoints.length > 0) {
                     sql =
-                        "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND CONCAT(endpoint, id) >= ? AND (" +
                         query.createSql(values) +
                         ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
                 } else {
                     sql =
-                        'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? AND (' +
+                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) >= ? AND (' +
                         query.createSql(values) +
                         ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
                 }
@@ -649,7 +650,7 @@ export class MySqlIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        query?: MySqlQuery,
+        query?: AASIndexQuery,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [current.endpoint + current.id];
@@ -672,14 +673,14 @@ export class MySqlIndex implements AASIndex {
             } else {
                 if (endpoints.length > 0) {
                     sql =
-                        "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND CONCAT(endpoint, id) < ? AND (" +
                         query.createSql(values) +
                         ') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
                 } else {
                     sql =
-                        'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) < ? AND (' +
+                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) < ? AND (' +
                         query.createSql(values) +
                         ') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
                 }
@@ -711,7 +712,7 @@ export class MySqlIndex implements AASIndex {
         connection: mysql.Connection,
         limit: number,
         endpoints: string[],
-        query?: MySqlQuery,
+        query?: AASIndexQuery,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [];
@@ -733,16 +734,16 @@ export class MySqlIndex implements AASIndex {
             } else {
                 if (endpoints.length > 0) {
                     sql =
-                        "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND (" +
                         query.createSql(values) +
-                        ') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
+                        ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
                 } else {
                     sql =
-                        'SELECT * FROM `documents` WHERE ' +
+                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
                         query.createSql(values) +
-                        ' ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
+                        ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
                 }
             }
         } else {
@@ -832,7 +833,7 @@ export class MySqlIndex implements AASIndex {
                 toAbbreviation(referable),
                 isIdentifiable(referable) ? referable.id : undefined,
                 referable.idShort,
-                this.toStringValue(referable, 512),
+                this.toStringValue(referable),
                 this.toNumberValue(referable),
                 this.toDateValue(referable),
                 this.toBooleanValue(referable),
@@ -841,27 +842,32 @@ export class MySqlIndex implements AASIndex {
         );
     }
 
-    private toStringValue(referable: aas.Referable, max: number = 512): string | undefined {
-        switch (referable.modelType) {
-            case 'Property': {
-                const property = referable as aas.Property;
-                if (baseType(property.valueType) === 'string') {
-                    return this.keywordDirectory.preprocessString(property.value, max);
-                }
+    private toStringValue(referable: aas.Referable): string | undefined {
+        if (isProperty(referable)) {
+            if (baseType(referable.valueType) === 'string') {
+                return referable.value;
+            }
 
+            return undefined;
+        }
+
+        if (isMultiLanguageProperty(referable)) {
+            if (!Array.isArray(referable.value) || referable.value.length === 0) {
                 return undefined;
             }
-            case 'MultiLanguageProperty':
-                return this.keywordDirectory.preprocessString((referable as aas.MultiLanguageProperty).value, 512);
-            case 'File':
-                return (referable as aas.File).value;
-            case 'Blob':
-                return (referable as aas.Blob).contentType;
-            case 'Range':
-            case 'ReferenceElement':
-            default:
-                return undefined;
+
+            return referable.value.map(item => item.text).join(' ');
         }
+
+        if (isFile(referable)) {
+            return referable.value;
+        }
+
+        if (isBlob(referable)) {
+            return referable.contentType;
+        }
+
+        return undefined;
     }
 
     private toNumberValue(referable: aas.Referable): number | undefined {

@@ -10,7 +10,6 @@ import { container, singleton } from 'tsyringe';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { createHash, randomBytes } from 'crypto';
 import {
     isCredentials,
     User,
@@ -293,26 +292,6 @@ export class IdentityProvider extends IdentityProviderClient {
         }
 
         return code_challenge === this.generateCodeChallenge(code_verifier);
-    }
-
-    private generateSessionState(clientId: string, clientOrigin: string, opSessionId: string): string {
-        const salt = randomBytes(16).toString('hex');
-        const hashInput = `${clientId} ${clientOrigin} ${opSessionId} ${salt}`;
-        const hash = createHash('sha256').update(hashInput).digest('base64url');
-        return `${hash}.${salt}`;
-    }
-
-    private toScriptLiteral(value: string | undefined): string {
-        return JSON.stringify(value ?? '').replace(/[<>&\u2028\u2029]/g, (character: string): string => {
-            const escape = {
-                '<': '\\u003c',
-                '>': '\\u003e',
-                '&': '\\u0026',
-                '\u2028': '\\u2028',
-                '\u2029': '\\u2029',
-            }[character];
-            return escape ?? character;
-        });
     }
 
     private createAccessToken(user: User): string {

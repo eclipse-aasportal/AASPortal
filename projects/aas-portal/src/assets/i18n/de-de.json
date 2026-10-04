@@ -333,7 +333,7 @@
         "CAPTION": "Eingabeaufforderung",
         "OK": "Index leeren"
     },
-    "QueryParser": {
+    "FilterExpressionParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel-Elementname an Position {{currentPosition}} erwartet.",
         "END_OF_TEXT_NOT_FOUND": "Das Ende des Textes, beginnend an Position {{currentPosition}}, wurde nicht gefunden.",
         "INVALID_ABBREVIATION": "'{{modelType}}' ist eine ungültige Modelltyp-Abkürzung an Position {{currentPosition}}.",
@@ -384,7 +384,6 @@
         "DigitalProductPassport": "Produktpass",
         "DOWNLOAD_TOOLTIP": "Verwaltungsschale als AASX-Package-Datei herunterladen.",
         "FAVORITES": "Alle Verwaltungsschalen",
-        "FILTER_TOOLTIP": "AAS Dokumente filtern.",
         "GenericSubmodel": "Generische Ansicht",
         "HandoverDocumentation": "Übergabedokumentation",
         "HierarchicalStructure": "Hierarchische Strukturen",

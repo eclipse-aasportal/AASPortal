@@ -11,7 +11,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     AASDocument,
     aas,
-    QueryParser,
+    FilterExpressionParser,
     OrExpression,
     AASQuery,
     AASQueryValueType,
@@ -33,12 +33,12 @@ export type ElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigin
 @Injectable()
 export class AASTableFilter {
     private readonly translate = inject(TranslateService);
-    private queryParser?: QueryParser;
+    private queryParser?: FilterExpressionParser;
 
     private readonly currentLang = computed(() => this.translate.currentLang() ?? 'en-us');
 
     public start(expression: string): void {
-        this.queryParser = new QueryParser(expression, this.currentLang());
+        this.queryParser = new FilterExpressionParser(expression, this.currentLang());
     }
 
     public match(document: AASDocument): boolean {

@@ -25,7 +25,7 @@ export * as aas from './aas.js';
 export * from './multi-key-map.js';
 export * from './keyed-list.js';
 export * from './crc32.js';
-export * from './query-parser.js';
+export * from './filter-expression-parser.js';
 export * from './cache.js';
 
 export { common, constants, jsonization, stringification, types, verification };

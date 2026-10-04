@@ -20,9 +20,14 @@
         }
     } @else {
         <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-2 row-cols-xl-3 row-cols-xxl-4">
-            @for (item of items(); track item; let i = $index) {
+            @for (item of items(); track item.id; let i = $index) {
                 <div class="p-2 rounded col" [class.bg-info-subtle]="item.selected()">
-                    <div class="card overflow-hidden" (click)="toggleSelected($event, item)" tabindex="0">
+                    <div
+                        class="card overflow-hidden"
+                        (click)="toggleSelected($event, item)"
+                        tabindex="0"
+                        style="height: 280px;"
+                    >
                         <ng-container
                             [ngComponentOutlet]="item.component"
                             [ngComponentOutletInputs]="item.inputs"

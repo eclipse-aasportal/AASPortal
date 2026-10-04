@@ -27,15 +27,17 @@ import {
     parseDate,
     isValidDate,
     toBoolean,
+    isMultiLanguageProperty,
+    isFile,
+    isBlob,
 } from 'aas-core';
 
 import { AASIndex, toAbbreviation, toDocumentId } from '../aas-index.js';
-import { KeywordDirectory } from '../keyword-directory.js';
 import { ERRORS } from '../../errors.js';
-import { SqliteQuery } from './sqlite-query.js';
 import { container, singleton } from 'tsyringe';
 import { Variable } from '../../variable.js';
 import { SqliteConnectionProvider } from '../../sqlite-connection-provider.js';
+import { AASIndexQuery, SqlIndexQuery } from '../aas-index-query.js';
 
 const LIMIT = 100;
 
@@ -84,7 +86,6 @@ CREATE TABLE IF NOT EXISTS submodelConceptDescriptions (
 @singleton()
 export class SqliteIndex implements AASIndex {
     private readonly logger = container.resolve(LOGGER);
-    private readonly keywords = container.resolve(KeywordDirectory);
     private readonly variable = container.resolve(Variable);
     private readonly connectionProvider = container.resolve(SqliteConnectionProvider);
 
@@ -180,6 +181,18 @@ export class SqliteIndex implements AASIndex {
         this.deleteEndpointConceptDescriptionIdsSql = this.db.prepare(
             'DELETE FROM submodelConceptDescriptions WHERE endpoint = ?',
         );
+
+        this.db.function('REGEXP', (pattern: SQLInputValue, value: SQLInputValue): SQLOutputValue => {
+            if (typeof pattern !== 'string' || typeof value !== 'string') {
+                return 0;
+            }
+
+            try {
+                return new RegExp(pattern).test(value) ? 1 : 0;
+            } catch {
+                return 0;
+            }
+        });
 
         this.logger.info(`AAS index connected to ${this.variable.AAS_INDEX} (SQLite).`);
     }
@@ -326,10 +339,10 @@ export class SqliteIndex implements AASIndex {
     ): Promise<AASPagedResult> {
         return new Promise((resolve, reject) => {
             try {
-                let query: SqliteQuery | undefined;
+                let query: AASIndexQuery | undefined;
                 if (expression) {
                     try {
-                        query = new SqliteQuery(expression, language ?? 'en');
+                        query = new SqlIndexQuery(expression, language ?? 'en');
                     } catch {
                         return resolve({ previous: null, next: null, documents: [] });
                     }
@@ -611,7 +624,7 @@ export class SqliteIndex implements AASIndex {
         return String(value.uuid);
     }
 
-    private getFirstPage(limit: number, endpoints: string[], query?: SqliteQuery): AASPagedResult {
+    private getFirstPage(limit: number, endpoints: string[], query?: AASIndexQuery): AASPagedResult {
         let sql: StatementSync;
         const params: SQLInputValue[] = [];
         if (query) {
@@ -634,13 +647,13 @@ export class SqliteIndex implements AASIndex {
             } else {
                 if (endpoints.length > 0) {
                     sql = this.db.prepare(
-                        `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join("','")}') AND (${query.createSql(
+                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE endpoint IN ('${endpoints.join("','")}') AND (${query.createSql(
                             params,
-                        )}) ORDER BY CONCAT(endpoint, id) ASC LIMIT ?`,
+                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
                     );
                 } else {
                     sql = this.db.prepare(
-                        `SELECT * FROM documents WHERE ${query.createSql(params)} ORDER BY CONCAT(endpoint, id) ASC LIMIT ?`,
+                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ${query.createSql(params)} ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
                     );
                 }
             }
@@ -669,7 +682,7 @@ export class SqliteIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        query?: SqliteQuery,
+        query?: AASIndexQuery,
     ): AASPagedResult {
         let sql: StatementSync;
         const params: SQLInputValue[] = [current.endpoint + current.id];
@@ -694,7 +707,7 @@ export class SqliteIndex implements AASIndex {
             } else {
                 if (endpoints.length > 0) {
                     sql = this.db.prepare(
-                        `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join(
+                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE endpoint IN ('${endpoints.join(
                             "','",
                         )}') AND CONCAT(endpoint, id) >= ? AND (${query.createSql(
                             params,
@@ -702,7 +715,9 @@ export class SqliteIndex implements AASIndex {
                     );
                 } else {
                     sql = this.db.prepare(
-                        `SELECT * FROM documents WHERE CONCAT(endpoint, id) >= ? AND (${query.createSql(params)}) ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;`,
+                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) >= ? AND (${query.createSql(
+                            params,
+                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;`,
                     );
                 }
             }
@@ -735,7 +750,7 @@ export class SqliteIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        query?: SqliteQuery,
+        query?: AASIndexQuery,
     ): AASPagedResult {
         let sql: StatementSync;
         const params: SQLInputValue[] = [current.endpoint + current.id];
@@ -760,13 +775,13 @@ export class SqliteIndex implements AASIndex {
             } else {
                 if (endpoints.length > 0) {
                     sql = this.db.prepare(
-                        `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join("','")}') AND CONCAT(endpoint, id) < ? AND (${query.createSql(
+                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE endpoint IN ('${endpoints.join("','")}') AND CONCAT(endpoint, id) < ? AND (${query.createSql(
                             params,
                         )}) ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
                     );
                 } else {
                     sql = this.db.prepare(
-                        `SELECT * FROM documents WHERE CONCAT(endpoint, id) < ? AND (${query.createSql(
+                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) < ? AND (${query.createSql(
                             params,
                         )}) ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
                     );
@@ -797,7 +812,7 @@ export class SqliteIndex implements AASIndex {
         };
     }
 
-    private getLastPage(limit: number, endpoints: string[], query?: SqliteQuery): AASPagedResult {
+    private getLastPage(limit: number, endpoints: string[], query?: AASIndexQuery): AASPagedResult {
         let sql: StatementSync;
         const params: SQLInputValue[] = [];
         if (query) {
@@ -820,13 +835,15 @@ export class SqliteIndex implements AASIndex {
             } else {
                 if (endpoints.length > 0) {
                     sql = this.db.prepare(
-                        `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join("','")}') AND (${query.createSql(
+                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE endpoint IN ('${endpoints.join("','")}') AND (${query.createSql(
                             params,
                         )}) ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
                     );
                 } else {
                     sql = this.db.prepare(
-                        `SELECT * FROM documents WHERE ${query.createSql(params)} ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
+                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ${query.createSql(
+                            params,
+                        )} ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
                     );
                 }
             }
@@ -898,27 +915,32 @@ export class SqliteIndex implements AASIndex {
             : this.getDocumentAssetSql.get(id);
     }
 
-    private toStringValue(referable: aas.Referable, max: number = 512): string | null {
-        switch (referable.modelType) {
-            case 'Property': {
-                const property = referable as aas.Property;
-                if (baseType(property.valueType) === 'string') {
-                    return this.keywords.preprocessString(property.value, max) ?? null;
-                }
+    private toStringValue(referable: aas.Referable): string | null {
+        if (isProperty(referable)) {
+            if (baseType(referable.valueType) === 'string') {
+                return referable.value ?? null;
+            }
 
+            return null;
+        }
+
+        if (isMultiLanguageProperty(referable)) {
+            if (!Array.isArray(referable.value) || referable.value.length === 0) {
                 return null;
             }
-            case 'MultiLanguageProperty':
-                return this.keywords.preprocessString((referable as aas.MultiLanguageProperty).value) ?? null;
-            case 'File':
-                return (referable as aas.File).value ?? null;
-            case 'Blob':
-                return (referable as aas.Blob).contentType;
-            case 'Range':
-            case 'ReferenceElement':
-            default:
-                return null;
+
+            return referable.value.map(item => item.text).join(' ');
         }
+
+        if (isFile(referable)) {
+            return referable.value ?? null;
+        }
+
+        if (isBlob(referable)) {
+            return referable.contentType ?? null;
+        }
+
+        return null;
     }
 
     private toNumberValue(referable: aas.Referable): number | null {

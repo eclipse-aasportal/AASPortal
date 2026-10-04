@@ -11,7 +11,6 @@ import { container } from 'tsyringe';
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { AASDocument, AASEndpoint } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
-import { KeywordDirectory } from '../keyword-directory.js';
 import { SqliteIndex } from './sqlite-index.js';
 import { createSpyObj } from '../../../test/mocks.js';
 import { SqliteConnectionProvider } from '../../sqlite-connection-provider.js';
@@ -21,18 +20,15 @@ import { DatabaseSync } from 'node:sqlite';
 describe('SqliteIndex', () => {
     let index: SqliteIndex;
     let logger: Mocked<Logger>;
-    let keywords: Mocked<KeywordDirectory>;
     let connectionProvider: Mocked<SqliteConnectionProvider>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'info']);
-        keywords = createSpyObj<KeywordDirectory>(['containedKeyword', 'toString']);
         connectionProvider = createSpyObj<SqliteConnectionProvider>(['getConnection']);
         connectionProvider.getConnection.mockReturnValue(new DatabaseSync(':memory:', { timeout: 5000 }));
 
         container.clearInstances();
         container.registerInstance(LOGGER, logger);
-        container.registerInstance(KeywordDirectory, keywords);
         container.registerInstance(Variable, createSpyObj<Variable>([], { AAS_INDEX: ':memory:' }));
         container.registerInstance(SqliteConnectionProvider, connectionProvider);
         container.registerSingleton(SqliteIndex);

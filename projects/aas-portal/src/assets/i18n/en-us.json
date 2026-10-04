@@ -339,7 +339,7 @@
         "CAPTION": "Prompt",
         "OK": "Clear Index"
     },
-    "QueryParser": {
+    "FilterExpressionParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel element name expected at position {{currentPosition}}.",
         "END_OF_TEXT_NOT_FOUND": "The end of the text, starting at position {{currentPosition}}, was not found.",
         "INVALID_ABBREVIATION": "'{{modelType}}' is an invalid model type abbreviation at position {{currentPosition}}.",
@@ -390,7 +390,6 @@
         "DigitalProductPassport": "Product passport",
         "DOWNLOAD_TOOLTIP": "Download selected shells as AASX package file.",
         "FAVORITES": "All shells",
-        "FILTER_TOOLTIP": "Filter AAS documents.",
         "GenericSubmodel": "Generic view",
         "HandoverDocumentation": "Handover documentation",
         "HierarchicalStructure": "Hierarchical Structures",

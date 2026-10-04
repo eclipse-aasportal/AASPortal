@@ -32,7 +32,9 @@ export interface Expression {
     orExpressions: OrExpression[];
 }
 
-export class QueryParser {
+export type ExpressionType = 'undefined' | 'text' | 'queries';
+
+export class FilterExpressionParser {
     private static readonly minLength = 3;
     private static readonly operatorChars = new Set(['=', '<', '>', '!', '&', '|']);
     private static readonly abbreviations = new Set([
@@ -79,15 +81,17 @@ export class QueryParser {
             return;
         }
 
-        if (!this.expression || this.expression.length < QueryParser.minLength) {
-            throw new ApplicationError('QueryParser.MIN_LENGTH', { minLength: QueryParser.minLength });
+        if (!this.expression || this.expression.length < FilterExpressionParser.minLength) {
+            throw new ApplicationError('FilterExpressionParser.MIN_LENGTH', {
+                minLength: FilterExpressionParser.minLength,
+            });
         }
 
         this.currentPosition = 0;
         this.nextTerm();
 
         if (this.stack.length !== 1) {
-            throw new ApplicationError('QueryParser.INVALID_NESTED_EXPRESSION');
+            throw new ApplicationError('FilterExpressionParser.INVALID_NESTED_EXPRESSION');
         }
 
         const current = this.stack[this.stack.length - 1];
@@ -104,6 +108,12 @@ export class QueryParser {
             term = this.parseQuery();
             this._hasAASQueries = true;
         } else {
+            if (this._hasAASQueries) {
+                throw new ApplicationError('FilterExpressionParser.MIXED_TEXT_AND_QUERIES_NOT_ALLOWED', {
+                    currentPosition: this.currentPosition,
+                });
+            }
+
             term = this.getText();
         }
 
@@ -112,7 +122,9 @@ export class QueryParser {
 
     private beginTerm(): void {
         if (!this.skipBlanks()) {
-            throw new ApplicationError('QueryParser.TERM_EXPECTED', { currentPosition: this.currentPosition });
+            throw new ApplicationError('FilterExpressionParser.TERM_EXPECTED', {
+                currentPosition: this.currentPosition,
+            });
         }
 
         if (this.ifChar('(')) {
@@ -143,7 +155,7 @@ export class QueryParser {
     private levelUp(term: string | AASQuery | OrExpression[]): void {
         const current = this.stack.pop();
         if (!current) {
-            throw new Error('');
+            throw new Error('Invalid state: no current stack frame found.');
         }
 
         if (!current.currentOr) {
@@ -161,7 +173,7 @@ export class QueryParser {
         if (c === '"' || c === "'") {
             const i = this.expression.indexOf(c, this.currentPosition + 1);
             if (i < 0) {
-                throw new ApplicationError('QueryParser.END_OF_TEXT_NOT_FOUND', {
+                throw new ApplicationError('FilterExpressionParser.END_OF_TEXT_NOT_FOUND', {
                     currentPosition: this.currentPosition,
                 });
             }
@@ -176,7 +188,7 @@ export class QueryParser {
 
         for (let i = this.currentPosition, n = this.expression.length; i < n; i++) {
             const c = this.expression[i];
-            if (c === ')' || QueryParser.operatorChars.has(c)) {
+            if (c === ')' || FilterExpressionParser.operatorChars.has(c)) {
                 const text = this.expression.substring(this.currentPosition, i);
                 this.currentPosition = i;
                 return text.trimEnd();
@@ -203,7 +215,7 @@ export class QueryParser {
 
         if (this.ifChar(')')) {
             if (this.stack.length <= 1) {
-                throw new ApplicationError('QueryParser.UNEXPECTED_CLOSING_BRACKET', {
+                throw new ApplicationError('FilterExpressionParser.UNEXPECTED_CLOSING_BRACKET', {
                     currentPosition: this.currentPosition,
                 });
             }
@@ -211,7 +223,7 @@ export class QueryParser {
             return ')';
         }
 
-        throw new ApplicationError('QueryParser.LINK_EXPECTED', {
+        throw new ApplicationError('FilterExpressionParser.LINK_EXPECTED', {
             currentPosition: this.currentPosition,
         });
     }
@@ -271,20 +283,20 @@ export class QueryParser {
         let i = this.currentPosition;
         for (let n = this.expression.length; i < n; i++) {
             const c = this.expression[i];
-            if (c === ' ' || c === ':' || QueryParser.operatorChars.has(c)) {
+            if (c === ' ' || c === ':' || FilterExpressionParser.operatorChars.has(c)) {
                 break;
             }
         }
 
         if (i === this.currentPosition) {
-            throw new ApplicationError('QueryParser.MODEL_TYPE_EXPECTED', {
+            throw new ApplicationError('FilterExpressionParser.MODEL_TYPE_EXPECTED', {
                 currentPosition: this.currentPosition,
             });
         }
 
         const modelType = this.expression.substring(this.currentPosition, i);
-        if (!QueryParser.abbreviations.has(modelType)) {
-            throw new ApplicationError('QueryParser.INVALID_ABBREVIATION', {
+        if (!FilterExpressionParser.abbreviations.has(modelType)) {
+            throw new ApplicationError('FilterExpressionParser.INVALID_ABBREVIATION', {
                 modelType,
                 currentPosition: this.currentPosition,
             });
@@ -304,13 +316,13 @@ export class QueryParser {
         let i = this.currentPosition;
         for (let n = this.expression.length; i < n; i++) {
             const c = this.expression[i];
-            if (c === ' ' || QueryParser.operatorChars.has(c)) {
+            if (c === ' ' || FilterExpressionParser.operatorChars.has(c)) {
                 break;
             }
         }
 
         if (i === this.currentPosition) {
-            throw new ApplicationError('QueryParser.ELEMENT_NAME_EXPECTED', {
+            throw new ApplicationError('FilterExpressionParser.ELEMENT_NAME_EXPECTED', {
                 currentPosition: this.currentPosition,
             });
         }
@@ -350,8 +362,8 @@ export class QueryParser {
         }
 
         const c = this.expression[this.currentPosition];
-        if (QueryParser.operatorChars.has(c)) {
-            throw new ApplicationError('QueryParser.INVALID_OPERATOR', {
+        if (FilterExpressionParser.operatorChars.has(c)) {
+            throw new ApplicationError('FilterExpressionParser.INVALID_OPERATOR', {
                 operator: c,
                 currentPosition: this.currentPosition,
             });
@@ -405,7 +417,7 @@ export class QueryParser {
         }
 
         if (minMax.length !== 2) {
-            throw new ApplicationError('QueryParser.INVALID_RANGE_EXPRESSION', {
+            throw new ApplicationError('FilterExpressionParser.INVALID_RANGE_EXPRESSION', {
                 expression: s,
                 currentPosition: this.currentPosition,
             });
@@ -415,7 +427,7 @@ export class QueryParser {
         const max = parseNumber(minMax[1], this.language);
         if (!Number.isNaN(min) || !Number.isNaN(max)) {
             if (Number.isNaN(min) || Number.isNaN(max)) {
-                throw new ApplicationError('QueryParser.INVALID_RANGE_EXPRESSION', {
+                throw new ApplicationError('FilterExpressionParser.INVALID_RANGE_EXPRESSION', {
                     expression: s,
                     currentPosition: this.currentPosition,
                 });
@@ -428,7 +440,7 @@ export class QueryParser {
         const bigMax = this.parseBigint(minMax[1]);
         if (bigMin || bigMax) {
             if (!bigMin || !bigMax) {
-                throw new ApplicationError('QueryParser.INVALID_RANGE_EXPRESSION', {
+                throw new ApplicationError('FilterExpressionParser.INVALID_RANGE_EXPRESSION', {
                     expression: s,
                     currentPosition: this.currentPosition,
                 });
@@ -440,7 +452,7 @@ export class QueryParser {
         const minDate = parseDate(minMax[0], this.language);
         const maxDate = parseDate(minMax[1], this.language);
         if (!minDate || !maxDate) {
-            throw new ApplicationError('QueryParser.INVALID_RANGE_EXPRESSION', {
+            throw new ApplicationError('FilterExpressionParser.INVALID_RANGE_EXPRESSION', {
                 expression: s,
                 currentPosition: this.currentPosition,
             });
@@ -460,5 +472,16 @@ export class QueryParser {
         } catch {
             return undefined;
         }
+    }
+
+    private splitIntoWords(text: string): string[] {
+        // Der reguläre Ausdruck sucht nach:
+        // 1. "..." inkl. maskierter Zeichen \"
+        // 2. '...' inkl. maskierter Zeichen \'
+        // 3. Allen Zeichen, die keine Leerzeichen sind (\S+)
+        const regex = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\S+/g;
+
+        const matches = text.match(regex);
+        return matches ? matches : [];
     }
 }
