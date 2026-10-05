@@ -47,12 +47,12 @@ describe('utilities', () => {
     describe('checkIsDefined', () => {
         it('should throw an error if value is undefined', () => {
             const value = undefined;
-            expect(() => checkIsDefined(value, 'value')).toThrow('Value is not defined');
+            expect(() => checkIsDefined(value, 'value')).toThrow('Value for "value" is not defined.');
         });
 
         it('should throw an error if value is null', () => {
             const value = null;
-            expect(() => checkIsDefined(value, 'value')).toThrow('Value is not defined');
+            expect(() => checkIsDefined(value, 'value')).toThrow('Value for "value" is not defined.');
         });
 
         it('should return the value if it is defined', () => {

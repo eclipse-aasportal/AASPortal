@@ -37,7 +37,7 @@ import { Variable } from '../../variable.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint, MySqlConceptDescriptionIds } from './mysql-types.js';
 import { urlToString } from '../../utilities.js';
 import { ERRORS } from '../../errors.js';
-import { AASIndexQuery, SqlIndexQuery } from '../aas-index-query.js';
+import { ConditionGenerator, SqlIndexQuery } from '../condition-generator.js';
 
 const LIMIT = 100;
 
@@ -201,7 +201,7 @@ export class MySqlIndex implements AASIndex {
         expression?: string,
         language?: string,
     ): Promise<AASPagedResult> {
-        let query: AASIndexQuery | undefined;
+        let query: ConditionGenerator | undefined;
         if (expression) {
             query = new SqlIndexQuery(expression, language ?? 'en');
         }
@@ -526,7 +526,7 @@ export class MySqlIndex implements AASIndex {
         connection: mysql.Connection,
         limit: number,
         endpoints: string[],
-        query?: AASIndexQuery,
+        query?: ConditionGenerator,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [];
@@ -537,12 +537,12 @@ export class MySqlIndex implements AASIndex {
                         "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND (" +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
                 } else {
                     sql =
                         'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ' ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
                 }
             } else {
@@ -551,12 +551,12 @@ export class MySqlIndex implements AASIndex {
                         "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND (" +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
                 } else {
                     sql =
                         'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
                 }
             }
@@ -587,7 +587,7 @@ export class MySqlIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        query?: AASIndexQuery,
+        query?: ConditionGenerator,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [current.endpoint + current.id];
@@ -599,12 +599,12 @@ export class MySqlIndex implements AASIndex {
                         "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND CONCAT(documents.endpoint, documents.id) >= ? AND (" +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
                 } else {
                     sql =
                         'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) >= ? AND (' +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
                 }
             } else {
@@ -613,12 +613,12 @@ export class MySqlIndex implements AASIndex {
                         "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND CONCAT(endpoint, id) >= ? AND (" +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
                 } else {
                     sql =
                         'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) >= ? AND (' +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
                 }
             }
@@ -650,7 +650,7 @@ export class MySqlIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        query?: AASIndexQuery,
+        query?: ConditionGenerator,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [current.endpoint + current.id];
@@ -662,12 +662,12 @@ export class MySqlIndex implements AASIndex {
                         "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND CONCAT(documents.endpoint, documents.id) < ? AND (" +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
                 } else {
                     sql =
                         'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) < ? AND (' +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
                 }
             } else {
@@ -676,12 +676,12 @@ export class MySqlIndex implements AASIndex {
                         "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND CONCAT(endpoint, id) < ? AND (" +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
                 } else {
                     sql =
                         'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) < ? AND (' +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
                 }
             }
@@ -712,7 +712,7 @@ export class MySqlIndex implements AASIndex {
         connection: mysql.Connection,
         limit: number,
         endpoints: string[],
-        query?: AASIndexQuery,
+        query?: ConditionGenerator,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [];
@@ -723,12 +723,12 @@ export class MySqlIndex implements AASIndex {
                         "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND (" +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
                 } else {
                     sql =
                         'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
                 }
             } else {
@@ -737,12 +737,12 @@ export class MySqlIndex implements AASIndex {
                         "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
                         endpoints.join("','") +
                         "') AND (" +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
                 } else {
                     sql =
                         'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
-                        query.createSql(values) +
+                        query.generate(values) +
                         ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
                 }
             }

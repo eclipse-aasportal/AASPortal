@@ -9,30 +9,30 @@
 import { parseDate, parseNumber } from './convert.js';
 import { ApplicationError } from './types.js';
 
-export type AASQueryOperator = '=' | '<' | '>' | '<=' | '>=' | '!=';
+export type ConditionOperator = '=' | '<' | '>' | '<=' | '>=' | '!=';
 
 export type BaseValueType = string | number | boolean | bigint | Date;
 
-export type AASQueryValueType = BaseValueType | [number, number] | [bigint, bigint] | [Date, Date];
+export type ConditionValueType = BaseValueType | [number, number] | [bigint, bigint] | [Date, Date];
 
-export interface AASQuery {
+export interface ModelTypeCondition {
     modelType: string;
-    operator?: AASQueryOperator;
+    operator?: ConditionOperator;
     name?: string;
-    value?: AASQueryValueType;
+    value?: ConditionValueType;
 }
 
-export type AndExpression = string | AASQuery | OrExpression[];
+export type TextCondition = string;
 
-export interface OrExpression {
-    andExpressions: AndExpression[];
+export type AndCondition = TextCondition | ModelTypeCondition | OrCondition[];
+
+export interface OrCondition {
+    andConditions: AndCondition[];
 }
 
-export interface Expression {
-    orExpressions: OrExpression[];
-}
+export type Clause = OrCondition[];
 
-export type ExpressionType = 'undefined' | 'text' | 'queries';
+export type ExpressionType = undefined | 'text' | 'model-type';
 
 export class FilterExpressionParser {
     private static readonly minLength = 3;
@@ -53,9 +53,9 @@ export class FilterExpressionParser {
         'sml',
     ]);
 
-    private readonly stack: { orExpressions: OrExpression[]; currentOr?: OrExpression }[] = [{ orExpressions: [] }];
+    private readonly stack: { ors: OrCondition[]; currentOr?: OrCondition }[] = [{ ors: [] }];
     private currentPosition = -1;
-    private _hasAASQueries = false;
+    private _expressionType: ExpressionType = undefined;
 
     public constructor(
         expression: string,
@@ -66,18 +66,18 @@ export class FilterExpressionParser {
 
     public readonly expression: string;
 
-    public get ast(): OrExpression[] {
+    public get expressionType(): ExpressionType {
         this.check();
-        return this.stack[0].orExpressions;
+        return this._expressionType;
     }
 
-    public get hasAASQueries(): boolean {
+    public get clause(): Clause {
         this.check();
-        return this._hasAASQueries;
+        return this.stack[0].ors;
     }
 
     public check(): void {
-        if (this.currentPosition >= 0) {
+        if (this._expressionType !== undefined) {
             return;
         }
 
@@ -95,29 +95,40 @@ export class FilterExpressionParser {
         }
 
         const current = this.stack[this.stack.length - 1];
-        if (current.currentOr && current.currentOr.andExpressions.length > 0) {
-            current.orExpressions.push(current.currentOr);
+        if (current.currentOr && current.currentOr.andConditions.length > 0) {
+            current.ors.push(current.currentOr);
             current.currentOr = undefined;
         }
     }
 
     private nextTerm(): void {
         this.beginTerm();
-        let term: string | AASQuery;
         if (this.expression[this.currentPosition] === '#') {
-            term = this.parseQuery();
-            this._hasAASQueries = true;
-        } else {
-            if (this._hasAASQueries) {
-                throw new ApplicationError('FilterExpressionParser.MIXED_TEXT_AND_QUERIES_NOT_ALLOWED', {
+            if (this._expressionType === 'text') {
+                throw new ApplicationError('FilterExpressionParser.MIXED_TEXT_AND_MODEL_TYPE_CONDITIONS_NOT_ALLOWED', {
                     currentPosition: this.currentPosition,
                 });
             }
 
-            term = this.getText();
-        }
+            this._expressionType = 'model-type';
+            this.endTerm(this.parseModelTypeCondition());
+        } else {
+            if (this._expressionType !== undefined) {
+                throw new ApplicationError('FilterExpressionParser.MIXED_TEXT_AND_MODEL_TYPE_CONDITIONS_NOT_ALLOWED', {
+                    currentPosition: this.currentPosition,
+                });
+            }
 
-        this.endTerm(term);
+            this._expressionType = 'text';
+            this.stack[0].ors.push(
+                ...this.splitIntoWords(this.expression).map(
+                    word =>
+                        ({
+                            andConditions: [word],
+                        }) satisfies OrCondition,
+                ),
+            );
+        }
     }
 
     private beginTerm(): void {
@@ -128,47 +139,48 @@ export class FilterExpressionParser {
         }
 
         if (this.ifChar('(')) {
+            this._expressionType = 'model-type';
             this.levelDown();
         }
     }
 
-    private endTerm(term: string | AASQuery | OrExpression[]): void {
+    private endTerm(term: ModelTypeCondition | OrCondition[]): void {
         const link = this.nextLink();
         if (link === '&&') {
-            this.addAndTerm(term);
+            this.addAndCondition(term);
             this.nextTerm();
         } else if (link === '||') {
-            this.addLastAndTerm(term);
+            this.addLastAndCondition(term);
             this.nextTerm();
         } else if (link === ')') {
             this.levelUp(term);
         } else {
-            this.addAndTerm(term);
+            this.addAndCondition(term);
         }
     }
 
     private levelDown(): void {
-        this.stack.push({ orExpressions: [] });
+        this.stack.push({ ors: [] });
         this.beginTerm();
     }
 
-    private levelUp(term: string | AASQuery | OrExpression[]): void {
+    private levelUp(term: ModelTypeCondition | OrCondition[]): void {
         const current = this.stack.pop();
         if (!current) {
             throw new Error('Invalid state: no current stack frame found.');
         }
 
         if (!current.currentOr) {
-            current.currentOr = { andExpressions: [term] };
+            current.currentOr = { andConditions: [term] };
         } else {
-            current.currentOr.andExpressions.push(term);
+            current.currentOr.andConditions.push(term);
         }
 
-        current.orExpressions.push(current.currentOr);
-        this.endTerm(current.orExpressions);
+        current.ors.push(current.currentOr);
+        this.endTerm(current.ors);
     }
 
-    private getText(leaveQuotationMarks = false): string {
+    private getText(): string {
         const c = this.expression[this.currentPosition];
         if (c === '"' || c === "'") {
             const i = this.expression.indexOf(c, this.currentPosition + 1);
@@ -178,10 +190,7 @@ export class FilterExpressionParser {
                 });
             }
 
-            const text = leaveQuotationMarks
-                ? this.expression.substring(this.currentPosition, i + 1)
-                : this.expression.substring(this.currentPosition + 1, i);
-
+            const text = this.expression.substring(this.currentPosition + 1, i);
             this.currentPosition = i + 1;
             return text;
         }
@@ -240,42 +249,42 @@ export class FilterExpressionParser {
         return this.currentPosition < this.expression.length;
     }
 
-    private addAndTerm(term: string | AASQuery | OrExpression[]): void {
+    private addAndCondition(term: AndCondition): void {
         const current = this.stack[this.stack.length - 1];
         if (!current.currentOr) {
-            current.currentOr = { andExpressions: [] };
+            current.currentOr = { andConditions: [] };
         }
 
-        current.currentOr.andExpressions.push(term);
+        current.currentOr.andConditions.push(term);
     }
 
-    private addLastAndTerm(term: string | AASQuery | OrExpression[]): void {
+    private addLastAndCondition(term: AndCondition): void {
         const current = this.stack[this.stack.length - 1];
         if (!current.currentOr) {
-            current.currentOr = { andExpressions: [term] };
+            current.currentOr = { andConditions: [term] };
         } else {
-            current.currentOr.andExpressions.push(term);
+            current.currentOr.andConditions.push(term);
         }
 
-        current.orExpressions.push(current.currentOr);
+        current.ors.push(current.currentOr);
         current.currentOr = undefined;
     }
 
-    private parseQuery(): AASQuery {
+    private parseModelTypeCondition(): ModelTypeCondition {
         ++this.currentPosition;
-        const query: AASQuery = { modelType: this.parseModelType() };
+        const condition: ModelTypeCondition = { modelType: this.parseModelType() };
         const name = this.parseName();
         if (name) {
-            query.name = name;
+            condition.name = name;
         }
 
         const operator = this.parseOperator();
         if (operator) {
-            query.operator = operator;
-            query.value = this.parseValue();
+            condition.operator = operator;
+            condition.value = this.parseValue();
         }
 
-        return query;
+        return condition;
     }
 
     private parseModelType(): string {
@@ -332,7 +341,7 @@ export class FilterExpressionParser {
         return name;
     }
 
-    private parseOperator(): AASQueryOperator | undefined {
+    private parseOperator(): ConditionOperator | undefined {
         if (!this.skipBlanks()) {
             return undefined;
         }
@@ -381,9 +390,9 @@ export class FilterExpressionParser {
         return false;
     }
 
-    private parseValue(): AASQueryValueType {
+    private parseValue(): ConditionValueType {
         this.skipBlanks();
-        const s = this.getText(true);
+        const s = this.getText();
         if (s[0] === '"' || s[0] === "'") {
             return s.substring(1, s.length - 1);
         }
@@ -475,13 +484,19 @@ export class FilterExpressionParser {
     }
 
     private splitIntoWords(text: string): string[] {
-        // Der reguläre Ausdruck sucht nach:
-        // 1. "..." inkl. maskierter Zeichen \"
-        // 2. '...' inkl. maskierter Zeichen \'
-        // 3. Allen Zeichen, die keine Leerzeichen sind (\S+)
         const regex = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\S+/g;
+        const matches = text.match(regex) ?? [text];
+        this.currentPosition = this.expression.length;
+        return matches.map(match => {
+            if (match.startsWith('"') || match.startsWith("'")) {
+                match = match.slice(1);
+            }
 
-        const matches = text.match(regex);
-        return matches ? matches : [];
+            if (match.endsWith('"') || match.endsWith("'")) {
+                match = match.slice(0, -1);
+            }
+
+            return match;
+        });
     }
 }

@@ -37,7 +37,8 @@ import { ERRORS } from '../../errors.js';
 import { container, singleton } from 'tsyringe';
 import { Variable } from '../../variable.js';
 import { SqliteConnectionProvider } from '../../sqlite-connection-provider.js';
-import { AASIndexQuery, SqlIndexQuery } from '../aas-index-query.js';
+import { ConditionGenerator } from '../condition-generator.js';
+import { SqlConditionGenerator } from '../sql-condition-generator.js';
 
 const LIMIT = 100;
 
@@ -339,10 +340,10 @@ export class SqliteIndex implements AASIndex {
     ): Promise<AASPagedResult> {
         return new Promise((resolve, reject) => {
             try {
-                let query: AASIndexQuery | undefined;
+                let query: ConditionGenerator | undefined;
                 if (expression) {
                     try {
-                        query = new SqlIndexQuery(expression, language ?? 'en');
+                        query = new SqlConditionGenerator(expression, language ?? 'en');
                     } catch {
                         return resolve({ previous: null, next: null, documents: [] });
                     }
@@ -624,38 +625,22 @@ export class SqliteIndex implements AASIndex {
         return String(value.uuid);
     }
 
-    private getFirstPage(limit: number, endpoints: string[], query?: AASIndexQuery): AASPagedResult {
+    private getFirstPage(limit: number, endpoints: string[], generator?: ConditionGenerator): AASPagedResult {
         let sql: StatementSync;
         const params: SQLInputValue[] = [];
-        if (query) {
-            if (query.joinElements) {
-                if (endpoints.length > 0) {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('${endpoints.join(
-                            "','",
-                        )}') AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
-                    );
-                } else {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ${query.createSql(
-                            params,
-                        )} ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
-                    );
-                }
+        if (generator) {
+            if (endpoints.length > 0) {
+                sql = this.db.prepare(
+                    `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') AND (${generator.generate(params)}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
+                );
             } else {
-                if (endpoints.length > 0) {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE endpoint IN ('${endpoints.join("','")}') AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
-                    );
-                } else {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ${query.createSql(params)} ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
-                    );
-                }
+                sql = this.db.prepare(
+                    `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ${generator.generate(
+                        params,
+                    )} ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
+                );
             }
         } else {
             if (endpoints.length > 0) {
@@ -682,44 +667,26 @@ export class SqliteIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        query?: AASIndexQuery,
+        generator?: ConditionGenerator,
     ): AASPagedResult {
         let sql: StatementSync;
         const params: SQLInputValue[] = [current.endpoint + current.id];
 
-        if (query) {
-            if (query.joinElements) {
-                if (endpoints.length > 0) {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('${endpoints.join(
-                            '","',
-                        )}') AND CONCAT(documents.endpoint, documents.id) >= ? AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
-                    );
-                } else {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) >= ? AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
-                    );
-                }
+        if (generator) {
+            if (endpoints.length > 0) {
+                sql = this.db.prepare(
+                    `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('${endpoints.join(
+                        '","',
+                    )}') AND CONCAT(documents.endpoint, documents.id) >= ? AND (${generator.generate(
+                        params,
+                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
+                );
             } else {
-                if (endpoints.length > 0) {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE endpoint IN ('${endpoints.join(
-                            "','",
-                        )}') AND CONCAT(endpoint, id) >= ? AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;`,
-                    );
-                } else {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) >= ? AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;`,
-                    );
-                }
+                sql = this.db.prepare(
+                    `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) >= ? AND (${generator.generate(
+                        params,
+                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
+                );
             }
         } else {
             if (endpoints.length > 0) {
@@ -750,42 +717,26 @@ export class SqliteIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        query?: AASIndexQuery,
+        generator?: ConditionGenerator,
     ): AASPagedResult {
         let sql: StatementSync;
         const params: SQLInputValue[] = [current.endpoint + current.id];
 
-        if (query) {
-            if (query.joinElements) {
-                if (endpoints.length > 0) {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('${endpoints.join(
-                            "','",
-                        )}') AND CONCAT(documents.endpoint, documents.id) < ? AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
-                    );
-                } else {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) < ? AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
-                    );
-                }
+        if (generator) {
+            if (endpoints.length > 0) {
+                sql = this.db.prepare(
+                    `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') AND CONCAT(documents.endpoint, documents.id) < ? AND (${generator.generate(
+                        params,
+                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
+                );
             } else {
-                if (endpoints.length > 0) {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE endpoint IN ('${endpoints.join("','")}') AND CONCAT(endpoint, id) < ? AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
-                    );
-                } else {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) < ? AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
-                    );
-                }
+                sql = this.db.prepare(
+                    `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) < ? AND (${generator.generate(
+                        params,
+                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
+                );
             }
         } else {
             if (endpoints.length > 0) {
@@ -812,40 +763,24 @@ export class SqliteIndex implements AASIndex {
         };
     }
 
-    private getLastPage(limit: number, endpoints: string[], query?: AASIndexQuery): AASPagedResult {
+    private getLastPage(limit: number, endpoints: string[], generator?: ConditionGenerator): AASPagedResult {
         let sql: StatementSync;
         const params: SQLInputValue[] = [];
-        if (query) {
-            if (query.joinElements) {
-                if (endpoints.length > 0) {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('${endpoints.join(
-                            "','",
-                        )}') AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
-                    );
-                } else {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ${query.createSql(
-                            params,
-                        )} ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
-                    );
-                }
+        if (generator) {
+            if (endpoints.length > 0) {
+                sql = this.db.prepare(
+                    `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') AND (${generator.generate(
+                        params,
+                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
+                );
             } else {
-                if (endpoints.length > 0) {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE endpoint IN ('${endpoints.join("','")}') AND (${query.createSql(
-                            params,
-                        )}) ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
-                    );
-                } else {
-                    sql = this.db.prepare(
-                        `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ${query.createSql(
-                            params,
-                        )} ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
-                    );
-                }
+                sql = this.db.prepare(
+                    `SELECT DISTINCT documents.* FROM documents INNER JOIN elements ON documents.uuid = elements.uuid WHERE ${generator.generate(
+                        params,
+                    )} ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
+                );
             }
         } else {
             if (endpoints.length > 0) {
