@@ -190,7 +190,7 @@ export class FilterExpressionParser {
                 });
             }
 
-            const text = this.expression.substring(this.currentPosition + 1, i);
+            const text = this.expression.substring(this.currentPosition, i + 1);
             this.currentPosition = i + 1;
             return text;
         }

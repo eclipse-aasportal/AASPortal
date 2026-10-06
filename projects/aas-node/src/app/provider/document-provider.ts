@@ -184,12 +184,14 @@ export class DocumentProvider {
                 const extension = dataElement.value ? path.extname(dataElement.value).toLowerCase() : '';
                 const imageOptions = options as { width?: number; height?: number };
                 if (dataElement.contentType.startsWith('image/')) {
-                    if (imageOptions?.width || imageOptions?.height) {
-                        stream = await ImageProcessing.resizeAsync(stream, imageOptions.width, imageOptions.height);
+                    if (imageOptions?.height) {
+                        stream = await ImageProcessing.resize(stream, { h: imageOptions.height });
+                    } else if (imageOptions?.width) {
+                        stream = await ImageProcessing.resize(stream, { w: imageOptions.width });
                     }
 
                     if (extension === '.tiff' || extension === '.tif') {
-                        stream = await ImageProcessing.convertAsync(stream);
+                        stream = await ImageProcessing.convert(stream);
                     }
                 }
             } else if (isBlob(dataElement)) {

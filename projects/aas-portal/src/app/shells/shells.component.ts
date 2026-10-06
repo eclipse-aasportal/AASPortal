@@ -211,7 +211,15 @@ export class ShellsComponent implements OnDestroy {
      */
     public readonly invalidFilter = this._invalidFilter.asReadonly();
 
+    /**
+     * The list of available AAS endpoints.
+     */
     public readonly endpoints = this.state.endpoints;
+
+    /**
+     * Indicates whether at least one endpoint is currently checked.
+     */
+    public readonly someEndpointsChecked = this.state.someEndpointsChecked;
 
     public ngOnDestroy(): void {
         this.toolbar.clear();

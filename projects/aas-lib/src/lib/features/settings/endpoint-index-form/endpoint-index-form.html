@@ -7,7 +7,7 @@
  !---------------------------------------------------------------------------->
 
 <form (submit)="submit($event)" class="modal-content">
-    <div class="modal-header text-secondary">
+    <div class="modal-header text-info">
         <h4 class="modal-title">
             <i class="bi bi-gear"></i>
             <span class="ms-2" translate="EndpointIndexForm.CAPTION"></span>
@@ -96,7 +96,7 @@
             container="body"
             (click)="clearIndex()"
         >
-            <i class="bi bi-trash3"></i>
+            <i class="bi bi-eraser-fill"></i>
             <span class="fw-light" style="font-size: 15px">Clear Entire Index</span>
         </button>
         <button type="submit" class="btn btn-sm border rounded-2 px-4" translate="EndpointIndexForm.CLOSE"></button>

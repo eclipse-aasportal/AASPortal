@@ -9,7 +9,7 @@
 <div id="shells-container" class="container-fluid h-100 w-100 px-2 overflow-auto">
     <fhg-aas-table
         [documents]="documents()"
-        [selected]="selected()" 
+        [selected]="selected()"
         (selectedChange)="setSelected($event)"
         [expression]="filter()"
     ></fhg-aas-table>
@@ -63,19 +63,7 @@
                 </select>
             </div>
 
-            <div class="btn-group d-none d-md-flex">
-                <button
-                    class="btn btn-outline-primary my-1"
-                    type="button"
-                    (click)="addToStart().subscribe()"
-                    [disabled]="someSelected() === false"
-                    ngbTooltip="{{ 'Shells.ADD_TO_START_TOOLTIP' | translate }}"
-                    placement="bottom"
-                    [openDelay]="300"
-                    [closeDelay]="500"
-                >
-                    <i class="bi bi-house-add"></i>
-                </button>
+            <div class="d-none d-md-flex">
                 <button
                     class="btn btn-outline-primary my-1"
                     type="button"
@@ -112,7 +100,7 @@
         </div>
     </div>
 
-    <div [hidden]="someSelected() === false" class="hidden-selected-bar">
+    <div [hidden]="someSelected() === false" class="fhg-hidden-selected-bar">
         <div
             class="d-flex flex-row align-items-center px-3 bg-secondary-subtle me-2 my-1 border border-black border-opacity-25 rounded-3"
         >
@@ -154,6 +142,18 @@
             >
                 <i class="bi bi-trash"></i>
             </button>
+            <button
+                class="btn text-primary bg-primary-subtle ms-2"
+                type="button"
+                (click)="addToStart().subscribe()"
+                [disabled]="someSelected() === false"
+                ngbTooltip="{{ 'Shells.ADD_TO_START_TOOLTIP' | translate }}"
+                placement="bottom"
+                [openDelay]="300"
+                [closeDelay]="500"
+            >
+                <i class="bi bi-house-add"></i>
+            </button>
         </div>
     </div>
 </ng-template>
@@ -169,7 +169,12 @@
             [openDelay]="300"
             [closeDelay]="500"
         >
-            <i class="bi bi-search"></i>
+            @if (someEndpointsChecked()) {
+                <i class="bi bi-filter"></i>
+                <i class="bi bi-check"></i>
+            } @else {
+                <i class="bi bi-filter"></i>
+            }
         </button>
         <div class="dropdown-menu" ngbDropdownMenu>
             @for (endpoint of endpoints(); track endpoint.name) {

@@ -12,10 +12,6 @@ import {
     AASDocument,
     aas,
     FilterExpressionParser,
-    OrExpression,
-    AASQuery,
-    AASQueryValueType,
-    AASQueryOperator,
     BaseValueType,
     isProperty,
     parseNumber,
@@ -26,6 +22,10 @@ import {
     getModelTypeFromAbbreviation,
     AASAbbreviation,
     normalize,
+    OrCondition,
+    ModelTypeCondition,
+    ConditionValueType,
+    ConditionOperator,
 } from 'aas-core';
 
 export type ElementValueType = 'string' | 'boolean' | 'number' | 'Date' | 'bigint';
@@ -48,7 +48,7 @@ export class AASTableFilter {
                 return false;
             }
 
-            return this.evaluate(this.queryParser.ast, document, [...this.traverseEnvironment(env)]);
+            return this.evaluate(this.queryParser.clause, document, [...this.traverseEnvironment(env)]);
         } catch {
             return false;
         }
@@ -66,10 +66,10 @@ export class AASTableFilter {
         }
     }
 
-    private evaluate(expression: OrExpression[], document: AASDocument, elements: aas.Referable[]): boolean {
+    private evaluate(conditions: OrCondition[], document: AASDocument, elements: aas.Referable[]): boolean {
         let result = false;
-        for (const or of expression) {
-            for (const and of or.andExpressions) {
+        for (const or of conditions) {
+            for (const and of or.andConditions) {
                 if (this.isText(and)) {
                     result = this.contains(document, and);
                 } else if (this.isExpression(and)) {
@@ -95,7 +95,7 @@ export class AASTableFilter {
         return typeof value === 'string';
     }
 
-    private isExpression(value: unknown): value is OrExpression[] {
+    private isExpression(value: unknown): value is OrCondition[] {
         return Array.isArray(value);
     }
 
@@ -109,9 +109,9 @@ export class AASTableFilter {
         );
     }
 
-    private matchElements(elements: aas.Referable[], query: AASQuery | undefined): boolean {
-        if (query) {
-            if (elements.some(element => this.any(element, query))) {
+    private matchElements(elements: aas.Referable[], condition: ModelTypeCondition | undefined): boolean {
+        if (condition) {
+            if (elements.some(element => this.any(element, condition))) {
                 return true;
             }
         }
@@ -119,14 +119,14 @@ export class AASTableFilter {
         return false;
     }
 
-    private any(element: aas.Referable, query: AASQuery): boolean {
-        if (element.modelType === getModelTypeFromAbbreviation(query.modelType as AASAbbreviation)) {
-            if (this.containsString(element.idShort, query.name)) {
-                if (!element || !query.value) {
+    private any(element: aas.Referable, condition: ModelTypeCondition): boolean {
+        if (element.modelType === getModelTypeFromAbbreviation(condition.modelType as AASAbbreviation)) {
+            if (this.containsString(element.idShort, condition.name)) {
+                if (!element || !condition.value) {
                     return true;
                 }
 
-                if (this.matchElement(element, query.value, query.operator)) {
+                if (this.matchElement(element, condition.value, condition.operator)) {
                     return true;
                 }
             }
@@ -135,7 +135,7 @@ export class AASTableFilter {
         return false;
     }
 
-    private matchElement(element: aas.Referable, value: AASQueryValueType, operator?: AASQueryOperator): boolean {
+    private matchElement(element: aas.Referable, value: ConditionValueType, operator?: ConditionOperator): boolean {
         switch (element.modelType) {
             case 'Property':
                 return this.matchProperty(element, value, operator);
@@ -151,7 +151,7 @@ export class AASTableFilter {
         }
     }
 
-    private matchProperty(element: aas.Referable, b: AASQueryValueType, operator: AASQueryOperator = '='): boolean {
+    private matchProperty(element: aas.Referable, b: ConditionValueType, operator: ConditionOperator = '='): boolean {
         const { value, valueType } = this.getValueType(element);
         if (!value || !valueType) {
             return false;
@@ -185,7 +185,7 @@ export class AASTableFilter {
         return b == null || a.toLowerCase().indexOf(b.toLowerCase()) >= 0;
     }
 
-    private matchNumber(a: number, b: AASQueryValueType, operator: AASQueryOperator): boolean {
+    private matchNumber(a: number, b: ConditionValueType, operator: ConditionOperator): boolean {
         if (typeof b === 'number') {
             switch (operator) {
                 case '<':
@@ -210,7 +210,7 @@ export class AASTableFilter {
         return false;
     }
 
-    private matchBigInt(a: bigint, b: AASQueryValueType, operator: AASQueryOperator): boolean {
+    private matchBigInt(a: bigint, b: ConditionValueType, operator: ConditionOperator): boolean {
         if (typeof b === 'bigint') {
             switch (operator) {
                 case '<':
@@ -235,7 +235,7 @@ export class AASTableFilter {
         return false;
     }
 
-    private matchDate(a: Date, b: AASQueryValueType, operator: AASQueryOperator): boolean {
+    private matchDate(a: Date, b: ConditionValueType, operator: ConditionOperator): boolean {
         if (b instanceof Date) {
             switch (operator) {
                 case '<':

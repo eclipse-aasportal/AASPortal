@@ -37,7 +37,8 @@ import { Variable } from '../../variable.js';
 import { DocumentCount, MySqlDocument, MySqlEndpoint, MySqlConceptDescriptionIds } from './mysql-types.js';
 import { urlToString } from '../../utilities.js';
 import { ERRORS } from '../../errors.js';
-import { ConditionGenerator, SqlIndexQuery } from '../condition-generator.js';
+import { ConditionGenerator } from '../condition-generator.js';
+import { SqlConditionGenerator } from '../sql-condition-generator.js';
 
 const LIMIT = 100;
 
@@ -203,7 +204,7 @@ export class MySqlIndex implements AASIndex {
     ): Promise<AASPagedResult> {
         let query: ConditionGenerator | undefined;
         if (expression) {
-            query = new SqlIndexQuery(expression, language ?? 'en');
+            query = new SqlConditionGenerator(expression, language ?? 'en');
         }
 
         const connection = await this.getConnection();
@@ -531,34 +532,18 @@ export class MySqlIndex implements AASIndex {
         let sql: string;
         const values: unknown[] = [];
         if (query) {
-            if (query.joinElements) {
-                if (endpoints.length > 0) {
-                    sql =
-                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
-                        endpoints.join("','") +
-                        "') AND (" +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
-                } else {
-                    sql =
-                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
-                        query.generate(values) +
-                        ' ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
-                }
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND (" +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
             } else {
-                if (endpoints.length > 0) {
-                    sql =
-                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
-                        endpoints.join("','") +
-                        "') AND (" +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
-                } else {
-                    sql =
-                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
-                        query.generate(values) +
-                        ' ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
-                }
+                sql =
+                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
+                    query.generate(values) +
+                    ' ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
             }
         } else {
             if (endpoints.length > 0) {
@@ -593,34 +578,18 @@ export class MySqlIndex implements AASIndex {
         const values: unknown[] = [current.endpoint + current.id];
 
         if (query) {
-            if (query.joinElements) {
-                if (endpoints.length > 0) {
-                    sql =
-                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
-                        endpoints.join("','") +
-                        "') AND CONCAT(documents.endpoint, documents.id) >= ? AND (" +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
-                } else {
-                    sql =
-                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) >= ? AND (' +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
-                }
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND CONCAT(documents.endpoint, documents.id) >= ? AND (" +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
             } else {
-                if (endpoints.length > 0) {
-                    sql =
-                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
-                        endpoints.join("','") +
-                        "') AND CONCAT(endpoint, id) >= ? AND (" +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
-                } else {
-                    sql =
-                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) >= ? AND (' +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
-                }
+                sql =
+                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) >= ? AND (' +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
             }
         } else {
             if (endpoints.length > 0) {
@@ -656,34 +625,18 @@ export class MySqlIndex implements AASIndex {
         const values: unknown[] = [current.endpoint + current.id];
 
         if (query) {
-            if (query.joinElements) {
-                if (endpoints.length > 0) {
-                    sql =
-                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
-                        endpoints.join("','") +
-                        "') AND CONCAT(documents.endpoint, documents.id) < ? AND (" +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
-                } else {
-                    sql =
-                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) < ? AND (' +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
-                }
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND CONCAT(documents.endpoint, documents.id) < ? AND (" +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
             } else {
-                if (endpoints.length > 0) {
-                    sql =
-                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
-                        endpoints.join("','") +
-                        "') AND CONCAT(endpoint, id) < ? AND (" +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
-                } else {
-                    sql =
-                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(endpoint, id) < ? AND (' +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
-                }
+                sql =
+                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) < ? AND (' +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
             }
         } else {
             if (endpoints.length > 0) {
@@ -717,34 +670,18 @@ export class MySqlIndex implements AASIndex {
         let sql: string;
         const values: unknown[] = [];
         if (query) {
-            if (query.joinElements) {
-                if (endpoints.length > 0) {
-                    sql =
-                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
-                        endpoints.join("','") +
-                        "') AND (" +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
-                } else {
-                    sql =
-                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
-                        query.generate(values) +
-                        ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
-                }
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND (" +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
             } else {
-                if (endpoints.length > 0) {
-                    sql =
-                        "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE endpoint IN ('" +
-                        endpoints.join("','") +
-                        "') AND (" +
-                        query.generate(values) +
-                        ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
-                } else {
-                    sql =
-                        'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
-                        query.generate(values) +
-                        ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
-                }
+                sql =
+                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
+                    query.generate(values) +
+                    ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
             }
         } else {
             if (endpoints.length > 0) {
@@ -844,11 +781,7 @@ export class MySqlIndex implements AASIndex {
 
     private toStringValue(referable: aas.Referable): string | undefined {
         if (isProperty(referable)) {
-            if (baseType(referable.valueType) === 'string') {
-                return referable.value;
-            }
-
-            return undefined;
+            return referable.value;
         }
 
         if (isMultiLanguageProperty(referable)) {

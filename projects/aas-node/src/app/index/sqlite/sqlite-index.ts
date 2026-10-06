@@ -6,6 +6,7 @@
  *
  *****************************************************************************/
 
+import { container, singleton } from 'tsyringe';
 import { DatabaseSync, SQLInputValue, SQLOutputValue, StatementSync } from 'node:sqlite';
 import { nanoid } from 'nanoid';
 import { LOGGER } from 'aas-package';
@@ -34,7 +35,6 @@ import {
 
 import { AASIndex, toAbbreviation, toDocumentId } from '../aas-index.js';
 import { ERRORS } from '../../errors.js';
-import { container, singleton } from 'tsyringe';
 import { Variable } from '../../variable.js';
 import { SqliteConnectionProvider } from '../../sqlite-connection-provider.js';
 import { ConditionGenerator } from '../condition-generator.js';
@@ -189,7 +189,7 @@ export class SqliteIndex implements AASIndex {
             }
 
             try {
-                return new RegExp(pattern).test(value) ? 1 : 0;
+                return new RegExp(pattern, 'i').test(value) ? 1 : 0;
             } catch {
                 return 0;
             }
@@ -852,11 +852,7 @@ export class SqliteIndex implements AASIndex {
 
     private toStringValue(referable: aas.Referable): string | null {
         if (isProperty(referable)) {
-            if (baseType(referable.valueType) === 'string') {
-                return referable.value ?? null;
-            }
-
-            return null;
+            return referable.value ?? null;
         }
 
         if (isMultiLanguageProperty(referable)) {

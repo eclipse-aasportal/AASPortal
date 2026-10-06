@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { Jimp } from 'jimp';
+import { Jimp, ResizeStrategy } from 'jimp';
 import { Duplex } from 'stream';
 
 export class ImageProcessing {
@@ -17,10 +17,9 @@ export class ImageProcessing {
      * @param height The new height of the image.
      * @returns The resized image.
      */
-    public static async resizeAsync(
+    public static async resize(
         source: NodeJS.ReadableStream,
-        width: number | undefined,
-        height: number | undefined,
+        options: { w: number; h?: number } | { w?: number; h: number },
     ): Promise<NodeJS.ReadableStream> {
         const buffer: Buffer = await new Promise((resolve, reject) => {
             const buffers: Uint8Array[] = [];
@@ -40,9 +39,8 @@ export class ImageProcessing {
         });
 
         const image = await Jimp.fromBuffer(buffer);
-        await image.resize({ w: width !== undefined ? width : 0, h: height !== undefined ? height : 0 });
+        await image.resize({ ...options, mode: ResizeStrategy.BICUBIC });
         const outBuffer = await image.getBuffer('image/png');
-
         const stream = new Duplex();
         stream.push(outBuffer);
         stream.push(null);
@@ -54,7 +52,7 @@ export class ImageProcessing {
      * @param source The source image.
      * @returns The converted image.
      */
-    public static async convertAsync(source: NodeJS.ReadableStream): Promise<NodeJS.ReadableStream> {
+    public static async convert(source: NodeJS.ReadableStream): Promise<NodeJS.ReadableStream> {
         const buffer: Buffer = await new Promise((resolve, reject) => {
             const buffers: Uint8Array[] = [];
             source.on('data', function (buffer: Uint8Array) {

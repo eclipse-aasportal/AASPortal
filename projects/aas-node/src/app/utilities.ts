@@ -48,7 +48,7 @@ export async function thumbnailToObjectUrl(readable: NodeJS.ReadableStream | und
             return undefined;
         }
 
-        const output = await ImageProcessing.resizeAsync(readable, 40, 40);
+        const output = await ImageProcessing.resize(readable, { h: 40 });
         return await streamToObjectUrl(output);
     } catch {
         return undefined;

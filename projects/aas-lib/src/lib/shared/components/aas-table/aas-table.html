@@ -86,10 +86,7 @@
                                 }
                                 @default {
                                     <div>
-                                        <img
-                                            class="object-fit-contain"
-                                            width="30"
-                                            height="30"
+                                        <img class="img-fluid"
                                             [src]="item.thumbnail"
                                             [alt]="item.name"
                                             (error)="item.thumbnail = '/assets/resources/aas-idta.png'"

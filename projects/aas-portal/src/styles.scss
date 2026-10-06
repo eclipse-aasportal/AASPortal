@@ -129,6 +129,14 @@ th[sortable].desc:before {
     width: 1rem;
 }
 
+// shows a fixed toolbar at the bottom (used for selected elements).
+.fhg-hidden-selected-bar {
+    position:fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 // --bs-primary (and its -rgb companion) is a "raw" theme color — Bootstrap generates it once on
 // :root from $theme-colors and never redefines it under [data-bs-theme="dark"] (only its derived
 // -bg-subtle/-text-emphasis/-border-subtle variants get a dark value, and even those are just a

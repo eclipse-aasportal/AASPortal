@@ -151,6 +151,11 @@ export class ShellsState {
     public readonly endpoints = this.endpoints$.asReadonly();
 
     /**
+     * Indicates whether at least one endpoint is currently checked.
+     */
+    public readonly someEndpointsChecked = computed(() => this.endpoints().some(endpoint => endpoint.checked));
+
+    /**
      * Indicates whether the pagination is currently on the first page.
      */
     public readonly isFirstPage = computed(() => !this.resource.hasValue() || this.resource.value().previous === null);
