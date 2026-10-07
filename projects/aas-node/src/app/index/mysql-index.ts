@@ -1,0 +1,927 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { nanoid } from 'nanoid';
+import mysql, { RowDataPacket } from 'mysql2/promise';
+import { LOGGER } from 'aas-package';
+import { container, singleton } from 'tsyringe';
+import {
+    AASEndpoint,
+    AASCursor,
+    AASDocument,
+    flat,
+    aas,
+    AASDocumentId,
+    isIdentifiable,
+    AASPagedResult,
+    PagedResult,
+    isProperty,
+    baseType,
+    toBoolean,
+    isValidDate,
+    parseDate,
+    parseNumber,
+    ApplicationError,
+    isMultiLanguageProperty,
+    isFile,
+    isBlob,
+    AASEndpointType,
+} from 'aas-core';
+
+import { AASIndex, toAbbreviation, toDocumentId } from './aas-index.js';
+import { Variable } from '../variable.js';
+import { urlToString } from '../utilities.js';
+import { ERRORS } from '../errors.js';
+import { ConditionGenerator } from './condition-generator.js';
+import { SqlConditionGenerator } from './sql-condition-generator.js';
+
+const LIMIT = 100;
+
+export interface MySqlEndpoint extends RowDataPacket {
+    name: string;
+    url: string;
+    type: AASEndpointType;
+    version: string | null;
+    headers: string | null;
+    schedule: string | null;
+}
+
+export interface MySqlDocument extends RowDataPacket {
+    uuid: string;
+    address: string;
+    idShort: string;
+    assetId: string | null;
+    thumbnail: string | null;
+    timestamp: number;
+}
+
+export interface MySqlConceptDescriptionIds extends RowDataPacket {
+    conceptDescriptionIds: string;
+}
+
+export interface MySqlElement extends RowDataPacket {
+    uuid: string;
+    modelType: string;
+    id?: string;
+    idShort: string;
+    stringValue?: string;
+    numberValue?: number;
+    dateValue?: Date;
+    booleanValue?: boolean;
+}
+
+export interface DocumentCount extends RowDataPacket {
+    'COUNT(*)': number;
+}
+
+@singleton()
+export class MySqlIndex implements AASIndex {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly variable = container.resolve(Variable);
+    private pool?: mysql.Pool;
+
+    public async dispose(): Promise<void> {
+        await this.pool?.end();
+    }
+
+    public async getDocumentCount(endpoint?: string): Promise<number> {
+        const connection = await this.getConnection();
+        try {
+            if (endpoint === undefined) {
+                const [results] = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `documents`;');
+                return results[0]['COUNT(*)'];
+            }
+
+            const [results] = await connection.query<DocumentCount[]>(
+                'SELECT COUNT(*) FROM `documents` WHERE endpoint = ?;',
+                [endpoint],
+            );
+
+            return results[0]['COUNT(*)'];
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async getEndpointCount(): Promise<number> {
+        const connection = await this.getConnection();
+        try {
+            const [results] = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `endpoints` AS count;');
+            return results[0]['COUNT(*)'];
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async getEndpoints(): Promise<AASEndpoint[]> {
+        const connection = await this.getConnection();
+        try {
+            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints`;');
+            return results.map(row => this.toEndpoint(row));
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async getEndpoint(name: string): Promise<AASEndpoint> {
+        const connection = await this.getConnection();
+        try {
+            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
+                name,
+            ]);
+
+            if (results.length === 0) {
+                throw new Error(`An endpoint with the name "${name}" does not exist.`);
+            }
+
+            return this.toEndpoint(results[0]);
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async findEndpoint(name: string): Promise<AASEndpoint | undefined> {
+        const connection = await this.getConnection();
+        try {
+            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
+                name,
+            ]);
+
+            if (results.length === 0) {
+                return undefined;
+            }
+
+            return this.toEndpoint(results[0]);
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async insertEndpoint(endpoint: AASEndpoint): Promise<void> {
+        const connection = await this.getConnection();
+        try {
+            await connection.query<mysql.ResultSetHeader>(
+                'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
+                [
+                    endpoint.name,
+                    endpoint.url,
+                    endpoint.type,
+                    endpoint.version,
+                    endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
+                    endpoint.schedule ? JSON.stringify(endpoint.schedule) : undefined,
+                ],
+            );
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
+        const connection = await this.getConnection();
+        try {
+            await connection.beginTransaction();
+            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
+                endpoint.name,
+            ]);
+
+            if (results.length === 0) {
+                throw new Error(`An endpoint with the name "${endpoint.name}" does not exist.`);
+            }
+
+            await connection.query<mysql.ResultSetHeader>(
+                'UPDATE `endpoints` SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
+                [
+                    endpoint.url,
+                    endpoint.type,
+                    endpoint.version,
+                    endpoint.headers ? JSON.stringify(endpoint.headers) : undefined,
+                    endpoint.schedule ? JSON.stringify(endpoint.schedule) : undefined,
+                    endpoint.name,
+                ],
+            );
+            await connection.commit();
+            return this.toEndpoint(results[0]);
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async deleteEndpoint(endpointName: string): Promise<boolean> {
+        const connection = await this.getConnection();
+        try {
+            await connection.beginTransaction();
+            const [results] = await connection.query<mysql.ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?;', [
+                endpointName,
+            ]);
+
+            await this.deleteDocuments(connection, endpointName);
+            await connection.commit();
+            return results.affectedRows > 0;
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async getDocuments(
+        cursor: AASCursor,
+        endpoints: string[] = [],
+        expression?: string,
+        language?: string,
+    ): Promise<AASPagedResult> {
+        let query: ConditionGenerator | undefined;
+        if (expression) {
+            query = new SqlConditionGenerator(expression, language ?? 'en');
+        }
+
+        const connection = await this.getConnection();
+        try {
+            if (cursor.next) {
+                return this.getNextPage(connection, cursor.next, cursor.limit, endpoints, query);
+            }
+
+            if (cursor.previous) {
+                return this.getPreviousPage(connection, cursor.previous, cursor.limit, endpoints, query);
+            }
+
+            if (cursor.previous === null) {
+                return this.getFirstPage(connection, cursor.limit, endpoints, query);
+            }
+
+            return this.getLastPage(connection, cursor.limit, endpoints, query);
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async getEndpointDocuments(
+        endpoint: string,
+        cursor: string | undefined,
+        limit: number = LIMIT,
+    ): Promise<PagedResult<AASDocument>> {
+        let sql: string;
+        const values: unknown[] = [endpoint];
+        if (cursor) {
+            values.push(cursor);
+            sql = 'SELECT * FROM `documents` WHERE endpoint = ? AND id >= ? ORDER BY id ASC LIMIT ?;';
+        } else {
+            sql = 'SELECT * FROM `documents` WHERE endpoint = ? ORDER BY id ASC LIMIT ?;';
+        }
+
+        values.push(limit + 1);
+        const connection = await this.getConnection();
+        try {
+            const [results] = await connection.query<MySqlDocument[]>(sql, values);
+            const documents = results.map(result => this.toDocument(result));
+            return {
+                result: documents.slice(0, limit),
+                paging_metadata: {
+                    cursor: documents.length >= limit + 1 ? documents[limit].id : undefined,
+                },
+            };
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async update(document: AASDocument): Promise<void> {
+        const connection = await this.getConnection();
+        try {
+            await connection.beginTransaction();
+            const [results] = await connection.query<MySqlDocument[]>(
+                'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;',
+                [document.endpoint, document.id],
+            );
+
+            if (results.length === 0) {
+                await connection.commit();
+                return;
+            }
+
+            const uuid = results[0].uuid;
+            await connection.query<mysql.ResultSetHeader>(
+                'UPDATE `documents` SET address = ?, idShort = ?, assetId = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
+                [
+                    document.address,
+                    document.idShort,
+                    document.assetId ?? null,
+                    document.timestamp,
+                    document.thumbnail ?? null,
+                    uuid,
+                ],
+            );
+
+            if (document.content && document.content.submodels) {
+                await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
+                await this.traverseEnvironment(connection, uuid, document.content);
+            }
+
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async insert(document: AASDocument): Promise<void> {
+        const connection = await this.getConnection();
+        try {
+            await connection.beginTransaction();
+            const uuid = nanoid();
+            await connection.query<mysql.ResultSetHeader>(
+                'INSERT INTO `documents` (uuid, address, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
+                [
+                    uuid,
+                    document.address,
+                    document.endpoint,
+                    document.id,
+                    document.idShort,
+                    document.assetId ?? null,
+                    document.thumbnail ?? null,
+                    BigInt(Math.floor(document.timestamp)),
+                ],
+            );
+
+            if (document.content) {
+                await this.traverseEnvironment(connection, uuid, document.content);
+            }
+
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async find(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument | undefined> {
+        const connection = await this.getConnection();
+        try {
+            const document = endpoint
+                ? await this.selectEndpointDocument(connection, endpoint, modelType, id)
+                : await this.selectDocument(connection, modelType, id);
+
+            if (!document) {
+                return undefined;
+            }
+
+            return this.toDocument(document);
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async get(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument> {
+        const document = await this.find(endpoint, modelType, id);
+        if (!document) {
+            throw new ApplicationError(ERRORS.AAS_NOT_FOUND, { modelType, id }, 404);
+        }
+
+        return document;
+    }
+
+    public async delete(endpointName: string, id: string): Promise<boolean> {
+        const connection = await this.getConnection();
+        try {
+            await connection.beginTransaction();
+            const uuid = await this.getUuid(connection, endpointName, id);
+            if (!uuid) {
+                await connection.commit();
+                return false;
+            }
+
+            await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
+            await connection.query<mysql.ResultSetHeader>('DELETE FROM `documents` WHERE uuid = ?;', [uuid]);
+            await connection.commit();
+            return true;
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async create(endpoint: string, id: string, env: aas.Environment): Promise<void> {
+        const connection = await this.getConnection();
+        try {
+            await connection.beginTransaction();
+            const uuid = await this.getUuid(connection, endpoint, id);
+            if (uuid) {
+                await this.traverseEnvironment(connection, uuid, env);
+            }
+
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async clear(endpoint?: string, id?: string): Promise<void> {
+        const connection = await this.getConnection();
+        try {
+            await connection.beginTransaction();
+            if (endpoint === undefined) {
+                await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements`;');
+                await connection.query<mysql.ResultSetHeader>('DELETE FROM `documents`;');
+                await connection.query<mysql.ResultSetHeader>('DELETE FROM `submodelConceptDescriptions`;');
+            } else if (id) {
+                const uuid = await this.getUuid(connection, endpoint, id);
+                if (uuid) {
+                    await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
+                }
+            } else {
+                await this.deleteDocuments(connection, endpoint);
+            }
+
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]> {
+        const connection = await this.getConnection();
+        try {
+            const [results] = await connection.query<MySqlConceptDescriptionIds[]>(
+                'SELECT conceptDescriptionIds FROM `submodelConceptDescriptions` WHERE endpoint = ? AND id = ?;',
+                [endpoint, id],
+            );
+
+            if (results.length === 0) {
+                return [];
+            }
+
+            return JSON.parse(results[0].conceptDescriptionIds) as string[];
+        } finally {
+            connection.release();
+        }
+    }
+
+    public async setSubmodelConceptDescriptionIds(
+        endpoint: string,
+        id: string,
+        conceptDescriptionIds: string[],
+    ): Promise<void> {
+        const connection = await this.getConnection();
+        try {
+            const [results] = await connection.query<MySqlConceptDescriptionIds[]>(
+                'SELECT id FROM `submodelConceptDescriptions` WHERE endpoint = ? AND id = ?;',
+                [endpoint, id],
+            );
+
+            if (results.length === 0) {
+                await connection.query<mysql.ResultSetHeader>(
+                    'INSERT INTO `submodelConceptDescriptions` (endpoint, id, conceptDescriptionIds) VALUES (?, ?, ?);',
+                    [endpoint, id, JSON.stringify(conceptDescriptionIds)],
+                );
+            } else {
+                await connection.query<mysql.ResultSetHeader>(
+                    'UPDATE `submodelConceptDescriptions` SET conceptDescriptionIds = ? WHERE endpoint = ? AND id = ?;',
+                    [JSON.stringify(conceptDescriptionIds), endpoint, id],
+                );
+            }
+        } finally {
+            connection.release();
+        }
+    }
+
+    private async getConnection(): Promise<mysql.PoolConnection> {
+        if (!this.pool) {
+            const url = new URL(this.variable.AAS_INDEX!);
+            const username = url.username;
+            const password = url.password;
+            this.pool = await mysql.createPool({
+                host: url.hostname,
+                port: Number(url.port),
+                database: 'aas-index',
+                user: username,
+                password: password,
+            });
+
+            this.logger.info(`AAS index connected to ${urlToString(this.variable.AAS_INDEX)}.`);
+        }
+
+        return await this.pool.getConnection();
+    }
+
+    private async deleteDocuments(connection: mysql.Connection, endpointName: string): Promise<void> {
+        const [results] = await connection.query<MySqlDocument[]>('SELECT uuid FROM `documents` WHERE endpoint = ?;', [
+            endpointName,
+        ]);
+
+        await connection.query<mysql.ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?;', [endpointName]);
+        await connection.query<mysql.ResultSetHeader>('DELETE FROM `submodelConceptDescriptions` WHERE endpoint = ?;', [
+            endpointName,
+        ]);
+
+        for (const document of results) {
+            await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [document.uuid]);
+        }
+    }
+
+    private async getUuid(connection: mysql.Connection, endpointName: string, id: string): Promise<string | undefined> {
+        const [results] = await connection.query<MySqlDocument[]>(
+            'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;',
+            [endpointName, id],
+        );
+
+        if (results.length === 0) {
+            return undefined;
+        }
+
+        return results[0].uuid;
+    }
+
+    private async getFirstPage(
+        connection: mysql.Connection,
+        limit: number,
+        endpoints: string[],
+        query?: ConditionGenerator,
+    ): Promise<AASPagedResult> {
+        let sql: string;
+        const values: unknown[] = [];
+        if (query) {
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND (" +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
+            } else {
+                sql =
+                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
+                    query.generate(values) +
+                    ' ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
+            }
+        } else {
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;";
+            } else {
+                sql = 'SELECT * FROM `documents` ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
+            }
+        }
+
+        values.push(limit + 1);
+        const [results] = await connection.query<MySqlDocument[]>(sql, values);
+        const documents = results.map(result => this.toDocument(result));
+
+        return {
+            previous: null,
+            documents: documents.slice(0, limit),
+            next: documents.length >= limit + 1 ? toDocumentId(documents[limit]) : null,
+        };
+    }
+
+    private async getNextPage(
+        connection: mysql.Connection,
+        current: AASDocumentId,
+        limit: number,
+        endpoints: string[],
+        query?: ConditionGenerator,
+    ): Promise<AASPagedResult> {
+        let sql: string;
+        const values: unknown[] = [current.endpoint + current.id];
+
+        if (query) {
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND CONCAT(documents.endpoint, documents.id) >= ? AND (" +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
+            } else {
+                sql =
+                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) >= ? AND (' +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
+            }
+        } else {
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND CONCAT(endpoint, id) >= ? ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;";
+            } else {
+                sql =
+                    'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
+            }
+        }
+
+        values.push(limit + 1);
+        const [results] = await connection.query<MySqlDocument[]>(sql, values);
+        const documents = results.map(result => this.toDocument(result));
+
+        return {
+            previous: current,
+            documents: documents.slice(0, limit),
+            next: documents.length >= limit + 1 ? toDocumentId(documents[limit]) : null,
+        };
+    }
+
+    private async getPreviousPage(
+        connection: mysql.Connection,
+        current: AASDocumentId,
+        limit: number,
+        endpoints: string[],
+        query?: ConditionGenerator,
+    ): Promise<AASPagedResult> {
+        let sql: string;
+        const values: unknown[] = [current.endpoint + current.id];
+
+        if (query) {
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND CONCAT(documents.endpoint, documents.id) < ? AND (" +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
+            } else {
+                sql =
+                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE CONCAT(documents.endpoint, documents.id) < ? AND (' +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
+            }
+        } else {
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND CONCAT(endpoint, id) < ? ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;";
+            } else {
+                sql =
+                    'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) < ? ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
+            }
+        }
+
+        values.push(limit + 1);
+        const [results] = await connection.query<MySqlDocument[]>(sql, values);
+        const documents = results.map(result => this.toDocument(result));
+
+        return {
+            previous: documents.length >= limit + 1 ? toDocumentId(documents[limit - 1]) : null,
+            documents: documents.slice(0, limit).reverse(),
+            next: current,
+        };
+    }
+
+    private async getLastPage(
+        connection: mysql.Connection,
+        limit: number,
+        endpoints: string[],
+        query?: ConditionGenerator,
+    ): Promise<AASPagedResult> {
+        let sql: string;
+        const values: unknown[] = [];
+        if (query) {
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE documents.endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') AND (" +
+                    query.generate(values) +
+                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
+            } else {
+                sql =
+                    'SELECT DISTINCT documents.* FROM `documents` INNER JOIN `elements` ON documents.uuid = elements.uuid WHERE ' +
+                    query.generate(values) +
+                    ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
+            }
+        } else {
+            if (endpoints.length > 0) {
+                sql =
+                    "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                    endpoints.join("','") +
+                    "') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;";
+            } else {
+                sql = 'SELECT * FROM `documents` ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
+            }
+        }
+
+        values.push(limit + 1);
+        const [results] = await connection.query<MySqlDocument[]>(sql, values);
+        const documents = results.map(result => this.toDocument(result));
+
+        return {
+            previous: documents.length >= limit + 1 ? toDocumentId(documents[limit - 1]) : null,
+            documents: documents.slice(0, limit).reverse(),
+            next: null,
+        };
+    }
+
+    private async selectEndpointDocument(
+        connection: mysql.Connection,
+        endpoint: string,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<MySqlDocument | undefined> {
+        const [results] = await connection.query<MySqlDocument[]>(
+            modelType === 'AssetAdministrationShell'
+                ? 'SELECT * FROM `documents` WHERE endpoint = ? AND id = ?'
+                : 'SELECT * FROM `documents` WHERE endpoint = ? AND assetId = ?',
+            [endpoint, id],
+        );
+
+        if (results.length === 0) {
+            return undefined;
+        }
+
+        return results[0];
+    }
+
+    private async selectDocument(
+        connection: mysql.Connection,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<MySqlDocument | undefined> {
+        const [results] = await connection.query<MySqlDocument[]>(
+            modelType === 'AssetAdministrationShell'
+                ? 'SELECT * FROM `documents` WHERE id = ?'
+                : 'SELECT * FROM `documents` WHERE assetId = ?',
+            [id],
+        );
+
+        if (results.length === 0) {
+            return undefined;
+        }
+
+        return results[0];
+    }
+
+    private async traverseEnvironment(
+        connection: mysql.Connection,
+        documentId: string,
+        env: aas.Environment,
+    ): Promise<void> {
+        if (env.submodels === undefined) {
+            return;
+        }
+
+        for (const submodel of env.submodels) {
+            for (const referable of flat(submodel)) {
+                if (referable.idShort) {
+                    await this.writeElement(connection, documentId, referable);
+                }
+            }
+        }
+    }
+
+    private async writeElement(connection: mysql.Connection, uuid: string, referable: aas.Referable): Promise<void> {
+        await connection.query<mysql.ResultSetHeader>(
+            'INSERT INTO `elements` (uuid, modelType, id, idShort, stringValue, numberValue, dateValue, booleanValue, bigintValue) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
+            [
+                uuid,
+                toAbbreviation(referable),
+                isIdentifiable(referable) ? referable.id : undefined,
+                referable.idShort,
+                this.toStringValue(referable),
+                this.toNumberValue(referable),
+                this.toDateValue(referable),
+                this.toBooleanValue(referable),
+                this.toBigintValue(referable),
+            ],
+        );
+    }
+
+    private toStringValue(referable: aas.Referable): string | undefined {
+        if (isProperty(referable)) {
+            return referable.value;
+        }
+
+        if (isMultiLanguageProperty(referable)) {
+            if (!Array.isArray(referable.value) || referable.value.length === 0) {
+                return undefined;
+            }
+
+            return referable.value.map(item => item.text).join(' ');
+        }
+
+        if (isFile(referable)) {
+            return referable.value ?? referable.contentType;
+        }
+
+        if (isBlob(referable)) {
+            return referable.contentType;
+        }
+
+        return undefined;
+    }
+
+    private toNumberValue(referable: aas.Referable): number | undefined {
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'number') {
+            return undefined;
+        }
+
+        const value = parseNumber(referable.value);
+        if (Number.isNaN(value)) {
+            return undefined;
+        }
+
+        return value;
+    }
+
+    private toDateValue(referable: aas.Referable): Date | undefined {
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'Date') {
+            return undefined;
+        }
+
+        const value = parseDate(referable.value);
+        return isValidDate(value) ? value : undefined;
+    }
+
+    private toBooleanValue(referable: aas.Referable): boolean | undefined {
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'boolean') {
+            return undefined;
+        }
+
+        return toBoolean(referable.value);
+    }
+
+    private toBigintValue(referable: aas.Referable): bigint | undefined {
+        if (!isProperty(referable) || !referable.value || baseType(referable.valueType) !== 'bigint') {
+            return undefined;
+        }
+
+        try {
+            return BigInt(referable.value);
+        } catch {
+            return undefined;
+        }
+    }
+
+    private toEndpoint(result: MySqlEndpoint): AASEndpoint {
+        const endpoint: AASEndpoint = {
+            name: result.name,
+            url: result.url,
+            type: result.type,
+        };
+
+        if (result.version) {
+            endpoint.version = result.version;
+        }
+
+        if (result.headers) {
+            endpoint.headers = JSON.parse(result.headers);
+        }
+
+        if (result.schedule) {
+            endpoint.schedule = JSON.parse(result.schedule);
+        }
+
+        return endpoint;
+    }
+
+    private toDocument(result: MySqlDocument): AASDocument {
+        const document: AASDocument = {
+            address: result.address,
+            endpoint: result.endpoint,
+            id: result.id,
+            idShort: result.idShort,
+            timestamp: Number(result.timestamp),
+            content: null,
+        };
+
+        if (result.assetId) {
+            document.assetId = result.assetId;
+        }
+
+        if (result.thumbnail) {
+            document.thumbnail = result.thumbnail;
+        }
+
+        return document;
+    }
+}
