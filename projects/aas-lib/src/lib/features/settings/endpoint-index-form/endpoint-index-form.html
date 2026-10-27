@@ -25,7 +25,7 @@
                 <div class="endpoint-index-row">
                     <div class="flex-column align-items-start justify-content-center">
                         <div class="fw-medium">{{ item.name }}</div>
-                        <div class="text-start label">
+                        <div class="text-start text-body-secondary fs-7">
                             <span>{{ item.count }}</span>
                             <span class="ms-1">{{ 'EndpointIndexForm.SHELLS' | translate }}</span>
                         </div>
@@ -45,6 +45,8 @@
                                 <i class="bi bi-play-fill"></i>
                                 <span class="fw-light" style="font-size: 15px">Scan</span>
                             </button>
+                        } @else {
+                            <div></div>
                         }
                         <button
                             type="button"
@@ -65,7 +67,9 @@
                                 </div>
                             </div>
                         } @else {
-                            <ngb-progressbar class="" [showValue]="true" type="info" [value]="item.progress" />
+                            <div class="mx-3">
+                                <ngb-progressbar class="w-100" [showValue]="true" type="info" [value]="item.progress" />
+                            </div>
                         }
 
                         <button
