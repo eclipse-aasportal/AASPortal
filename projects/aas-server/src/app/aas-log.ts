@@ -7,9 +7,9 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { container } from 'tsyringe';
+import { container, instanceCachingFactory } from 'tsyringe';
 import { parentPort } from 'worker_threads';
-import { LOG_LEVEL, LOGGER, LoggerApp, LoggerFactory } from 'aas-package';
+import { ConsoleLogger, LOG_LEVEL, LOGGER, LoggerApp } from 'aas-package';
 import { Variable } from './variable.js';
 
 parentPort?.once('close', () => {
@@ -17,6 +17,6 @@ parentPort?.once('close', () => {
 });
 
 container.register(LOG_LEVEL, { useValue: container.resolve(Variable).LOG_LEVEL });
-container.register(LOGGER, { useFactory: c => c.resolve(LoggerFactory).getInstance() });
+container.register(LOGGER, { useFactory: instanceCachingFactory(c => c.resolve(ConsoleLogger)) });
 
 container.resolve(LoggerApp);

@@ -252,8 +252,7 @@ export class ShellsComponent implements OnDestroy {
     }
 
     /**
-     * Updates the state by setting the selected documents.
-     * @param documents - An array of AASDocument objects to be set as selected
+     * Clears the selection.
      */
     public emptySelected(): void {
         this.state.update({ selected: [] });

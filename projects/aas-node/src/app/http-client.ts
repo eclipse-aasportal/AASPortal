@@ -123,10 +123,15 @@ export class HttpClient {
     /**
      * Checks an endpoint with a HEAD request.
      * @param url Request URL.
-     * @param headers Request headers.
      * @param timeoutMs Request timeout in milliseconds.
      */
     public async checkUrlExist(url: string, timeoutMs?: number): Promise<void>;
+    /**
+     * Checks an endpoint with a HEAD request.
+     * @param url Request URL.
+     * @param headers Request headers.
+     * @param timeoutMs Request timeout in milliseconds.
+     */
     public async checkUrlExist(url: string, headers?: Record<string, string>, timeoutMs?: number): Promise<void>;
     public async checkUrlExist(
         url: string,
