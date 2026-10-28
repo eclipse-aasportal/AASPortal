@@ -144,7 +144,7 @@ describe('EndpointIndexForm', () => {
         vi.resetAllMocks();
     });
 
-    it.skip('should create', () => {
+    it('should create', () => {
         expect(component).toBeInstanceOf(EndpointIndexForm);
         expect(component.items()).toEqual(
             expect.arrayContaining([

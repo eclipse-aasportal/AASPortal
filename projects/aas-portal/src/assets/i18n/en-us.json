@@ -357,7 +357,7 @@
     "PromptDialog": {
         "CANCEL": "Cancel",
         "CAPTION": "Prompt",
-        "OK": "Clear Index"
+        "OK": "OK"
     },
     "FilterExpressionParser": {
         "ELEMENT_NAME_EXPECTED": "Submodel element name expected at position {{currentPosition}}.",
