@@ -45,9 +45,10 @@ export class TestDocumentHeader {
 })
 export class TestContactInformation {
     public readonly document = input<AASDocument>();
+    public readonly state = input<ContactInformationState>();
 }
 
-describe.skip('ContactInformationsView', () => {
+describe('ContactInformationsView', () => {
     let component: ContactInformationView;
     let fixture: ComponentFixture<ContactInformationView>;
     let api: Mocked<EndpointsApi>;
@@ -69,7 +70,10 @@ describe.skip('ContactInformationsView', () => {
 
         route = createSpyObj<ActivatedRoute>(
             {},
-            { params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }) },
+            {
+                params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
+                queryParams: of({}),
+            },
         );
 
         api.getDocument.mockReturnValue(of(document));

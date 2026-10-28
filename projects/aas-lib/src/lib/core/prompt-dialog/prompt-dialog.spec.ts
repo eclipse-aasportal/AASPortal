@@ -15,7 +15,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { createSpyObj, FakeLoader } from '../../../test/mocks';
 
-describe.skip('PromptDialog', () => {
+describe('PromptDialog', () => {
     let component: PromptDialog;
     let fixture: ComponentFixture<PromptDialog>;
     let activeModal: Mocked<NgbActiveModal>;

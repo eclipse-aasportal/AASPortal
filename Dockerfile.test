@@ -4,4 +4,4 @@ WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
 RUN npm run build
-RUN npm run test
+RUN npm run test -w aas-lib
