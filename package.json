@@ -41,10 +41,10 @@
   "license": "Apache-2.0",
   "workspaces": [
     "projects/aas-core",
-    "projects/aas-package",
-    "projects/aas-node",
     "projects/aas-lib",
+    "projects/aas-package",
     "projects/aas-portal",
+    "projects/aas-node",
     "projects/aas-server",
     "projects/aas-browser"
   ],
