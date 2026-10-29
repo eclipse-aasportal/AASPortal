@@ -24,22 +24,22 @@
     "dependencies": {
         "@xmldom/xmldom": "^0.8.10",
         "bcryptjs": "^3.0.3",
-        "compression": "^1.8.1",
+        "compression": "^1.8.2",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.6",
-        "express": "^5.2.1",
+        "express": "^5.3.0",
         "jsonwebtoken": "^9.0.3",
-        "jszip": "^3.10.1",
+        "jszip": "^3.10.2",
         "jwks-rsa": "^4.1.0",
         "lodash-es": "^4.18.1",
-        "multer": "^2.2.0",
-        "nanoid": "^5.1.7",
+        "multer": "^2.4.0",
+        "nanoid": "^6.0.2",
         "reflect-metadata": "^0.2.2",
         "swagger-ui-express": "^5.0.1",
         "tslib": "^2.8.1",
         "tsoa": "^6.6.0",
         "tsyringe": "^4.10.0",
-        "ws": "^8.21.0",
+        "ws": "^8.22.0",
         "xpath": "^0.0.34"
     }
 }
