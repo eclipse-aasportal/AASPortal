@@ -13,5 +13,7 @@ export default defineConfig({
         include: ['src/**/*.spec.ts'],
         outputFile: './coverage/coverage.xml',
         reporters: ['default', 'junit'],
+        clearMocks: true,
+        restoreMocks: true,
     },
 });
