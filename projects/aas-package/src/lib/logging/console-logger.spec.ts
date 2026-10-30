@@ -26,13 +26,8 @@ describe('ConsoleLogger', () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
-        vi.resetModules();
+        vi.resetAllMocks();
         vi.clearAllMocks();
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
-        vi.resetModules();
     });
 
     describe('info', () => {

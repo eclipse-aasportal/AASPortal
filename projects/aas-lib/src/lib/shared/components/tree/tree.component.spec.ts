@@ -165,6 +165,8 @@ describe('TreeComponent', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should create', () => {

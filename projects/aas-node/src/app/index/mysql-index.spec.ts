@@ -43,6 +43,7 @@ describe('MySqlIndex', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should be created', () => {

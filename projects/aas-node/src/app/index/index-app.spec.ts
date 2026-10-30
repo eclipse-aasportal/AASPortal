@@ -8,7 +8,7 @@
 
 import 'reflect-metadata';
 import { container } from 'tsyringe';
-import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { CommandData, Logger, LOGGER, WorkerData } from 'aas-package';
 
 import { createSpyObj } from '../../test/mocks.js';
@@ -91,6 +91,12 @@ describe('IndexApp', () => {
         container.registerSingleton(IndexApp);
         app = container.resolve(IndexApp);
         parentPort = (await import('worker_threads')).parentPort!;
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should be created', () => {

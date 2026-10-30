@@ -142,6 +142,8 @@ describe('EndpointIndexForm', () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should create', () => {

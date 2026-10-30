@@ -46,6 +46,8 @@ describe('EndpointsApi', () => {
     afterEach(() => {
         httpTestingController.verify();
         vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should created', () => {

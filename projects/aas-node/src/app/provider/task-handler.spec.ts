@@ -18,6 +18,8 @@ describe('TaskHandler', () => {
     });
 
     afterEach(() => {
+        vi.restoreAllMocks();
+        vi.resetAllMocks();
         vi.clearAllMocks();
     });
 

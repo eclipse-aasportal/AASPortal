@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { container } from 'tsyringe';
 import { MessagePort, Worker } from 'worker_threads';
 import { aas, AASCursor } from 'aas-core';
@@ -144,6 +144,12 @@ describe('AASIndexClient', () => {
         container.registerInstance(LOGGER, createSpyObj<Logger>(['info', 'warning', 'error']));
 
         client = container.resolve(AAS_INDEX) as AASIndexClient;
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should be created', () => {

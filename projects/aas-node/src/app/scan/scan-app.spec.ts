@@ -9,7 +9,7 @@
 import 'reflect-metadata';
 import { EventEmitter } from 'events';
 import { container } from 'tsyringe';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AASDocument, AASEndpoint } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
 
@@ -41,6 +41,12 @@ describe('ScanApp', () => {
         container.registerInstance(AAS_INDEX, createSpyObj<AASIndexClient>([]));
         container.registerInstance(EndpointScanFactory, factory);
         container.registerSingleton(ScanApp, ScanApp);
+    });
+
+    afterAll(() => {
+        vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('posts update events with active scan metadata', async () => {

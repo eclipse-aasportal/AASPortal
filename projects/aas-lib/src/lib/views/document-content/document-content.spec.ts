@@ -174,6 +174,8 @@ describe('DocumentContent', () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should create', () => {
