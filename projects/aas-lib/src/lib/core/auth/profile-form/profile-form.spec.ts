@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -69,6 +69,10 @@ describe('ProfileForm', () => {
         fixture = TestBed.createComponent(ProfileForm);
         component = fixture.componentInstance;
         await fixture.whenStable();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it('should create', () => {

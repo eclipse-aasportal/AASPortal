@@ -6,15 +6,16 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { Component, DOCUMENT, effect, inject, Injectable, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { noop } from 'aas-core';
-import { FakeLoader } from '../../../../test/mocks';
+import { createSpyObj, FakeLoader } from '../../../../test/mocks';
 import { TreeComponent, TreeId, TreeNode, TreeResult } from './tree.component';
 import { afterEach } from 'node:test';
+import { WINDOW, WindowService } from '../../services/window.service';
 
 function createComposite(id: string, parent: string | null): TreeNode {
     return {
@@ -128,13 +129,20 @@ describe('TreeComponent', () => {
     let component: TreeComponent;
     let fixture: ComponentFixture<TreeComponent>;
     let treeSearch: TreeSearch;
+    let window: Mocked<WindowService>;
 
     beforeEach(async () => {
+        window = createSpyObj<WindowService>(['addEventListener', 'removeEventListener']);
+
         await TestBed.configureTestingModule({
             providers: [
                 {
                     provide: TreeSearch,
                     useClass: TreeSearch,
+                },
+                {
+                    provide: WINDOW,
+                    useValue: window,
                 },
                 provideTranslateService({
                     loader: {
@@ -156,6 +164,7 @@ describe('TreeComponent', () => {
 
     afterEach(() => {
         vi.useRealTimers();
+        vi.restoreAllMocks();
     });
 
     it('should create', () => {
