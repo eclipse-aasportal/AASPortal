@@ -54,15 +54,17 @@ CREATE TABLE IF NOT EXISTS endpoints (
 
 CREATE TABLE IF NOT EXISTS documents (
     uuid TEXT PRIMARY KEY,
-    address TEXT, 
-    endpoint TEXT, 
-    id TEXT, 
-    idShort TEXT, 
+    address TEXT NOT NULL, 
+    endpoint TEXT NOT NULL, 
+    id TEXT NOT NULL, 
+    idShort TEXT NOT NULL, 
     assetId TEXT,
     thumbnail TEXT, 
-    timestamp INTEGER,
-    UNIQUE (id, endpoint)
+    timestamp INTEGER NOT NULL,
+    UNIQUE (endpoint, id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_doc_endpoint_id ON documents(endpoint, id);
 
 CREATE TABLE IF NOT EXISTS elements (
     uuid TEXT NOT NULL,
@@ -76,11 +78,13 @@ CREATE TABLE IF NOT EXISTS elements (
     booleanValue INTEGER
 );
 
+CREATE INDEX IF NOT EXISTS idx_elem_uuid on elements(uuid);
+
 CREATE TABLE IF NOT EXISTS submodelConceptDescriptions (
     endpoint TEXT NOT NULL,
     id TEXT NOT NULL,
     conceptDescriptionIds TEXT NOT NULL,
-    UNIQUE (id, endpoint)
+    PRIMARY KEY (endpoint, id)
 );
 `;
 
@@ -378,11 +382,9 @@ export class SqliteIndex implements AASIndex {
                 const params: SQLInputValue[] = [endpoint];
                 if (cursor) {
                     params.push(cursor);
-                    sql = this.db.prepare(
-                        'SELECT * FROM documents WHERE endpoint = ? AND id >= ? ORDER BY id ASC LIMIT ?',
-                    );
+                    sql = this.db.prepare('SELECT * FROM documents WHERE endpoint = ? AND id >= ? ORDER BY id LIMIT ?');
                 } else {
-                    sql = this.db.prepare('SELECT * FROM documents WHERE endpoint = ? ORDER BY id ASC LIMIT ?');
+                    sql = this.db.prepare('SELECT * FROM documents WHERE endpoint = ? ORDER BY id LIMIT ?');
                 }
 
                 params.push(limit + 1);
@@ -631,24 +633,27 @@ export class SqliteIndex implements AASIndex {
         if (generator) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents WHERE documents.endpoint IN ('${endpoints.join(
-                        "','",
-                    )}') AND (${generator.generate(params)}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d
+                    WHERE d.endpoint IN ('${endpoints.join("','")}') 
+                        AND (${generator.generate(params)}) 
+                    ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents WHERE ${generator.generate(
-                        params,
-                    )} ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d 
+                    WHERE ${generator.generate(params)} 
+                    ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             }
         } else {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join("','")}') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?`,
+                    `SELECT * FROM documents 
+                    WHERE endpoint IN ('${endpoints.join("','")}') 
+                    ORDER BY endpoint, id LIMIT ?`,
                 );
             } else {
-                sql = this.db.prepare('SELECT * FROM documents ORDER BY CONCAT(endpoint, id) ASC LIMIT ?');
+                sql = this.db.prepare('SELECT * FROM documents ORDER BY endpoint, id LIMIT ?');
             }
         }
 
@@ -670,34 +675,38 @@ export class SqliteIndex implements AASIndex {
         generator?: ConditionGenerator,
     ): AASPagedResult {
         let sql: StatementSync;
-        const params: SQLInputValue[] = [current.endpoint + current.id];
+        const params: SQLInputValue[] = [current.endpoint, current.endpoint, current.id];
 
         if (generator) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents WHERE documents.endpoint IN ('${endpoints.join(
-                        '","',
-                    )}') AND CONCAT(documents.endpoint, documents.id) >= ? AND (${generator.generate(
-                        params,
-                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d 
+                    WHERE d.endpoint IN ('${endpoints.join('","')}') 
+                        AND (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) 
+                        AND (${generator.generate(params)}) 
+                    ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents WHERE CONCAT(documents.endpoint, documents.id) >= ? AND (${generator.generate(
-                        params,
-                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d 
+                    WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) 
+                        AND (${generator.generate(params)}) 
+                    ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             }
         } else {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join(
-                        "','",
-                    )}') AND CONCAT(endpoint, id) >= ? ORDER BY CONCAT(endpoint, id) ASC LIMIT ?`,
+                    `SELECT * FROM documents 
+                    WHERE endpoint IN ('${endpoints.join("','")}') 
+                        AND (endpoint > ? OR (endpoint = ? AND id >= ?)) 
+                    ORDER BY endpoint, id LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    'SELECT * FROM documents WHERE CONCAT(endpoint, id) >= ? ORDER BY CONCAT(endpoint, id) ASC LIMIT ?',
+                    `SELECT * FROM documents 
+                    WHERE (endpoint > ? OR (endpoint = ? AND id >= ?)) 
+                    ORDER BY endpoint, id LIMIT ?`,
                 );
             }
         }
@@ -720,34 +729,38 @@ export class SqliteIndex implements AASIndex {
         generator?: ConditionGenerator,
     ): AASPagedResult {
         let sql: StatementSync;
-        const params: SQLInputValue[] = [current.endpoint + current.id];
+        const params: SQLInputValue[] = [current.endpoint, current.endpoint, current.id];
 
         if (generator) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents WHERE documents.endpoint IN ('${endpoints.join(
-                        "','",
-                    )}') AND CONCAT(documents.endpoint, documents.id) < ? AND (${generator.generate(
-                        params,
-                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d 
+                    WHERE d.endpoint IN ('${endpoints.join("','")}') 
+                        AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) 
+                        AND (${generator.generate(params)}) 
+                    ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents WHERE CONCAT(documents.endpoint, documents.id) < ? AND (${generator.generate(
-                        params,
-                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d
+                    WHERE (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?))
+                        AND (${generator.generate(params)}) 
+                    ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             }
         } else {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join(
-                        "','",
-                    )}') AND CONCAT(endpoint, id) < ? ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
+                    `SELECT * FROM documents 
+                    WHERE endpoint IN ('${endpoints.join("','")}') 
+                        AND (endpoint < ? OR (endpoint = ? AND id < ?)) 
+                    ORDER BY endpoint DESC, id DESC LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    'SELECT * FROM documents WHERE CONCAT(endpoint, id) < ? ORDER BY CONCAT(endpoint, id) DESC LIMIT ?',
+                    `SELECT * FROM documents 
+                    WHERE (endpoint < ? OR (endpoint = ? AND id < ?)) 
+                    ORDER BY endpoint DESC, id DESC LIMIT ?`,
                 );
             }
         }
@@ -769,26 +782,27 @@ export class SqliteIndex implements AASIndex {
         if (generator) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents WHERE documents.endpoint IN ('${endpoints.join(
-                        "','",
-                    )}') AND (${generator.generate(
-                        params,
-                    )}) ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
+                    `SELECT documents.* FROM documents AS d
+                    WHERE d.endpoint IN ('${endpoints.join("','")}') 
+                        AND (${generator.generate(params)}) 
+                    ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents WHERE ${generator.generate(
-                        params,
-                    )} ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?`,
+                    `SELECT documents.* FROM documents AS d
+                    WHERE ${generator.generate(params)} 
+                    ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             }
         } else {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join("','")}') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?`,
+                    `SELECT * FROM documents 
+                    WHERE endpoint IN ('${endpoints.join("','")}') 
+                    ORDER BY endpoint DESC, id DESC LIMIT ?`,
                 );
             } else {
-                sql = this.db.prepare('SELECT * FROM documents ORDER BY CONCAT(endpoint, id) DESC LIMIT ?');
+                sql = this.db.prepare('SELECT * FROM documents ORDER BY endpoint DESC, id DESC LIMIT ?');
             }
         }
 

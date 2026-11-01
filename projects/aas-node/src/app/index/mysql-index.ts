@@ -93,12 +93,12 @@ export class MySqlIndex implements AASIndex {
         const connection = await this.getConnection();
         try {
             if (endpoint === undefined) {
-                const [results] = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `documents`;');
+                const [results] = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM documents;');
                 return results[0]['COUNT(*)'];
             }
 
             const [results] = await connection.query<DocumentCount[]>(
-                'SELECT COUNT(*) FROM `documents` WHERE endpoint = ?;',
+                'SELECT COUNT(*) FROM documents WHERE endpoint = ?;',
                 [endpoint],
             );
 
@@ -273,9 +273,9 @@ export class MySqlIndex implements AASIndex {
         const values: unknown[] = [endpoint];
         if (cursor) {
             values.push(cursor);
-            sql = 'SELECT * FROM `documents` WHERE endpoint = ? AND id >= ? ORDER BY id ASC LIMIT ?;';
+            sql = 'SELECT * FROM documents WHERE endpoint = ? AND id >= ? ORDER BY id LIMIT ?;';
         } else {
-            sql = 'SELECT * FROM `documents` WHERE endpoint = ? ORDER BY id ASC LIMIT ?;';
+            sql = 'SELECT * FROM documents WHERE endpoint = ? ORDER BY id LIMIT ?;';
         }
 
         values.push(limit + 1);
@@ -299,7 +299,7 @@ export class MySqlIndex implements AASIndex {
         try {
             await connection.beginTransaction();
             const [results] = await connection.query<MySqlDocument[]>(
-                'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;',
+                'SELECT uuid FROM documents WHERE endpoint = ? AND id = ?;',
                 [document.endpoint, document.id],
             );
 
@@ -310,7 +310,7 @@ export class MySqlIndex implements AASIndex {
 
             const uuid = results[0].uuid;
             await connection.query<mysql.ResultSetHeader>(
-                'UPDATE `documents` SET address = ?, idShort = ?, assetId = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
+                'UPDATE documents SET address = ?, idShort = ?, assetId = ?, timestamp = ?, thumbnail = ? WHERE uuid = ?;',
                 [
                     document.address,
                     document.idShort,
@@ -322,7 +322,7 @@ export class MySqlIndex implements AASIndex {
             );
 
             if (document.content && document.content.submodels) {
-                await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
+                await connection.query<mysql.ResultSetHeader>('DELETE FROM elements WHERE uuid = ?;', [uuid]);
                 await this.traverseEnvironment(connection, uuid, document.content);
             }
 
@@ -341,7 +341,7 @@ export class MySqlIndex implements AASIndex {
             await connection.beginTransaction();
             const uuid = nanoid();
             await connection.query<mysql.ResultSetHeader>(
-                'INSERT INTO `documents` (uuid, address, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
+                'INSERT INTO documents (uuid, address, endpoint, id, idShort, assetId, thumbnail, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
                 [
                     uuid,
                     document.address,
@@ -411,8 +411,8 @@ export class MySqlIndex implements AASIndex {
                 return false;
             }
 
-            await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
-            await connection.query<mysql.ResultSetHeader>('DELETE FROM `documents` WHERE uuid = ?;', [uuid]);
+            await connection.query<mysql.ResultSetHeader>('DELETE FROM elements WHERE uuid = ?;', [uuid]);
+            await connection.query<mysql.ResultSetHeader>('DELETE FROM documents WHERE uuid = ?;', [uuid]);
             await connection.commit();
             return true;
         } catch (error) {
@@ -446,13 +446,13 @@ export class MySqlIndex implements AASIndex {
         try {
             await connection.beginTransaction();
             if (endpoint === undefined) {
-                await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements`;');
-                await connection.query<mysql.ResultSetHeader>('DELETE FROM `documents`;');
+                await connection.query<mysql.ResultSetHeader>('DELETE FROM elements;');
+                await connection.query<mysql.ResultSetHeader>('DELETE FROM documents;');
                 await connection.query<mysql.ResultSetHeader>('DELETE FROM `submodelConceptDescriptions`;');
             } else if (id) {
                 const uuid = await this.getUuid(connection, endpoint, id);
                 if (uuid) {
-                    await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [uuid]);
+                    await connection.query<mysql.ResultSetHeader>('DELETE FROM elements WHERE uuid = ?;', [uuid]);
                 }
             } else {
                 await this.deleteDocuments(connection, endpoint);
@@ -533,23 +533,23 @@ export class MySqlIndex implements AASIndex {
     }
 
     private async deleteDocuments(connection: mysql.Connection, endpointName: string): Promise<void> {
-        const [results] = await connection.query<MySqlDocument[]>('SELECT uuid FROM `documents` WHERE endpoint = ?;', [
+        const [results] = await connection.query<MySqlDocument[]>('SELECT uuid FROM documents WHERE endpoint = ?;', [
             endpointName,
         ]);
 
-        await connection.query<mysql.ResultSetHeader>('DELETE FROM `documents` WHERE endpoint = ?;', [endpointName]);
+        await connection.query<mysql.ResultSetHeader>('DELETE FROM documents WHERE endpoint = ?;', [endpointName]);
         await connection.query<mysql.ResultSetHeader>('DELETE FROM `submodelConceptDescriptions` WHERE endpoint = ?;', [
             endpointName,
         ]);
 
         for (const document of results) {
-            await connection.query<mysql.ResultSetHeader>('DELETE FROM `elements` WHERE uuid = ?;', [document.uuid]);
+            await connection.query<mysql.ResultSetHeader>('DELETE FROM elements WHERE uuid = ?;', [document.uuid]);
         }
     }
 
     private async getUuid(connection: mysql.Connection, endpointName: string, id: string): Promise<string | undefined> {
         const [results] = await connection.query<MySqlDocument[]>(
-            'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;',
+            'SELECT uuid FROM documents WHERE endpoint = ? AND id = ?;',
             [endpointName, id],
         );
 
@@ -571,25 +571,25 @@ export class MySqlIndex implements AASIndex {
         if (query) {
             if (endpoints.length > 0) {
                 sql =
-                    "SELECT documents.* FROM `documents` WHERE documents.endpoint IN ('" +
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('" +
                     endpoints.join("','") +
                     "') AND (" +
                     query.generate(values) +
-                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
+                    ') ORDER BY d.endpoint, d.id LIMIT ?;';
             } else {
                 sql =
-                    'SELECT documents.* FROM `documents` WHERE ' +
+                    'SELECT d.* FROM documents AS d WHERE ' +
                     query.generate(values) +
-                    ' ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
+                    ' ORDER BY d.endpoint, d.id LIMIT ?;';
             }
         } else {
             if (endpoints.length > 0) {
                 sql =
-                    "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                    "SELECT * FROM documents WHERE endpoint IN ('" +
                     endpoints.join("','") +
-                    "') ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;";
+                    "') ORDER BY endpoint, id LIMIT ?;";
             } else {
-                sql = 'SELECT * FROM `documents` ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
+                sql = 'SELECT * FROM documents ORDER BY endpoint, id LIMIT ?;';
             }
         }
 
@@ -612,31 +612,31 @@ export class MySqlIndex implements AASIndex {
         generator?: ConditionGenerator,
     ): Promise<AASPagedResult> {
         let sql: string;
-        const values: unknown[] = [current.endpoint + current.id];
+        const values: unknown[] = [current.endpoint, current.endpoint, current.id];
 
         if (generator) {
             if (endpoints.length > 0) {
                 sql =
-                    "SELECT documents.* FROM `documents` WHERE documents.endpoint IN ('" +
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('" +
                     endpoints.join("','") +
-                    "') AND CONCAT(documents.endpoint, documents.id) >= ? AND (" +
+                    "') AND (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (" +
                     generator.generate(values) +
-                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
+                    ') ORDER BY d.endpoint, d.id LIMIT ?;';
             } else {
                 sql =
-                    'SELECT documents.* FROM `documents` WHERE CONCAT(documents.endpoint, documents.id) >= ? AND (' +
+                    'SELECT d.* FROM documents AS d WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (' +
                     generator.generate(values) +
-                    ') ORDER BY CONCAT(documents.endpoint, documents.id) ASC LIMIT ?;';
+                    ') ORDER BY d.endpoint, d.id LIMIT ?;';
             }
         } else {
             if (endpoints.length > 0) {
                 sql =
-                    "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                    "SELECT * FROM documents WHERE endpoint IN ('" +
                     endpoints.join("','") +
-                    "') AND CONCAT(endpoint, id) >= ? ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;";
+                    "') AND (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;";
             } else {
                 sql =
-                    'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) >= ? ORDER BY CONCAT(endpoint, id) ASC LIMIT ?;';
+                    'SELECT * FROM documents WHERE (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;';
             }
         }
 
@@ -664,26 +664,26 @@ export class MySqlIndex implements AASIndex {
         if (generator) {
             if (endpoints.length > 0) {
                 sql =
-                    "SELECT documents.* FROM `documents` WHERE documents.endpoint IN ('" +
+                    "SELECT d.* FROM documents AS d WHERE documents.endpoint IN ('" +
                     endpoints.join("','") +
-                    "') AND CONCAT(documents.endpoint, documents.id) < ? AND (" +
+                    "') AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (" +
                     generator.generate(values) +
-                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
+                    ') ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             } else {
                 sql =
-                    'SELECT documents.* FROM `documents` WHERE CONCAT(documents.endpoint, documents.id) < ? AND (' +
+                    'SELECT d.* FROM documents AS d WHERE (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (' +
                     generator.generate(values) +
-                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
+                    ') ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             }
         } else {
             if (endpoints.length > 0) {
                 sql =
-                    "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                    "SELECT * FROM documents WHERE endpoint IN ('" +
                     endpoints.join("','") +
-                    "') AND CONCAT(endpoint, id) < ? ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;";
+                    "') AND (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint, id DESC LIMIT ?;";
             } else {
                 sql =
-                    'SELECT * FROM `documents` WHERE CONCAT(endpoint, id) < ? ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
+                    'SELECT * FROM documents WHERE (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint DESC, id DESC LIMIT ?;';
             }
         }
 
@@ -709,25 +709,25 @@ export class MySqlIndex implements AASIndex {
         if (generator) {
             if (endpoints.length > 0) {
                 sql =
-                    "SELECT documents.* FROM `documents` WHERE documents.endpoint IN ('" +
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('" +
                     endpoints.join("','") +
                     "') AND (" +
                     generator.generate(values) +
-                    ') ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
+                    ') ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             } else {
                 sql =
-                    'SELECT documents.* FROM `documents` WHERE ' +
+                    'SELECT documents.* FROM documents AS d WHERE ' +
                     generator.generate(values) +
-                    ' ORDER BY CONCAT(documents.endpoint, documents.id) DESC LIMIT ?;';
+                    ' ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             }
         } else {
             if (endpoints.length > 0) {
                 sql =
-                    "SELECT * FROM `documents` WHERE endpoint IN ('" +
+                    "SELECT * FROM documents WHERE endpoint IN ('" +
                     endpoints.join("','") +
-                    "') ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;";
+                    "') ORDER BY endpoint DESC, id DESC LIMIT ?;";
             } else {
-                sql = 'SELECT * FROM `documents` ORDER BY CONCAT(endpoint, id) DESC LIMIT ?;';
+                sql = 'SELECT * FROM documents ORDER BY endpoint DESC, id DESC LIMIT ?;';
             }
         }
 
@@ -750,8 +750,8 @@ export class MySqlIndex implements AASIndex {
     ): Promise<MySqlDocument | undefined> {
         const [results] = await connection.query<MySqlDocument[]>(
             modelType === 'AssetAdministrationShell'
-                ? 'SELECT * FROM `documents` WHERE endpoint = ? AND id = ?'
-                : 'SELECT * FROM `documents` WHERE endpoint = ? AND assetId = ?',
+                ? 'SELECT * FROM documents WHERE endpoint = ? AND id = ?'
+                : 'SELECT * FROM documents WHERE endpoint = ? AND assetId = ?',
             [endpoint, id],
         );
 
@@ -769,8 +769,8 @@ export class MySqlIndex implements AASIndex {
     ): Promise<MySqlDocument | undefined> {
         const [results] = await connection.query<MySqlDocument[]>(
             modelType === 'AssetAdministrationShell'
-                ? 'SELECT * FROM `documents` WHERE id = ?'
-                : 'SELECT * FROM `documents` WHERE assetId = ?',
+                ? 'SELECT * FROM documents WHERE id = ?'
+                : 'SELECT * FROM documents WHERE assetId = ?',
             [id],
         );
 
@@ -801,7 +801,7 @@ export class MySqlIndex implements AASIndex {
 
     private async writeElement(connection: mysql.Connection, uuid: string, referable: aas.Referable): Promise<void> {
         await connection.query<mysql.ResultSetHeader>(
-            'INSERT INTO `elements` (uuid, modelType, id, idShort, stringValue, numberValue, dateValue, booleanValue, bigintValue) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
+            'INSERT INTO elements (uuid, modelType, id, idShort, stringValue, numberValue, dateValue, booleanValue, bigintValue) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
             [
                 uuid,
                 toAbbreviation(referable),
