@@ -7,7 +7,7 @@ CREATE TABLE endpoints (
     version VARCHAR(8),
     headers VARCHAR(255),
     schedule VARCHAR(255)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE documents (
     uuid CHAR(21) PRIMARY KEY,
@@ -17,9 +17,10 @@ CREATE TABLE documents (
     idShort VARCHAR(128) NOT NULL, 
     assetId VARCHAR(255),
     thumbnail TEXT, 
-    timestamp LONG,
-    UNIQUE (id, endpoint)
-);
+    timestamp DATETIME,
+    UNIQUE KEY uq_doc (id, endpoint),
+    FULLTEXT KEY ft_doc (endpoint, id, idShort, assetId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE elements (
     uuid CHAR(21) NOT NULL,
@@ -28,14 +29,15 @@ CREATE TABLE elements (
     idShort VARCHAR(128) NOT NULL,
     stringValue VARCHAR(512),
     numberValue DOUBLE,
-    bigintValue LONG,
+    bigintValue BIGINT,
     dateValue DATETIME,
-    booleanValue BOOLEAN
-);
+    booleanValue BOOLEAN,
+    FULLTEXT KEY ft_element (id, idShort, stringValue),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE submodelConceptDescriptions (
     endpoint VARCHAR(64) NOT NULL, 
     id VARCHAR(255) NOT NULL,
     conceptDescriptionIds TEXT,
     PRIMARY KEY (id, endpoint)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
