@@ -97,7 +97,7 @@
         "webdav": "^5.9.0",
         "ws": "^8.19.0",
         "xpath": "^0.0.34",
-        "zod": "^4.4.3"
+        "zod": "^4.6.6"
     },
     "devDependencies": {
         "@angular/build": "^21.2.3",
