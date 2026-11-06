@@ -1,0 +1,108 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<form (submit)="submit($event)" class="modal-content">
+    <div class="modal-header text-info">
+        <h4 class="modal-title">
+            <i class="bi bi-gear"></i>
+            <span class="ms-2" translate="EndpointIndexForm.CAPTION"></span>
+        </h4>
+        <button type="button" class="btn-close" (click)="close()"></button>
+    </div>
+    <div class="modal-body">
+        @if (successMessage()) {
+            <ngb-alert #selfClosingAlert type="danger" (closed)="successMessage.set('')">{{
+                successMessage()
+            }}</ngb-alert>
+        }
+        <div class="endpoint-index-grid">
+            @for (item of items(); track item.name; let i = $index) {
+                <div class="endpoint-index-row">
+                    <div class="flex-column align-items-start justify-content-center">
+                        <div class="fw-medium">{{ item.name }}</div>
+                        <div class="text-start text-body-secondary fs-7">
+                            <span>{{ item.count }}</span>
+                            <span class="ms-1">{{ 'EndpointIndexForm.SHELLS' | translate }}</span>
+                        </div>
+                    </div>
+
+                    @if (item.status === 'idle') {
+                        @if (item.schedule === 'manual' || item.schedule === 'once') {
+                            <button
+                                type="button"
+                                class="btn btn-lg btn-outline-primary py-0 px-3 endpoint-index-icon-btn"
+                                [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
+                                [openDelay]="300"
+                                placement="top"
+                                container="body"
+                                (click)="startScan(item.name).subscribe()"
+                            >
+                                <i class="bi bi-play-fill"></i>
+                                <span class="fw-light" style="font-size: 15px">Scan</span>
+                            </button>
+                        } @else {
+                            <div></div>
+                        }
+                        <button
+                            type="button"
+                            class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
+                            [ngbTooltip]="'EndpointIndexForm.CLEAR_ENDPOINT_INDEX_TOOL_TIP' | translate"
+                            [openDelay]="300"
+                            placement="top"
+                            container="body"
+                            (click)="clearIndex(item.name).subscribe()"
+                        >
+                            <i class="bi bi-eraser-fill"></i>
+                        </button>
+                    } @else {
+                        @if (item.progress < 0) {
+                            <div class="text-center">
+                                <div class="spinner-border spinner-border-sm text-info" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        } @else {
+                            <div class="mx-3">
+                                <ngb-progressbar class="w-100" [showValue]="true" type="info" [value]="item.progress" />
+                            </div>
+                        }
+
+                        <button
+                            type="button"
+                            class="btn btn-lg btn-outline-danger border-0 endpoint-index-icon-btn"
+                            [ngbTooltip]="'EndpointIndexForm.CANCEL_SCAN_TOOL_TIP' | translate"
+                            [openDelay]="300"
+                            placement="top"
+                            container="body"
+                            (click)="cancelScan(item.name).subscribe()"
+                        >
+                            <i class="bi bi-stop-circle"></i>
+                        </button>
+                    }
+                    <div class="endpoint-index-divider"></div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button
+            type="button"
+            id="AID_CLEAR_INDEX"
+            class="btn btn-lg btn-outline-danger me-auto border-0 py-1 px-3"
+            [ngbTooltip]="'EndpointIndexForm.CLEAR_INDEX_TOOLTIP' | translate"
+            [openDelay]="300"
+            placement="top"
+            container="body"
+            (click)="clearIndex()"
+        >
+            <i class="bi bi-eraser-fill"></i>
+            <span class="fw-light" style="font-size: 15px">Clear Entire Index</span>
+        </button>
+        <button type="submit" class="btn btn-sm border rounded-2 px-4" translate="EndpointIndexForm.CLOSE"></button>
+    </div>
+</form>

@@ -1,16 +1,25 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "moduleResolution": "bundler",
+        "noEmit": false,
         "outDir": "./out-tsc/app",
+        "rootDir": "..",
         "types": [
-          "@angular/localize"
+            "@angular/localize"
         ]
     },
     "include": [
         "src/**/*.ts"
     ],
     "exclude": [
-        "src/test/**/*"
-    ]
+        "src/**/*.spec.ts"
+    ],
+    "angularCompilerOptions": {
+        "extendedDiagnostics": {
+            "checks": {
+                "nullishCoalescingNotNullable": "suppress",
+                "optionalChainNotNullable": "suppress"
+            }
+        }
+    }
 }

@@ -13,7 +13,7 @@ For more details about the AASPortal see the full documentation :blue_book: [her
 **AASPortal is under active development and we are looking forward to your active contributions!**
 
 ## Prerequisites
-- **Node.js v24.15.0** (required for development)
+- **Node.js v24.22.1** (required for development)
 - **Visual Studio Code** (recommended IDE)
 - **Docker Desktop 4.x OR Podman Desktop** (for containerized development)
 - **Git** (for version control)
@@ -49,7 +49,7 @@ Then open http://localhost/ in your browser.
 
 3. **Build all workspaces:**
    ```bash
-   npm run build -ws
+   npm run build:debug -ws
    ```
 
 4. **Start the development server:**
@@ -148,6 +148,52 @@ spec:
 - High availability setup
 - Monitoring and troubleshooting
 
+## AASNode Environment Variables
+
+```.env
+# AAS Node environment configuration
+
+# AAS lifetime in milliseconds.
+AAS_EXPIRES_IN=86400000
+AAS_INDEX=
+AAS_NODE_PASSWORD=aas-node
+AAS_NODE_PORT=1337
+AAS_NODE_USERNAME=aas-node
+
+# Filesystem locations.
+ASSETS=./assets
+CONTENT_ROOT=./
+COOKIE_STORE=aasportal-users.db
+USER_STORE=aasportal-users.db
+USER_RIGHTS_STORE=aasportal-users.db
+SESSION_STORE=aasportal-users.db
+WEB_ROOT=./wwwroot
+
+# JSON arrays of permitted origins and initial AAS container endpoints.
+CORS_ORIGIN='["http://localhost:4200","http://localhost:1337"]'
+ENDPOINTS='["file:///endpoints/samples?name=Samples"]'
+
+# HTTPS configuration. Set one of HTTPS_KEY_FILE/HTTPS_CERT_FILE or HTTPS_PFX_FILE.
+HTTPS_CERT_FILE=
+HTTPS_KEY_FILE=
+HTTPS_PFX_FILE=
+
+# Identity provider configuration.
+IDENTITY_PROVIDER=file:///identity-provider
+CLIENT_ID=aas-node
+CLIENT_SECRET=aas-node-client-secret-for-development
+HOST_URL=
+REDIRECT_URI=
+
+LOG_LEVEL=Info
+MAX_WORKERS=2
+SCAN_ENDPOINT_TIMEOUT=3600000
+
+# Session configuration.
+SESSION_SECRET=aas-portal-session-secret
+SESSION_TTL=86400
+```
+
 ## Troubleshooting
 
 ### Container Networking Issues
@@ -175,9 +221,9 @@ http://127.0.0.1:5001                      # Container's loopback
 
 ### Common Development Issues
 
-**Build fails**: Ensure Node.js v24.15.0 is installed
+**Build fails**: Ensure Node.js v24.22.1 is installed
 ```bash
-node --version  # Should output v24.15.0
+node --version  # Should output v24.22.1
 ```
 
 **Tests fail**: Run tests individually to isolate issues
@@ -201,7 +247,6 @@ You can find the detailed changelog [here](read-the-docs/source/changelog/change
 | :------------------ | ----------------------------------------------------------- |
 | Ralf Aron           | [ralfaron](https://github.com/ralfaron)                     |
 | Alexander Wollbrink | [AlexanderWollbrink](https://github.com/AlexanderWollbrink) |
-| Juilee Tikekar      | [juileetikekar](https://github.com/juileetikekar)           |
 | Florian Pethig      | [fpethig](https://github.com/fpethig)                       |
 
 ## Contact

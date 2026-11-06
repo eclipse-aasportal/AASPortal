@@ -4,7 +4,7 @@ const token = jwt.sign(
     {
         id: 'john.doe@email.com',
         name: 'John Doe',
-        role: 'editor',
+        role: 'viewer',
     },
     'The quick brown fox jumps over the lazy dog.',
 );

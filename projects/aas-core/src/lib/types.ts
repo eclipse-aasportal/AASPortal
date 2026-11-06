@@ -6,16 +6,8 @@
  *
  *****************************************************************************/
 
+import * as z from 'zod';
 import * as aas from './aas.js';
-
-/** Defines the supported endpoint types. */
-export type EndpointType = 'file' | 'http' | 'opc';
-
-/** Represents an endpoint of an AAS resource. */
-export interface Endpoint {
-    address: string;
-    type: EndpointType;
-}
 
 /** Abbreviations for AAS model elements. */
 export type AASAbbreviation =
@@ -45,9 +37,14 @@ export type AASAbbreviation =
     | 'SME'
     | 'SML';
 
-export type AASEndpointScheduleType = 'disabled' | 'manual' | 'once' | 'every' | 'daily' | 'weekly';
+export type AASEndpointScheduleType = 'disabled' | 'manual' | 'once' | 'every';
 
 /** The schedule type. */
+export const AASEndpointScheduleSchema = z.object({
+    type: z.literal(['disabled', 'manual', 'once', 'every']),
+    values: z.array(z.string().or(z.number())).optional(),
+});
+
 export interface AASEndpointSchedule {
     type: AASEndpointScheduleType;
     values?: (string | number)[];
@@ -56,43 +53,65 @@ export interface AASEndpointSchedule {
 /** The kind of AAS container or server. */
 export type AASEndpointType = 'FileSystem' | 'AAS_API' | 'OPC_UA' | 'WebDAV';
 
-/** The endpoint to an AAS container */
+/** Represents an AAS endpoint. */
+export const AASEndpointSchema = z.object({
+    headers: z.record(z.string(), z.string()).optional(),
+    name: z.string().min(1),
+    schedule: AASEndpointScheduleSchema.optional(),
+    type: z.literal(['FileSystem', 'AAS_API', 'OPC_UA', 'WebDAV']),
+    url: z.url(),
+    version: z.string().optional(),
+});
+
 export interface AASEndpoint {
     name: string;
-    url: string;
-    type: AASEndpointType;
-    schedule?: AASEndpointSchedule;
-    version?: string;
     headers?: Record<string, string>;
+    schedule?: AASEndpointSchedule;
+    type: AASEndpointType;
+    url: string;
+    version?: string;
+}
+
+/** The index update status.  */
+export type UpdateIndexStatus = {
+    name: string;
+} & (
+    | {
+          status: 'idle';
+      }
+    | {
+          status: 'scanning';
+          start: number;
+      }
+);
+
+/** Authentication of a user for an AAS endpoint. */
+export interface AASEndpointAuth {
+    /** The name of the AAS endpoint. */
+    name: string;
+    /** The HTTP request headers to use for authenticating requests.  */
+    headers: Record<string, string>;
 }
 
 /** The unique identifier of an AAS. */
 export interface AASDocumentId {
     /** The identification of the Asset Administration Shell. */
     id: string;
-    /** The name of the endpoint. */
+    /** The name of the AAS endpoint. */
     endpoint: string;
 }
 
 /** Represents an Asset Administration Shell */
 export interface AASDocument extends AASDocumentId {
-    /** The address of the AAS in the endpoint. */
+    /** The address of the AAS at the endpoint. */
     address: string;
+    /** The Asset identifier */
+    assetId?: string;
     /** The document content of type `Environment`, `null` if the content is not loaded or
      * `undefined` if the content is not available. */
     content?: aas.Environment | null;
-    /** Checksum to detect changes. */
-    crc32: number;
     /** The name of the AAS. */
     idShort: string;
-    /** The Asset identifier */
-    assetId?: string;
-    /** Indicates whether the document is modified. */
-    modified?: boolean;
-    /** Indicates whether communication can be established with the system represented by the AAS. */
-    onlineReady?: boolean;
-    /** Indicates whether the document can be edited. */
-    readonly: boolean;
     /** A thumbnail. */
     thumbnail?: string | null;
     /** The time at which the document was created. */
@@ -108,8 +127,11 @@ export interface AASPagedResult {
 
 /** Represents a cursor in the collection of Asset Administration Shells. */
 export interface AASCursor {
+    /** The previous page in the collection, or `null` if at the beginning */
     previous?: AASDocumentId | null;
+    /** The maximum items in the page returned. */
     limit: number;
+    /** The next page in the collection, or `null` if at the end */
     next?: AASDocumentId | null;
 }
 
@@ -172,6 +194,7 @@ export interface DirEntry {
 export type ErrorData = {
     name: string;
     message: string;
+    stack?: string;
     status: number;
     args?: Record<string, unknown>;
 };
@@ -190,10 +213,15 @@ export interface Message {
 }
 
 /** Represents a cookie. */
-export interface Cookie {
+export const CookieSchema = z.object({
+    name: z.string().min(1),
+    data: z.string(),
+});
+
+export type Cookie = {
     name: string;
     data: string;
-}
+};
 
 /** The Websocket data. */
 export interface WebSocketData {
@@ -203,27 +231,15 @@ export interface WebSocketData {
     data: unknown;
 }
 
-/** Defines the message types. */
-export type AASNodeMessageType =
-    | 'Added'
-    | 'Removed'
-    | 'Update'
-    | 'EndpointAdded'
-    | 'EndpointRemoved'
-    | 'EndpointUpdate'
-    | 'Reset'
-    | 'End';
-
 /** Server message. */
-export type AASNodeMessage = {
-    /** The type of change. */
-    type: AASNodeMessageType;
-} & (
+export type AASNodeMessage =
     | {
-          type: 'Reset';
+          type: 'Cleared';
+          endpoint?: string;
       }
     | {
-          type: 'Added' | 'Removed' | 'Update';
+          type: 'Added' | 'Removed' | 'Updated';
+          start: number;
           document: AASDocument;
       }
     | {
@@ -231,10 +247,18 @@ export type AASNodeMessage = {
           endpoint: AASEndpoint;
       }
     | {
-          type: 'End';
-          endpoint: AASEndpoint;
+          type: 'Progress';
+          start: number;
+          endpoint: string;
+          progress: number;
+          shellCount: number;
+          submodelCount: number;
       }
-);
+    | {
+          type: 'Start' | 'End';
+          start: number;
+          endpoint: string;
+      };
 
 /**
  * Additional information for the client to, e.g. fetch the next part of the result set.
@@ -294,7 +318,7 @@ export class ApplicationError extends Error {
      * @returns {ErrorData} The serialized error containing name, message, and status code.
      */
     public toJson(): ErrorData {
-        const data: ErrorData = { name: this.name, message: this.stack ?? this.message, status: this.statusCode };
+        const data: ErrorData = { name: this.name, message: this.message, stack: this.stack, status: this.statusCode };
         if (this.args) {
             data.args = this.args;
         }

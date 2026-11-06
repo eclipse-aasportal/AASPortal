@@ -3,6 +3,10 @@
         "target": "http://localhost:1337",
         "secure": false
     },
+    "/auth": {
+        "target": "http://localhost:1337",
+        "secure": false
+    },
     "/websocket": {
         "target": "ws://localhost:1337",
         "secure": false,

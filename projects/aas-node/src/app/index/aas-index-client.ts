@@ -1,0 +1,285 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { container, singleton, Disposable } from 'tsyringe';
+import path from 'path';
+import { isMainThread, MessagePort, MessageChannel, SHARE_ENV, Worker } from 'worker_threads';
+import { aas, AASEndpoint, AASCursor, AASPagedResult, PagedResult, AASDocument } from 'aas-core';
+
+import { AASIndex, ChannelCommand, CommandName, ChannelResponse, isChannelError, ChannelError } from './aas-index.js';
+import { Variable } from '../variable.js';
+import { CommandData, Connectable, isConnectable, isResponseData, LOGGER, WorkerData } from 'aas-package';
+
+type ResolvePending = {
+    resolve: (value: unknown) => void;
+    reject: (reason?: unknown) => void;
+    handle: NodeJS.Timeout;
+};
+
+/**
+ * Represents a client for the AAS index worker thread.
+ */
+@singleton()
+export class AASIndexClient implements AASIndex, Connectable, Disposable {
+    private readonly variable = container.resolve(Variable);
+    private readonly logger = container.resolve(LOGGER);
+    private readonly worker?: Worker;
+    private readonly pending = new Map<number, ResolvePending>();
+    private port?: MessagePort;
+    private id = 0;
+
+    public constructor() {
+        if (isMainThread) {
+            const { port1, port2 } = new MessageChannel();
+            this.port = port2;
+            const script = path.resolve(this.variable.CONTENT_ROOT, 'aas-idx.js');
+            const name = 'AASIndex Worker';
+            this.worker = new Worker(script, { env: SHARE_ENV, name });
+            this.worker.on('error', this.onWorkerError);
+            this.worker.on('message', this.onWorkerMessage);
+            this.connect(port1, name);
+            this.port.on('message', this.onMessage);
+            this.port.once('close', () => {
+                this.port = undefined;
+            });
+
+            this.connectLogger(this.worker, name);
+        }
+    }
+
+    public connect(port: MessagePort, name?: string): void {
+        if (this.worker) {
+            this.worker.postMessage(
+                {
+                    type: 'command',
+                    name: 'ConnectIndex',
+                    args: { port, name },
+                } satisfies CommandData,
+                [port],
+            );
+        } else {
+            if (this.port) {
+                throw new Error('Port is already connected');
+            }
+
+            this.port = port;
+            this.port.on('message', this.onMessage);
+            this.port.once('close', () => {
+                this.port = undefined;
+            });
+        }
+    }
+
+    public getDocumentCount(endpoint?: string): Promise<number> {
+        return this.invoke('GetDocumentCount', { endpoint }) as Promise<number>;
+    }
+
+    public getEndpoints(): Promise<AASEndpoint[]> {
+        return this.invoke('GetEndpoints', {}) as Promise<AASEndpoint[]>;
+    }
+
+    public getEndpointCount(): Promise<number> {
+        return this.invoke('GetEndpointCount', {}) as Promise<number>;
+    }
+
+    public getEndpoint(name: string): Promise<AASEndpoint> {
+        return this.invoke('GetEndpoint', { name }) as Promise<AASEndpoint>;
+    }
+
+    public findEndpoint(name: string): Promise<AASEndpoint | undefined> {
+        return this.invoke('FindEndpoint', { name }) as Promise<AASEndpoint | undefined>;
+    }
+
+    public insertEndpoint(endpoint: AASEndpoint): Promise<void> {
+        return this.invoke('InsertEndpoint', { endpoint }) as Promise<void>;
+    }
+
+    public updateEndpoint(endpoint: AASEndpoint): Promise<AASEndpoint> {
+        return this.invoke('UpdateEndpoint', { endpoint }) as Promise<AASEndpoint>;
+    }
+
+    public deleteEndpoint(endpoint: string): Promise<boolean> {
+        return this.invoke('DeleteEndpoint', { endpoint }) as Promise<boolean>;
+    }
+
+    public getDocuments(
+        cursor: AASCursor,
+        endpoints?: string[],
+        query?: string,
+        language?: string,
+    ): Promise<AASPagedResult> {
+        return this.invoke('GetDocuments', { cursor, endpoints, query, language }) as Promise<AASPagedResult>;
+    }
+
+    public getEndpointDocuments(
+        endpoint: string,
+        cursor: string | undefined,
+        limit?: number,
+    ): Promise<PagedResult<AASDocument>> {
+        return this.invoke('GetEndpointDocuments', { endpoint, cursor, limit }) as Promise<PagedResult<AASDocument>>;
+    }
+
+    public update(document: AASDocument): Promise<void> {
+        return this.invoke('Update', { document }) as Promise<void>;
+    }
+
+    public insert(document: AASDocument): Promise<void> {
+        return this.invoke('Insert', { document }) as Promise<void>;
+    }
+
+    public create(endpoint: string, id: string, env: aas.Environment): Promise<void> {
+        return this.invoke('Create', { endpoint, id, env }) as Promise<void>;
+    }
+
+    public find(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument | undefined> {
+        return this.invoke('Find', { endpoint, modelType, id }) as Promise<AASDocument | undefined>;
+    }
+
+    public get(
+        endpoint: string | undefined,
+        modelType: 'AssetAdministrationShell' | 'Asset',
+        id: string,
+    ): Promise<AASDocument> {
+        return this.invoke('Get', { endpoint, modelType, id }) as Promise<AASDocument>;
+    }
+
+    public delete(endpoint?: string, id?: string): Promise<boolean> {
+        return this.invoke('Delete', { endpoint, id }) as Promise<boolean>;
+    }
+
+    public clear(endpoint?: string, id?: string): Promise<void> {
+        return this.invoke('Clear', { endpoint, id }) as Promise<void>;
+    }
+
+    public getSubmodelConceptDescriptionIds(endpoint: string, id: string): Promise<string[]> {
+        return this.invoke('GetSubmodelConceptDescriptionIds', { endpoint, id }) as Promise<string[]>;
+    }
+
+    public setSubmodelConceptDescriptionIds(
+        endpoint: string,
+        id: string,
+        conceptDescriptionIds: string[],
+    ): Promise<void> {
+        return this.invoke('SetSubmodelConceptDescriptionIds', {
+            endpoint,
+            id,
+            conceptDescriptionIds,
+        }) as Promise<void>;
+    }
+
+    public dispose(): void {
+        if (this.port) {
+            this.port?.off('message', this.onMessage);
+            this.port.close();
+        }
+
+        if (this.worker) {
+            this.worker.once('exit', this.onWorkerExit);
+            this.worker.postMessage({
+                type: 'command',
+                name: 'shutdown',
+                args: {},
+            } satisfies CommandData);
+        }
+    }
+
+    private connectLogger(worker: Worker, name: string): void {
+        const loggerChannel = new MessageChannel();
+        if (isConnectable(this.logger)) {
+            this.logger.connect(loggerChannel.port2, name);
+        }
+
+        worker.postMessage(
+            {
+                type: 'command',
+                name: 'ConnectLogger',
+                args: { port: loggerChannel.port1, name: 'Logger' },
+            },
+            [loggerChannel.port1],
+        );
+    }
+
+    private readonly onWorkerMessage = (data: WorkerData): void => {
+        if (isResponseData(data)) {
+            if (data.command === 'shutdown') {
+                this.worker?.terminate();
+            }
+        }
+    };
+
+    private invoke(name: CommandName, args: Record<string, unknown>): Promise<unknown> {
+        return new Promise((resolve, reject) => {
+            if (!this.port) {
+                reject(new Error('No message port available'));
+                return;
+            }
+
+            const id = this.nextId();
+            const handle = setTimeout(() => {
+                const entry = this.pending.get(id);
+                if (entry) {
+                    this.pending.delete(id);
+                    entry.reject(new Error(`Request "${name}" timed out.`));
+                }
+            }, 60000);
+
+            this.pending.set(id, { resolve, reject, handle });
+            this.port.postMessage({ id, type: 'command', name, args } satisfies ChannelCommand);
+        });
+    }
+
+    private nextId(): number {
+        if (this.id >= Number.MAX_SAFE_INTEGER) {
+            this.id = 0;
+            return this.id;
+        }
+
+        return this.id++;
+    }
+
+    private readonly onMessage = (data: ChannelResponse | ChannelError): void => {
+        const value = this.pending.get(data.id);
+        if (!value) {
+            return;
+        }
+
+        clearTimeout(value.handle);
+        this.pending.delete(data.id);
+        if (isChannelError(data)) {
+            return value.reject(new Error(data.message));
+        }
+
+        value.resolve(data.result);
+    };
+
+    private readonly onWorkerError = (error: unknown): void => {
+        const reason = error instanceof Error ? error : new Error(String(error));
+        for (const { reject } of this.pending.values()) {
+            reject(reason);
+        }
+
+        this.pending.clear();
+    };
+
+    private readonly onWorkerExit = (exitCode: number): void => {
+        if (this.pending.size === 0) {
+            return;
+        }
+
+        const error = new Error(`AAS index worker exited with code ${exitCode}.`);
+        for (const { reject } of this.pending.values()) {
+            reject(error);
+        }
+
+        this.pending.clear();
+    };
+}

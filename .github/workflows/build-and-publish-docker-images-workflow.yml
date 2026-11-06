@@ -46,7 +46,8 @@ jobs:
       - name: Build and push AASPortal (frontend) image
         uses: docker/build-push-action@v6
         with:
-          file: ./Dockerfile.aas-portal
+          file: ./Dockerfile.dbg.aas-portal
+          # file: ./Dockerfile.aas-portal
           context: .
           build-args: |
             GITHUB_RUN_NUMBER=${{ github.run_number }}
@@ -57,7 +58,8 @@ jobs:
       - name: Build and push AASNode (backend) image
         uses: docker/build-push-action@v6
         with:
-          file: ./Dockerfile.aas-node
+          file: ./Dockerfile.dbg.aas-node
+          # file: ./Dockerfile.aas-node
           context: .
           build-args: |
             GITHUB_RUN_NUMBER=${{ github.run_number }}

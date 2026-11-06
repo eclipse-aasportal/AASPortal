@@ -8,19 +8,13 @@
 
 import { Observable, of } from 'rxjs';
 import { NgComponentOutlet } from '@angular/common';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    effect,
-    OnDestroy,
-    TemplateRef,
-    viewChild,
-    computed,
-    inject,
-} from '@angular/core';
+import { Component, effect, OnDestroy, TemplateRef, viewChild, computed, inject } from '@angular/core';
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartState, StartTileItem } from './start.state';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 
 /**
  * The Start page. Provides a favorites page or, if no favorites are available, a welcome page.
@@ -29,8 +23,7 @@ import { StartState, StartTileItem } from './start.state';
     selector: 'fhg-start',
     templateUrl: './start.component.html',
     styleUrl: './start.component.scss',
-    imports: [NgComponentOutlet],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [CdkDrag, CdkDropList, NgComponentOutlet, NgbTooltip, TranslatePipe, TranslateDirective],
 })
 export class StartComponent implements OnDestroy {
     private readonly state = inject(StartState);
@@ -61,6 +54,9 @@ export class StartComponent implements OnDestroy {
     /** Indicates whether at least one favorite is selected. */
     public readonly someSelected = computed(() => this.items().some(item => item.selected()));
 
+    /** The selected favorites. */
+    public readonly selectedItems = computed(() => this.items().filter(item => item.selected()));
+
     /** Determines whether a single selected favorite can be moved to the left. */
     public readonly canMoveLeft = computed(() => {
         const indexes = this.items()
@@ -86,9 +82,16 @@ export class StartComponent implements OnDestroy {
         this.toolbar.clear();
     }
 
-    /** Toggles the selection of a favorite.  */
+    /** Selects a favorite, or toggles it when Command is pressed. */
     public toggleSelected($event: MouseEvent, item: StartTileItem): void {
-        item.selected.update(state => !state);
+        if ($event.metaKey) {
+            item.selected.update(state => !state);
+        } else {
+            this.items().forEach(favorite => {
+                favorite.selected.set(favorite === item && !item.selected());
+            });
+        }
+
         $event.stopPropagation();
     }
 
@@ -137,5 +140,24 @@ export class StartComponent implements OnDestroy {
         });
 
         return this.start.save();
+    }
+
+    /** Moves a favorite to its new drag-and-drop position. */
+    public drop(event: CdkDragDrop<StartTileItem[]>): void {
+        if (event.previousIndex === event.currentIndex) {
+            return;
+        }
+
+        this.start.tiles.update(tiles => {
+            const reordered = [...tiles];
+            moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+            return reordered;
+        });
+
+        this.start.save().subscribe();
+    }
+
+    public deselect(): void {
+        this.items().forEach(item => item.selected.set(false));
     }
 }

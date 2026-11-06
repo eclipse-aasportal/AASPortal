@@ -14,7 +14,7 @@ await esbuild.build({
     bundle: true,
     platform: 'node',
     format: 'esm',
-    target: 'es2022',
+    target: 'es2024',
     tsconfig: 'tsconfig.lib.json',
     packages: 'external',
     minify: false,
