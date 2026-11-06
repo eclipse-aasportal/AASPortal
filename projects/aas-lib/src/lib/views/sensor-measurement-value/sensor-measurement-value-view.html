@@ -1,0 +1,44 @@
+<div>
+    <div class="mt-1">
+        <fhg-doc-header [document]="document()"></fhg-doc-header>
+    </div>
+    <div class="mt-3">
+        <fhg-sensor-measurement-value [document]="document()" [submodel]="submodel()"></fhg-sensor-measurement-value>
+    </div>
+</div>
+
+<ng-template #toolbar>
+    <div class="w-100">
+        <div class="row mb-1">
+            <h2 class="col" translate="SensorMeasurementValue.TITLE"></h2>
+            <button
+                class="btn btn-outline-primary border-0 col-auto"
+                type="button"
+                (click)="addToStart().subscribe()"
+                ngbTooltip="{{ 'SensorMeasurementValue.ADD_TO_START_TOOLTIP' | translate }}"
+                placement="bottom"
+                container="body"
+                [openDelay]="300"
+                [closeDelay]="500"
+            >
+                <i class="bi bi-house-add"></i>
+                <div class="d-none d-lg-inline px-2">
+                    <span translate="SensorMeasurementValue.ADD_TO_START"></span>
+                </div>
+            </button>
+        </div>
+        @if (count() >= 2) {
+            <div class="row mb-1">
+                <div class="col">
+                    <ngb-pagination
+                        [collectionSize]="count()"
+                        [(page)]="index"
+                        [pageSize]="1"
+                        [directionLinks]="count() > 5"
+                        [ellipses]="true"
+                    />
+                </div>
+            </div>
+        }
+    </div>
+</ng-template>

@@ -1,0 +1,15 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+.btn-primary:disabled,
+.btn-primary.disabled {
+  --bs-btn-disabled-bg: var(--bs-secondary-bg);
+  --bs-btn-disabled-color: var(--bs-secondary-color);
+  --bs-btn-disabled-border-color: var(--bs-border-color);
+  --bs-btn-disabled-opacity: 1;
+}

@@ -10,11 +10,15 @@
  * Provides a cache with a remove oldest item strategy.
  */
 export abstract class Cache<TKey, TValue> {
-    private map = new Map<TKey, [TValue, number]>();
+    private readonly map = new Map<TKey, [TValue, number]>();
 
+    /**
+     * @param size The maximum size.
+     * @param expiration The expiration in seconds
+     */
     public constructor(
         private readonly size: number = 100,
-        private readonly expiration: number = 60 * 1000,
+        private readonly expiration: number = 60000,
     ) {}
 
     public clear(): void {

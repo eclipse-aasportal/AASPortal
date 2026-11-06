@@ -8,26 +8,15 @@
 
 import { aas, getReferable, isFile } from 'aas-core';
 import { RouterModule } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable } from 'rxjs';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { LangChangeEvent, TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    inject,
-    OnDestroy,
-    Signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { encodeBase64Url, getUrl, toString } from '../../utilities';
-import { ToolbarService } from '../../services/toolbar.service';
-import { StartService } from '../../services/start.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
 import { Nameplate } from '../nameplate/nameplate';
 import { HandoverDocumentation } from '../handover-documentation/handover-documentation';
@@ -57,27 +46,20 @@ const emptyMainData: MainData = {
         TranslateDirective,
         NgbAccordionModule,
         NgbPaginationModule,
-        ThumbnailQRCode,
+        DocumentHeader,
         CarbonFootprint,
         Nameplate,
         HandoverDocumentation,
         RouterModule,
     ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DigitalProductPassportView extends CompositeView implements OnDestroy {
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly state = inject(DigitalProductPassportViewState);
 
     public constructor() {
         super();
-
-        const translate = inject(TranslateService);
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -151,8 +133,9 @@ export class DigitalProductPassportView extends CompositeView implements OnDestr
 
         const endpoint = document.endpoint;
         const id = document.id;
+        const caption = 'DigitalProductPassport.CAPTION';
         const href = `/view/DigitalProductPassport;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
-        this.start.add('Favorite', `DPP#${endpoint}#${id}`, { endpoint, id, href });
+        this.start.add('Favorite', `DPP#${endpoint}#${id}`, { endpoint, id, caption, href });
         return this.start.save();
     }
 

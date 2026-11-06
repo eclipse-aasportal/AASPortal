@@ -8,13 +8,21 @@
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
+import semver from 'semver';
 import {
     aas,
     ApplicationError,
     convertToString,
+    extensionToMimeType,
     getLocaleValue,
     getPreferredName,
     AASDocument,
+    isAnnotatedRelationshipElement,
+    isAssetAdministrationShell,
+    isBlob,
+    isEntity,
+    isOperation,
+    isRange,
     isSubmodelElementCollection,
     getReferable,
     isProperty,
@@ -29,6 +37,7 @@ import {
     isErrorData,
     isSubmodel,
     isEnvironment,
+    AASEndpointType,
 } from 'aas-core';
 
 import {
@@ -50,24 +59,38 @@ import {
 export function messageToString(message: unknown, translate: TranslateService): string {
     let text: string;
     if (message instanceof ApplicationError) {
-        text = translate.instant(message.message, message.args);
+        text = translate.instant(message.message, translateArgs(message.args));
     } else if (typeof message === 'string') {
-        text = message;
+        text = translate.instant(message);
     } else if (message instanceof HttpErrorResponse) {
         if (isErrorData(message.error)) {
-            text = translate.instant(message.error.message, message.error.args);
+            text = translate.instant(message.error.message, translateArgs(message.error.args));
         } else {
             text = message.message ?? `${message.status} ${message.message}`;
         }
     } else if (message instanceof Error) {
         text = message.message;
     } else if (isErrorData(message)) {
-        text = translate.instant(message.message, message.args);
+        text = translate.instant(message.message, translateArgs(message.args));
     } else {
         text = convertToString(message);
     }
 
     return text;
+
+    function translateArgs(args: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+        if (!args) {
+            return args;
+        }
+
+        const result: Record<string, unknown> = {};
+        for (const name in args) {
+            const value = args[name];
+            result[name] = typeof value === 'string' ? translate.instant(value) : value;
+        }
+
+        return result;
+    }
 }
 
 /**
@@ -96,63 +119,6 @@ export function extension(path: string): string | undefined {
 }
 
 /**
- * Encodes a string to Base64Url.
- * @param s The string to encode.
- * @returns The encoded string.
- */
-export function encodeBase64Url(str: string): string {
-    const utf8Bytes = new TextEncoder().encode(str);
-    let binary = '';
-    utf8Bytes.forEach(b => (binary += String.fromCharCode(b)));
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-/**
- * Decodes a Base64Url string.
- * @param s The encoded string.
- * @returns The decoded string.
- */
-export function decodeBase64Url(str: string): string {
-    str = str.replace(/-/g, '+').replace(/_/g, '/');
-    while (str.length % 4) {
-        str += '=';
-    }
-
-    const binary = atob(str);
-    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
-    return new TextDecoder().decode(bytes);
-}
-
-/**
- * Checks if the specified string is base64 encoded
- * @param s The string to test.
- * @return true if base64 encoded
- */
-export function isBase64(s: string): boolean {
-    return /^[A-Za-z0-9+/]*[=]{0,2}$/.test(s);
-}
-
-/**
- * Converts a Blob to a base64 encoded string.
- * @param blob The current Blob.
- * @returns The base64 encoded string.
- */
-export function convertBlobToBase64Async(blob: Blob): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = (): void => {
-            const base64WithDataUrlPrefix = reader.result as string;
-            const index = base64WithDataUrlPrefix.indexOf(';base64,');
-            const base64 = base64WithDataUrlPrefix.substring(index + 8);
-            resolve(base64);
-        };
-
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-}
-
-/**
  * Determines the display name for the specified Referable.
  * @param referable The current Referable.
  * @param env The Environment of the Referable.
@@ -178,6 +144,72 @@ export function getDisplayName(referable: aas.Referable, env?: aas.Environment |
     }
 
     return toDisplayName(referable.idShort);
+}
+
+/**
+ * Computes a short, type-specific description for the given Referable — e.g. a Property's
+ * value type, a File's content type, a Collection's item count, or a MultiLanguageProperty's
+ * languages. Gives the user a quick sense of an element's content without expanding it.
+ * Shared between AasTree (which wraps it in brackets) and SubmodelTree.
+ * @param referable The current Referable, or `null` for an empty description.
+ * @returns The description, or an empty string if none applies to this Referable's type.
+ */
+export function getElementDescription(referable: aas.Referable | null): string {
+    if (!referable) {
+        return '';
+    }
+
+    if (isAssetAdministrationShell(referable)) {
+        return referable.id;
+    }
+
+    if (isMultiLanguageProperty(referable)) {
+        return Array.isArray(referable.value) ? referable.value.map(item => item.language).join(', ') : '';
+    }
+
+    if (isSubmodel(referable)) {
+        const sid = getSemanticId(referable);
+        return sid ? `sematicId: ${sid}` : `id: ${referable.id}`;
+    }
+
+    if (isProperty(referable) || isRange(referable)) {
+        const valueType = referable.valueType;
+        return valueType ? (valueType.startsWith('xs:') ? valueType.substring(3) : valueType) : '';
+    }
+
+    if (isBlob(referable)) {
+        return referable.contentType ?? '';
+    }
+
+    if (isFile(referable)) {
+        if (referable.contentType) {
+            return referable.contentType;
+        }
+
+        return referable.value ? (extensionToMimeType(referable.value) ?? '') : '';
+    }
+
+    if (isSubmodelElementCollection(referable) || isSubmodelElementList(referable)) {
+        return referable.value ? `${referable.value.length}` : '0';
+    }
+
+    if (isAnnotatedRelationshipElement(referable)) {
+        return referable.annotations ? `${referable.annotations.length}` : '0';
+    }
+
+    if (isEntity(referable)) {
+        return referable.statements ? `${referable.statements.length}` : '0';
+    }
+
+    if (isOperation(referable)) {
+        return (
+            (referable.inputVariables?.length ?? 0) +
+            (referable.inoutputVariables?.length ?? 0) +
+            (referable.outputVariables?.length ?? 0)
+        ).toString();
+    }
+
+    return '';
 }
 
 /**
@@ -647,7 +679,7 @@ export function findSubmodel(document: AASDocument, semanticIds: string[]): aas.
         return undefined;
     }
 
-    return env.submodels.find(submodel => {
+    return env.submodels?.find(submodel => {
         const semanticId = getSemanticId(submodel);
         if (!semanticId) {
             return false;
@@ -690,7 +722,10 @@ export function findRouteForSubmodel(
         }
     }
 
-    return defaultRoute ? viewRoutes.find(item => item.data.type === 'Default') : undefined;
+    // Submodel-level fallback is a distinct route type from the whole-shell 'Default' (used by
+    // findRouteForShell below) — an unmatched submodel opens the generic per-submodel view, not
+    // the whole-AAS tree browser.
+    return defaultRoute ? viewRoutes.find(item => item.data.type === 'DefaultSubmodel') : undefined;
 }
 
 /**
@@ -723,10 +758,12 @@ export function findRouteForShell(
         );
 
         const submodelSemanticIds = new Map<string, aas.Submodel>();
-        for (const submodel of env.submodels) {
-            const semanticId = getSemanticId(submodel);
-            if (semanticId) {
-                submodelSemanticIds.set(semanticId, submodel);
+        if (env.submodels) {
+            for (const submodel of env.submodels) {
+                const semanticId = getSemanticId(submodel);
+                if (semanticId) {
+                    submodelSemanticIds.set(semanticId, submodel);
+                }
             }
         }
 
@@ -759,7 +796,7 @@ export function findRouteForShell(
                 if (data.idShorts) {
                     let submodel: aas.Submodel | undefined;
                     for (const idShort of data.idShorts) {
-                        const submodel = env.submodels.find(submodel => submodel.idShort === idShort);
+                        const submodel = env.submodels?.find(submodel => submodel.idShort === idShort);
 
                         if (submodel) {
                             break;
@@ -794,4 +831,162 @@ export function hasSpecificView(viewRoutes: ViewRoute[], arg: aas.Submodel | AAS
 
     const { route } = findRouteForShell(viewRoutes, arg, false);
     return route !== undefined;
+}
+
+/**
+ * Validates the specified endpoint URL based on the endpoint type.
+ * @param value The endpoint URL to validate.
+ * @param type The type of the endpoint.
+ * @returns `undefined` if the endpoint URL is valid for the specified type; otherwise an error ID.
+ */
+export function validateEndpointUrl(value: string, type: AASEndpointType): string | undefined {
+    try {
+        const url = new URL(value);
+        switch (type) {
+            case 'AAS_API':
+                return validateAASApiEndpoint(url);
+            case 'FileSystem':
+                return validateFileSystemEndpoint(url);
+            case 'OPC_UA':
+                return validateOpcuaEndpoint(url);
+            case 'WebDAV':
+                return validateWebDAVEndpoint(url);
+        }
+    } catch (error) {
+        return error?.message;
+    }
+
+    function validateAASApiEndpoint(url: URL): string | undefined {
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return 'HTTP_OR_HTTPS_PROTOCOL_REQUIRED';
+        }
+
+        if (!url.hostname) {
+            return 'HOSTNAME_REQUIRED';
+        }
+
+        if (!url.pathname.endsWith('/')) {
+            return 'ENDING_SLASH_REQUIRED';
+        }
+
+        const version = url.searchParams.get('version');
+        if (version && !semver.valid(semver.coerce(version))) {
+            return 'INVALID_VERSION';
+        }
+
+        return undefined;
+    }
+
+    function validateFileSystemEndpoint(url: URL): string | undefined {
+        if (url.protocol !== 'file:') {
+            return 'FILE_PROTOCOL_REQUIRED';
+        }
+
+        if (url.hostname !== '') {
+            return 'EMPTY_HOSTNAME_REQUIRED';
+        }
+
+        if (url.pathname === '/') {
+            return 'PATHNAME_REQUIRED';
+        }
+
+        return undefined;
+    }
+
+    function validateOpcuaEndpoint(url: URL): string | undefined {
+        if (url.protocol !== 'opc.tcp:') {
+            return 'OPC_TCP_PROTOCOL_REQUIRED';
+        }
+
+        if (!url.hostname) {
+            return 'HOSTNAME_REQUIRED';
+        }
+
+        return undefined;
+    }
+
+    function validateWebDAVEndpoint(url: URL): string | undefined {
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return 'HTTP_OR_HTTPS_PROTOCOL_REQUIRED';
+        }
+
+        if (!url.hostname) {
+            return 'HOSTNAME_REQUIRED';
+        }
+
+        return undefined;
+    }
+}
+
+const BASE64URL_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+/**
+ * Encodes a string to Base64URL format (without btoa and replace).
+ * @param input The string to encode.
+ * @returns The Base64URL encoded string.
+ */
+export function encodeBase64Url(input: string): string {
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(input);
+
+    let result = '';
+
+    for (let i = 0; i < bytes.length; i += 3) {
+        const byte1 = bytes[i];
+        const byte2 = bytes[i + 1] ?? 0;
+        const byte3 = bytes[i + 2] ?? 0;
+
+        const index1 = byte1 >> 2;
+        const index2 = ((byte1 & 0x03) << 4) | (byte2 >> 4);
+        const index3 = ((byte2 & 0x0f) << 2) | (byte3 >> 6);
+        const index4 = byte3 & 0x3f;
+
+        result += BASE64URL_ALPHABET[index1];
+        result += BASE64URL_ALPHABET[index2];
+        result += i + 1 < bytes.length ? BASE64URL_ALPHABET[index3] : '';
+        result += i + 2 < bytes.length ? BASE64URL_ALPHABET[index4] : '';
+    }
+
+    return result;
+}
+
+/**
+ * Decodes a Base64URL encoded string to its original string representation.
+ * @param input The Base64URL encoded string to decode.
+ * @returns The original string representation.
+ */
+export function decodeBase64Url(input: string): string {
+    const revMap: Record<string, number> = {};
+    for (let i = 0; i < BASE64URL_ALPHABET.length; i++) {
+        revMap[BASE64URL_ALPHABET[i]] = i;
+    }
+
+    const pad = (4 - (input.length % 4)) % 4;
+    const paddedInput = input + '='.repeat(pad);
+
+    const bytes: number[] = [];
+
+    for (let i = 0; i < paddedInput.length; i += 4) {
+        const char1 = paddedInput[i];
+        const char2 = paddedInput[i + 1];
+        const char3 = paddedInput[i + 2];
+        const char4 = paddedInput[i + 3];
+
+        const val1 = revMap[char1];
+        const val2 = revMap[char2];
+        const val3 = char3 === '=' ? 0 : revMap[char3];
+        const val4 = char4 === '=' ? 0 : revMap[char4];
+
+        const byte1 = (val1 << 2) | (val2 >> 4);
+        const byte2 = ((val2 & 15) << 4) | (val3 >> 2);
+        const byte3 = ((val3 & 3) << 6) | val4;
+
+        bytes.push(byte1);
+
+        if (char3 !== '=') bytes.push(byte2);
+        if (char4 !== '=') bytes.push(byte3);
+    }
+
+    const decoder = new TextDecoder('utf-8');
+    return decoder.decode(new Uint8Array(bytes));
 }

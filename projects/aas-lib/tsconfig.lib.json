@@ -1,14 +1,24 @@
 /* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./out-tsc/lib",
-    "declaration": true,
-    "declarationMap": true,
-    "inlineSources": true
-  },
-  "exclude": [
-    "src/test/**",
-    "dist/**"
-  ]
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./out-tsc/lib",
+        "declaration": true,
+        "declarationMap": true,
+        "inlineSources": true,
+        "noEmit": false
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": [
+        "src/test/**/*",
+        "src/**/*.spec.ts"
+    ],
+    "angularCompilerOptions": {
+        "extendedDiagnostics": {
+            "checks": {
+                "nullishCoalescingNotNullable": "suppress",
+                "optionalChainNotNullable": "suppress"
+            }
+        }
+    }
 }

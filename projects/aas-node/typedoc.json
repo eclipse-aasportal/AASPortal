@@ -5,5 +5,9 @@
     "entryPoints": [
         "src/app/**/*.ts"
     ],
+    "exclude": [
+        "src/**/*.spec.ts",
+        "src/test/**/*"
+    ],
     "tsconfig": "tsconfig.app.json"
 }

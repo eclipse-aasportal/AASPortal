@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, TemplateRef, viewChild, inject } from '@angular/core';
+import { Component, computed, effect, TemplateRef, viewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConceptDescriptionComponent, decodeBase64Url, ToolbarService } from 'aas-lib';
 
@@ -18,7 +18,6 @@ import { ConceptDescriptionApi } from './concept-description-api';
     templateUrl: './concept-descriptions.component.html',
     styleUrl: './concept-descriptions.component.scss',
     imports: [FormsModule, ConceptDescriptionComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConceptDescriptionsComponent {
     private readonly toolbar = inject(ToolbarService);

@@ -27,7 +27,7 @@ export class SubmodelTable extends IdentifiableTable<aas.Submodel> {
      *
      * @param id - The unique identifier of the submodel.
      * @returns A promise that resolves to the corresponding {@link DatabaseKey}.
-     * @throws {@link ApplicationError} If the submodel does not exist, with error code {@link ERROR.SUBMODEL_DOES_NOT_EXIST}.
+     * @throws If the submodel does not exist, with error code {@link ERROR.SUBMODEL_DOES_NOT_EXIST}.
      */
     public override async getKey(id: string): Promise<DatabaseKey> {
         const key = await this.findKey(id);

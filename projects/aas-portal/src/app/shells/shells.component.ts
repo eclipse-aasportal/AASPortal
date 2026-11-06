@@ -7,11 +7,10 @@
  *****************************************************************************/
 
 import { Route, Router } from '@angular/router';
-import { NgClass } from '@angular/common';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
 import {
-    ChangeDetectionStrategy,
     Component,
     ElementRef,
     OnDestroy,
@@ -24,10 +23,10 @@ import {
     viewChild,
 } from '@angular/core';
 
-import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { catchError, concatMap, EMPTY, from, map, mergeMap, Observable, of } from 'rxjs';
-import { AASDocument, AASEndpoint, QueryParser } from 'aas-core';
+import { NgbDropdown, NgbModal, NgbModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { catchError, concatMap, EMPTY, from, map, mergeMap, Observable, of, tap } from 'rxjs';
+import { AASDocument, AASEndpoint, FilterExpressionParser } from 'aas-core';
 import {
     AASTable,
     AuthService,
@@ -38,25 +37,30 @@ import {
     StartService,
     ToolbarService,
     encodeBase64Url,
-    viewRoutes,
+    messageToString,
 } from 'aas-lib';
 
-import { AddEndpointFormComponent } from './add-endpoint-form/add-endpoint-form.component';
-import { EndpointSelect, RemoveEndpointFormComponent } from './remove-endpoint-form/remove-endpoint-form.component';
 import { UploadFormComponent } from './upload-form/upload-form.component';
 import { FavoritesService } from './favorites.service';
 import { FavoritesFormComponent } from './favorites-form/favorites-form.component';
-import { ShellsState } from './shells.state';
-import { UpdateEndpointFormComponent } from './update-endpoint-form/update-endpoint-form.component';
-import { ExtrasEndpointFormComponent } from './extras-endpoint-form/extras-endpoint-form.component';
+import { EndpointItem, ShellsState } from './shells.state';
 import { INFO } from '../messages';
 
 @Component({
     selector: 'fhg-shells',
     templateUrl: './shells.component.html',
     styleUrls: ['./shells.component.scss'],
-    imports: [AASTable, NgClass, TranslateModule, NgbModule, FormsModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        AASTable,
+        NgClass,
+        TranslateDirective,
+        TranslatePipe,
+        NgbModule,
+        NgbTooltip,
+        NgbDropdown,
+        FormsModule,
+        NgTemplateOutlet,
+    ],
 })
 /**
  * Component responsible for managing AAS (Asset Administration Shell) documents and endpoints.
@@ -65,7 +69,6 @@ import { INFO } from '../messages';
  * - Endpoint management (add, update, remove)
  * - Favorites management
  * - Document filtering and pagination
- * - View navigation
  * - Toolbar integration
  *
  * Key features:
@@ -89,6 +92,8 @@ export class ShellsComponent implements OnDestroy {
     private readonly favorites = inject(FavoritesService);
     private readonly start = inject(StartService);
     private readonly progress = inject(ProgressService);
+    private readonly _filterTooltip = signal('');
+    private readonly _invalidFilter = signal(false);
 
     public constructor() {
         effect(() => {
@@ -197,9 +202,24 @@ export class ShellsComponent implements OnDestroy {
     public readonly someSelected = computed(() => this.selected().length > 0);
 
     /**
-     * Provides a list of available views.
+     * Provides the tooltip text for the current filter expression.
      */
-    public readonly views = signal(viewRoutes).asReadonly();
+    public readonly filterTooltip = this._filterTooltip.asReadonly();
+
+    /**
+     * Indicates whether the current filter expression is invalid.
+     */
+    public readonly invalidFilter = this._invalidFilter.asReadonly();
+
+    /**
+     * The list of available AAS endpoints.
+     */
+    public readonly endpoints = this.state.endpoints;
+
+    /**
+     * Indicates whether at least one endpoint is currently checked.
+     */
+    public readonly someEndpointsChecked = this.state.someEndpointsChecked;
 
     public ngOnDestroy(): void {
         this.toolbar.clear();
@@ -232,105 +252,10 @@ export class ShellsComponent implements OnDestroy {
     }
 
     /**
-     * Adds a new AAS endpoint.
-     * This operation requires specific permissions.
-     *
-     * @returns An Observable that completes when the endpoint is successfully added,
-     *          or emits an error if the operation fails. Returns EMPTY if user cancels the operation.
-     * @throws Will be caught and handled by the notification service
+     * Clears the selection.
      */
-    public addEndpoint(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            map(endpoints => {
-                const modalRef = this.modal.open(AddEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.initialize(endpoints);
-                return modalRef;
-            }),
-            mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
-            mergeMap(result => {
-                if (result === undefined) {
-                    return EMPTY;
-                }
-
-                return this.api.addEndpoint(result);
-            }),
-            catchError(error => of(this.notify.error(error))),
-        );
-    }
-
-    /**
-     * Updates the configuration of an AAS endpoint.
-     * This operation requires specific permissions.
-     *
-     * @returns An Observable that completes when the endpoint is updated, or emits an error if the operation fails
-     * @throws Error if unauthorized, endpoint retrieval fails, or update operation fails
-     */
-    public updateEndpoint(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            map(endpoints => {
-                const modalRef = this.modal.open(UpdateEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.initialize(endpoints);
-                return modalRef;
-            }),
-            mergeMap(modalRef => from<Promise<AASEndpoint | undefined>>(modalRef.result)),
-            mergeMap(result => {
-                if (result === undefined) {
-                    return EMPTY;
-                }
-
-                return this.api.updateEndpoint(result);
-            }),
-            catchError(error => of(this.notify.error(error))),
-        );
-    }
-
-    /**
-     * Removes one or multiple endpoints from the AASNode configuration.
-     * This operation requires specific permissions.
-     *
-     * @returns An Observable that completes when the endpoint removal process is finished
-     * @throws Handled by the notification service if any error occurs during the process
-     */
-    public removeEndpoint(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
-            mergeMap(endpoints => {
-                const modalRef = this.modal.open(RemoveEndpointFormComponent, { backdrop: 'static' });
-                modalRef.componentInstance.endpoints.set(
-                    endpoints
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .map(
-                            item =>
-                                ({
-                                    name: item.name,
-                                    url: item.url,
-                                    selected: false,
-                                }) as EndpointSelect,
-                        ),
-                );
-                return from<Promise<string[] | undefined>>(modalRef.result);
-            }),
-            mergeMap(endpoints => from(endpoints ?? [])),
-            mergeMap(endpoint => this.api.removeEndpoint(endpoint)),
-            catchError(error => of(this.notify.error(error))),
-        );
-    }
-
-    /**
-     * Opens the extras dialog.
-     * This operation requires specific permissions.
-     *
-     * @returns An Observable that completes when the dialog has been closed.
-     */
-    public extras(): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => {
-                const modalRef = this.modal.open(ExtrasEndpointFormComponent, { backdrop: 'static', scrollable: true });
-                return from(modalRef.result);
-            }),
-        );
+    public emptySelected(): void {
+        this.state.update({ selected: [] });
     }
 
     /**
@@ -339,9 +264,19 @@ export class ShellsComponent implements OnDestroy {
      * @returns An Observable that completes when the download request(s) complete.
      */
     public downloadPackages(): Observable<void> {
+        if (!this.auth.isAuthenticated()) {
+            return this.auth.login();
+        }
+
         return from(this.state.selected()).pipe(
-            mergeMap(document => this.api.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx')),
-            catchError(error => of(this.notify.error(error))),
+            mergeMap(document =>
+                this.api.downloadPackage(document.endpoint, document.id, document.idShort + '.aasx').pipe(
+                    catchError(error => {
+                        this.notify.error(error);
+                        return EMPTY;
+                    }),
+                ),
+            ),
         );
     }
 
@@ -358,34 +293,40 @@ export class ShellsComponent implements OnDestroy {
      * @returns Observable that completes when the operation finishes (or EMPTY if there was nothing to delete).
      */
     public deletePackages(): Observable<void> {
-        if (this.state.selected().length === 0) {
-            return EMPTY;
+        const documents = this.state.selected();
+        if (documents.length === 0) {
+            return of(void 0);
         }
 
         return of(this.favorites.active()).pipe(
             mergeMap(activeFavorites => {
                 if (activeFavorites) {
-                    this.favorites.remove(this.state.selected(), activeFavorites);
-                    return this.favorites.save();
+                    this.favorites.remove(documents, activeFavorites);
+                    return this.favorites.save().pipe(tap(() => this.emptySelected()));
                 } else {
-                    return this.auth.ensureAuthorized('editor').pipe(
+                    if (!this.auth.isAuthenticated()) {
+                        return this.auth.login();
+                    }
+
+                    return this.auth.checkAuthorized('editor').pipe(
                         mergeMap(() =>
                             ConfirmDialog.open(
                                 this.modal,
                                 this.translate.instant('Shells.CONFIRM_DELETE_DOCUMENT', {
-                                    documents: this.state
-                                        .selected()
-                                        .map(item => item.idShort)
-                                        .join(', '),
+                                    documents: documents.map(item => item.idShort).join(', '),
                                 }),
                             ),
                         ),
-                        mergeMap(result => from(result ? this.state.selected() : [])),
-                        mergeMap(document => this.api.deleteDocument(document.id, document.endpoint)),
-                        catchError(error => {
-                            this.notify.error(error);
-                            return of(void 0);
-                        }),
+                        mergeMap(result => from(result ? documents : [])),
+                        mergeMap(document =>
+                            this.api.deletePackage(document.id, document.endpoint).pipe(
+                                catchError(error => {
+                                    this.notify.error(error);
+                                    return EMPTY;
+                                }),
+                            ),
+                        ),
+                        tap(() => this.emptySelected()),
                     );
                 }
             }),
@@ -416,11 +357,11 @@ export class ShellsComponent implements OnDestroy {
 
     public setFilterText(filterText: string): void {
         try {
+            this._invalidFilter.set(false);
+            this._filterTooltip.set('');
             filterText = filterText.trim();
             if (filterText.length >= 3) {
-                new QueryParser(filterText).check();
-            } else {
-                filterText = '';
+                new FilterExpressionParser(filterText).check();
             }
 
             this.state.update({ filterText });
@@ -428,7 +369,8 @@ export class ShellsComponent implements OnDestroy {
                 this.state.getFirstPage();
             }
         } catch (error) {
-            this.notify.error(error);
+            this._invalidFilter.set(true);
+            this._filterTooltip.set(messageToString(error, this.translate));
         }
     }
 
@@ -449,9 +391,10 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public addToFavorites(): Observable<void> {
+        const documents = this.state.selected();
         return of(this.modal.open(FavoritesFormComponent, { backdrop: 'static', scrollable: true })).pipe(
             mergeMap(modalRef => {
-                modalRef.componentInstance.documents = [...this.state.selected()];
+                modalRef.componentInstance.documents = [...documents];
                 return from(modalRef.result);
             }),
             map(() => {
@@ -461,20 +404,33 @@ export class ShellsComponent implements OnDestroy {
     }
 
     public addToStart(): Observable<void> {
-        for (const document of this.state.selected()) {
+        const documents = this.state.selected();
+        for (const document of documents) {
             this.start.add('Favorite', `${document.endpoint}.${document.id}`, {
                 href: `/aas;endpoint=${encodeBase64Url(document.endpoint)};id=${encodeBase64Url(document.id)}`,
                 id: document.id,
                 endpoint: document.endpoint,
+                caption: 'AAS.CAPTION',
             });
         }
 
         return this.start.save();
     }
 
+    public toggleCheckEndpoint(checked: boolean, item: EndpointItem): void {
+        this.state.update({ endpoints: [{ ...item, checked }] });
+    }
+
+    public selectFiles(): Observable<void> {
+        if (!this.auth.isAuthenticated()) {
+            return this.auth.login();
+        }
+
+        return this.auth.checkAuthorized('editor').pipe(tap(() => this.inputFiles()?.nativeElement.click()));
+    }
+
     private uploadPackages(files: File[]): Observable<void> {
-        return this.auth.ensureAuthorized('editor').pipe(
-            mergeMap(() => this.api.getEndpoints()),
+        return this.api.getEndpoints().pipe(
             mergeMap(endpoints => {
                 if (endpoints.length <= 1) {
                     return of(endpoints.at(0));
@@ -503,8 +459,8 @@ export class ShellsComponent implements OnDestroy {
                                 return of();
                             }),
                             map(event => {
-                                if (event.type === HttpEventType.UploadProgress) {
-                                    this.progress.set(Math.round((event.loaded / event.total!) * 100), file.name);
+                                if (event.type === HttpEventType.UploadProgress && event.total && event.total > 0) {
+                                    this.progress.set(Math.round((event.loaded / event.total) * 100), file.name);
                                 } else if (event.type === HttpEventType.Response) {
                                     this.notify.info(INFO.FILE_SUCCESSFULLY_UPLOADED, { file: file.name });
                                 }

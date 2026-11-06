@@ -28,8 +28,8 @@
                         "inlineStyleLanguage": "scss",
                         "assets": [
                             "projects/aas-portal/src/favicon.ico",
-                            "projects/aas-portal/src/assets",
-                            "projects/aas-portal/src/start"
+                            "projects/aas-portal/src/theme.js",
+                            "projects/aas-portal/src/assets"
                         ],
                         "styles": [
                             "node_modules/bootstrap/dist/css/bootstrap.min.css",
@@ -38,7 +38,8 @@
                         ],
                         "scripts": [],
                         "allowedCommonJsDependencies": [
-                            "qrcode"
+                            "qrcode",
+                            "semver"
                         ]
                     },
                     "configurations": {
@@ -93,18 +94,18 @@
                         "coverageInclude": [
                             "src/app/**/*.ts"
                         ],
+                        "coverageExclude": [
+                            "src/app/**/*.spec.ts"
+                        ],
                         "coverageReporters": [
-                            "text",
-                            "json",
-                            "html",
-                            "lcov",
-                            "json-summary"
+                            "text-summary",
+                            "json"
                         ],
                         "include": [
-                            "projects/aas-portal/src/test/**/*.{test,spec}.ts"
+                            "projects/aas-portal/src/**/*.spec.ts"
                         ],
                         "runnerConfig": "projects/aas-portal/vitest.config.ts",
-                        "outputFile": "coverage/aas-portal.xml",
+                        "outputFile": "projects/aas-portal/coverage/coverage.xml",
                         "reporters": [
                             "default",
                             "junit"
@@ -122,8 +123,8 @@
                     "builder": "@angular-eslint/builder:lint",
                     "options": {
                         "lintFilePatterns": [
-                            "projects/aas-portal/src/app/**/*.ts",
-                            "projects/aas-portal/src/app/**/*.html"
+                            "projects/aas-portal/src/**/*.ts",
+                            "projects/aas-portal/src/**/*.html"
                         ]
                     }
                 }
@@ -215,18 +216,18 @@
                         "coverageInclude": [
                             "src/app/**/*.ts"
                         ],
+                        "coverageExclude": [
+                            "src/app/**/*.spec.ts"
+                        ],
                         "coverageReporters": [
-                            "text",
-                            "json",
-                            "html",
-                            "lcov",
-                            "json-summary"
+                            "text-summary",
+                            "json"
                         ],
                         "include": [
-                            "projects/aas-browser/src/test/**/*.{test,spec}.ts"
+                            "projects/aas-browser/src/**/*.spec.ts"
                         ],
                         "runnerConfig": "projects/aas-browser/vitest.config.ts",
-                        "outputFile": "coverage/aas-browser.xml",
+                        "outputFile": "projects/aas-browser/coverage/coverage.xml",
                         "reporters": [
                             "default",
                             "junit"
@@ -273,8 +274,8 @@
                     "builder": "@angular-eslint/builder:lint",
                     "options": {
                         "lintFilePatterns": [
-                            "projects/aas-lib/src/lib/**/*.ts",
-                            "projects/aas-lib/src/lib/**/*.html"
+                            "projects/aas-lib/src/**/*.ts",
+                            "projects/aas-lib/src/**/*.html"
                         ]
                     }
                 },
@@ -285,18 +286,18 @@
                         "coverageInclude": [
                             "src/lib/**/*.ts"
                         ],
+                        "coverageExclude": [
+                            "src/lib/**/*.spec.ts"
+                        ],
                         "coverageReporters": [
-                            "text",
-                            "json",
-                            "html",
-                            "lcov",
-                            "json-summary"
+                            "text-summary",
+                            "json"
                         ],
                         "include": [
-                            "projects/aas-lib/src/test/**/*.{test,spec}.ts"
+                            "projects/aas-lib/src/**/*.spec.ts"
                         ],
                         "runnerConfig": "projects/aas-lib/vitest.config.ts",
-                        "outputFile": "coverage/aas-lib.xml",
+                        "outputFile": "projects/aas-lib/coverage/coverage.xml",
                         "reporters": [
                             "default",
                             "junit"

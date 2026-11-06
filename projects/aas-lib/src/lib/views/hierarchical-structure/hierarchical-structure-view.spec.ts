@@ -1,0 +1,128 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslateService } from '@ngx-translate/core';
+import { Component, input, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
+
+import { aas, AASDocument } from 'aas-core';
+import { HierarchicalStructureView } from './hierarchical-structure-view';
+import { HierarchicalStructure } from './hierarchical-structure';
+import { createSpyObj } from '../../../test/mocks';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
+import { StartService } from '../../shared/services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
+import { encodeBase64Url } from '../../utilities';
+import { VIEW_ROUTES } from '../views-routes';
+import { HIERARCHICAL_STRUCTURES_1_0, HIERARCHICAL_STRUCTURES_1_1 } from '../views-constants';
+
+import hierarchicalStructures_1_1 from '../../../test/assets/hierarchical-structures-1-1.json';
+
+@Component({
+    selector: 'fhg-doc-header',
+    template: '<div></div>',
+    styleUrls: [],
+})
+export class TestDocumentHeader {
+    public readonly document = input<AASDocument>();
+}
+
+@Component({
+    selector: 'fhg-hierarchical-structure',
+    template: '<div></div>',
+    styleUrls: [],
+})
+export class TestHierarchicalStructure {
+    public readonly document = input<AASDocument>();
+    public readonly submodel = input<aas.Submodel>();
+}
+
+describe('HierarchicalStructureView', () => {
+    let component: HierarchicalStructureView;
+    let fixture: ComponentFixture<HierarchicalStructureView>;
+    let start: Mocked<StartService>;
+    let api: Mocked<EndpointsApi>;
+    let route: Mocked<ActivatedRoute>;
+    let document: AASDocument;
+
+    beforeEach(async () => {
+        start = createSpyObj<StartService>(['add', 'save']);
+        document = {
+            address: '',
+            idShort: 'BillofMaterialAAS',
+            timestamp: 0,
+            id: 'https://admin-shell.io/idta/aas/HierarchicalStructuresBoM/1/1',
+            endpoint: 'Test',
+            content: hierarchicalStructures_1_1 as aas.Environment,
+        };
+
+        route = createSpyObj<ActivatedRoute>(
+            {},
+            {
+                params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
+                queryParams: of({}),
+            },
+        );
+
+        api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
+        api.getDocument.mockReturnValue(of(document));
+
+        await TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: ToolbarService,
+                    useValue: createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
+                },
+                {
+                    provide: StartService,
+                    useValue: start,
+                },
+                {
+                    provide: EndpointsApi,
+                    useValue: api,
+                },
+                {
+                    provide: ActivatedRoute,
+                    useValue: route,
+                },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: [
+                        {
+                            path: 'HierarchicalStructure',
+                            component: HierarchicalStructureView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [HIERARCHICAL_STRUCTURES_1_0, HIERARCHICAL_STRUCTURES_1_1],
+                            },
+                        },
+                    ],
+                },
+                provideTranslateService(),
+            ],
+            imports: [HierarchicalStructureView],
+        }).compileComponents();
+
+        TestBed.overrideComponent(HierarchicalStructureView, {
+            remove: { imports: [HierarchicalStructure, DocumentHeader] },
+            add: { imports: [TestHierarchicalStructure, TestDocumentHeader] },
+        });
+
+        fixture = TestBed.createComponent(HierarchicalStructureView);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+});

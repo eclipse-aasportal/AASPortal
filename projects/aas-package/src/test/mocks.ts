@@ -49,8 +49,5 @@ export function createSpyObj<T extends object>(
     return obj as Mocked<T>;
 }
 
-export type DoneFn = () => void;
-
-export function fail(): void {
-    expect(false).toBe(true);
+export function noop(...args: unknown[]): void {
 }

@@ -7,36 +7,25 @@
  *****************************************************************************/
 
 import { EMPTY, Observable } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
-import {
-    Component,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    signal,
-    ChangeDetectionStrategy,
-    viewChild,
-    effect,
-    inject,
-} from '@angular/core';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+import { Component, OnDestroy, OnInit, TemplateRef, signal, viewChild, effect, inject } from '@angular/core';
 
 import { Library } from 'aas-core';
-import { IndexChange, LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
+import { LicenseInfoComponent, StartService, ToolbarService } from 'aas-lib';
 import { AboutApiService } from './about-api.service';
 import { environment } from '../../environments/environment';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'fhg-about',
     templateUrl: './about.component.html',
     styleUrls: ['./about.component.scss'],
-    imports: [TranslateModule, LicenseInfoComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslateDirective, TranslatePipe, LicenseInfoComponent, NgbTooltip],
 })
 export class AboutComponent implements OnInit, OnDestroy {
     private readonly api = inject(AboutApiService);
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
-    private readonly indexChange = inject(IndexChange);
     private readonly version$ = signal('');
     private readonly libraries$ = signal<Library[]>([]);
 
@@ -56,10 +45,6 @@ export class AboutComponent implements OnInit, OnDestroy {
     public readonly homepage = signal(environment.homepage).asReadonly();
 
     public readonly libraries = this.libraries$.asReadonly();
-
-    public readonly endpoints = this.indexChange.endpointCount;
-
-    public readonly shells = this.indexChange.documentCount;
 
     public ngOnInit(): void {
         this.api.getInfo().subscribe(info => {

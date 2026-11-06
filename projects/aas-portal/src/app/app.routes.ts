@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { Routes } from '@angular/router';
-import { LoginFormComponent, ProfileFormComponent, RegisterFormComponent, viewRoutes } from 'aas-lib';
+import { LoginForm, ProfileForm, RegisterForm, viewRoutes } from 'aas-lib';
 import { AASComponent } from './aas/aas.component';
 import { AboutComponent } from './about/about.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -29,9 +29,9 @@ export const routes: Routes = [
     },
     { path: 'dashboard', component: DashboardComponent },
     { path: 'about', component: AboutComponent },
-    { path: 'login', component: LoginFormComponent },
-    { path: 'register', component: RegisterFormComponent },
-    { path: 'profile', component: ProfileFormComponent },
+    { path: 'login', component: LoginForm },
+    { path: 'register', component: RegisterForm },
+    { path: 'profile', component: ProfileForm },
     { path: '', redirectTo: '/start', pathMatch: 'full' },
     { path: '**', component: ShellsComponent },
 ];

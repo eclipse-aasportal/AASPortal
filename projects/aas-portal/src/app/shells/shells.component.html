@@ -6,137 +6,256 @@
  !
  !---------------------------------------------------------------------------->
 
-<div id="shells-container" class="overflow-auto h-100 px-2">
+<div class="h-100 w-100 overflow-y-auto overflow-x-hidden px-3">
     <fhg-aas-table
         [documents]="documents()"
         [selected]="selected()"
         (selectedChange)="setSelected($event)"
         [expression]="filter()"
     ></fhg-aas-table>
+
+    <div class="w-100 d-block d-md-none">
+        @if (!activeFavoritesList()) {
+            <ng-container *ngTemplateOutlet="pagination"></ng-container>
+        }
+    </div>
 </div>
 
 <ng-template #toolbar>
-    <div class="input-group me-2 my-1">
-        <button class="btn btn-outline-primary" type="button" (click)="addToFavorites().subscribe()">
-            <i class="bi bi-star"></i>
-        </button>
-        <select
-            [ngClass]="activeFavoritesList() ? 'form-select fst-normal fw-normal' : 'form-select fst-italic fw-light'"
-            [ngModel]="activeFavoritesList()"
-            (ngModelChange)="setActiveFavoriteList($event)"
-        >
-            @for (option of favoritesLists(); track option; let i = $index) {
-                @if (i === 0) {
-                    <option class="fst-italic fw-light" [value]="''" translate>Shells.FAVORITES</option>
-                } @else {
-                    <option class="fst-normal fw-normal" [value]="option">{{ option }}</option>
-                }
+    <div class="w-100 d-none d-md-block">
+        <h2 class="mb-1" translate="Shells.CAPTION"></h2>
+        <div class="d-flex flex-row">
+            <div class="input-group flex-nowrap me-2 my-1 flex-fill">
+                <ng-container *ngTemplateOutlet="favorites"></ng-container>
+            </div>
+
+            @if (!activeFavoritesList()) {
+                <div class="btn-group input-group flex-nowrap me-2 my-1 flex-fill">
+                    <ng-container *ngTemplateOutlet="filterControl"></ng-container>
+                </div>
             }
-        </select>
-        <button
-            class="btn btn-outline-primary"
-            type="button"
-            (click)="addToStart().subscribe()"
-            [disabled]="someSelected() === false"
-        >
-            <i class="bi bi-house-add"></i>
-        </button>
+
+            <div class="d-none d-md-flex">
+                <button
+                    class="btn btn-outline-primary my-1"
+                    type="button"
+                    id="AID_OPEN_FILE"
+                    (click)="selectFiles().subscribe()"
+                    ngbTooltip="{{ 'Shells.UPLOAD_TOOLTIP' | translate }}"
+                    placement="bottom"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-upload"></i>
+                    <div class="d-none d-lg-inline px-2">
+                        <span translate="Shells.UPLOAD"></span>
+                    </div>
+                </button>
+            </div>
+            <input
+                #inputFiles
+                class="form-control"
+                type="file"
+                id="AID_INPUT_FILE"
+                accept=".aasx"
+                [multiple]="true"
+                [(ngModel)]="files"
+                hidden
+            />
+
+            @if (!activeFavoritesList()) {
+                <ng-container *ngTemplateOutlet="pagination"></ng-container>
+            }
+        </div>
     </div>
-    @if (!activeFavoritesList()) {
-        <div class="input-group me-2 my-1">
-            <button type="button" class="btn btn-primary" (click)="getFirstPage()">
+
+    <!-- small screens -->
+    <div class="w-100 d-block d-md-none">
+        <div class="mb-1">
+            <h2 translate="Shells.CAPTION"></h2>
+        </div>
+        @if (activeFavoritesList()) {
+            <div class="input-group flex-nowrap me-2 my-1 w-100">
+                <ng-container *ngTemplateOutlet="favorites"></ng-container>
+            </div>
+        } @else {
+            <div class="d-flex flex-row">
+                <div class="input-group flex-nowrap me-2 my-1 w-50">
+                    <ng-container *ngTemplateOutlet="favorites"></ng-container>
+                </div>
+                <div class="input-group btn-group flex-nowrap my-1 w-50">
+                    <ng-container *ngTemplateOutlet="filterControl"></ng-container>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (someSelected()) {
+        <div class="fhg-hidden-selected-bar">
+            <div
+                class="d-flex flex-row align-items-center px-3 bg-secondary-subtle my-1 border border-black border-opacity-25 rounded-3"
+            >
+                <div class="d-flex flex-row align-items-center text-white">
+                    <button
+                        type="button"
+                        class="btn text-primary"
+                        (click)="emptySelected()"
+                    >
+                        <i class="bi bi-x fs-3"></i>
+                    </button>
+                    <span>{{ selected().length }} selected</span>
+                </div>
+
+                <div class="vr vertical-line text-white"></div>
+
+                <button
+                    type="button"
+                    class="btn text-primary bg-primary-subtle mx-2"
+                    (click)="downloadPackages().subscribe()"
+                    ngbTooltip="{{ 'Shells.DOWNLOAD_TOOLTIP' | translate }}"
+                    placement="top"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-download"></i>
+                </button>
+                <button
+                    type="button"
+                    class="btn text-danger bg-danger-subtle"
+                    (click)="deletePackages().subscribe()"
+                    ngbTooltip="{{ 'Shells.DELETE_TOOLTIP' | translate }}"
+                    placement="top"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-trash"></i>
+                </button>
+                <button
+                    class="btn text-primary bg-primary-subtle ms-2"
+                    type="button"
+                    (click)="addToStart().subscribe()"
+                    ngbTooltip="{{ 'Shells.ADD_TO_START_TOOLTIP' | translate }}"
+                    placement="top"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-house-add"></i>
+                </button>
+            </div>
+        </div>
+    }
+</ng-template>
+
+<ng-template #filterControl>
+    <div class="btn-group" ngbDropdown role="group">
+        <button
+            type="button"
+            class="btn btn-outline-primary"
+            ngbDropdownToggle
+            ngbTooltip="{{ 'Shells.VISIBLE_ENDPOINTS_TOOLTIP' | translate }}"
+            placement="top"
+            [openDelay]="300"
+            [closeDelay]="500"
+        >
+            @if (someEndpointsChecked()) {
+                <i class="bi bi-filter"></i>
+                <i class="bi bi-check"></i>
+            } @else {
+                <i class="bi bi-filter"></i>
+            }
+        </button>
+        <div class="dropdown-menu" ngbDropdownMenu>
+            @for (endpoint of endpoints(); track endpoint.name) {
+                <div class="form-check ms-3">
+                    <input
+                        class="form-check-input"
+                        [id]="'AID_CHECK_ENDPOINT_' + endpoint.name"
+                        type="checkbox"
+                        [ngModel]="endpoint.checked"
+                        (ngModelChange)="toggleCheckEndpoint($event, endpoint)"
+                    />
+                    <label
+                        class="form-check-label d-flex justify-content-between"
+                        [for]="'AID_CHECK_ENDPOINT_' + endpoint.name"
+                    >
+                        <span>{{ endpoint.name }}</span>
+                        @if (endpoint.locked) {
+                            <span class="text-body-tertiary">
+                                <i class="bi bi-lock-fill me-2"></i>
+                            </span>
+                        }
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+    <input
+        type="search"
+        [ngClass]="invalidFilter() ? 'form-control text-danger' : 'form-control'"
+        [placeholder]="'Shells.PLACEHOLDER_FILTER' | translate"
+        [ngModel]="filterText()"
+        (ngModelChange)="setFilterText($event)"
+        (search)="setFilterText('')"
+        [ngbTooltip]="filterTooltip()"
+        placement="bottom"
+        [openDelay]="300"
+        [closeDelay]="500"
+    />
+</ng-template>
+
+<ng-template #favorites>
+    <button
+        id="AID_ADD_TO_FAVORITES"
+        class="btn btn-outline-primary"
+        type="button"
+        (click)="addToFavorites().subscribe()"
+        ngbTooltip="{{ 'Shells.FAVORITES_TOOLTIP' | translate }}"
+        placement="bottom"
+        [openDelay]="300"
+        [closeDelay]="500"
+    >
+        <i class="bi bi-star"></i>
+    </button>
+    <select
+        id="AID_FAVORITES_LIST"
+        [ngClass]="
+            activeFavoritesList() ? 'form-select w-auto fst-normal fw-normal' : 'form-select w-auto fst-italic fw-light'
+        "
+        [ngModel]="activeFavoritesList()"
+        (ngModelChange)="setActiveFavoriteList($event)"
+    >
+        @for (option of favoritesLists(); track option; let i = $index) {
+            @if (i === 0) {
+                <option class="fst-italic fw-light" [value]="''" translate="Shells.FAVORITES"></option>
+            } @else {
+                <option class="fst-normal fw-normal" [value]="option">{{ option }}</option>
+            }
+        }
+    </select>
+</ng-template>
+
+<ng-template #pagination>
+    <div class="d-flex justify-content-end my-1 ms-auto">
+        <div class="d-flex align-items-center">
+            <button type="button" class="btn pager-btn" (click)="getFirstPage()" [disabled]="isFirstPage()">
                 <i class="bi bi-chevron-bar-left"></i>
             </button>
-            <button type="button" class="btn btn-primary" (click)="getPreviousPage()" [disabled]="isFirstPage()">
+            <button type="button" class="btn pager-btn" (click)="getPreviousPage()" [disabled]="isFirstPage()">
                 <i class="bi bi-chevron-left"></i>
             </button>
-            <select class="form-select" [ngModel]="limit()" (ngModelChange)="setLimit($event)">
+            <select class="form-select w-auto" [ngModel]="limit()" (ngModelChange)="setLimit($event)">
                 <option [ngValue]="10">10</option>
                 <option [ngValue]="20">20</option>
                 <option [ngValue]="30">30</option>
                 <option [ngValue]="40">40</option>
                 <option [ngValue]="50">50</option>
             </select>
-            <button type="button" class="btn btn-primary" (click)="getNextPage()" [disabled]="isLastPage()">
+            <button type="button" class="btn pager-btn" (click)="getNextPage()" [disabled]="isLastPage()">
                 <i class="bi bi-chevron-right"></i>
             </button>
-            <button type="button" class="btn btn-primary" (click)="getLastPage()">
+            <button type="button" class="btn pager-btn" (click)="getLastPage()" [disabled]="isLastPage()">
                 <i class="bi bi-chevron-bar-right"></i>
             </button>
         </div>
-    }
-    <div class="btn-group me-2 my-1">
-        <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="menuEndpoints" translate>
-                Shells.ENDPOINT
-            </button>
-            <div ngbDropdownMenu class="dropdown-menu" id="menuEndpoints">
-                <button ngbDropdownItem (click)="addEndpoint().subscribe()" translate>Shells.ADD_ENDPOINT</button>
-                <button ngbDropdownItem (click)="updateEndpoint().subscribe()" translate>Shells.UPDATE_ENDPOINT</button>
-                <button ngbDropdownItem (click)="removeEndpoint().subscribe()" translate>Shells.REMOVE_ENDPOINT</button>
-                <button ngbDropdownItem (click)="extras().subscribe()" translate>Shells.EXTRAS</button>
-            </div>
-        </div>
-    </div>
-    <div class="btn-group me-2 my-1">
-        <button class="btn btn-primary ms-2" type="button" id="AID_OPEN_FILE" (click)="inputFiles.click()">
-            <i class="bi bi-upload"></i>
-        </button>
-        <input
-            #inputFiles
-            class="form-control"
-            type="file"
-            id="AID_INPUT_FILE"
-            accept=".aasx"
-            [multiple]="true"
-            [(ngModel)]="files"
-            hidden
-        />
-        <button
-            type="button"
-            class="btn btn-primary"
-            (click)="downloadPackages().subscribe()"
-            [disabled]="someSelected() === false"
-        >
-            <i class="bi bi-download"></i>
-        </button>
-        <button
-            type="button"
-            class="btn btn-primary"
-            (click)="deletePackages().subscribe()"
-            [disabled]="someSelected() === false"
-        >
-            <i class="bi bi-trash"></i>
-        </button>
-    </div>
-    <div class="btn-group me-2 my-1">
-        <div ngbDropdown class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" ngbDropdownToggle id="selectEndpoints" translate>
-                LABEL_VIEWS
-            </button>
-            <div ngbDropdownMenu class="dropdown-menu" id="selectEndpoints">
-                @for (view of views(); track view.path) {
-                    <button ngbDropdownItem (click)="openView(view)" [disabled]="someSelected() === false">
-                        {{ 'Shells.' + view.path | translate }}
-                    </button>
-                }
-            </div>
-        </div>
-    </div>
-    <div class="input-group flex-grow-1 me-2 my-1">
-        <div class="input-group-text">
-            <i class="bi bi-filter"></i>
-        </div>
-        <input
-            #textInput
-            type="search"
-            class="form-control"
-            [placeholder]="'Shells.PLACEHOLDER_FILTER' | translate"
-            [ngModel]="filterText()"
-            (ngModelChange)="setFilterText($event)"
-            [ngModelOptions]="{ updateOn: 'blur' }"
-            (keydown.enter)="textInput.blur()"
-            (search)="setFilterText('')"
-        />
     </div>
 </ng-template>

@@ -8,32 +8,26 @@
 
 import { isAbsolute, resolve } from 'path/posix';
 import { readFile } from 'fs/promises';
-import { inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import { type AppInfo } from 'aas-core';
-import { LOGGER, Logger } from 'aas-package';
+import { LOGGER } from 'aas-package';
 import { Variable } from './variable.js';
 
 @singleton()
 export class ApplicationInfo {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly variable = container.resolve(Variable);
     private data?: AppInfo;
 
-    public constructor(
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(Variable) private readonly variable: Variable,
-        data?: AppInfo,
-    ) {
-        this.data = data;
-    }
-
-    public async getAsync(): Promise<AppInfo> {
+    public async get(): Promise<AppInfo> {
         if (!this.data) {
-            this.data = await this.readAsync();
+            this.data = await this.read();
         }
 
         return this.data;
     }
 
-    private async readAsync(file?: string): Promise<AppInfo> {
+    private async read(file?: string): Promise<AppInfo> {
         try {
             let path: string;
             if (file) {

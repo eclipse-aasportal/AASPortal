@@ -6,18 +6,18 @@
  *
  *****************************************************************************/
 
-import { TranslateDirective } from '@ngx-translate/core';
-import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+import { NgbAccordionModule, NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { of, Observable } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
-import { ToolbarService } from '../../services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { CarbonFootprint } from './carbon-footprint';
 import { LeafView } from '../leaf-view';
 import { CarbonFootprintViewState } from './carbon-footprint-view.state';
-import { StartService } from '../../services/start.service';
+import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 
@@ -29,15 +29,16 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'CarbonFootprint' }],
     imports: [
         TranslateDirective,
+        TranslatePipe,
         NgbPaginationModule,
         NgbAccordionModule,
-        ThumbnailQRCode,
+        DocumentHeader,
         CarbonFootprint,
         RouterModule,
+        NgbTooltip,
     ],
     templateUrl: './carbon-footprint-view.html',
     styleUrl: './carbon-footprint-view.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarbonFootprintView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
@@ -78,8 +79,9 @@ export class CarbonFootprintView extends LeafView implements OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
+        const caption = 'CarbonFootprint.CAPTION';
         const href = `/views/CarbonFootprint;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
-        if (!this.start.add('Favorite', `CFV#${endpoint}#${id}`, { endpoint, id, href })) {
+        if (!this.start.add('Favorite', `CFV#${endpoint}#${id}`, { endpoint, id, caption, href })) {
             return of(void 0);
         }
 

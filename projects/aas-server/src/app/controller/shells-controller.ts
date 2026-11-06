@@ -59,8 +59,6 @@ export class ShellsController extends Controller {
     /**
      * @summary Returns a specific Asset Administration Shell.
      * @param id The Asset Administration Shell’s unique id (BASE64-URL encoded).
-     * @param level Determines the structural depth of the respective resource content.
-     * @param extent Determines to which extent the resource is being serialized.
      * @returns Requested Asset Administration Shell.
      */
     @Get('/{id}')
