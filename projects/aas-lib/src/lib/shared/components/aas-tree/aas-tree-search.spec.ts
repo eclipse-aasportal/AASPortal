@@ -7,12 +7,11 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { AASTreeSearch } from './aas-tree-search';
 import { NotifyService } from '../../../core/notify/notify.service';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 
 describe('AASTreeSearch', () => {
     let search: AASTreeSearch;
@@ -25,13 +24,7 @@ describe('AASTreeSearch', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
                 },
-                provideZonelessChangeDetection(),
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
+                provideTranslateService(),
             ],
             imports: [],
         });

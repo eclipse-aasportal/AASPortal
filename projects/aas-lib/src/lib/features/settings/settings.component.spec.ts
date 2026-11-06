@@ -11,10 +11,9 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SettingsComponent } from './settings.component';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { createSpyObj } from '../../../test/mocks';
+import { provideTranslateService } from '@ngx-translate/core';
 import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { NotifyService } from '../../core/notify/notify.service';
 
@@ -38,13 +37,7 @@ describe('SettingsComponent', () => {
                 { provide: AuthService, useValue: auth },
                 { provide: EndpointsApi, useValue: api },
                 { provide: NotifyService, useValue: notify },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [SettingsComponent],
         }).compileComponents();

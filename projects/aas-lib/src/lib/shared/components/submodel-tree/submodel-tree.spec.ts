@@ -8,13 +8,12 @@
 
 import { describe, beforeEach, it, expect } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { aas } from 'aas-core';
 import { SubmodelTree } from './submodel-tree';
 import { WebSocketService } from '../../services/web-socket.service';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 
 describe('SubmodelTree', () => {
     let component: SubmodelTree;
@@ -64,16 +63,7 @@ describe('SubmodelTree', () => {
         const webSocket = createSpyObj<WebSocketService>(['sendMessage', 'getMessages']);
 
         await TestBed.configureTestingModule({
-            providers: [
-                { provide: WebSocketService, useValue: webSocket },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [{ provide: WebSocketService, useValue: webSocket }, provideTranslateService()],
             imports: [SubmodelTree],
         }).compileComponents();
 

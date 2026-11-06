@@ -8,13 +8,13 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
+import { signal } from '@angular/core';
 
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
 import { AuthComponent } from './auth.component';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('AuthComponent', () => {
     let auth: Mocked<AuthService>;
@@ -35,13 +35,7 @@ describe('AuthComponent', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error', 'info']),
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [AuthComponent],
         }).compileComponents();

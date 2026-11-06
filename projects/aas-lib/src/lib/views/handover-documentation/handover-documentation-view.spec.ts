@@ -10,8 +10,8 @@ import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { first, lastValueFrom, of } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
+import { Component, input, signal } from '@angular/core';
 import { aas, AASDocument } from 'aas-core';
 
 import { ToolbarService } from '../../shared/services/toolbar.service';
@@ -22,7 +22,7 @@ import { VIEW_ROUTES } from '../views-routes';
 import { HandoverDocumentationView } from './handover-documentation-view';
 import { HandoverDocumentation } from './handover-documentation';
 import { DocumentHeader } from '../../shared/components/document-header/document-header';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { HandoverDocumentationState } from './handover-documentation.state';
 import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views-constants';
 
@@ -109,13 +109,7 @@ describe('HandoverDocumentationView', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [HandoverDocumentationView],
         }).compileComponents();

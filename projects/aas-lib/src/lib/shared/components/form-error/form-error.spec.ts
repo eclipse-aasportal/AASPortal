@@ -8,11 +8,11 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { inputBinding, provideZonelessChangeDetection, signal } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { inputBinding, signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { FieldState } from '@angular/forms/signals';
 
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 import { FormError } from './form-error';
 
 describe('FormError', () => {
@@ -22,15 +22,7 @@ describe('FormError', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [provideTranslateService()],
             imports: [FormError],
         }).compileComponents();
 

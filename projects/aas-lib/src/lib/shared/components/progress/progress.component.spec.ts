@@ -10,7 +10,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ProgressComponent } from './progress.component';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 describe('ProgressComponent', () => {
     let component: ProgressComponent;
@@ -19,7 +18,6 @@ describe('ProgressComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [ProgressComponent],
-            providers: [provideZonelessChangeDetection()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(ProgressComponent);

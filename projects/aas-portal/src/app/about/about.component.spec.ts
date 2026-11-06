@@ -7,16 +7,16 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { AppInfo } from 'aas-core';
 import { IndexChange, StartService, ToolbarService } from 'aas-lib';
 import { AboutComponent } from './about.component';
 import { AboutApiService } from './about-api.service';
-import { createSpyObj, FakeLoader } from '../../test/mocks';
+import { createSpyObj } from '../../test/mocks';
 
 describe('AboutComponent', () => {
     let api: Mocked<AboutApiService>;
@@ -60,13 +60,7 @@ describe('AboutComponent', () => {
                     provide: IndexChange,
                     useValue: indexChange,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [AboutComponent],
         }).compileComponents();

@@ -9,13 +9,13 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { signal, WritableSignal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { lastValueFrom, of } from 'rxjs';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { StartService, ToolbarService } from 'aas-lib';
 import { StartComponent } from './start.component';
-import { createSpyObj, FakeLoader } from '../../test/mocks';
+import { createSpyObj } from '../../test/mocks';
 import { StartState, StartTileItem } from './start.state';
 
 describe('StartComponent', () => {
@@ -61,13 +61,7 @@ describe('StartComponent', () => {
                     provide: StartState,
                     useValue: state,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [StartComponent],
         }).compileComponents();

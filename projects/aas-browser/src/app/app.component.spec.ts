@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component } from '@angular/core';
 import { AppComponent } from './app.component';
 import { MainComponent } from './main/main.component';
 
@@ -22,9 +22,7 @@ export class TestMainComponent {}
 
 describe('AppComponent', () => {
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
-        }).compileComponents();
+        await TestBed.configureTestingModule({}).compileComponents();
 
         TestBed.overrideComponent(AppComponent, {
             remove: { imports: [MainComponent] },

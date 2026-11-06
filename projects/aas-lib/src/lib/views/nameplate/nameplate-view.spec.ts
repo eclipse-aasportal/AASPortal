@@ -8,9 +8,9 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { first, lastValueFrom, of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
@@ -22,7 +22,7 @@ import { VIEW_ROUTES } from '../views-routes';
 import { NameplateView } from './nameplate-view';
 import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { Nameplate } from './nameplate';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { NameplateState } from './nameplate.state';
 import { NAMEPLATE_2_0, NAMEPLATE_3_0, NAMEPLATE_FHG, NAMEPLATE_HSU } from '../views-constants';
 
@@ -108,14 +108,7 @@ describe('NameplateView', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [NameplateView],
         }).compileComponents();

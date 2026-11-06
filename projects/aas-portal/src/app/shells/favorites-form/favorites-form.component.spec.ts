@@ -8,13 +8,13 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { FavoritesFormComponent } from './favorites-form.component';
 import { FavoritesList, FavoritesService } from '../favorites.service';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('FavoritesFormComponent', () => {
     let service: Mocked<FavoritesService>;
@@ -35,13 +35,7 @@ describe('FavoritesFormComponent', () => {
                     provide: FavoritesService,
                     useValue: service,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [FavoritesFormComponent],
         }).compileComponents();

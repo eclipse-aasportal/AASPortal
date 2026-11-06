@@ -8,13 +8,12 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { FavoriteComponent } from './favorite.component';
 import { CookieService } from '../../services/cookie.service';
 import { EndpointsApi } from '../../services/endpoints-api';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 
 describe('FavoriteComponent', () => {
     let api: Mocked<EndpointsApi>;
@@ -34,13 +33,7 @@ describe('FavoriteComponent', () => {
                     provide: EndpointsApi,
                     useValue: api,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [FavoriteComponent],
         }).compileComponents();

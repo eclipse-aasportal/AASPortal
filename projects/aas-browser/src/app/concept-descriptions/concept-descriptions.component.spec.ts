@@ -8,8 +8,6 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { provideRouter } from '@angular/router';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { API_URL, ToolbarService } from 'aas-lib';
@@ -34,9 +32,7 @@ describe('ConceptDescriptionsComponent', () => {
                     useValue: createSpyObj<ApiUrlService>(['join']),
                 },
                 provideRouter([]),
-                provideHttpClient(),
                 provideHttpClientTesting(),
-                provideZonelessChangeDetection(),
             ],
             imports: [],
         }).compileComponents();

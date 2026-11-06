@@ -7,15 +7,13 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideTranslateService } from '@ngx-translate/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { UploadFormComponent } from './upload-form.component';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('UploadFormComponent', () => {
     let component: UploadFormComponent;
@@ -28,15 +26,8 @@ describe('UploadFormComponent', () => {
                     provide: NgbActiveModal,
                     useValue: createSpyObj<NgbActiveModal>(['close', 'dismiss']),
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideHttpClient(),
+                provideTranslateService(),
                 provideHttpClientTesting(),
-                provideZonelessChangeDetection(),
             ],
             imports: [UploadFormComponent],
         }).compileComponents();

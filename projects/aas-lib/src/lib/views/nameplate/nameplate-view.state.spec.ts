@@ -8,13 +8,11 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { NameplateViewState } from './nameplate-view.state';
 import { NameplateState } from './nameplate.state';
-import { FakeLoader } from '../../../test/mocks';
 
 import nameplate_3_0 from '../../../test/assets/nameplate-3-0.json';
 
@@ -36,15 +34,7 @@ describe('NameplateViewState', () => {
         submodel = document.content!.submodels![0];
 
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [NameplateViewState, provideTranslateService()],
         });
 
         service = TestBed.inject(NameplateViewState);

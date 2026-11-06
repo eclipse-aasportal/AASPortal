@@ -7,13 +7,13 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { ToolbarService, VIEW_ROUTES, viewRoutes } from 'aas-lib';
 
 import { ViewComponent } from './view.component';
-import { createSpyObj, FakeLoader } from '../../test/mocks';
+import { createSpyObj } from '../../test/mocks';
 
 describe('ViewComponent', () => {
     beforeEach(async () => {
@@ -27,13 +27,7 @@ describe('ViewComponent', () => {
                     provide: VIEW_ROUTES,
                     useValue: viewRoutes,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [ViewComponent],
         }).compileComponents();

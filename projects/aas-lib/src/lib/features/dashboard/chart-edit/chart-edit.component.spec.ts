@@ -7,16 +7,16 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { ChartEditComponent } from './chart-edit.component';
 import { DashboardService } from '../dashboard.service';
 import { DashboardState } from '../dashboard-types';
 
 import data from '../../../../test/assets/test-pages.json';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 import { NotifyService } from '../../../core/notify/notify.service';
 
 describe('ChartEditComponent', () => {
@@ -41,13 +41,7 @@ describe('ChartEditComponent', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [ChartEditComponent],
         }).compileComponents();

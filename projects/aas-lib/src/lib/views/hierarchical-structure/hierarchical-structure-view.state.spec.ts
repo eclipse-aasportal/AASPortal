@@ -8,7 +8,6 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 import { HierarchicalStructureViewState } from './hierarchical-structure-view.state';
 
@@ -17,7 +16,7 @@ describe('HierarchicalStructureViewState', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
+            providers: [HierarchicalStructureViewState],
         });
         service = TestBed.inject(HierarchicalStructureViewState);
     });

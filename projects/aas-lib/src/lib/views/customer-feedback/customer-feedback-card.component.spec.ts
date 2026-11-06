@@ -7,24 +7,14 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { CustomerFeedbackCardComponent } from './customer-feedback-card.component';
-import { FakeLoader } from '../../../test/mocks';
 
 describe('CustomerFeedbackCardComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            providers: [
-                provideZonelessChangeDetection(),
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-            ],
+            providers: [provideTranslateService()],
             imports: [CustomerFeedbackCardComponent],
         }).compileComponents();
     });

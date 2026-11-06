@@ -8,12 +8,10 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { TechnicalDataState } from './technical-data.state';
 import { aas, AASDocument } from 'aas-core';
-import { FakeLoader } from '../../../test/mocks';
 
 import technicalData from '../../../test/assets/technical-data-1-2.json';
 
@@ -32,17 +30,7 @@ describe('TechnicalDataState', () => {
         };
 
         TestBed.configureTestingModule({
-            providers: [
-                TechnicalDataState,
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-
-                provideZonelessChangeDetection(),
-            ],
+            providers: [TechnicalDataState, provideTranslateService()],
         });
 
         service = TestBed.inject(TechnicalDataState);

@@ -9,9 +9,8 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { StartService } from 'aas-lib';
@@ -33,6 +32,7 @@ describe('StartState', () => {
 
         TestBed.configureTestingModule({
             providers: [
+                StartState,
                 {
                     provide: StartService,
                     useValue: start,
@@ -47,9 +47,7 @@ describe('StartState', () => {
                         useClass: FakeLoader,
                     },
                 }),
-                provideHttpClient(),
                 provideHttpClientTesting(),
-                provideZonelessChangeDetection(),
             ],
         });
 

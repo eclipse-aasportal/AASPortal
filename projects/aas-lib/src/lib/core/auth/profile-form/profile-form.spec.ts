@@ -7,15 +7,15 @@
  *****************************************************************************/
 
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { lastValueFrom, of } from 'rxjs';
 
 import { ApplicationError, SessionUser, UserProfile } from 'aas-core';
 import { ProfileForm } from './profile-form';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 import { AuthService } from '../auth.service';
 import { NotifyService } from '../../notify/notify.service';
 import { FormError } from '../../../shared/components/form-error/form-error';
@@ -56,13 +56,7 @@ describe('ProfileForm', () => {
                     provide: NotifyService,
                     useValue: notify,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
         }).compileComponents();
 

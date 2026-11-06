@@ -8,11 +8,10 @@
 
 import { beforeEach, describe, expect, it, Mocked, vitest } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { BrowserComponent } from './browser.component';
 import { BrowserState } from './browser.state';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 import { EndpointsApi } from '../../services/endpoints-api';
 import { API_URL } from '../../../api-url';
 
@@ -42,13 +41,7 @@ describe('BrowserComponent', () => {
                         getFileUrl: vitest.fn(),
                     },
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
         }).compileComponents();
 

@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mock, vitest } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { noop } from 'aas-core';
 import { Command } from './command';
@@ -80,7 +79,6 @@ describe('CommandHandler', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
                 },
-                provideZonelessChangeDetection(),
             ],
         });
 

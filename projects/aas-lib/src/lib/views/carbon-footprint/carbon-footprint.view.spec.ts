@@ -9,9 +9,9 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { first, lastValueFrom, of } from 'rxjs';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { ToolbarService } from '../../shared/services/toolbar.service';
@@ -23,7 +23,7 @@ import { VIEW_ROUTES } from '../views-routes';
 import { CarbonFootprintView } from './carbon-footprint-view';
 import { CarbonFootprint } from './carbon-footprint';
 import { DocumentHeader } from '../../shared/components/document-header/document-header';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { CarbonFootprintState } from './carbon-footprint.state';
 import { CARBON_FOOTPRINT_0_9, CARBON_FOOTPRINT_1_0 } from '../views-constants';
 
@@ -108,14 +108,7 @@ describe('CarbonFootprintView', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [CarbonFootprintView],
         }).compileComponents();

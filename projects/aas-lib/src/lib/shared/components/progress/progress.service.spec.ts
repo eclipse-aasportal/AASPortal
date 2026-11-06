@@ -10,15 +10,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 import { ProgressService } from './progress.service';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 describe('ProgressService', () => {
     let service: ProgressService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
-        });
+        TestBed.configureTestingModule({});
         service = TestBed.inject(ProgressService);
     });
 

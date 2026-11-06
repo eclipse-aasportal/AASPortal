@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { lastValueFrom, of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
@@ -69,7 +69,6 @@ describe('StartService', () => {
                     provide: NotifyService,
                     useValue: notify,
                 },
-                provideZonelessChangeDetection(),
             ],
         });
 
