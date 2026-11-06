@@ -7,8 +7,6 @@
  *****************************************************************************/
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
@@ -21,11 +19,7 @@ describe('DashboardApiService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                provideHttpClient(withInterceptorsFromDi()),
-                provideHttpClientTesting(),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [provideHttpClientTesting()],
         });
 
         service = TestBed.inject(DashboardApiService);

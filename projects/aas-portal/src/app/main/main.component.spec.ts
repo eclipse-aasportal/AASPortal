@@ -8,10 +8,10 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
-import { Component, input, provideZonelessChangeDetection, Signal, signal } from '@angular/core';
+import { Component, input, Signal, signal } from '@angular/core';
 
 import { AASDocument } from 'aas-core';
 import {
@@ -24,7 +24,7 @@ import {
 } from 'aas-lib';
 
 import { MainComponent } from './main.component';
-import { createSpyObj, FakeLoader } from '../../test/mocks';
+import { createSpyObj } from '../../test/mocks';
 
 @Component({
     selector: 'fhg-auth',
@@ -81,14 +81,8 @@ describe('MainComponent', () => {
                     provide: IndexChange,
                     useValue: indexChange,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
+                provideTranslateService(),
                 provideRouter([]),
-                provideZonelessChangeDetection(),
             ],
             imports: [MainComponent],
         }).compileComponents();

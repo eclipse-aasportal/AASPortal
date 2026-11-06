@@ -8,11 +8,10 @@
 
 import { beforeEach, describe, expect, it, vitest } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
+import { signal } from '@angular/core';
 import { aas, AASDocument } from 'aas-core';
 import { Nameplate } from './nameplate';
-import { FakeLoader } from '../../../test/mocks';
 import { NameplateState } from './nameplate.state';
 
 import nameplate_3_0 from '../../../test/assets/nameplate-3-0.json';
@@ -41,15 +40,7 @@ describe('Nameplate', () => {
 
         await TestBed.configureTestingModule({
             imports: [Nameplate],
-            providers: [
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [provideTranslateService()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(Nameplate);

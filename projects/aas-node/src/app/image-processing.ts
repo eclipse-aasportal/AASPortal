@@ -13,8 +13,8 @@ export class ImageProcessing {
     /**
      * Resizes an image.
      * @param source The source stream of the image.
-     * @param width The new with of the image.
-     * @param height The new height of the image.
+     * @param options.w The new with of the image.
+     * @param options.h The new height of the image.
      * @returns The resized image.
      */
     public static async resize(
@@ -23,11 +23,11 @@ export class ImageProcessing {
     ): Promise<NodeJS.ReadableStream> {
         const buffer: Buffer = await new Promise((resolve, reject) => {
             const buffers: Uint8Array[] = [];
-            source.on('data', function (buffer: Uint8Array) {
+            source.on('data', (buffer: Uint8Array) => {
                 buffers.push(buffer);
             });
 
-            source.on('end', function () {
+            source.on('end', () => {
                 try {
                     resolve(Buffer.concat(buffers));
                 } catch (error) {
@@ -55,11 +55,11 @@ export class ImageProcessing {
     public static async convert(source: NodeJS.ReadableStream): Promise<NodeJS.ReadableStream> {
         const buffer: Buffer = await new Promise((resolve, reject) => {
             const buffers: Uint8Array[] = [];
-            source.on('data', function (buffer: Uint8Array) {
+            source.on('data', (buffer: Uint8Array) => {
                 buffers.push(buffer);
             });
 
-            source.on('end', function () {
+            source.on('end', () => {
                 try {
                     resolve(Buffer.concat(buffers));
                 } catch (error) {

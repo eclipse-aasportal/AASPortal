@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ToolbarService, WebSocketService, WINDOW, WindowService } from 'aas-lib';
@@ -41,7 +41,6 @@ describe('MainComponent', () => {
                 },
                 provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
                 provideRouter([]),
-                provideZonelessChangeDetection(),
             ],
             imports: [MainComponent],
         }).compileComponents();

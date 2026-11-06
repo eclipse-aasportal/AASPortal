@@ -7,10 +7,9 @@
  *****************************************************************************/
 
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
-import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { aas, TemplateDescriptor, types } from 'aas-core';
 
 import { NotifyService } from '../../core/notify/notify.service';
@@ -28,9 +27,7 @@ describe('TemplateService', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
                 },
-                provideHttpClient(),
                 provideHttpClientTesting(),
-                provideZonelessChangeDetection(),
             ],
         });
 
@@ -52,7 +49,7 @@ describe('TemplateService', () => {
     describe('templates', () => {
         it('returns the available templates', async () => {
             const httpMock: HttpTestingController = TestBed.inject(HttpTestingController);
-            TestBed.inject(ApplicationRef).tick();
+            TestBed.tick();
             httpMock.expectOne('/assets/published-idta-templates.json').flush([template]);
             await TestBed.inject(ApplicationRef).whenStable();
             expect(service.templates()).toEqual([template.name]);
@@ -60,7 +57,7 @@ describe('TemplateService', () => {
         });
     });
 
-    describe.skip('getTemplate', () => {
+    describe('getTemplate', () => {
         afterEach(() => {
             restoreFetch();
         });
@@ -79,12 +76,13 @@ describe('TemplateService', () => {
             };
 
             const httpMock: HttpTestingController = TestBed.inject(HttpTestingController);
-            TestBed.inject(ApplicationRef).tick();
+            TestBed.tick();
             httpMock.expectOne('/assets/published-idta-templates.json').flush([template]);
             await TestBed.inject(ApplicationRef).whenStable();
 
             mockFetchJson(env);
 
+            service.template.set('submodel-template');
             const environment = await service.getTemplate();
             expect(environment).toBeInstanceOf(types.Environment);
         });

@@ -12,9 +12,15 @@ import { ImageProcessing } from './image-processing.js';
 import { fileURLToPath } from 'url';
 
 describe('image processing', function () {
-    it('resizes an image to 128 x 128 pixels', async () => {
+    it('resizes an image to 128 pixels in width', async () => {
         const source = fs.createReadStream(fileURLToPath(new URL('../test/assets/thumbnail.jpg', import.meta.url)));
-        const stream = await ImageProcessing.resize(source, { w: 128, h: 128 });
+        const stream = await ImageProcessing.resize(source, { w: 128 });
+        expect(stream).toBeTruthy();
+    });
+
+    it('resizes an image to 40 pixels in height', async () => {
+        const source = fs.createReadStream(fileURLToPath(new URL('../test/assets/thumbnail.jpg', import.meta.url)));
+        const stream = await ImageProcessing.resize(source, { h: 40 });
         expect(stream).toBeTruthy();
     });
 

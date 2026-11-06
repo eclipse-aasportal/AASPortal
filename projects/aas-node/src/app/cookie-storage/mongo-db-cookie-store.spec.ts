@@ -15,6 +15,7 @@ import { Logger, MongoDBConnectionProvider } from 'aas-package';
 import { MongoDBCookieStore } from './mongo-db-cookie-store.js';
 import { createSpyObj } from '../../test/mocks.js';
 import { Variable } from '../variable.js';
+import { afterEach } from 'node:test';
 
 vi.mock(import('mongoose'), () => {
     return {
@@ -69,6 +70,12 @@ describe('MongoDBCookieStorage', () => {
         variable = createSpyObj<Variable>([], { COOKIE_STORE: 'mongodb://localhost:27017/cookies' });
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
         storage = new MongoDBCookieStore(logger, connectionProvider, variable);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should created', () => {

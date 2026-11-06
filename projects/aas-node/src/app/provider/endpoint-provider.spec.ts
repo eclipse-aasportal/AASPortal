@@ -88,6 +88,8 @@ describe('EndpointController', () => {
 
     afterEach(() => {
         vi.useRealTimers();
+        vi.restoreAllMocks();
+        vi.resetAllMocks();
         vi.clearAllMocks();
     });
 

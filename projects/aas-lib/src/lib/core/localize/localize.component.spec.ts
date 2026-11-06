@@ -8,12 +8,11 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { LocalizeComponent } from './localize.component';
 import { WINDOW, WindowService } from '../../shared/services/window.service';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('LocalizeComponent', () => {
     let window: Mocked<WindowService>;
@@ -30,13 +29,7 @@ describe('LocalizeComponent', () => {
                     provide: WINDOW,
                     useValue: window,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [LocalizeComponent],
         }).compileComponents();

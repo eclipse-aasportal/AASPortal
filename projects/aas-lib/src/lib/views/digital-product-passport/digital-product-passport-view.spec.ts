@@ -9,8 +9,8 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
+import { Component, input, signal } from '@angular/core';
 import { of } from 'rxjs';
 import { AASDocument } from 'aas-core';
 
@@ -21,7 +21,7 @@ import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { DigitalProductPassportView } from './digital-product-passport-view';
 import { DocumentHeader } from '../../shared/components/document-header/document-header';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { Nameplate } from '../nameplate/nameplate';
 import { CarbonFootprint } from '../carbon-footprint/carbon-footprint';
 import { HandoverDocumentation } from '../handover-documentation/handover-documentation';
@@ -158,13 +158,7 @@ describe('DigitalProductPassportView', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [DigitalProductPassportView],
         }).compileComponents();

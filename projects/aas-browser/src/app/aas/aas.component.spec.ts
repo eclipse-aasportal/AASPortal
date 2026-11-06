@@ -9,14 +9,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { aas } from 'aas-core';
 import { API_URL, BrowserComponent, BrowserState, ToolbarService } from 'aas-lib';
 
 import { AASComponent } from './aas.component';
-import { createSpyObj, FakeLoader } from '../../test/mocks';
+import { createSpyObj } from '../../test/mocks';
 import { ApiUrlService } from '../api-url.service';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { AASApi } from './aas-api';
 
 @Component({
@@ -58,14 +58,8 @@ describe('AASComponent', () => {
                         },
                     },
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
+                provideTranslateService(),
                 provideRouter([]),
-                provideZonelessChangeDetection(),
             ],
             imports: [],
         }).compileComponents();

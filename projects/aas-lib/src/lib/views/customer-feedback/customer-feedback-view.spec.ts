@@ -8,8 +8,8 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 
@@ -20,7 +20,7 @@ import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTES } from '../views-routes';
 import { CustomerFeedbackView } from './customer-feedback-view';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { CUSTOMER_FEEDBACK } from '../views-constants';
 
 describe.skip('CustomerFeedbackView', () => {
@@ -77,13 +77,7 @@ describe.skip('CustomerFeedbackView', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [CustomerFeedbackView],
         }).compileComponents();

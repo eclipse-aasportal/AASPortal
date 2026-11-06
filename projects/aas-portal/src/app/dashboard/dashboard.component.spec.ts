@@ -10,9 +10,9 @@ import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest'
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { EMPTY } from 'rxjs';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import {
     NotifyService,
     StartService,
@@ -28,7 +28,7 @@ import {
 } from 'aas-lib';
 
 import { DashboardComponent } from './dashboard.component';
-import { createSpyObj, FakeLoader, MockWebSocketService } from '../../test/mocks';
+import { createSpyObj, MockWebSocketService } from '../../test/mocks';
 
 import data from '../../test/assets/test-pages.json';
 
@@ -112,14 +112,7 @@ describe('DashboardComponent', () => {
                     useValue: modal,
                 },
                 provideRouter([]),
-                provideZonelessChangeDetection(),
-                provideTranslateService({
-                    fallbackLang: 'en-us',
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
+                provideTranslateService(),
             ],
             imports: [DashboardComponent],
         }).compileComponents();

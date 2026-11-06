@@ -41,7 +41,6 @@ export class AddEndpointForm {
     private readonly modal = inject(NgbActiveModal);
     private readonly _templates = signal<EndpointTemplate[]>(templates);
     private readonly endpoints = httpResource<string[]>(() => '/api/v1/endpoints', {
-        defaultValue: [] as string[],
         parse: values => (values as AASEndpoint[]).map(value => value.name).sort(),
     });
 

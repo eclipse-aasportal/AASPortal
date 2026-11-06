@@ -8,9 +8,9 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
@@ -24,7 +24,7 @@ import { DocumentHeader } from '../../shared/components/document-header/document
 import { ContactInformationView } from './contact-information-view';
 import { ContactInformation } from './contact-information';
 import { ContactInformationState } from './contact-information.state';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { CONTACT_INFORMATION_1_0 } from '../views-constants';
 
 import contactInformation from '../../../test/assets/contact-information-1-0.json';
@@ -109,13 +109,7 @@ describe('ContactInformationsView', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [ContactInformationView],
         }).compileComponents();

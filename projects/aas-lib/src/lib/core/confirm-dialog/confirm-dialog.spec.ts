@@ -11,9 +11,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { ConfirmDialog } from './confirm-dialog';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('ConfirmDialog', () => {
     let component: ConfirmDialog;
@@ -35,13 +35,7 @@ describe('ConfirmDialog', () => {
                     provide: NgbModal,
                     useValue: modal,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [ConfirmDialog],
         }).compileComponents();

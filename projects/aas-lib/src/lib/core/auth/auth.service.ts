@@ -90,7 +90,7 @@ export class AuthService {
 
     /**
      * Ensures that the current user has the expected rights.
-     * @param roles The minimum required role.
+     * @param requiredRole The minimum required role.
      */
     public checkAuthorized(requiredRole: UserRole): Observable<void> {
         return this.isAuthorized(requiredRole)
@@ -188,7 +188,7 @@ export class AuthService {
 
     /**
      * Determines whether the current user is authorized for the specified roles.
-     * @param expected The expected role, the current user must have.
+     * @param requiredRole The expected role, the current user must have.
      */
     public isAuthorized(requiredRole: UserRole | undefined): boolean {
         return isUserAuthorized(this.role(), requiredRole);

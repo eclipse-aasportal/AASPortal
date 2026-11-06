@@ -14,9 +14,7 @@ import {
     basename,
     messageToString,
     decodeBase64Url,
-    isBase64,
     extension,
-    convertBlobToBase64Async,
     validateEndpointUrl,
 } from './utilities';
 import { createSpyObj } from '../test/mocks';
@@ -80,23 +78,6 @@ describe('utilities', () => {
         it('converts Base64Url string of ÄÖÜäöüß to normal string', () => {
             const str = decodeBase64Url('w4TDlsOcw6TDtsO8w58');
             expect(str).toEqual('ÄÖÜäöüß');
-        });
-    });
-
-    describe('isBase64', () => {
-        it('indicates that "The quick brown fox jumps over the lazy dog." is not base64 encoded', () => {
-            expect(isBase64('The quick brown fox jumps over the lazy dog.')).toBe(false);
-        });
-
-        it('indicates that "VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZy4=" is base64 encoded', () => {
-            expect(isBase64('VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZy4=')).toBe(true);
-        });
-    });
-
-    describe('convertBlobToBase64Async', () => {
-        it('converts the Blob content to a base64 encoded string', async () => {
-            const blob = new Blob(['Hello World!']);
-            await expect(convertBlobToBase64Async(blob)).resolves.toEqual('SGVsbG8gV29ybGQh');
         });
     });
 

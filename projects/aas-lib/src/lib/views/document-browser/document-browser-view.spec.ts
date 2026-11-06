@@ -8,10 +8,10 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { first, lastValueFrom, of } from 'rxjs';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { EndpointsApi } from '../../shared/services/endpoints-api';
@@ -21,7 +21,7 @@ import { StartService } from '../../shared/services/start.service';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { VIEW_ROUTES } from '../views-routes';
 import { DocumentBrowserView } from './document-browser-view';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { BrowserState } from '../../shared/components/browser/browser.state';
 import { DocumentHeader } from '../../shared/components/document-header/document-header';
 
@@ -107,13 +107,7 @@ describe('DocumentBrowserView', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [DocumentBrowserView],
         }).compileComponents();

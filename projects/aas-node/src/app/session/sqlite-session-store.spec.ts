@@ -54,6 +54,8 @@ describe('SqliteSessionStore', () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
         db.close();
     });
 

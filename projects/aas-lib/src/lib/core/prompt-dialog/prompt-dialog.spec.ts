@@ -9,11 +9,10 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal, NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { PromptDialog } from './prompt-dialog';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('PromptDialog', () => {
     let component: PromptDialog;
@@ -35,13 +34,7 @@ describe('PromptDialog', () => {
                     provide: NgbModal,
                     useValue: modal,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [PromptDialog],
         }).compileComponents();

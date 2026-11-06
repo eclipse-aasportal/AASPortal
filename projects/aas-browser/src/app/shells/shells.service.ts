@@ -53,12 +53,12 @@ export class ShellsService {
     /**
      * The items of the current page.
      */
-    public readonly items = linkedSignal(() => this.page.value().items);
+    public readonly items = linkedSignal(() => (this.page.hasValue() ? this.page.value().items : []));
 
     /**
      * The cursor of the current page.
      */
-    public readonly current = linkedSignal(() => this.page.value().cursor);
+    public readonly current = linkedSignal(() => (this.page.hasValue() ? this.page.value().cursor : undefined));
 
     /**
      * Uploads a package file.
@@ -200,7 +200,6 @@ export class ShellsService {
             return this.apiUrl.join('shells', params);
         },
         {
-            defaultValue: { cursor: undefined, items: [] },
             parse: this.parse,
         },
     );

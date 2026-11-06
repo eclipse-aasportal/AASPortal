@@ -21,6 +21,8 @@ describe('HttpClient', () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should created', () => {

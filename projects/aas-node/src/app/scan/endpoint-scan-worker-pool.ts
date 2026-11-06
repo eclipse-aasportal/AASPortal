@@ -111,7 +111,8 @@ export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
 
     /**
      * Cancels a task with the given task ID.
-     * @param data The message to cancel the corresponding task.
+     * @param taskId The task identifier.
+     * @param endpoint The AAS endpoint name.
      * @returns A promise that resolves when the task is canceled or if the task was not found.
      */
     public cancel(taskId: number, endpoint: string): Promise<void> {

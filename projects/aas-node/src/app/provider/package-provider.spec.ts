@@ -23,8 +23,8 @@ vi.mock('fs', () => ({
     default: {
         existsSync: vi.fn(),
         promises: {
-            rename: vi.fn(),
-            unlink: vi.fn(),
+            rename: vi.fn(async () => {}),
+            unlink: vi.fn(async () => {}),
         },
     },
 }));
@@ -70,6 +70,8 @@ describe('PackageProvider', () => {
 
     afterEach(() => {
         vi.useRealTimers();
+        vi.restoreAllMocks();
+        vi.resetAllMocks();
         vi.clearAllMocks();
     });
 

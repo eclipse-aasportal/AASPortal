@@ -7,16 +7,15 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
+import { ActivatedRoute } from '@angular/router';
 import { AASDocument } from 'aas-core';
 
 import { AASTable } from './aas-table';
-import { ActivatedRoute } from '@angular/router';
 import { createDocument } from '../../../../test/assets/test-document';
 import { NotifyService } from '../../../core/notify/notify.service';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 
 describe('AASTable', () => {
     let document1: AASDocument;
@@ -38,13 +37,7 @@ describe('AASTable', () => {
                     provide: ActivatedRoute,
                     useValue: createSpyObj<ActivatedRoute>([]),
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [AASTable],
         }).compileComponents();

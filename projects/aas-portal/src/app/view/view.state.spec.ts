@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, Type } from '@angular/core';
+import { Type } from '@angular/core';
 import { ViewRoute } from 'aas-lib';
 
 import { ViewState } from './view.state';
@@ -18,7 +18,7 @@ describe('ViewState', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [provideZonelessChangeDetection()],
+            providers: [ViewState],
         });
 
         service = TestBed.inject(ViewState);

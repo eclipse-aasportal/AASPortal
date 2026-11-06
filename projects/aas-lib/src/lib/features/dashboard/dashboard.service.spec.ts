@@ -7,16 +7,15 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { DashboardService } from './dashboard.service';
 
 import data from '../../../test/assets/test-pages.json';
 import { CookieService } from '../../shared/services/cookie.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('DashboardService', () => {
     let service: DashboardService;
@@ -39,13 +38,7 @@ describe('DashboardService', () => {
                     provide: CookieService,
                     useValue: cookies,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
         });
 

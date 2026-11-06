@@ -8,12 +8,10 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { aas, AASDocument, WebSocketData } from 'aas-core';
 
-import { FakeLoader } from '../../../test/mocks';
 import { SensorMeasurementValue } from './sensor-measurement-value';
 import { validateSensorMeasurementValue } from './sensor-measurement-value-validator';
 
@@ -45,11 +43,7 @@ describe('SensorMeasurementValue', () => {
 
         await TestBed.configureTestingModule({
             imports: [SensorMeasurementValue],
-            providers: [
-                { provide: WebSocketService, useValue: webSocket },
-                provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [{ provide: WebSocketService, useValue: webSocket }, provideTranslateService()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(SensorMeasurementValue);

@@ -100,7 +100,7 @@ describe('EndpointScanWorkerPool', () => {
     });
 
     afterEach(() => {
-        vi.clearAllMocks();
+        vi.resetAllMocks();
     });
 
     it('should be defined', () => {

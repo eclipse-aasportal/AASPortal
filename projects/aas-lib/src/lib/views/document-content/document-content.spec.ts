@@ -9,13 +9,13 @@
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { Component, DOCUMENT, input, model, output, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, DOCUMENT, input, model, output, signal } from '@angular/core';
 
 import { AASDocument, aas, noop } from 'aas-core';
 import { LiveState } from '../../types';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { EndpointsApi } from '../../shared/services/endpoints-api';
 import { DashboardService } from '../../features/dashboard/dashboard.service';
 import { StartService } from '../../shared/services/start.service';
@@ -147,13 +147,7 @@ describe('DocumentContent', () => {
                         },
                     ],
                 },
-                provideZonelessChangeDetection(),
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
+                provideTranslateService(),
             ],
             imports: [DocumentContent],
         }).compileComponents();
@@ -173,6 +167,8 @@ describe('DocumentContent', () => {
     });
 
     afterEach(() => {
+        vi.restoreAllMocks();
+        vi.resetAllMocks();
         vi.clearAllMocks();
     });
 

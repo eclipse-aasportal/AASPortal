@@ -101,9 +101,7 @@ export class UpdateEndpointForm {
     private readonly _deleting = signal<string | undefined>(undefined);
     private readonly _templates = signal<EndpointTemplate[]>(templates);
 
-    private readonly _endpoints = httpResource<AASEndpoint[]>(() => '/api/v1/endpoints', {
-        defaultValue: [] as AASEndpoint[],
-    });
+    private readonly _endpoints = httpResource<AASEndpoint[]>(() => '/api/v1/endpoints');
 
     private readonly _template = signal<EndpointTemplate>(this._templates()[0]);
 
@@ -310,7 +308,8 @@ export class UpdateEndpointForm {
     }
 
     private isModified(endpoint: AASEndpoint): boolean {
-        const existing = this._endpoints.value().find(e => e.name === endpoint.name);
+        const endpoints = this._endpoints.hasValue() ? this._endpoints.value() : [];
+        const existing = endpoints.find(e => e.name === endpoint.name);
         if (!existing) {
             return true;
         }

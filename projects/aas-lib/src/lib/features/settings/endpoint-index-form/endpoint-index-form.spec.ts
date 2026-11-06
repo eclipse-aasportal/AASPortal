@@ -7,15 +7,15 @@
  *****************************************************************************/
 
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { provideRouter } from '@angular/router';
 import { lastValueFrom, of, Subject } from 'rxjs';
 
 import { EndpointIndexForm } from './endpoint-index-form';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 import { IndexChange } from '../../../shared/services/index-change';
 import { EndpointsApi } from '../../../shared/services/endpoints-api';
 import { PromptDialog } from '../../../core/prompt-dialog/prompt-dialog';
@@ -123,25 +123,21 @@ describe('EndpointIndexForm', () => {
                     provide: AuthService,
                     useValue: auth,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
+                provideTranslateService(),
                 provideRouter([]),
-                provideZonelessChangeDetection(),
             ],
             imports: [EndpointIndexForm],
         }).compileComponents();
 
         fixture = TestBed.createComponent(EndpointIndexForm);
         component = fixture.componentInstance;
-        fixture.whenStable();
+        await fixture.whenStable();
     });
 
     afterEach(() => {
+        vi.restoreAllMocks();
         vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     it('should create', () => {

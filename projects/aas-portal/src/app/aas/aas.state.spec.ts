@@ -8,26 +8,16 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { AASState } from './aas.state';
-import { FakeLoader } from '../../test/mocks';
 
 describe('AASState', () => {
     let service: AASState;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [AASState, provideTranslateService()],
         });
 
         service = TestBed.inject(AASState);

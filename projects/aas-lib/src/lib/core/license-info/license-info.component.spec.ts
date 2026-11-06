@@ -7,28 +7,18 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { Library } from 'aas-core';
 import { LicenseInfoComponent } from './license-info.component';
-import { FakeLoader } from '../../../test/mocks';
 
 describe('LicenseInfoComponent', () => {
     let libraries: Library[];
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            providers: [
-                provideZonelessChangeDetection(),
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-            ],
+            providers: [provideTranslateService()],
             imports: [LicenseInfoComponent],
         }).compileComponents();
 

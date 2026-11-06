@@ -61,12 +61,9 @@ export class EndpointAuthForm {
     private readonly modal = inject(NgbActiveModal);
     private readonly model = signal<EndpointAuthModel>(initialState);
 
-    private readonly endpointAuthItems = httpResource<AASEndpointAuth[]>(() => '/api/v1/endpoints/auth', {
-        defaultValue: [] as AASEndpointAuth[],
-    });
+    private readonly endpointAuthItems = httpResource<AASEndpointAuth[]>(() => '/api/v1/endpoints/auth');
 
     private readonly endpoints = httpResource<string[]>(() => '/api/v1/endpoints', {
-        defaultValue: [] as string[],
         parse: values => (values as AASEndpoint[]).map(value => value.name).sort(),
     });
 
@@ -169,7 +166,7 @@ export class EndpointAuthForm {
     }
 
     private isModified(item: EndpointAuthItem): boolean {
-        const authItems = untracked(this.endpointAuthItems.value);
+        const authItems = this.endpointAuthItems.hasValue() ? this.endpointAuthItems.value() : [];
         const authItem = authItems.find(auth => auth.name === item.name);
         if (!authItem) {
             return item.authorization !== 'EndpointAuthForm.NO_AUTH' || item.value !== '' || item.token !== '';

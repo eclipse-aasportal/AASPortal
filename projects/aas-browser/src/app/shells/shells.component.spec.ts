@@ -9,10 +9,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { API_URL, ToolbarService } from 'aas-lib';
 
 import { ShellsComponent } from './shells.component';
@@ -51,9 +50,7 @@ describe('ShellsComponent', () => {
                     },
                 }),
                 provideRouter([]),
-                provideHttpClient(),
                 provideHttpClientTesting(),
-                provideZonelessChangeDetection(),
             ],
             imports: [ShellsComponent],
         }).compileComponents();
