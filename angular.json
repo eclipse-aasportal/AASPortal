@@ -38,7 +38,8 @@
                         ],
                         "scripts": [],
                         "allowedCommonJsDependencies": [
-                            "qrcode"
+                            "qrcode",
+                            "semver"
                         ]
                     },
                     "configurations": {

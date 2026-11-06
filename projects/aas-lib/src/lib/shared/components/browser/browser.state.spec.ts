@@ -8,10 +8,8 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { aas } from 'aas-core';
-import { FakeLoader } from '../../../../test/mocks';
 import { BrowserData, BrowserElement, BrowserState } from './browser.state';
 
 describe('BrowserState', () => {
@@ -19,16 +17,7 @@ describe('BrowserState', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                BrowserState,
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [BrowserState, provideTranslateService()],
         });
 
         service = TestBed.inject(BrowserState);

@@ -8,7 +8,6 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
 
 import { DataSheet } from './data-sheet';
 import { DataSheetData } from '../../../types';
@@ -20,7 +19,6 @@ describe('DataSheet', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [DataSheet],
-            providers: [provideZonelessChangeDetection()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(DataSheet);

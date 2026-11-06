@@ -7,14 +7,12 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 
 import { CarbonFootprintState } from './carbon-footprint.state';
-import { FakeLoader } from '../../../test/mocks';
 
 import carbon_footprint_1_0 from '../../../test/assets/carbon-footprint-1-0.json';
 
@@ -33,16 +31,7 @@ describe('CarbonFootprintState', () => {
         };
 
         TestBed.configureTestingModule({
-            providers: [
-                CarbonFootprintState,
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [CarbonFootprintState, provideTranslateService()],
         });
 
         service = TestBed.inject(CarbonFootprintState);

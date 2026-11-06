@@ -8,9 +8,9 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { first, lastValueFrom, of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
@@ -22,7 +22,7 @@ import { VIEW_ROUTES } from '../views-routes';
 import { TechnicalDataView } from './technical-data-view';
 import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { TechnicalData } from './technical-data';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { TechnicalDataState } from './technical-data.state';
 import { TECHNICAL_DATA_1_2 } from '../views-constants';
 
@@ -108,13 +108,7 @@ describe('TechnicalDataView', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [TechnicalDataView],
         }).compileComponents();

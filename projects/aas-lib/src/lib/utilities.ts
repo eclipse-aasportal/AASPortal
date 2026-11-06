@@ -119,35 +119,6 @@ export function extension(path: string): string | undefined {
 }
 
 /**
- * Checks if the specified string is base64 encoded
- * @param s The string to test.
- * @return true if base64 encoded
- */
-export function isBase64(s: string): boolean {
-    return /^[A-Za-z0-9+/]*[=]{0,2}$/.test(s);
-}
-
-/**
- * Converts a Blob to a base64 encoded string.
- * @param blob The current Blob.
- * @returns The base64 encoded string.
- */
-export function convertBlobToBase64Async(blob: Blob): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = (): void => {
-            const base64WithDataUrlPrefix = reader.result as string;
-            const index = base64WithDataUrlPrefix.indexOf(';base64,');
-            const base64 = base64WithDataUrlPrefix.substring(index + 8);
-            resolve(base64);
-        };
-
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-}
-
-/**
  * Determines the display name for the specified Referable.
  * @param referable The current Referable.
  * @param env The Environment of the Referable.

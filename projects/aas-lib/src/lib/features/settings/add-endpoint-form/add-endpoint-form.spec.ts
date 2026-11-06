@@ -9,7 +9,7 @@
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { provideRouter } from '@angular/router';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -17,7 +17,6 @@ import { AASEndpoint } from 'aas-core';
 
 import { AddEndpointForm } from './add-endpoint-form';
 import { createSpyObj, FakeLoader } from '../../../../test/mocks';
-import { provideHttpClient } from '@angular/common/http';
 import { FormError } from '../../../shared/components/form-error/form-error';
 
 describe('AddEndpointForm', () => {
@@ -25,7 +24,6 @@ describe('AddEndpointForm', () => {
     let fixture: ComponentFixture<AddEndpointForm>;
     let activeModal: Mocked<NgbActiveModal>;
     let httpController: HttpTestingController;
-    let app: ApplicationRef;
 
     beforeEach(async () => {
         activeModal = createSpyObj<NgbActiveModal>(['close', 'dismiss']);
@@ -39,20 +37,17 @@ describe('AddEndpointForm', () => {
                         useClass: FakeLoader,
                     },
                 }),
-                provideZonelessChangeDetection(),
-                provideHttpClient(),
                 provideHttpClientTesting(),
                 provideRouter([]),
             ],
             imports: [AddEndpointForm, FormError],
         }).compileComponents();
 
-        app = TestBed.inject(ApplicationRef);
         httpController = TestBed.inject(HttpTestingController);
         fixture = TestBed.createComponent(AddEndpointForm);
         component = fixture.componentInstance;
 
-        app.tick();
+        TestBed.tick();
         httpController.expectOne('/api/v1/endpoints').flush([
             {
                 name: 'Endpoint A',
@@ -67,7 +62,7 @@ describe('AddEndpointForm', () => {
             },
         ] satisfies AASEndpoint[]);
 
-        await fixture.whenStable();
+        await TestBed.inject(ApplicationRef).whenStable();
     });
 
     it('should create', () => {

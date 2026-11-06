@@ -8,12 +8,10 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { ContactInformationState } from './contact-information.state';
-import { FakeLoader } from '../../../test/mocks';
 
 import contactInformation from '../../../test/assets/contact-information-1-0.json';
 
@@ -32,16 +30,7 @@ describe('ContactInformationState', () => {
         };
 
         TestBed.configureTestingModule({
-            providers: [
-                ContactInformationState,
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [ContactInformationState, provideTranslateService()],
         });
 
         service = TestBed.inject(ContactInformationState);

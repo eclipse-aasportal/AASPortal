@@ -9,12 +9,12 @@
 import { describe, beforeEach, it, expect, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { Component, input, signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { StartService } from '../../shared/services/start.service';
 import { ToolbarService } from '../../shared/services/toolbar.service';
 import { encodeBase64Url } from '../../utilities';
@@ -99,13 +99,7 @@ describe('ServiceRequestNotification', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [AssetStatus],
         }).compileComponents();

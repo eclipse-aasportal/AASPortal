@@ -7,12 +7,12 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
-import { Component, DOCUMENT, effect, inject, Injectable, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, DOCUMENT, effect, inject, Injectable, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { noop } from 'aas-core';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 import { TreeComponent, TreeId, TreeNode, TreeResult } from './tree.component';
 import { afterEach } from 'node:test';
 import { WINDOW, WindowService } from '../../services/window.service';
@@ -144,13 +144,7 @@ describe('TreeComponent', () => {
                     provide: WINDOW,
                     useValue: window,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [TestTreeComponent],
         }).compileComponents();

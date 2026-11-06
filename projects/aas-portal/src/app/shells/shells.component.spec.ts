@@ -8,11 +8,11 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Component, input, model, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
+import { Component, input, model, signal, WritableSignal } from '@angular/core';
 
 import { AASDocument, aas } from 'aas-core';
 import {
@@ -29,7 +29,7 @@ import {
 import { ShellsComponent } from './shells.component';
 import { FavoritesList, FavoritesService } from './favorites.service';
 import { ShellsState } from './shells.state';
-import { createSpyObj, FakeLoader } from '../../test/mocks';
+import { createSpyObj } from '../../test/mocks';
 
 @Component({
     selector: 'fhg-aas-table',
@@ -149,13 +149,7 @@ describe('ShellsComponent', () => {
                     provide: NgbModal,
                     useValue: modal,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [ShellsComponent],
         }).compileComponents();

@@ -8,11 +8,10 @@
 
 import { beforeEach, describe, expect, it, vitest } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
 import { HandoverDocumentation } from './handover-documentation';
-import { FakeLoader } from '../../../test/mocks';
 import { HandoverDocumentationState } from './handover-documentation.state';
 
 import handoverDocumentation_1_2 from '../../../test/assets/handover-documentation-1-2.json';
@@ -41,15 +40,7 @@ describe('HandoverDocumentation', () => {
 
         await TestBed.configureTestingModule({
             imports: [HandoverDocumentation],
-            providers: [
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [provideTranslateService()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(HandoverDocumentation);

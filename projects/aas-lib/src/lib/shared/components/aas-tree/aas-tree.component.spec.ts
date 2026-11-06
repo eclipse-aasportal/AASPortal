@@ -7,9 +7,8 @@
  *****************************************************************************/
 
 import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { AASDocument, WebSocketData } from 'aas-core';
@@ -20,7 +19,7 @@ import { NotifyService } from '../../../core/notify/notify.service';
 import { WebSocketService } from '../../services/web-socket.service';
 import { WINDOW } from '../../services/window.service';
 import { AASTreeApi } from './aas-tree-api';
-import { createSpyObj, FakeLoader, MockWebSocketService } from '../../../../test/mocks';
+import { createSpyObj, MockWebSocketService } from '../../../../test/mocks';
 import { VIEW_ROUTES } from '../../../views/views-routes';
 
 describe('AASTreeComponent', () => {
@@ -62,13 +61,7 @@ describe('AASTreeComponent', () => {
                     provide: VIEW_ROUTES,
                     useValue: [],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
         }).compileComponents();
 

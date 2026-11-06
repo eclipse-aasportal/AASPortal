@@ -8,15 +8,15 @@
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Component, input, provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideTranslateService } from '@ngx-translate/core';
+import { Component, input, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 
 import { aas, AASDocument } from 'aas-core';
 import { HierarchicalStructureView } from './hierarchical-structure-view';
 import { HierarchicalStructure } from './hierarchical-structure';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { StartService } from '../../shared/services/start.service';
 import { ToolbarService } from '../../shared/services/toolbar.service';
@@ -107,13 +107,7 @@ describe('HierarchicalStructureView', () => {
                         },
                     ],
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
             imports: [HierarchicalStructureView],
         }).compileComponents();

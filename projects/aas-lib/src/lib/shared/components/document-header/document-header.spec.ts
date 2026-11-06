@@ -9,9 +9,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AASDocument, aas } from 'aas-core';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 import { DocumentHeader, QR_CODE } from './document-header';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { WINDOW } from '../../services/window.service';
 
 describe('DocumentHeader', () => {
@@ -29,12 +29,7 @@ describe('DocumentHeader', () => {
                     provide: QR_CODE,
                     useValue: { toCanvas: vi.fn() },
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
+                provideTranslateService(),
             ],
             imports: [DocumentHeader],
         }).compileComponents();

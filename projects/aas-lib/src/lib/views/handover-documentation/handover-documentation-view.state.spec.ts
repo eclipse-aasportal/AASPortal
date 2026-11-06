@@ -8,13 +8,11 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { aas, AASDocument } from 'aas-core';
 
 import { HandoverDocumentationViewState as HandoverDocumentationViewState } from './handover-documentation-view.state';
 import { HandoverDocumentationState } from './handover-documentation.state';
-import { FakeLoader } from '../../../test/mocks';
 
 import handoverDocumentation_1_2 from '../../../test/assets/handover-documentation-1-2.json';
 
@@ -36,15 +34,7 @@ describe('HandoverDocumentationViewState', () => {
         submodel = document.content!.submodels![0];
 
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [HandoverDocumentationViewState, provideTranslateService()],
         });
 
         service = TestBed.inject(HandoverDocumentationViewState);

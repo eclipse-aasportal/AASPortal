@@ -7,9 +7,8 @@
  *****************************************************************************/
 
 import { afterEach, beforeEach, describe, expect, it, Mocked, vi } from 'vitest';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { lastValueFrom, of, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, ParamMap } from '@angular/router';
@@ -19,7 +18,7 @@ import { DocumentCache } from '../../shared/services/document-cache';
 import { WINDOW, WindowService } from '../../shared/services/window.service';
 import { NotifyService } from '../notify/notify.service';
 import { AuthService } from './auth.service';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -65,13 +64,7 @@ describe('AuthService', () => {
                     provide: ActivatedRoute,
                     useValue: activatedRoute,
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
         });
 

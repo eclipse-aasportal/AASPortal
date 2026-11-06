@@ -25,7 +25,6 @@ describe('IndexChange', () => {
     let webSocket: Mocked<WebSocketService>;
     let cache: Mocked<DocumentCache>;
     let controller: HttpTestingController;
-    let app: ApplicationRef;
     const subject = new Subject<WebSocketData>();
 
     beforeEach(async () => {
@@ -48,14 +47,13 @@ describe('IndexChange', () => {
             ],
         });
 
-        app = TestBed.inject(ApplicationRef);
         controller = TestBed.inject(HttpTestingController);
         service = TestBed.inject(IndexChange);
 
-        app.tick();
+        TestBed.tick();
         controller.expectOne('/api/v1/endpoints/document-count').flush(42);
         controller.expectOne('/api/v1/endpoints/endpoint-count').flush(5);
-        await app.whenStable();
+        await TestBed.inject(ApplicationRef).whenStable();
     });
 
     afterEach(() => {
@@ -71,10 +69,10 @@ describe('IndexChange', () => {
     describe('clear', () => {
         it('should clear the current state', async () => {
             service.reload();
-            app.tick();
+            TestBed.tick();
             controller.expectOne('/api/v1/endpoints/document-count').flush(1);
             controller.expectOne('/api/v1/endpoints/endpoint-count').flush(33);
-            await app.whenStable();
+            await TestBed.inject(ApplicationRef).whenStable();
 
             expect(service.documentCount()).toBe(1);
             expect(service.endpointCount()).toBe(33);
@@ -261,9 +259,9 @@ describe('IndexChange', () => {
         it('should clear the index for a specific endpoint', async () => {
             const endpoint = 'test-endpoint';
             const promise = lastValueFrom(service.clearIndex(endpoint));
-            app.tick();
+            TestBed.tick();
             controller.expectOne(`api/v1/index/${encodeBase64Url(endpoint)}/clear-index`).flush(null);
-            await app.whenStable();
+            await TestBed.inject(ApplicationRef).whenStable();
             await expect(promise).resolves.toBeUndefined();
         });
     });
@@ -272,9 +270,9 @@ describe('IndexChange', () => {
         it('should start the update index process for a specific endpoint', async () => {
             const endpoint = 'test-endpoint';
             const promise = lastValueFrom(service.startUpdateIndex(endpoint));
-            app.tick();
+            TestBed.tick();
             controller.expectOne(`api/v1/endpoints/${encodeBase64Url(endpoint)}/start-scan`).flush(null);
-            await app.whenStable();
+            await TestBed.inject(ApplicationRef).whenStable();
             await expect(promise).resolves.toBeUndefined();
         });
     });
@@ -283,9 +281,9 @@ describe('IndexChange', () => {
         it('should cancel the update index process for a specific endpoint', async () => {
             const endpoint = 'test-endpoint';
             const promise = lastValueFrom(service.cancelUpdateIndex(endpoint));
-            app.tick();
+            TestBed.tick();
             controller.expectOne(`api/v1/endpoints/${encodeBase64Url(endpoint)}/cancel-scan`).flush(null);
-            await app.whenStable();
+            await TestBed.inject(ApplicationRef).whenStable();
             await expect(promise).resolves.toBeUndefined();
         });
     });
@@ -300,9 +298,9 @@ describe('IndexChange', () => {
             };
 
             const promise = lastValueFrom(service.getUpdateStatus(endpoint));
-            app.tick();
+            TestBed.tick();
             controller.expectOne(`/api/v1/endpoints/${encodeBase64Url(endpoint)}/status`).flush(expectedResponse);
-            await app.whenStable();
+            await TestBed.inject(ApplicationRef).whenStable();
             await expect(promise).resolves.toEqual(expectedResponse);
         });
     });

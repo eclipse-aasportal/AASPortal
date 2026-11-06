@@ -7,13 +7,13 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { NotifyService } from '../../../lib/core/notify/notify.service';
 import { NotifyComponent } from '../../../lib/core/notify/notify.component';
-import { createSpyObj, FakeLoader } from '../../../test/mocks';
+import { createSpyObj } from '../../../test/mocks';
 
 describe('NotifyComponent', () => {
     beforeEach(async () => {
@@ -24,13 +24,7 @@ describe('NotifyComponent', () => {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error', 'clear'], { messages: signal([]) }),
                 },
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
+                provideTranslateService(),
             ],
         }).compileComponents();
     });

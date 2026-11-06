@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { beforeEach, describe, expect, it, Mocked } from 'vitest';
-import { ApplicationRef, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { lastValueFrom, of } from 'rxjs';
 import { AuthService, CookieService } from 'aas-lib';
@@ -19,7 +19,6 @@ describe('FavoritesService', () => {
     let service: FavoritesService;
     let cookies: Mocked<CookieService>;
     let auth: Mocked<AuthService>;
-    let app: ApplicationRef;
 
     const user = signal<SessionUser | null>(null);
     const favorite: AASDocument = {
@@ -63,9 +62,8 @@ describe('FavoritesService', () => {
             ],
         });
 
-        app = TestBed.inject(ApplicationRef);
         service = TestBed.inject(FavoritesService);
-        app.tick();
+        TestBed.tick();
     });
 
     it('should be created', () => {

@@ -8,13 +8,11 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { aas, AASDocument } from 'aas-core';
 import { ContactInformationViewState } from './contact-information-view.state';
 import { ContactInformationState } from './contact-information.state';
-import { FakeLoader } from '../../../test/mocks';
 
 import contactInformation from '../../../test/assets/contact-information-1-0.json';
 
@@ -36,15 +34,7 @@ describe('ContactInformationViewState', () => {
         submodel = document.content!.submodels![0];
 
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useClass: FakeLoader,
-                    },
-                }),
-                provideZonelessChangeDetection(),
-            ],
+            providers: [provideTranslateService()],
         });
         service = TestBed.inject(ContactInformationViewState);
         service.update({ tuples: [[document, submodel]] });
