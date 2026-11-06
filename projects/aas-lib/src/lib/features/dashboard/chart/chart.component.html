@@ -1,0 +1,19 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div class="card-header d-flex flex-row justify-content-between align-items-center">
+    <div class="fs-5 fw-medium">{{ page() | translate }}</div>
+    <a [href]="href()">
+        <i class="bi bi-chevron-right"></i>
+    </a>
+</div>
+<div class="card-body">
+    <div class="m-auto h-auto w-auto">
+        <canvas #chart></canvas>
+    </div>
+</div>

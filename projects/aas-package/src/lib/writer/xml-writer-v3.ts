@@ -27,21 +27,27 @@ export class XmlWriterV3 extends AASWriter {
         envNode.attributes.setNamedItem(xmlns);
 
         const shellsNode = this.appendChild(envNode, 'assetAdministrationShells');
-        for (const aas of env.assetAdministrationShells) {
-            this.writeAssetAdministrationShell(aas, this.appendChild(shellsNode, 'assetAdministrationShell'));
+        if (env.assetAdministrationShells) {
+            for (const aas of env.assetAdministrationShells) {
+                this.writeAssetAdministrationShell(aas, this.appendChild(shellsNode, 'assetAdministrationShell'));
+            }
         }
 
-        const submodelsNode = this.appendChild(envNode, 'submodels');
-        for (const submodel of env.submodels) {
-            this.writeSubmodel(submodel, this.appendChild(submodelsNode, 'submodel'));
+        if (env.submodels) {
+            const submodelsNode = this.appendChild(envNode, 'submodels');
+            for (const submodel of env.submodels) {
+                this.writeSubmodel(submodel, this.appendChild(submodelsNode, 'submodel'));
+            }
         }
 
-        const conceptDescriptionsNode = this.appendChild(envNode, 'conceptDescriptions');
-        for (const conceptDescription of env.conceptDescriptions) {
-            this.writeConceptDescription(
-                conceptDescription,
-                this.appendChild(conceptDescriptionsNode, 'conceptDescription'),
-            );
+        if (env.conceptDescriptions) {
+            const conceptDescriptionsNode = this.appendChild(envNode, 'conceptDescriptions');
+            for (const conceptDescription of env.conceptDescriptions) {
+                this.writeConceptDescription(
+                    conceptDescription,
+                    this.appendChild(conceptDescriptionsNode, 'conceptDescription'),
+                );
+            }
         }
 
         return new XMLSerializer().serializeToString(this.document);

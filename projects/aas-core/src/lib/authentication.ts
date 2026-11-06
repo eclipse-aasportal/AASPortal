@@ -8,16 +8,21 @@
 
 import capitalize from 'lodash-es/capitalize.js';
 
-export type UserRole = 'reader' | 'editor' | 'admin' | undefined;
+export type UserRole = 'viewer' | 'editor' | 'admin';
 
-export const priority: UserRole[] = ['reader', 'editor', 'admin'];
+const priority: UserRole[] = ['viewer', 'editor', 'admin'];
 
-/** The user roles. */
-export const USER_ROLES: Record<string, string> = {
-    admin: 'admin',
-    editor: 'editor',
-    reader: 'reader',
-};
+/** JSON web token private claim. */
+export interface User {
+    id: string;
+    name: string;
+}
+
+/** User with additional session information. */
+export interface SessionUser extends User {
+    role: UserRole;
+    client_id: string;
+}
 
 /** The user profile. */
 export interface UserProfile {
@@ -73,13 +78,6 @@ export interface AuthResult {
     token: string;
 }
 
-/** JSON web token private claim. */
-export interface User {
-    id: string;
-    name: string;
-    role: UserRole;
-}
-
 /**
  * Extracts a user name from the specified e-mail.
  * @param email The e-mail.
@@ -103,10 +101,18 @@ export function getUserNameFromEMail(email: string): string {
 }
 
 /**
- * Determines whether the current user is authorized for the specified roles.
+ * Determines whether the current user is authorized for the specified role.
  * @param actual The actual role.
- * @param expected The expected roles.
+ * @param minimumRequired The minimum required role.
  */
-export function isUserAuthorized(actual: UserRole, expected: UserRole[]): boolean {
-    return expected.indexOf(actual) >= 0;
+export function isUserAuthorized(actual: UserRole | undefined, minimumRequired: UserRole | undefined): boolean {
+    if (!minimumRequired) {
+        return true;
+    }
+
+    if (!actual) {
+        return false;
+    }
+
+    return priority.indexOf(actual) >= priority.indexOf(minimumRequired);
 }

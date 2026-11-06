@@ -10,14 +10,14 @@
     <div class="modal-header">
         <h5 class="modal-title text-info">
             <i class="bi bi-key"></i>
-            <span class="ms-2" translate>AuthForm.CAPTION</span>
+            <span class="ms-2" translate="AuthForm.CAPTION"></span>
         </h5>
         <button type="button" class="btn-close" (click)="cancel()"></button>
     </div>
     <div class="modal-body">
         <div class="form-floating mb-3">
             <input type="password" class="form-control" id="AID_API_KEY" [formField]="apiKey" />
-            <label for="AID_API_KEY" translate>AuthForm.API_KEY</label>
+            <label for="AID_API_KEY" translate="AuthForm.API_KEY"></label>
         </div>
         @if (apiKey().touched() && apiKey().invalid()) {
             <div class="text-danger fs-7">
@@ -28,7 +28,7 @@
         }
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" translate>AuthForm.OK</button>
-        <button type="button" class="btn btn-secondary" (click)="cancel()" translate>AuthForm.CANCEL</button>
+        <button type="submit" class="btn btn-primary" translate="AuthForm.OK"></button>
+        <button type="button" class="btn btn-secondary" (click)="cancel()" translate="AuthForm.CANCEL"></button>
     </div>
 </form>

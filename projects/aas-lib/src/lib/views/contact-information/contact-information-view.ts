@@ -6,19 +6,20 @@
  *
  *****************************************************************************/
 
-import { TranslateDirective } from '@ngx-translate/core';
-import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+import { NgbAccordionModule, NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
-import { ToolbarService } from '../../services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { ContactInformation } from './contact-information';
 import { ContactInformationViewState } from './contact-information-view.state';
 import { LeafView } from '../leaf-view';
-import { StartService } from '../../services/start.service';
+import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
+import { RouterModule } from '@angular/router';
 
 /**
  * Provides a view for contact information submodels.
@@ -28,8 +29,16 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './contact-information-view.html',
     styleUrls: ['./contact-information-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'ContactInformation' }],
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, ContactInformation],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TranslateDirective,
+        TranslatePipe,
+        NgbPaginationModule,
+        NgbAccordionModule,
+        DocumentHeader,
+        ContactInformation,
+        RouterModule,
+        NgbTooltip,
+    ],
 })
 export class ContactInformationView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
@@ -72,8 +81,9 @@ export class ContactInformationView extends LeafView implements OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
+        const caption = 'ContactInformation.CAPTION';
         const href = `/views/ContactInformation;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
-        if (!this.start.add('Favorite', `CIV#${endpoint}#${id}`, { endpoint, id, href })) {
+        if (!this.start.add('Favorite', `CIV#${endpoint}#${id}`, { endpoint, id, caption, href })) {
             return of(void 0);
         }
 

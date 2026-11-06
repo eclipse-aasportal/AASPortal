@@ -12,7 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AASDocument, getSemanticId } from 'aas-core';
 import { DataSheetData } from '../../types';
 import { createDataSheet, getDisplayName } from '../../utilities';
-import { ChildState } from '../../components/child-state';
+import { ChildState } from '../../shared/components/child-state';
 import { CONTACT_INFORMATION_1_0 } from '../views-constants';
 
 export type ContactInformationData = {
@@ -40,7 +40,7 @@ export class ContactInformationState extends ChildState {
             return undefined;
         }
 
-        return env.submodels.find(submodel => getSemanticId(submodel) === CONTACT_INFORMATION_1_0);
+        return env.submodels?.find(submodel => getSemanticId(submodel) === CONTACT_INFORMATION_1_0);
     });
 
     /**
@@ -53,7 +53,6 @@ export class ContactInformationState extends ChildState {
      */
     public readonly contacts = computed(() => {
         const contacts: DataSheetData[] = [];
-        const currentLang = this.translate.getCurrentLang();
         const document = this.document();
         const submodel = this.submodel();
         const env = document?.content;
@@ -63,8 +62,8 @@ export class ContactInformationState extends ChildState {
 
         let index = 1;
         for (const element of submodel.submodelElements) {
-            const dataSheet = createDataSheet(document, element, currentLang, {
-                name: `${getDisplayName(element, env, currentLang)} [${index}]`,
+            const dataSheet = createDataSheet(document, element, this.currentLang(), {
+                name: `${getDisplayName(element, env, this.currentLang())} [${index}]`,
                 type: 'A',
                 include: [
                     'RoleOfContactPerson',
@@ -85,6 +84,7 @@ export class ContactInformationState extends ChildState {
                     'IPCommunication{00}',
                     'Street',
                     'Zipcode',
+                    'ZipCode',
                     'POBox',
                     'ZipCodeOfPOBox',
                     'StateCounty',

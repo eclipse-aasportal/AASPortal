@@ -8,6 +8,7 @@
 
 import { singleton } from 'tsyringe';
 import path from 'path/posix';
+import { LogLevel } from 'aas-package';
 
 @singleton()
 export class Variable {
@@ -15,16 +16,10 @@ export class Variable {
     public readonly AAS_EXPIRES_IN: number = process.env.AAS_EXPIRES_IN ? Number(process.env.AAS_EXPIRES_IN) : 86400000;
 
     /** The AASIndex realization. */
-    public readonly AAS_INDEX?: string = process.env.AAS_INDEX;
-
-    /** The root password. */
-    public readonly AAS_NODE_PASSWORD: string = process.env.AAS_NODE_PASSWORD ?? 'aas-node';
+    public readonly AAS_INDEX: string = process.env.AAS_INDEX ?? 'aas-index.db';
 
     /** The port of the AASNode. */
     public readonly AAS_NODE_PORT: number = Number(process.env.AAS_NODE_PORT ?? '1337');
-
-    /** The user name of AASNode (default: aas-node) */
-    public readonly AAS_NODE_USERNAME: string = process.env.AAS_NODE_USERNAME ?? 'aas-node';
 
     /** The assets directory. */
     public readonly ASSETS: string = path.resolve(process.env.ASSETS ?? './assets');
@@ -33,7 +28,13 @@ export class Variable {
     public readonly CONTENT_ROOT: string = path.resolve(process.env.CONTENT_ROOT ?? './');
 
     /** The URL of the cookie storage. */
-    public readonly COOKIE_STORAGE?: string = process.env.COOKIE_STORAGE;
+    public readonly COOKIE_STORE: string = process.env.COOKIE_STORE ?? 'aasportal-users.db';
+
+    /** The URL of the user store. */
+    public readonly USER_STORE: string = process.env.USER_STORE ?? 'aasportal-users.db';
+
+    /** The URL of the user rights store. */
+    public readonly USER_RIGHTS_STORE: string = process.env.USER_RIGHTS_STORE ?? 'aasportal-users.db';
 
     /** The CORS origin settings. */
     public readonly CORS_ORIGIN: string | string[] = process.env.CORS_ORIGIN
@@ -43,7 +44,7 @@ export class Variable {
     /** The URLs of the initial AAS container endpoints. */
     public readonly ENDPOINTS: string[] = process.env.ENDPOINTS
         ? JSON.parse(process.env.ENDPOINTS)
-        : ['file:///endpoints/samples?name=Samples'];
+        : ['file:///endpoints/samples?name=Samples', 'file:///endpoints/templates?name=Templates'];
 
     /** The certificate file if AASNode supports HTTPS. */
     public readonly HTTPS_CERT_FILE?: string = process.env.HTTPS_CERT_FILE;
@@ -54,35 +55,43 @@ export class Variable {
     /** The pfx file if AASNode supports HTTPS. */
     public readonly HTTPS_PFX_FILE?: string = process.env.HTTPS_PFX_FILE;
 
+    /** The password for the pfx file if AASNode supports HTTPS. */
+    public readonly HTTPS_PFX_PASSWORD?: string = process.env.HTTPS_PFX_PASSWORD;
+
     /** The URL of the host */
     public readonly HOST_URL?: string = process.env.HOST_URL;
 
-    /** Specifies the identity provider issuer URL */
-    public readonly IDENTITY_PROVIDER: string = process.env.IDENTITY_PROVIDER ?? 'file:///users';
+    /** Specifies the identity provider issuer URL (default) */
+    public readonly IDENTITY_PROVIDER: string = process.env.IDENTITY_PROVIDER ?? 'file:///identity-provider';
 
     /** The client name or identifier. */
-    public readonly CLIENT_ID: string = process.env.CLIENT_ID ?? 'aas-node';
+    public readonly CLIENT_ID?: string = process.env.CLIENT_ID;
 
     /** The client secret. */
-    public readonly CLIENT_SECRET: string = process.env.CLIENT_SECRET ?? 'aas-node-client-secret-for-development';
+    public readonly CLIENT_SECRET?: string = process.env.CLIENT_SECRET;
 
     /** The redirect URI after successful login. */
     public readonly REDIRECT_URI?: string = process.env.REDIRECT_URI;
 
     /** The logging level. */
-    public readonly LOG_LEVEL: 'Error' | 'Warning' | 'Info' =
-        (process.env.LOG_LEVEL as 'Error' | 'Warning' | 'Info') ?? 'Info';
+    public readonly LOG_LEVEL: LogLevel = (process.env.LOG_LEVEL as LogLevel) ?? 'Info';
 
     /** The number of worker threads. */
-    public readonly MAX_WORKERS: number = process.env.MAX_WORKERS ? Number(process.env.MAX_WORKERS) : 8;
+    public readonly MAX_WORKERS: number = process.env.MAX_WORKERS ? Number(process.env.MAX_WORKERS) : 2;
 
-    /** The time before a new endpoint scan starts.*/
+    /** The time before a new endpoint scan starts (default 1 hour = 3,600,00 ms).*/
     public readonly SCAN_ENDPOINT_TIMEOUT: number = process.env.SCAN_ENDPOINT_TIMEOUT
         ? Number(process.env.SCAN_ENDPOINT_TIMEOUT)
-        : 3600000;
+        : 3_600_000;
 
     /** The session secret. */
-    public readonly SESSION_SECRET: string = process.env.SESSION_SECRET ?? 'aas-portal-session-secret';
+    public readonly SESSION_SECRET?: string = process.env.SESSION_SECRET;
+
+    /** The session store. */
+    public readonly SESSION_STORE: string = process.env.SESSION_STORE ?? 'aasportal-users.db';
+
+    /** The session time-to-live in seconds (default 1 day = 86400 s). */
+    public readonly SESSION_TTL: number = process.env.SESSION_TTL ? Number(process.env.SESSION_TTL) : 86400;
 
     /** The root directory for static files. */
     public readonly WEB_ROOT: string = path.resolve(process.env.WEB_ROOT ?? './wwwroot');

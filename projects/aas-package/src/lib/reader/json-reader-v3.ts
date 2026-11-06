@@ -31,7 +31,16 @@ export class JsonReaderV3 extends AASReader {
         const conceptDescriptions = this.readConceptDescriptions();
         const assetAdministrationShells = this.readAssetAdministrationShells();
         const submodels = this.readSubmodels();
-        return { assetAdministrationShells, submodels, conceptDescriptions };
+        const env: aas.Environment = { assetAdministrationShells };
+        if (conceptDescriptions.length > 0) {
+            env.conceptDescriptions = conceptDescriptions;
+        }
+
+        if (submodels.length > 0) {
+            env.submodels = submodels;
+        }
+
+        return env;
     }
 
     /**
@@ -43,7 +52,7 @@ export class JsonReaderV3 extends AASReader {
         const source: aas.Referable = typeof data === 'string' ? JSON.parse(data) : data;
         switch (source.modelType) {
             case 'AssetAdministrationShell':
-                throw new Error('Invalid operation.');
+                return this.readAssetAdministrationShell(source as aas.AssetAdministrationShell);
             case 'Submodel':
                 return this.readSubmodel(source as aas.Submodel);
             case 'ConceptDescription':
@@ -128,16 +137,17 @@ export class JsonReaderV3 extends AASReader {
             throw new Error('SpecificAssetId.value');
         }
 
-        if (!source.externalSubjectId) {
-            throw new Error('SpecificAssetId.externalSubjectId');
-        }
-
-        return {
+        const value: aas.SpecificAssetId = {
             ...this.readHasSemantics,
             name: source.name,
             value: source.value,
-            externalSubjectId: this.readReference(source.externalSubjectId),
         };
+
+        if (source.externalSubjectId) {
+            value.externalSubjectId = this.readReference(source.externalSubjectId);
+        }
+
+        return value;
     }
 
     private readAdministrationInformation(source: aas.AdministrativeInformation): aas.AdministrativeInformation {
@@ -236,6 +246,8 @@ export class JsonReaderV3 extends AASReader {
                 return this.readBasicEventElement(source as aas.BasicEventElement, path);
             case 'Blob':
                 return this.readBlob(source as aas.Blob, path);
+            case 'Capability':
+                return this.readCapability(source as aas.Capability, path);
             case 'Entity':
                 return this.readEntity(source as aas.Entity, path);
             case 'File':
@@ -443,6 +455,14 @@ export class JsonReaderV3 extends AASReader {
         }
 
         return blob;
+    }
+
+    private readCapability(source: aas.Capability, path?: aas.ReferablePath): aas.Capability {
+        const capability: aas.Capability = {
+            ...this.readSubmodelElementType(source, path),
+        };
+
+        return capability;
     }
 
     private readEntity(source: aas.Entity, path?: aas.ReferablePath): aas.Entity {
@@ -668,7 +688,7 @@ export class JsonReaderV3 extends AASReader {
 
                 return {
                     type: key.type,
-                    value: key.value != null ? key.value : '',
+                    value: key.value ?? '',
                 } as aas.Key;
             }),
         };

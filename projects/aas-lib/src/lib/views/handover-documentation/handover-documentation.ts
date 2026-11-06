@@ -15,12 +15,12 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import { Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
 
-import { ChildComponent } from '../../components/child-component';
+import { ChildComponent } from '../../shared/components/child-component';
 import { DocumentationItem, HandoverDocumentationState } from './handover-documentation.state';
 import { DocumentPopupComponent } from './document-popup/document-popup.component';
 
@@ -33,7 +33,6 @@ import { DocumentPopupComponent } from './document-popup/document-popup.componen
     imports: [NgbAccordionModule],
     templateUrl: './handover-documentation.html',
     styleUrl: './handover-documentation.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HandoverDocumentation extends ChildComponent {
     public clickedItem: DocumentationItem = {

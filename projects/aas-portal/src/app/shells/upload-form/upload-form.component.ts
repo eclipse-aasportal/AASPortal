@@ -6,18 +6,17 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { AASEndpoint } from 'aas-core';
 
 @Component({
     selector: 'fhg-upload-form',
     templateUrl: './upload-form.component.html',
     styleUrls: ['./upload-form.component.scss'],
-    imports: [FormsModule, TranslateModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslateDirective],
 })
 export class UploadFormComponent {
     public constructor(private readonly modal: NgbActiveModal) {}

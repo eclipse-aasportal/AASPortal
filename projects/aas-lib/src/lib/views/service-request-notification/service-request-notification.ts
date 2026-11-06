@@ -6,41 +6,26 @@
  *
  *****************************************************************************/
 
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    inject,
-    OnDestroy,
-    Signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { LeafView } from '../leaf-view';
-import { ToolbarService } from '../../services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { encodeBase64Url, toString } from '../../utilities';
-import { StartService } from '../../services/start.service';
+import { StartService } from '../../shared/services/start.service';
 import { RouterLink } from '@angular/router';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
-import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'fhg-service-request-notification',
-    imports: [ThumbnailQRCode, RouterLink],
+    imports: [DocumentHeader, RouterLink],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'ServiceRequestNotification' }],
     templateUrl: './service-request-notification.html',
     styleUrl: './service-request-notification.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServiceRequestNotification extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
 
     public constructor() {
         super();
@@ -51,10 +36,6 @@ export class ServiceRequestNotification extends LeafView implements OnDestroy {
                 this.toolbar.set(template);
             }
         });
-
-        const translate = inject(TranslateService);
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.currentLang);
     }
 
     public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
@@ -80,8 +61,9 @@ export class ServiceRequestNotification extends LeafView implements OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
+        const caption = 'ServiceRequestNotification.CAPTION';
         const href = `/views/ServiceRequestNotification;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
-        if (!this.start.add('Favorite', `SRN#${endpoint}#${id}`, { endpoint, id, href })) {
+        if (!this.start.add('Favorite', `SRN#${endpoint}#${id}`, { endpoint, id, caption, href })) {
             return of(void 0);
         }
 

@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { aas, AASEndpoint, convertFromString, DefaultType, getSemanticId, LiveRequest, traverse } from 'aas-core';
+import { aas, AASEndpoint, convertFromString, DefaultType, LiveRequest } from 'aas-core';
 import { Logger } from 'aas-package';
 
 import { HttpClient } from '../../http-client.js';
@@ -15,47 +15,49 @@ import { SocketClient } from '../../live/socket-client.js';
 import { EndpointClient } from '../endpoint-client.js';
 import { SocketSubscription } from '../../live/socket-subscription.js';
 import { AasxPackage } from '../fs/aasx-package.js';
+import { AASIndex } from '../../index/aas-index.js';
 
 interface PropertyValue {
     value: string;
 }
 
-/** Provides access to an AASX-Server. */
+/**
+ * Provides access to an AAS API endpoint.
+ */
 export abstract class ApiClient extends EndpointClient {
     private reentry = 0;
 
     /**
      * @param logger The logger.
+     * @param endpoint The AAS endpoint
+     * @param auth The authentication/authorization parameter.
      * @param http The HTTP client.
-     * @param endpoint AAS endpoint.
      */
-    public constructor(logger: Logger, http: HttpClient, endpoint: AASEndpoint) {
-        super(logger, endpoint);
-
-        this.http = http;
+    public constructor(
+        logger: Logger,
+        index: AASIndex,
+        endpoint: AASEndpoint,
+        auth: Record<string, string> | undefined,
+        protected readonly http: HttpClient,
+    ) {
+        super(logger, index, endpoint, auth);
     }
 
-    protected readonly http: HttpClient;
-
-    /** Indicates whether a connection to an AAS endpoint exits. */
     public override get isOpen(): boolean {
         return this.reentry > 0;
     }
 
-    /** Tests the connection to the endpoint. */
     public override async test(): Promise<void> {
         if (this.reentry === 0) {
-            await this.http.checkUrlExist(this.endpoint.url);
+            await this.http.checkUrlExist(this.endpoint.url, this.auth);
         }
     }
 
-    /** Opens a connection to the AAS endpoint. */
     public override open(): Promise<void> {
         ++this.reentry;
         return Promise.resolve();
     }
 
-    /** Closes the connection to the AAS endpoint. */
     public override close(): Promise<void> {
         return new Promise(resolve => {
             if (this.reentry > 0) {
@@ -69,16 +71,9 @@ export abstract class ApiClient extends EndpointClient {
     public override async determineAddress(aasxFile: string): Promise<string | undefined> {
         const aasxPackage = await AasxPackage.createFromFile(aasxFile);
         const env = await aasxPackage.getEnvironment();
-        return env.assetAdministrationShells.at(0)?.id;
+        return env.assetAdministrationShells?.at(0)?.id;
     }
 
-    /**
-     * Creates a subscription for live data from an AAS endpoint.
-     * @param client The socket.
-     * @param request The list of SubmodelElements to get live data.
-     * @param env The AAS.
-     * @returns A new `HttpSubscription` instance.
-     */
     public override createSubscription(
         client: SocketClient,
         request: LiveRequest,
@@ -94,7 +89,7 @@ export abstract class ApiClient extends EndpointClient {
      * @returns The current value.
      */
     public async readValue(url: string, valueType: aas.DataTypeDefXsd): Promise<DefaultType | undefined> {
-        const property = await this.http.getLive<PropertyValue>(new URL(url), this.endpoint.headers);
+        const property = await this.http.get<PropertyValue>(new URL(url), this.auth);
         return convertFromString(property.value, valueType);
     }
 
@@ -106,19 +101,47 @@ export abstract class ApiClient extends EndpointClient {
     public abstract resolveNodeId(aas: aas.AssetAdministrationShell, nodeId: string): string;
 
     /**
-     * Gets all concept description identifiers that are available in the specified referable and its descendants.
-     * @param referable The current referable.
-     * @returns The available semantic identifiers.
+     * Gets the ConceptDescription with the specified identifier.
+     * @param id The identifier of the ConceptDescription.
      */
-    protected getConceptDescriptionIds(referable: aas.Referable): Set<string> {
-        const result = new Set<string>();
-        for (const element of traverse(referable)) {
-            const id = getSemanticId(element);
-            if (id) {
-                result.add(id);
-            }
+    protected abstract getConceptDescription(id: string): Promise<aas.ConceptDescription>;
+
+    /**
+     * Gets the ConceptDescriptions referenced by all submodels of the given shell.
+     * @param shell The AssetAdministrationShell
+     * @returns A promise resolving to an array of ConceptDescriptions
+     */
+    protected async getShellConceptDescriptions(
+        shell: aas.AssetAdministrationShell,
+    ): Promise<aas.ConceptDescription[]> {
+        if (!shell.submodels) {
+            return [];
         }
 
-        return result;
+        const set = new Set<string>();
+        await Promise.all(
+            shell.submodels.map(async submodelRef => {
+                (
+                    await this.index.getSubmodelConceptDescriptionIds(this.endpoint.name, submodelRef.keys[0].value)
+                ).forEach(id => set.add(id));
+            }),
+        );
+
+        const result = await Promise.allSettled(
+            Array.from(set.values()).map(id => {
+                return this.getConceptDescription(id);
+            }),
+        );
+
+        const conceptDescriptions: aas.ConceptDescription[] = [];
+        result.forEach(item => {
+            if (item.status === 'fulfilled') {
+                conceptDescriptions.push(item.value);
+            } else {
+                this.logger.warning(`Failed to retrieve concept description: ${item.reason}`);
+            }
+        });
+
+        return conceptDescriptions;
     }
 }

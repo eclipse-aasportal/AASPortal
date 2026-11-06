@@ -7,13 +7,13 @@
  *****************************************************************************/
 
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, computed, effect, Input, input, untracked } from '@angular/core';
+import { Component, computed, effect, Input, input, untracked } from '@angular/core';
 import { TranslateDirective } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
 import { CarbonFootprintState } from './carbon-footprint.state';
-import { ChildComponent } from '../../components/child-component';
+import { ChildComponent } from '../../shared/components/child-component';
 
 /**
  * Provides a component for a submodel that belongs to the IDTA specification "Carbon Footprint".
@@ -25,7 +25,6 @@ import { ChildComponent } from '../../components/child-component';
     styleUrl: './carbon-footprint.scss',
     providers: [CarbonFootprintState],
     imports: [NgbAccordionModule, NgbPaginationModule, TranslateDirective],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarbonFootprint extends ChildComponent {
     // Determines wether the view is used from inside the dpp view or standalone

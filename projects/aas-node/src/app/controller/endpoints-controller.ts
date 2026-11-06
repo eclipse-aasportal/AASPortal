@@ -13,59 +13,85 @@ import {
     Delete,
     Get,
     OperationId,
+    Patch,
     Path,
     Post,
     Put,
-    Queries,
+    Request,
     Route,
     Security,
     Tags,
-    UploadedFile,
 } from 'tsoa';
+import express from 'express';
 
-import { aas, AASDocument, type AASEndpoint } from 'aas-core';
+import { UpdateIndexStatus, ApplicationError, AASEndpointAuth, type AASEndpoint } from 'aas-core';
 import { decodeBase64Url } from 'aas-package';
 
-import { AASProvider } from '../provider/aas-provider.js';
+import { EndpointProvider } from '../provider/endpoint-provider.js';
+import { ERRORS } from '../errors.js';
+import { USER_RIGHTS_STORE, UserRightsStore } from '../auth/user-rights-store.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
 @Tags('Endpoints')
 export class EndpointsController extends Controller {
-    public constructor(@inject(AASProvider) private readonly aasProvider: AASProvider) {
+    public constructor(
+        @inject(EndpointProvider) private readonly provider: EndpointProvider,
+        @inject(USER_RIGHTS_STORE) private readonly userRightsStore: UserRightsStore,
+    ) {
         super();
     }
 
     /**
-     * @summary Gets the endpoints.
-     * @returns All current available endpoints.
+     * @summary Gets the current registered AAS endpoints.
+     * @returns All current registered endpoints.
      */
     @Get('')
-    @Security('oauth2', ['reader', 'editor', 'admin'])
-    @OperationId('getEndpoints')
+    @OperationId('GetEndpoints')
     public async getEndpoints(): Promise<AASEndpoint[]> {
-        return await this.aasProvider.getEndpoints();
+        return (await this.provider.getEndpoints()).map(endpoint => {
+            if (endpoint.headers) {
+                const headers: Record<string, string> = {};
+                for (const key in endpoint.headers) {
+                    headers[key] = '*****';
+                }
+
+                return { ...endpoint, headers };
+            }
+
+            return endpoint;
+        });
     }
 
     /**
      * @summary Gets the number of registered endpoints.
      * @returns The number of registered endpoints.
      */
-    @Get('count')
-    @OperationId('getCount')
-    public async getCount(): Promise<{ count: number }> {
-        return { count: await this.aasProvider.getEndpointCount() };
+    @Get('endpoint-count')
+    @OperationId('GetEndpointCount')
+    public async getEndpointCount(): Promise<number> {
+        return await this.provider.getEndpointCount();
     }
 
     /**
-     * @summary The total count of AAS documents of the specified endpoint.
-     * @param endpoint The endpoint name or `undefined`.
+     * @summary The total count of AAS documents over all endpoints.
+     * @returns The total count of AAS documents.
+     */
+    @Get('document-count')
+    @OperationId('GetDocumentCount')
+    public async getDocumentCount(): Promise<number> {
+        return await this.provider.getDocumentCount();
+    }
+
+    /**
+     * @summary The total number of AAS documents of the specified endpoint.
+     * @param name The endpoint name.
      * @returns The total number of AAS documents.
      */
-    @Get('{endpoint}/documents/count')
-    @OperationId('getDocumentCount')
-    public async getDocumentCount(@Path() endpoint: string): Promise<{ count: number }> {
-        return { count: await this.aasProvider.getCount(decodeBase64Url(endpoint)) };
+    @Get('{name}/document-count')
+    @OperationId('GetEndpointDocumentCount')
+    public async getEndpointDocumentCount(@Path() name: string): Promise<number> {
+        return await this.provider.getEndpointDocumentCount(decodeBase64Url(name));
     }
 
     /**
@@ -73,26 +99,26 @@ export class EndpointsController extends Controller {
      * @param endpoint The endpoint data.
      */
     @Post('')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('addEndpoint')
+    @Security('oauth2', ['admin'])
+    @OperationId('AddEndpoint')
     public async addEndpoint(@Body() endpoint: AASEndpoint): Promise<void> {
-        await this.aasProvider.addEndpoint(endpoint);
+        await this.provider.addEndpoint(endpoint);
     }
 
     /**
      * @summary Updates an existing endpoint.
-     * @param name The old endpoint name.
-     * @param endpoint The endpoint to update.
+     * @param name The endpoint name.
+     * @param endpoint The new endpoint data.
      */
     @Put('{name}')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('updateEndpoint')
+    @Security('oauth2', ['admin'])
+    @OperationId('UpdateEndpoint')
     public async updateEndpoint(@Path() name: string, @Body() endpoint: AASEndpoint): Promise<void> {
         if (decodeBase64Url(name) !== endpoint.name) {
             throw new Error('Endpoint name cannot be changed.');
         }
 
-        await this.aasProvider.updateEndpoint(endpoint);
+        await this.provider.updateEndpoint(endpoint);
     }
 
     /**
@@ -100,187 +126,89 @@ export class EndpointsController extends Controller {
      * @param name The endpoint name.
      */
     @Delete('{name}')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('deleteEndpoint')
+    @Security('oauth2', ['admin'])
+    @OperationId('DeleteEndpoint')
     public async deleteEndpoint(@Path() name: string): Promise<void> {
-        await this.aasProvider.removeEndpoint(decodeBase64Url(name));
-    }
-
-    /**
-     * @summary Resets the endpoint configuration.
-     */
-    @Delete('')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('reset')
-    public async reset(): Promise<void> {
-        await this.aasProvider.reset();
+        await this.provider.removeEndpoint(decodeBase64Url(name));
     }
 
     /**
      * @summary Starts a scan of the endpoint with the specified name.
      * @param name The endpoint name (Base64-URL encoded).
      */
-    @Put('{name}/scan')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('startEndpointScan')
+    @Put('{name}/start-scan')
+    @Security('oauth2', ['admin'])
+    @OperationId('StartEndpointScan')
     public async startEndpointScan(@Path() name: string): Promise<void> {
-        await this.aasProvider.startEndpointScan(decodeBase64Url(name));
+        await this.provider.startEndpointScan(decodeBase64Url(name));
     }
 
     /**
-     * @summary Gets the thumbnail of the specified AAS document.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The AAS identifier (Base64-URL encoded).
-     * @returns The thumbnail of the current AAS document.
+     * @summary Cancels a running scan of the endpoint with the specified name.
+     * @param name The endpoint name (Base64-URL encoded).
      */
-    @Get('{endpoint}/documents/{id}/thumbnail')
-    @OperationId('getThumbnail')
-    public async getThumbnail(
-        @Path() endpoint: string,
-        @Path() id: string,
-    ): Promise<NodeJS.ReadableStream | undefined> {
-        return await this.aasProvider.getThumbnail(decodeBase64Url(endpoint), decodeBase64Url(id));
+    @Put('{name}/cancel-scan')
+    @Security('oauth2', ['admin'])
+    @OperationId('CancelEndpointScan')
+    public async cancelEndpointScan(@Path() name: string): Promise<void> {
+        await this.provider.cancelEndpointScan(decodeBase64Url(name));
     }
 
     /**
-     * @summary Downloads an AASX package from the specified endpoint.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The AAS identifier (Base64-URL encoded).
-     * @returns A readable stream.
+     * @summary Gets the authentication information for all endpoints of the current authenticated user.
+     * @returns The authentication information for all endpoints of the current authenticated user.
      */
-    @Get('{endpoint}/packages/{id}')
-    @Security('oauth2', ['reader', 'editor', 'admin'])
-    @OperationId('getPackage')
-    public async getPackage(@Path() endpoint: string, @Path() id: string): Promise<NodeJS.ReadableStream> {
-        return await this.aasProvider.getPackage(decodeBase64Url(endpoint), decodeBase64Url(id));
+    @Get('auth')
+    @OperationId('GetAllEndpointAuth')
+    public async getAllEndpointAuth(@Request() req: express.Request): Promise<AASEndpointAuth[]> {
+        const user = req.user;
+        if (!user) {
+            throw new ApplicationError(ERRORS.UNAUTHENTICATED_ACCESS, {}, 401);
+        }
+
+        return (await this.userRightsStore.getEndpoints(user.id)).map(endpoint => {
+            if (endpoint.headers) {
+                const headers: Record<string, string> = {};
+                for (const key in endpoint.headers) {
+                    headers[key] = '*****';
+                }
+
+                return { ...endpoint, headers };
+            }
+
+            return endpoint;
+        });
     }
 
     /**
-     * @summary Inserts an AASX packages to the specified endpoint.
-     * @param endpoint The name of the destination endpoint (Base64-URL encoded).
-     * @param file The AASX package file.
+     * @summary Updates the authentication information of the specified endpoints for the current authenticated user.
+     * @param items The updated endpoint authentication information.
      */
-    @Post('{endpoint}/packages')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('insertPackages')
-    public async insertPackages(@Path() endpoint: string, @UploadedFile() file: Express.Multer.File): Promise<void> {
-        await this.aasProvider.insertPackages(decodeBase64Url(endpoint), file);
-    }
-
-    /**
-     * @summary Deletes an AASX package from the specified endpoint.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The AAS identifier (Base64-URL encoded).
-     */
-    @Delete('{endpoint}/packages/{id}')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('deletePackage')
-    public async deletePackage(@Path() endpoint: string, @Path() id: string): Promise<void> {
-        await this.aasProvider.deletePackage(decodeBase64Url(endpoint), decodeBase64Url(id));
-    }
-
-    /**
-     * @summary Gets an AAS document that provides an AAS with the specified identifier from the given endpoint.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The AAS identifier (Base64-URL encoded).
-     * @returns The AAS document.
-     */
-    @Get('{endpoint}/documents/{id}')
-    @OperationId('getDocument')
-    public async getDocument(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
-        return await this.aasProvider.getDocument(
-            decodeBase64Url(endpoint),
-            'AssetAdministrationShell',
-            decodeBase64Url(id),
-        );
-    }
-
-    /**
-     * @summary Gets the AAS document that provides an Asset with the specified identifier from the specified endpoint.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The Asset identifier (Base64-URL encoded).
-     * @returns The AAS document
-     */
-    @Get('{endpoint}/documents/asset/{id}')
-    @OperationId('getDocumentByAsset')
-    public async getDocumentByAsset(@Path() endpoint: string, @Path() id: string): Promise<AASDocument> {
-        return await this.aasProvider.getDocument(decodeBase64Url(endpoint), 'Asset', decodeBase64Url(id));
-    }
-
-    /**
-     * @summary Gets the content of the specified AAS document.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The AAS identifier (Base64-URL encoded).
-     * @returns The AAS environment or `undefined`.
-     */
-    @Get('{endpoint}/documents/{id}/content')
-    @OperationId('getDocumentContent')
-    public async getDocumentContent(
-        @Path() endpoint: string,
-        @Path() id: string,
-    ): Promise<aas.Environment | undefined> {
-        return await this.aasProvider.getContent(decodeBase64Url(endpoint), decodeBase64Url(id));
-    }
-
-    /**
-     * @summary Downloads the value of a Data Element.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The document or AAS identifier (Base64-URL encoded).
-     * @param smId The Submodel identifier (Base64-URL encoded).
-     * @param path The idShort path to the Data Element.
-     * @param queryParams The required image `width` and or `height`.
-     */
-    @Get('{endpoint}/documents/{id}/submodels/{smId}/submodel-elements/{path}/value')
-    @OperationId('getDataElementValue')
-    public async getDataElementValue(
-        @Path() endpoint: string,
-        @Path() id: string,
-        @Path() smId: string,
-        @Path() path: string,
-        @Queries() queryParams: { width?: number; height?: number },
-    ): Promise<NodeJS.ReadableStream> {
-        return await this.aasProvider.getDataElementValue(
-            decodeBase64Url(endpoint),
-            decodeBase64Url(id),
-            decodeBase64Url(smId),
-            path,
-            queryParams,
-        );
-    }
-
-    /**
-     * @summary Updates the content of an AAS document.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The document or AAS identifier (Base64-URL encoded).
-     * @param env The ASS environment containing the modified elements.
-     * @returns The messages of the update process.
-     */
-    @Put('{endpoint}/documents/{id}')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('updateDocument')
-    public async updateDocument(
-        @Path() endpoint: string,
-        @Path() id: string,
-        @Body() env: aas.Environment,
+    @Patch('auth')
+    @OperationId('UpdateEndpointAuthItems')
+    public async updateEndpointAuthItems(
+        @Body() items: AASEndpointAuth[],
+        @Request() req: express.Request,
     ): Promise<void> {
-        await this.aasProvider.updateDocument(decodeBase64Url(endpoint), decodeBase64Url(id), env);
+        const user = req.user;
+        if (!user) {
+            throw new ApplicationError(ERRORS.UNAUTHORIZED_ACCESS, {}, 401);
+        }
+
+        await this.userRightsStore.update(user.id, { endpoints: items });
+        if (req.session) {
+            req.session.endpoints = await this.userRightsStore.getEndpoints(user.id);
+        }
     }
 
     /**
-     * @summary Invokes an Operation synchronously.
-     * @param endpoint The endpoint name (Base64-URL encoded).
-     * @param id The document identifier (Base64-URL encoded).
-     * @param operation The `Operation`.
-     * @returns The executed `Operation`.
+     * Gets the scan status of the AAS endpoint with the specified name.
+     * @param name The name of the AAS endpoint.
+     * @returns The scan status of the AAS endpoint.
      */
-    @Post('{endpoint}/documents/{id}/invoke')
-    @Security('oauth2', ['editor', 'admin'])
-    @OperationId('invokeOperation')
-    public async invokeOperation(
-        @Path() endpoint: string,
-        @Path() id: string,
-        @Body() operation: aas.Operation,
-    ): Promise<aas.Operation> {
-        return await this.aasProvider.invoke(decodeBase64Url(endpoint), decodeBase64Url(id), operation);
+    @Get('{name}/status')
+    @OperationId('GetUpdateStatus')
+    public async getUpdateStatus(@Path() name: string): Promise<UpdateIndexStatus> {
+        return this.provider.getUpdateStatus(decodeBase64Url(name));
     }
 }

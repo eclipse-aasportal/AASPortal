@@ -6,18 +6,25 @@
  *
  *****************************************************************************/
 
-import { computed, inject, Injectable, linkedSignal, signal, untracked } from '@angular/core';
+import { computed, debounced, effect, inject, Injectable, linkedSignal, signal, untracked } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { httpResource } from '@angular/common/http';
-import { catchError, from, map, mergeMap, Observable, of, skipWhile, Subject, switchMap } from 'rxjs';
+import { catchError, from, lastValueFrom, map, mergeMap, Observable, of, Subject, switchMap } from 'rxjs';
 import { AASCursor, AASDocument, AASDocumentId, AASPagedResult } from 'aas-core';
 import { AuthService, CookieService, encodeBase64Url, EndpointsApi } from 'aas-lib';
 import { FavoritesService } from './favorites.service';
 
+export interface EndpointItem {
+    name: string;
+    checked: boolean;
+    locked: boolean;
+}
+
 export type PageOptions = {
     limit: number;
     filterText: string;
+    endpoints: EndpointItem[];
 };
 
 export type ShellsData = {
@@ -25,6 +32,7 @@ export type ShellsData = {
     limit: number;
     selected: AASDocument[];
     position: { next: AASDocumentId | null | undefined; previous: AASDocumentId | null | undefined };
+    endpoints: EndpointItem[];
 };
 
 const cookieName = 'v1.Shells';
@@ -34,13 +42,17 @@ const initialData: ShellsData = {
     selected: [],
     limit: 10,
     position: { next: undefined, previous: null },
+    endpoints: [],
 };
 
 @Injectable({
     providedIn: 'root',
 })
 export class ShellsState {
-    private readonly filterText$ = signal(initialData.filterText);
+    private readonly filterText$ = signal(initialData.filterText, {
+        equal: (a, b) => (a.length < 3 && b.length < 3) || a === b,
+    });
+
     private readonly cookies = inject(CookieService);
     private readonly auth = inject(AuthService);
     private readonly translate = inject(TranslateService);
@@ -49,40 +61,60 @@ export class ShellsState {
     private readonly limit$ = signal(initialData.limit);
     private readonly selected$ = signal(initialData.selected);
     private readonly position$ = signal(initialData.position);
+    private readonly endpoints$ = signal(initialData.endpoints);
     private readonly subject = new Subject<AASDocument[]>();
+    private readonly debouncedFilter = debounced(() => this.filterText(), 500);
 
-    private readonly resource = httpResource<AASPagedResult>(
-        () => {
-            const filter = this.filterText();
-            const cursor: AASCursor = {
-                limit: this.limit(),
-                next: this.position().next,
-                previous: this.position().previous,
-            };
-            let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
-            if (filter) {
-                url += `&filter=${encodeBase64Url(filter)}`;
-                url += `&language=${this.translate.getCurrentLang()}`;
-            }
+    private readonly resource = httpResource<AASPagedResult>(() => {
+        const filter = this.debouncedFilter.value();
+        const endpoints = this.endpoints();
+        const cursor: AASCursor = {
+            limit: this.limit(),
+            next: this.position().next,
+            previous: this.position().previous,
+        };
 
-            return url;
-        },
-        { defaultValue: { previous: null, next: null, documents: [] } },
-    );
+        let url = `/api/v1/documents?cursor=${encodeBase64Url(JSON.stringify(cursor))}`;
+        if (filter.length >= 3) {
+            url += `&filter=${encodeBase64Url(filter)}`;
+            url += `&language=${this.translate.getCurrentLang()}`;
+        }
+
+        const checkedEndpoints = endpoints.filter(endpoint => endpoint.checked).map(endpoint => endpoint.name);
+        if (checkedEndpoints.length > 0 && checkedEndpoints.length < endpoints.length) {
+            url += `&endpoint=${checkedEndpoints.map(encodeBase64Url).join('&endpoint=')}`;
+        }
+
+        return url;
+    });
 
     public constructor() {
-        this.auth.ready
-            .pipe(
-                skipWhile(ready => ready === false),
-                takeUntilDestroyed(),
-                mergeMap(() => this.cookies.getCookie(cookieName)),
-            )
-            .subscribe(value => {
-                if (value) {
-                    const { limit, filterText } = JSON.parse(value) as PageOptions;
-                    this.update({ limit, filterText });
+        effect(async () => {
+            const user = this.auth.user();
+            if (user === undefined) {
+                return;
+            }
+
+            const value = await lastValueFrom(this.cookies.getCookie(cookieName));
+            const items = (await lastValueFrom(this.api.getEndpoints())).map(endpoint => ({
+                name: endpoint.name,
+                checked: false,
+                locked: endpoint.headers ? Object.keys(endpoint.headers).length > 0 : false,
+            }));
+
+            if (value) {
+                const { limit, filterText, endpoints } = JSON.parse(value) as PageOptions;
+                if (endpoints) {
+                    for (const item of items) {
+                        item.checked = endpoints.find(e => e.name === item.name)?.checked ?? false;
+                    }
                 }
-            });
+
+                this.update({ limit, filterText, endpoints: items });
+            } else {
+                this.update({ endpoints: items });
+            }
+        });
 
         this.subject
             .pipe(
@@ -109,6 +141,16 @@ export class ShellsState {
      * The current limit for the number of documents to be displayed per page.
      */
     public readonly limit = this.limit$.asReadonly();
+
+    /**
+     * The list of available AAS endpoints.
+     */
+    public readonly endpoints = this.endpoints$.asReadonly();
+
+    /**
+     * Indicates whether at least one endpoint is currently checked.
+     */
+    public readonly someEndpointsChecked = computed(() => this.endpoints().some(endpoint => endpoint.checked));
 
     /**
      * Indicates whether the pagination is currently on the first page.
@@ -148,7 +190,19 @@ export class ShellsState {
      */
     public update(newState: Partial<ShellsData>): void {
         if (newState.position !== undefined) {
-            this.position$.set(newState.position);
+            const position = this.position$();
+            if (position.next !== newState.position?.next || position.previous !== newState.position?.previous) {
+                this.position$.set(newState.position);
+            }
+        } else if (
+            newState.limit !== undefined ||
+            newState.filterText !== undefined ||
+            newState.endpoints !== undefined
+        ) {
+            const position = this.position$();
+            if (position.next !== undefined || position.previous !== null) {
+                this.position$.set({ next: undefined, previous: null });
+            }
         }
 
         if (newState.limit !== undefined) {
@@ -161,6 +215,23 @@ export class ShellsState {
 
         if (newState.selected) {
             this.selected$.set(newState.selected);
+        }
+
+        if (newState.endpoints !== undefined) {
+            const values = newState.endpoints;
+            this.endpoints$.update(items => {
+                const newItems = [...items];
+                for (const value of values) {
+                    const index = newItems.findIndex(item => item.name === value.name);
+                    if (index !== -1) {
+                        newItems[index] = { ...items[index], checked: value.checked };
+                    } else {
+                        newItems.push(value);
+                    }
+                }
+
+                return newItems;
+            });
         }
     }
 
@@ -175,24 +246,14 @@ export class ShellsState {
             JSON.stringify({
                 limit: this.limit(),
                 filterText: this.filterText(),
+                endpoints: this.endpoints(),
             }),
         );
     }
 
     /**
-     * Retrieves the first page of documents based on the provided filter and limit.
-     * If no filter is provided, uses the current untracked filter text.
-     *
-     * @param filter - Optional string to filter the documents
-     * @param limit - Optional number to limit the amount of documents per page
+     * Retrieves the first page of AAS documents cuments per page
      * @returns void
-     *
-     * @remarks
-     * This method makes an API call to get documents with the following:
-     * - No previous page reference (starts from beginning)
-     * - Uses provided limit or falls back to untracked limit
-     * - Applies language settings from translation service
-     * - Pipes the result through setPageAndLoadContents
      */
     public getFirstPage(): void {
         this.update({ position: { next: undefined, previous: null } });
