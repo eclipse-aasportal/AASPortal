@@ -66,6 +66,12 @@ describe('FilterExpressionParser', () => {
             parser = new FilterExpressionParser('ab');
             expect(() => parser.check()).toThrow('FilterExpressionParser.MIN_LENGTH');
         });
+
+        it('ignores words with less than 3 characters', () => {
+            parser = new FilterExpressionParser('a an the');
+            expect(parser.clause.length).toBe(1);
+            expect(parser.clause[0].andConditions).toEqual(['the']);
+        });
     });
 
     describe('model type conditions', () => {

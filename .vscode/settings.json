@@ -83,5 +83,8 @@
     "plantuml.diagramsRoot": "read-the-docs/source",
     "plantuml.exportIncludeFolderHeirarchy": false,
     "plantuml.exportSubFolder": false,
-    "editor.formatOnType": false
+    "editor.formatOnType": false,
+    "[sql]": {
+        "editor.defaultFormatter": "cweijan.vscode-mysql-client2"
+    }
 }

@@ -59,7 +59,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.getDocumentCount()).resolves.toEqual(42);
-            expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM `documents`;');
+            expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM documents;');
         });
 
         it('returns the total number of documents of the specified Endpoint', async () => {
@@ -70,7 +70,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.getDocumentCount('Samples')).resolves.toEqual(42);
-            expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM `documents` WHERE endpoint = ?;', [
+            expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM documents WHERE endpoint = ?;', [
                 'Samples',
             ]);
         });
@@ -85,7 +85,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.getEndpointCount()).resolves.toEqual(42);
-            expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM `endpoints` AS count;');
+            expect(connection.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM endpoints AS count;');
             expect(connection.release).toHaveBeenCalledTimes(1);
         });
     });
@@ -129,7 +129,7 @@ describe('MySqlIndex', () => {
                 },
             ]);
 
-            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints`;');
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM endpoints;');
         });
     });
 
@@ -147,7 +147,7 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             const actual = await index.getEndpoint('Endpoint 1');
-            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM endpoints WHERE name = ?;', ['Endpoint 1']);
             expect(actual).toEqual({
                 name: 'Endpoint 1',
                 url: 'http://endpoint1.com',
@@ -159,7 +159,7 @@ describe('MySqlIndex', () => {
         it('throws an error if endpoint does not exist', async () => {
             connection.query.mockResolvedValue([[], []]);
             await expect(index.getEndpoint('Unknown')).rejects.toThrow();
-            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Unknown']);
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM endpoints WHERE name = ?;', ['Unknown']);
         });
     });
 
@@ -177,13 +177,13 @@ describe('MySqlIndex', () => {
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.findEndpoint('Endpoint 1')).resolves.toBeDefined();
-            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM endpoints WHERE name = ?;', ['Endpoint 1']);
         });
 
         it('indicates that Unknown does not exist', async () => {
             connection.query.mockResolvedValue([[], []]);
             await expect(index.findEndpoint('Endpoint 1')).resolves.toBeUndefined();
-            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM `endpoints` WHERE name = ?;', ['Endpoint 1']);
+            expect(connection.query).toHaveBeenCalledWith('SELECT * FROM endpoints WHERE name = ?;', ['Endpoint 1']);
         });
     });
 
@@ -197,7 +197,7 @@ describe('MySqlIndex', () => {
 
             await expect(index.insertEndpoint(endpoint)).resolves.toEqual(void 0);
             expect(connection.query).toHaveBeenCalledWith(
-                'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
+                'INSERT INTO endpoints (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
                 [endpoint.name, endpoint.url, endpoint.type, undefined, undefined, undefined],
             );
         });
@@ -229,13 +229,13 @@ describe('MySqlIndex', () => {
                 version: 'v3',
             });
 
-            expect(connection.query).toHaveBeenNthCalledWith(1, 'SELECT * FROM `endpoints` WHERE name = ?;', [
+            expect(connection.query).toHaveBeenNthCalledWith(1, 'SELECT * FROM endpoints WHERE name = ?;', [
                 'Endpoint 1',
             ]);
 
             expect(connection.query).toHaveBeenNthCalledWith(
                 2,
-                'UPDATE `endpoints` SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
+                'UPDATE endpoints SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
                 [endpoint.url, endpoint.type, undefined, undefined, undefined, endpoint.name],
             );
         });
@@ -246,7 +246,7 @@ describe('MySqlIndex', () => {
             connection.query.mockImplementation(
                 (sql: string | object) =>
                     new Promise((resolve, reject) => {
-                        if (sql === 'DELETE FROM `endpoints` WHERE name = ?;') {
+                        if (sql === 'DELETE FROM endpoints WHERE name = ?;') {
                             return resolve([
                                 {
                                     affectedRows: 1,
@@ -255,11 +255,11 @@ describe('MySqlIndex', () => {
                             ]);
                         }
 
-                        if (sql === 'SELECT uuid FROM `documents` WHERE endpoint = ?;') {
+                        if (sql === 'SELECT uuid FROM documents WHERE endpoint = ?;') {
                             return resolve([[{ uuid: 'uuid1' } as MySqlDocument], []]);
                         }
 
-                        if (sql === 'DELETE FROM `documents` WHERE endpoint = ?;') {
+                        if (sql === 'DELETE FROM documents WHERE endpoint = ?;') {
                             return resolve([[], []]);
                         }
 
@@ -267,7 +267,7 @@ describe('MySqlIndex', () => {
                             return resolve([[], []]);
                         }
 
-                        if (sql === 'DELETE FROM `elements` WHERE uuid = ?;') {
+                        if (sql === 'DELETE FROM elements WHERE uuid = ?;') {
                             return resolve([[], []]);
                         }
 
@@ -325,7 +325,7 @@ describe('MySqlIndex', () => {
             });
 
             expect(connection.query).toHaveBeenLastCalledWith(
-                'SELECT * FROM `documents` WHERE endpoint = ? ORDER BY id ASC LIMIT ?;',
+                'SELECT * FROM documents WHERE endpoint = ? ORDER BY id LIMIT ?;',
                 ['Endpoint 1', 11],
             );
         });
@@ -337,7 +337,7 @@ describe('MySqlIndex', () => {
                 (sql: string | object) =>
                     new Promise(resolve => {
                         const query = String(sql);
-                        if (query === 'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;') {
+                        if (query === 'SELECT uuid FROM documents WHERE endpoint = ? AND id = ?;') {
                             return resolve([[{ uuid: '1' } as MySqlDocument], []]);
                         }
 
@@ -430,11 +430,11 @@ describe('MySqlIndex', () => {
                 (sql: string | object) =>
                     new Promise(resolve => {
                         const query = String(sql);
-                        if (query === 'SELECT uuid FROM `documents` WHERE endpoint = ? AND id = ?;') {
+                        if (query === 'SELECT uuid FROM documents WHERE endpoint = ? AND id = ?;') {
                             return resolve([[{ uuid: '1' } as MySqlDocument], []]);
                         }
 
-                        if (query === 'DELETE FROM `elements` WHERE uuid = ?;') {
+                        if (query === 'DELETE FROM elements WHERE uuid = ?;') {
                             return resolve([[], []]);
                         }
 
@@ -462,15 +462,15 @@ describe('MySqlIndex', () => {
             connection.query.mockResolvedValue([[], []]);
             await expect(index.clear()).resolves.toEqual(void 0);
             expect(connection.beginTransaction).toHaveBeenCalled();
-            expect(connection.query).toHaveBeenNthCalledWith(1, 'DELETE FROM `elements`;');
-            expect(connection.query).toHaveBeenNthCalledWith(2, 'DELETE FROM `documents`;');
+            expect(connection.query).toHaveBeenNthCalledWith(1, 'DELETE FROM elements;');
+            expect(connection.query).toHaveBeenNthCalledWith(2, 'DELETE FROM documents;');
             expect(connection.commit).toHaveBeenCalled();
         });
 
         it('clears all endpoint-scoped index data', async () => {
             const document = { uuid: 'uuid1' } as MySqlDocument;
             connection.query.mockImplementation((sql: string | object) => {
-                if (sql === 'SELECT uuid FROM `documents` WHERE endpoint = ?;') {
+                if (sql === 'SELECT uuid FROM documents WHERE endpoint = ?;') {
                     return Promise.resolve([[document], []]);
                 }
 
@@ -479,7 +479,7 @@ describe('MySqlIndex', () => {
 
             await expect(index.clear('Endpoint 1')).resolves.toEqual(void 0);
 
-            expect(connection.query).toHaveBeenCalledWith('DELETE FROM `documents` WHERE endpoint = ?;', [
+            expect(connection.query).toHaveBeenCalledWith('DELETE FROM documents WHERE endpoint = ?;', [
                 'Endpoint 1',
             ]);
 
@@ -488,7 +488,7 @@ describe('MySqlIndex', () => {
                 ['Endpoint 1'],
             );
 
-            expect(connection.query).toHaveBeenCalledWith('DELETE FROM `elements` WHERE uuid = ?;', ['uuid1']);
+            expect(connection.query).toHaveBeenCalledWith('DELETE FROM elements WHERE uuid = ?;', ['uuid1']);
         });
     });
 

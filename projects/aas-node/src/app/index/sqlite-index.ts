@@ -31,14 +31,14 @@ import {
     isMultiLanguageProperty,
     isFile,
     isBlob,
+    FilterExpressionParser,
 } from 'aas-core';
 
 import { AASIndex, toAbbreviation, toDocumentId } from './aas-index.js';
 import { ERRORS } from '../errors.js';
 import { Variable } from '../variable.js';
 import { SqliteConnectionProvider } from '../sqlite-connection-provider.js';
-import { ConditionGenerator } from './condition-generator.js';
-import { SqlConditionGenerator } from './sql-condition-generator.js';
+import { getWhereClause } from './get-where-clause.js';
 
 const LIMIT = 100;
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS endpoints (
 CREATE TABLE IF NOT EXISTS documents (
     uuid TEXT PRIMARY KEY,
     address TEXT NOT NULL, 
-    endpoint TEXT NOT NULL, 
+    endpoint TEXT NOT NULL REFERENCES endpoints(name) ON DELETE CASCADE,
     id TEXT NOT NULL, 
     idShort TEXT NOT NULL, 
     assetId TEXT,
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS documents (
 CREATE INDEX IF NOT EXISTS idx_doc_endpoint_id ON documents(endpoint, id);
 
 CREATE TABLE IF NOT EXISTS elements (
-    uuid TEXT NOT NULL,
+    uuid TEXT NOT NULL REFERENCES documents(uuid) ON DELETE CASCADE,
     modelType TEXT NOT NULL,
     id TEXT,
     idShort TEXT NOT NULL,
@@ -78,15 +78,54 @@ CREATE TABLE IF NOT EXISTS elements (
     booleanValue INTEGER
 );
 
-CREATE INDEX IF NOT EXISTS idx_elem_uuid on elements(uuid);
-
 CREATE TABLE IF NOT EXISTS submodelConceptDescriptions (
-    endpoint TEXT NOT NULL,
+    endpoint TEXT NOT NULL REFERENCES endpoints(name) ON DELETE CASCADE,
     id TEXT NOT NULL,
     conceptDescriptionIds TEXT NOT NULL,
     PRIMARY KEY (endpoint, id)
 );
+
+CREATE VIRTUAL TABLE IF NOT EXISTS documents_fts USING fts5(idShort, id, assetId);
+CREATE VIRTUAL TABLE IF NOT EXISTS elements_fts USING fts5(id, idShort, stringValue);
+
+CREATE TRIGGER IF NOT EXISTS documents_fts_ai AFTER INSERT ON documents BEGIN
+    INSERT INTO documents_fts(rowid, idShort, id, assetId)
+    VALUES (new.rowid, fold(new.idShort), fold(new.id), fold(new.assetId));
+END;
+
+CREATE TRIGGER IF NOT EXISTS documents_fts_ad AFTER DELETE ON documents BEGIN
+    DELETE FROM documents_fts WHERE rowid = old.rowid;
+END;
+
+CREATE TRIGGER IF NOT EXISTS documents_fts_au AFTER UPDATE ON documents BEGIN
+    DELETE FROM documents_fts WHERE rowid = old.rowid;
+    INSERT INTO documents_fts(rowid, idShort, id, assetId)
+    VALUES (new.rowid, fold(new.idShort), fold(new.id), fold(new.assetId));
+END;
+
+CREATE TRIGGER IF NOT EXISTS elements_fts_ai AFTER INSERT ON elements BEGIN
+    INSERT INTO elements_fts(rowid, id, idShort, stringValue)
+    VALUES (new.rowid, fold(new.id), fold(new.idShort), fold(new.stringValue));
+END;
+
+CREATE TRIGGER IF NOT EXISTS elements_fts_ad AFTER DELETE ON elements BEGIN
+    DELETE FROM elements_fts WHERE rowid = old.rowid;
+END;
+
+CREATE TRIGGER IF NOT EXISTS elements_fts_au AFTER UPDATE ON elements BEGIN
+    DELETE FROM elements_fts WHERE rowid = old.rowid;
+    INSERT INTO elements_fts(rowid, id, idShort, stringValue)
+    VALUES (new.rowid, fold(new.id), fold(new.idShort), fold(new.stringValue));
+END;
 `;
+
+function fold(value: SQLInputValue, locale: string = 'en'): string | null {
+    if (!value || typeof value !== 'string') {
+        return null;
+    }
+
+    return value.normalize('NFKC').toLocaleLowerCase(locale);
+}
 
 @singleton()
 export class SqliteIndex implements AASIndex {
@@ -116,7 +155,6 @@ export class SqliteIndex implements AASIndex {
     private readonly selectUuidSql: StatementSync;
     private readonly selectEndpointDocumentsSql: StatementSync;
     private readonly deleteEndpointDocumentsSql: StatementSync;
-    private readonly deleteAllElementsSql: StatementSync;
     private readonly deleteAllDocumentsSql: StatementSync;
     private readonly getConceptDescriptionIdsSql: StatementSync;
     private readonly insertConceptDescriptionIdsSql: StatementSync;
@@ -126,8 +164,12 @@ export class SqliteIndex implements AASIndex {
 
     public constructor() {
         this.db = this.connectionProvider.getConnection(this.variable.AAS_INDEX);
-        this.db.exec(initDatabase);
         this.db.exec('PRAGMA journal_mode = WAL');
+        this.db.exec('PRAGMA foreign_keys = ON');
+        this.db.exec('PRAGMA synchronous = NORMAL');
+
+        this.db.function('fold', { deterministic: true }, (value: SQLInputValue): SQLOutputValue => fold(value));
+        this.db.exec(initDatabase);
 
         this.getCountAll = this.db.prepare('SELECT COUNT(*) FROM documents');
         this.getCountEndpoint = this.db.prepare('SELECT COUNT(*) FROM documents WHERE endpoint = ?');
@@ -166,7 +208,6 @@ export class SqliteIndex implements AASIndex {
         this.getDocumentAssetSql = this.db.prepare('SELECT * FROM documents WHERE assetId = ?');
         this.deleteDocumentSql = this.db.prepare('DELETE FROM documents WHERE uuid = ?');
         this.selectUuidSql = this.db.prepare('SELECT uuid FROM documents WHERE endpoint = ? AND id = ?');
-        this.deleteAllElementsSql = this.db.prepare('DELETE FROM elements');
         this.deleteAllDocumentsSql = this.db.prepare('DELETE FROM documents');
         this.selectEndpointDocumentsSql = this.db.prepare('SELECT uuid FROM documents WHERE endpoint = ?');
         this.deleteEndpointDocumentsSql = this.db.prepare('DELETE FROM documents WHERE endpoint = ?');
@@ -186,18 +227,6 @@ export class SqliteIndex implements AASIndex {
         this.deleteEndpointConceptDescriptionIdsSql = this.db.prepare(
             'DELETE FROM submodelConceptDescriptions WHERE endpoint = ?',
         );
-
-        this.db.function('REGEXP', (pattern: SQLInputValue, value: SQLInputValue): SQLOutputValue => {
-            if (typeof pattern !== 'string' || typeof value !== 'string') {
-                return 0;
-            }
-
-            try {
-                return new RegExp(pattern, 'i').test(value) ? 1 : 0;
-            } catch {
-                return 0;
-            }
-        });
 
         this.logger.info(`AAS index connected to ${this.variable.AAS_INDEX} (SQLite).`);
     }
@@ -325,7 +354,6 @@ export class SqliteIndex implements AASIndex {
         return new Promise((resolve, reject) => {
             try {
                 this.db.exec('BEGIN');
-                this.deleteDocuments(endpoint);
                 this.deleteEndpointSql.run(endpoint);
                 this.db.exec('COMMIT');
                 resolve(true);
@@ -344,24 +372,15 @@ export class SqliteIndex implements AASIndex {
     ): Promise<AASPagedResult> {
         return new Promise((resolve, reject) => {
             try {
-                let query: ConditionGenerator | undefined;
-                if (expression) {
-                    try {
-                        query = new SqlConditionGenerator(expression, language ?? 'en');
-                    } catch {
-                        return resolve({ previous: null, next: null, documents: [] });
-                    }
-                }
-
                 let result: AASPagedResult;
                 if (cursor.next) {
-                    result = this.getNextPage(cursor.next, cursor.limit, endpoints, query);
+                    result = this.getNextPage(cursor.next, cursor.limit, endpoints, expression, language);
                 } else if (cursor.previous) {
-                    result = this.getPreviousPage(cursor.previous, cursor.limit, endpoints, query);
+                    result = this.getPreviousPage(cursor.previous, cursor.limit, endpoints, expression, language);
                 } else if (cursor.previous === null) {
-                    result = this.getFirstPage(cursor.limit, endpoints, query);
+                    result = this.getFirstPage(cursor.limit, endpoints, expression, language);
                 } else {
-                    result = this.getLastPage(cursor.limit, endpoints, query);
+                    result = this.getLastPage(cursor.limit, endpoints, expression, language);
                 }
 
                 resolve(result);
@@ -512,7 +531,6 @@ export class SqliteIndex implements AASIndex {
                     return;
                 }
 
-                this.deleteElementsSql.run(uuid);
                 this.deleteDocumentSql.run(uuid);
                 this.db.exec('COMMIT');
                 resolve(true);
@@ -546,7 +564,6 @@ export class SqliteIndex implements AASIndex {
             try {
                 this.db.exec('BEGIN');
                 if (endpoint === undefined) {
-                    this.deleteAllElementsSql.run();
                     this.deleteAllDocumentsSql.run();
                     this.deleteConceptDescriptionIdsSql.run();
                 } else if (id) {
@@ -627,21 +644,21 @@ export class SqliteIndex implements AASIndex {
         return String(value.uuid);
     }
 
-    private getFirstPage(limit: number, endpoints: string[], generator?: ConditionGenerator): AASPagedResult {
+    private getFirstPage(limit: number, endpoints: string[], expression?: string, language?: string): AASPagedResult {
         let sql: StatementSync;
-        const params: SQLInputValue[] = [];
-        if (generator) {
+        const values: SQLInputValue[] = [];
+        if (expression) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
                     `SELECT d.* FROM documents AS d
                     WHERE d.endpoint IN ('${endpoints.join("','")}') 
-                        AND (${generator.generate(params)}) 
+                        AND (${this.createWhereClause(expression, values, language)}) 
                     ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
                     `SELECT d.* FROM documents AS d 
-                    WHERE ${generator.generate(params)} 
+                    WHERE ${this.createWhereClause(expression, values, language)} 
                     ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             }
@@ -657,9 +674,9 @@ export class SqliteIndex implements AASIndex {
             }
         }
 
-        params.push(limit + 1);
-        const values = sql.all(...params);
-        const documents = values.map(result => this.toDocument(result));
+        values.push(limit + 1);
+        const results = sql.all(...values);
+        const documents = results.map(result => this.toDocument(result));
 
         return {
             previous: null,
@@ -672,25 +689,26 @@ export class SqliteIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        generator?: ConditionGenerator,
+        expression?: string,
+        language?: string,
     ): AASPagedResult {
         let sql: StatementSync;
-        const params: SQLInputValue[] = [current.endpoint, current.endpoint, current.id];
+        const values: SQLInputValue[] = [current.endpoint, current.endpoint, current.id];
 
-        if (generator) {
+        if (expression) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
                     `SELECT d.* FROM documents AS d 
                     WHERE d.endpoint IN ('${endpoints.join('","')}') 
                         AND (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) 
-                        AND (${generator.generate(params)}) 
+                        AND (${this.createWhereClause(expression, values, language)}) 
                     ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
                     `SELECT d.* FROM documents AS d 
                     WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) 
-                        AND (${generator.generate(params)}) 
+                        AND (${this.createWhereClause(expression, values, language)}) 
                     ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             }
@@ -711,9 +729,9 @@ export class SqliteIndex implements AASIndex {
             }
         }
 
-        params.push(limit + 1);
-        const values = sql.all(...params);
-        const documents = values.map(result => this.toDocument(result));
+        values.push(limit + 1);
+        const results = sql.all(...values);
+        const documents = results.map(result => this.toDocument(result));
 
         return {
             previous: current,
@@ -726,25 +744,26 @@ export class SqliteIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        generator?: ConditionGenerator,
+        expression?: string,
+        language?: string,
     ): AASPagedResult {
         let sql: StatementSync;
-        const params: SQLInputValue[] = [current.endpoint, current.endpoint, current.id];
+        const values: SQLInputValue[] = [current.endpoint, current.endpoint, current.id];
 
-        if (generator) {
+        if (expression) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
                     `SELECT d.* FROM documents AS d 
                     WHERE d.endpoint IN ('${endpoints.join("','")}') 
                         AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) 
-                        AND (${generator.generate(params)}) 
+                        AND (${this.createWhereClause(expression, values, language)}) 
                     ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
                     `SELECT d.* FROM documents AS d
                     WHERE (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?))
-                        AND (${generator.generate(params)}) 
+                        AND (${this.createWhereClause(expression, values, language)}) 
                     ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             }
@@ -765,9 +784,9 @@ export class SqliteIndex implements AASIndex {
             }
         }
 
-        params.push(limit + 1);
-        const values = sql.all(...params);
-        const documents = values.map(result => this.toDocument(result));
+        values.push(limit + 1);
+        const results = sql.all(...values);
+        const documents = results.map(result => this.toDocument(result));
 
         return {
             previous: documents.length >= limit + 1 ? toDocumentId(documents[limit - 1]) : null,
@@ -776,21 +795,21 @@ export class SqliteIndex implements AASIndex {
         };
     }
 
-    private getLastPage(limit: number, endpoints: string[], generator?: ConditionGenerator): AASPagedResult {
+    private getLastPage(limit: number, endpoints: string[], expression?: string, language?: string): AASPagedResult {
         let sql: StatementSync;
-        const params: SQLInputValue[] = [];
-        if (generator) {
+        const values: SQLInputValue[] = [];
+        if (expression) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
                     `SELECT documents.* FROM documents AS d
                     WHERE d.endpoint IN ('${endpoints.join("','")}') 
-                        AND (${generator.generate(params)}) 
+                        AND (${this.createWhereClause(expression, values, language)}) 
                     ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
                     `SELECT documents.* FROM documents AS d
-                    WHERE ${generator.generate(params)} 
+                    WHERE ${this.createWhereClause(expression, values, language)} 
                     ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             }
@@ -806,15 +825,36 @@ export class SqliteIndex implements AASIndex {
             }
         }
 
-        params.push(limit + 1);
-        const values = sql.all(...params);
-        const documents = values.map(result => this.toDocument(result));
+        values.push(limit + 1);
+        const results = sql.all(...values);
+        const documents = results.map(result => this.toDocument(result));
 
         return {
             previous: documents.length >= limit + 1 ? toDocumentId(documents[limit - 1]) : null,
             documents: documents.slice(0, limit).reverse(),
             next: null,
         };
+    }
+
+    private createWhereClause(expression: string, values: SQLInputValue[], language?: string): string {
+        const parser = new FilterExpressionParser(expression, language);
+        if (parser.expressionType === 'model-type') {
+            return getWhereClause(parser.clause, values);
+        }
+
+        const query = parser.clause
+            .flatMap(item => item.andConditions)
+            .map(word => '"' + String(word).normalize('NFKC').toLocaleLowerCase(language) + '"')
+            .join(' ');
+
+        values.push(query);
+        values.push(query);
+
+        return `
+        (EXISTS (SELECT 1 FROM documents_fts df
+            WHERE df.rowid = d.rowid AND documents_fts MATCH ?)
+        OR EXISTS (SELECT 1 FROM elements e
+            JOIN elements_fts ef ON ef.rowid = e.rowid WHERE e.uuid = d.uuid AND elements_fts MATCH ?))`;
     }
 
     private traverseEnvironment(documentId: string, env: aas.Environment): void {

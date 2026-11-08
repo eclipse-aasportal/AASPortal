@@ -31,14 +31,14 @@ import {
     isFile,
     isBlob,
     AASEndpointType,
+    FilterExpressionParser,
 } from 'aas-core';
 
 import { AASIndex, toAbbreviation, toDocumentId } from './aas-index.js';
 import { Variable } from '../variable.js';
 import { urlToString } from '../utilities.js';
 import { ERRORS } from '../errors.js';
-import { ConditionGenerator } from './condition-generator.js';
-import { SqlConditionGenerator } from './sql-condition-generator.js';
+import { getWhereClause } from './get-where-clause.js';
 
 const LIMIT = 100;
 
@@ -111,7 +111,7 @@ export class MySqlIndex implements AASIndex {
     public async getEndpointCount(): Promise<number> {
         const connection = await this.getConnection();
         try {
-            const [results] = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM `endpoints` AS count;');
+            const [results] = await connection.query<DocumentCount[]>('SELECT COUNT(*) FROM endpoints AS count;');
             return results[0]['COUNT(*)'];
         } finally {
             connection.release();
@@ -121,7 +121,7 @@ export class MySqlIndex implements AASIndex {
     public async getEndpoints(): Promise<AASEndpoint[]> {
         const connection = await this.getConnection();
         try {
-            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints`;');
+            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM endpoints;');
             return results.map(row => this.toEndpoint(row));
         } finally {
             connection.release();
@@ -131,7 +131,7 @@ export class MySqlIndex implements AASIndex {
     public async getEndpoint(name: string): Promise<AASEndpoint> {
         const connection = await this.getConnection();
         try {
-            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
+            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM endpoints WHERE name = ?;', [
                 name,
             ]);
 
@@ -148,7 +148,7 @@ export class MySqlIndex implements AASIndex {
     public async findEndpoint(name: string): Promise<AASEndpoint | undefined> {
         const connection = await this.getConnection();
         try {
-            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
+            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM endpoints WHERE name = ?;', [
                 name,
             ]);
 
@@ -166,7 +166,7 @@ export class MySqlIndex implements AASIndex {
         const connection = await this.getConnection();
         try {
             await connection.query<mysql.ResultSetHeader>(
-                'INSERT INTO `endpoints` (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
+                'INSERT INTO endpoints (name, url, type, version, headers, schedule) VALUES (?, ?, ?, ?, ?, ?);',
                 [
                     endpoint.name,
                     endpoint.url,
@@ -185,7 +185,7 @@ export class MySqlIndex implements AASIndex {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
-            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM `endpoints` WHERE name = ?;', [
+            const [results] = await connection.query<MySqlEndpoint[]>('SELECT * FROM endpoints WHERE name = ?;', [
                 endpoint.name,
             ]);
 
@@ -194,7 +194,7 @@ export class MySqlIndex implements AASIndex {
             }
 
             await connection.query<mysql.ResultSetHeader>(
-                'UPDATE `endpoints` SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
+                'UPDATE endpoints SET url = ?, type = ?, version = ?, headers = ?, schedule = ? WHERE name = ?;',
                 [
                     endpoint.url,
                     endpoint.type,
@@ -218,7 +218,7 @@ export class MySqlIndex implements AASIndex {
         const connection = await this.getConnection();
         try {
             await connection.beginTransaction();
-            const [results] = await connection.query<mysql.ResultSetHeader>('DELETE FROM `endpoints` WHERE name = ?;', [
+            const [results] = await connection.query<mysql.ResultSetHeader>('DELETE FROM endpoints WHERE name = ?;', [
                 endpointName,
             ]);
 
@@ -239,26 +239,21 @@ export class MySqlIndex implements AASIndex {
         expression?: string,
         language?: string,
     ): Promise<AASPagedResult> {
-        let query: ConditionGenerator | undefined;
-        if (expression) {
-            query = new SqlConditionGenerator(expression, language ?? 'en');
-        }
-
         const connection = await this.getConnection();
         try {
             if (cursor.next) {
-                return this.getNextPage(connection, cursor.next, cursor.limit, endpoints, query);
+                return this.getNextPage(connection, cursor.next, cursor.limit, endpoints, expression, language);
             }
 
             if (cursor.previous) {
-                return this.getPreviousPage(connection, cursor.previous, cursor.limit, endpoints, query);
+                return this.getPreviousPage(connection, cursor.previous, cursor.limit, endpoints, expression, language);
             }
 
             if (cursor.previous === null) {
-                return this.getFirstPage(connection, cursor.limit, endpoints, query);
+                return this.getFirstPage(connection, cursor.limit, endpoints, expression, language);
             }
 
-            return this.getLastPage(connection, cursor.limit, endpoints, query);
+            return this.getLastPage(connection, cursor.limit, endpoints, expression, language);
         } finally {
             connection.release();
         }
@@ -564,22 +559,23 @@ export class MySqlIndex implements AASIndex {
         connection: mysql.Connection,
         limit: number,
         endpoints: string[],
-        query?: ConditionGenerator,
+        expression?: string,
+        language?: string,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [];
-        if (query) {
+        if (expression) {
             if (endpoints.length > 0) {
                 sql =
                     "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('" +
                     endpoints.join("','") +
                     "') AND (" +
-                    query.generate(values) +
+                    this.createWhereClause(expression, values, language) +
                     ') ORDER BY d.endpoint, d.id LIMIT ?;';
             } else {
                 sql =
                     'SELECT d.* FROM documents AS d WHERE ' +
-                    query.generate(values) +
+                    this.createWhereClause(expression, values, language) +
                     ' ORDER BY d.endpoint, d.id LIMIT ?;';
             }
         } else {
@@ -609,23 +605,24 @@ export class MySqlIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        generator?: ConditionGenerator,
+        expression?: string,
+        language?: string,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [current.endpoint, current.endpoint, current.id];
 
-        if (generator) {
+        if (expression) {
             if (endpoints.length > 0) {
                 sql =
                     "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('" +
                     endpoints.join("','") +
                     "') AND (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (" +
-                    generator.generate(values) +
+                    this.createWhereClause(expression, values, language) +
                     ') ORDER BY d.endpoint, d.id LIMIT ?;';
             } else {
                 sql =
                     'SELECT d.* FROM documents AS d WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (' +
-                    generator.generate(values) +
+                    this.createWhereClause(expression, values, language) +
                     ') ORDER BY d.endpoint, d.id LIMIT ?;';
             }
         } else {
@@ -656,23 +653,24 @@ export class MySqlIndex implements AASIndex {
         current: AASDocumentId,
         limit: number,
         endpoints: string[],
-        generator?: ConditionGenerator,
+        expression?: string,
+        language?: string,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [current.endpoint + current.id];
 
-        if (generator) {
+        if (expression) {
             if (endpoints.length > 0) {
                 sql =
                     "SELECT d.* FROM documents AS d WHERE documents.endpoint IN ('" +
                     endpoints.join("','") +
                     "') AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (" +
-                    generator.generate(values) +
+                    this.createWhereClause(expression, values, language) +
                     ') ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             } else {
                 sql =
                     'SELECT d.* FROM documents AS d WHERE (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (' +
-                    generator.generate(values) +
+                    this.createWhereClause(expression, values, language) +
                     ') ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             }
         } else {
@@ -702,22 +700,23 @@ export class MySqlIndex implements AASIndex {
         connection: mysql.Connection,
         limit: number,
         endpoints: string[],
-        generator?: ConditionGenerator,
+        expression?: string,
+        language?: string,
     ): Promise<AASPagedResult> {
         let sql: string;
         const values: unknown[] = [];
-        if (generator) {
+        if (expression) {
             if (endpoints.length > 0) {
                 sql =
                     "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('" +
                     endpoints.join("','") +
                     "') AND (" +
-                    generator.generate(values) +
+                    this.createWhereClause(expression, values, language) +
                     ') ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             } else {
                 sql =
                     'SELECT documents.* FROM documents AS d WHERE ' +
-                    generator.generate(values) +
+                    this.createWhereClause(expression, values, language) +
                     ' ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             }
         } else {
@@ -740,6 +739,28 @@ export class MySqlIndex implements AASIndex {
             documents: documents.slice(0, limit).reverse(),
             next: null,
         };
+    }
+
+    private createWhereClause(expression: string, values: unknown[], language?: string): string {
+        const parser = new FilterExpressionParser(expression, language);
+        if (parser.expressionType === 'model-type') {
+            return getWhereClause(parser.clause, values);
+        }
+
+        const query = parser.clause
+            .flatMap(item => item.andConditions)
+            .map(word => '"' + String(word).normalize('NFKC').toLocaleLowerCase(language) + '"')
+            .join(' ');
+
+        values.push(query);
+        values.push(query);
+
+        return `
+        MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE)
+        OR EXISTS (
+            SELECT 1
+            FROM elements AS e
+            WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort,e.stringValue) AGAINST(? IN BOOLEAN MODE))`;
     }
 
     private async selectEndpointDocument(

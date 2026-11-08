@@ -121,12 +121,14 @@ export class FilterExpressionParser {
 
             this._expressionType = 'text';
             this.stack[0].ors.push(
-                ...this.splitIntoWords(this.expression).map(
-                    word =>
-                        ({
-                            andConditions: [word],
-                        }) satisfies OrCondition,
-                ),
+                ...this.splitIntoWords(this.expression)
+                    .filter(word => word.length >= 3)
+                    .map(
+                        word =>
+                            ({
+                                andConditions: [word],
+                            }) satisfies OrCondition,
+                    ),
             );
         }
     }

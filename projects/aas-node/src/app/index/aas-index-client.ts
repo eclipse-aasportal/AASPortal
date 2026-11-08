@@ -10,10 +10,10 @@ import { container, singleton, Disposable } from 'tsyringe';
 import path from 'path';
 import { isMainThread, MessagePort, MessageChannel, SHARE_ENV, Worker } from 'worker_threads';
 import { aas, AASEndpoint, AASCursor, AASPagedResult, PagedResult, AASDocument } from 'aas-core';
+import { CommandData, Connectable, isConnectable, isResponseData, LOGGER, WorkerData } from 'aas-package';
 
 import { AASIndex, ChannelCommand, CommandName, ChannelResponse, isChannelError, ChannelError } from './aas-index.js';
 import { Variable } from '../variable.js';
-import { CommandData, Connectable, isConnectable, isResponseData, LOGGER, WorkerData } from 'aas-package';
 
 type ResolvePending = {
     resolve: (value: unknown) => void;

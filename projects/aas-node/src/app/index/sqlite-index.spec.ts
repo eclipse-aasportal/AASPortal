@@ -56,6 +56,12 @@ describe('SqliteIndex', () => {
         };
     }
 
+    async function insertEndpoints(...names: string[]): Promise<void> {
+        for (const name of names) {
+            await index.insertEndpoint(createEndpoint(name));
+        }
+    }
+
     it('should be created', () => {
         expect(index).toBeTruthy();
     });
@@ -75,6 +81,7 @@ describe('SqliteIndex', () => {
     });
 
     it('counts documents and returns endpoint pages in identifier order', async () => {
+        await insertEndpoints('Endpoint 1', 'Endpoint 2');
         await index.insert(createDocument(2));
         await index.insert(createDocument(1));
         await index.insert(createDocument(3, 'Endpoint 2'));
@@ -93,6 +100,7 @@ describe('SqliteIndex', () => {
     });
 
     it('deletes a document and reports when it is absent', async () => {
+        await insertEndpoints('Endpoint 1');
         await index.insert(createDocument());
 
         await expect(index.delete('Endpoint 1', 'aas-1')).resolves.toBe(true);
@@ -101,6 +109,7 @@ describe('SqliteIndex', () => {
     });
 
     it('clears documents and concept descriptions for an endpoint', async () => {
+        await insertEndpoints('Endpoint 1', 'Endpoint 2');
         await index.insert(createDocument(1));
         await index.insert(createDocument(2, 'Endpoint 2'));
         await index.setSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1', ['concept-description-1']);
@@ -113,6 +122,7 @@ describe('SqliteIndex', () => {
     });
 
     it('commits a no-op document update', async () => {
+        await insertEndpoints('Endpoint 1');
         const document = createDocument();
 
         await index.update(document);
@@ -121,6 +131,7 @@ describe('SqliteIndex', () => {
     });
 
     it('updates the indexed asset identifier', async () => {
+        await insertEndpoints('Endpoint 1');
         const doc = createDocument(1);
         await index.insert(doc);
         await index.update({ ...doc, assetId: 'asset-2' });
@@ -130,6 +141,7 @@ describe('SqliteIndex', () => {
     });
 
     it('gets stored submodel concept-description identifiers', async () => {
+        await insertEndpoints('Endpoint 1');
         await index.setSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1', [
             'concept-description-1',
             'concept-description-2',
@@ -143,6 +155,7 @@ describe('SqliteIndex', () => {
 
     describe('getDocuments forward', () => {
         beforeEach(async () => {
+            await insertEndpoints('Endpoint 1', 'Endpoint 2');
             for (let i = 1; i <= 5; ++i) {
                 await index.insert(createDocument(i, `Endpoint ${1}`));
             }
@@ -182,6 +195,7 @@ describe('SqliteIndex', () => {
 
     describe('getDocuments reward', () => {
         beforeEach(async () => {
+            await insertEndpoints('Endpoint 1', 'Endpoint 2');
             for (let i = 1; i <= 5; ++i) {
                 await index.insert(createDocument(i, `Endpoint ${1}`));
             }
