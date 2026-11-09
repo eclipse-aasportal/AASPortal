@@ -61,7 +61,9 @@ describe('MongoDBUserRightsStore', () => {
         container.registerInstance(LOGGER, createSpyObj<Logger>(['error', 'warning', 'info']));
         container.registerInstance(
             Variable,
-            createSpyObj<Variable>([], { USER_RIGHTS_STORE: 'mongodb://localhost:27017/users' }),
+            createSpyObj<Variable>([], {
+                USER_RIGHTS_STORE: 'mongodb://localhost:27017/users',
+            }),
         );
 
         store = container.resolve(MongoDBUserRightsStore);
