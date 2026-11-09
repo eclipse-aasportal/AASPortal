@@ -34,7 +34,8 @@
                 "IDENTITY_PROVIDER": "file:///identity-provider",
                 "NODE_ENV": "development",
                 "SESSION_SECRET": "aas-portal-session-secret",
-                "WEB_ROOT": "projects/aas-portal/dist/browser"
+                "WEB_ROOT": "projects/aas-portal/dist/browser",
+                "DEFAULT_ADMIN": "john.doe@email.com"
             }
         },
         {
@@ -69,7 +70,8 @@
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_RIGHTS_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
-                "WEB_ROOT": "projects/aas-portal/dist/browser"
+                "WEB_ROOT": "projects/aas-portal/dist/browser",
+                "DEFAULT_ADMIN": "john.doe@email.com"
             }
         },
         {
@@ -107,6 +109,7 @@
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_RIGHTS_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "WEB_ROOT": "projects/aas-portal/dist/browser",
+                "DEFAULT_ADMIN": "john.doe@email.com"
             }
         },
         {
@@ -140,6 +143,7 @@
                 "USER_RIGHTS_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "WEB_ROOT": "projects/aas-portal/dist/browser",
+                "DEFAULT_ADMIN": "john.doe@email.com"
             }
         },
         {
@@ -175,7 +179,8 @@
                 "REDIRECT_URI": "http://localhost:4200/auth/callback",
                 "SESSION_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
                 "USER_RIGHTS_STORE": "mongodb://aas-node:root-password@localhost:27017/aasportal-users",
-                "WEB_ROOT": "projects/aas-portal/dist/browser"
+                "WEB_ROOT": "projects/aas-portal/dist/browser",
+                "DEFAULT_ADMIN": "john.doe@email.com"
             }
         },
         {

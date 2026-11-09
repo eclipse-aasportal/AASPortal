@@ -95,4 +95,7 @@ export class Variable {
 
     /** The root directory for static files. */
     public readonly WEB_ROOT: string = path.resolve(process.env.WEB_ROOT ?? './wwwroot');
+
+    /** The user ID (e-mail) of the default admin. */
+    public readonly DEFAULT_ADMIN?: string = process.env.DEFAULT_ADMIN;
 }

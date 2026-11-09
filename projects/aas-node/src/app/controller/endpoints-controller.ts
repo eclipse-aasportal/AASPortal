@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { inject, injectable } from 'tsyringe';
+import { container, injectable } from 'tsyringe';
 import {
     Body,
     Controller,
@@ -29,18 +29,14 @@ import { decodeBase64Url } from 'aas-package';
 
 import { EndpointProvider } from '../provider/endpoint-provider.js';
 import { ERRORS } from '../errors.js';
-import { USER_RIGHTS_STORE, UserRightsStore } from '../auth/user-rights-store.js';
+import { USER_RIGHTS_STORE } from '../auth/user-rights-store.js';
 
 @injectable()
 @Route('/api/v1/endpoints')
 @Tags('Endpoints')
 export class EndpointsController extends Controller {
-    public constructor(
-        @inject(EndpointProvider) private readonly provider: EndpointProvider,
-        @inject(USER_RIGHTS_STORE) private readonly userRightsStore: UserRightsStore,
-    ) {
-        super();
-    }
+    private readonly provider = container.resolve(EndpointProvider);
+    private readonly userRightsStore = container.resolve(USER_RIGHTS_STORE);
 
     /**
      * @summary Gets the current registered AAS endpoints.
