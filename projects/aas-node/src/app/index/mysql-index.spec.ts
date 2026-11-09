@@ -17,6 +17,43 @@ import { Variable } from '../variable.js';
 import { createSpyObj } from '../../test/mocks.js';
 import { container } from 'tsyringe';
 
+function createResults(endpoint: string, count: number, start: number = 1): MySqlDocument[] {
+    const results: MySqlDocument[] = [];
+    for (let i = start, n = start + count; i < n; i++) {
+        {
+            results.push({
+                constructor: { name: 'RowDataPacket' },
+                uuid: `aas-${i}`,
+                id: `http://document/aas-${i}`,
+                endpoint: endpoint,
+                address: `address-${i}`,
+                idShort: `idShort-${i}`,
+                assetId: `assetId-${i}`,
+                thumbnail: null,
+                timestamp: new Date(123456789),
+            });
+        }
+    }
+
+    return results;
+}
+
+function toDocuments(results: MySqlDocument[]): AASDocument[] {
+    return results.map(
+        result =>
+            ({
+                address: result.address,
+                endpoint: result.endpoint,
+                id: result.id,
+                idShort: result.idShort,
+                assetId: result.assetId!,
+                thumbnail: undefined,
+                timestamp: result.timestamp.getTime(),
+                content: null,
+            }) satisfies AASDocument,
+    );
+}
+
 describe('MySqlIndex', () => {
     let index: MySqlIndex;
     let logger: Mocked<Logger>;
@@ -281,41 +318,541 @@ describe('MySqlIndex', () => {
     });
 
     describe('getDocuments', () => {
-        it('returns all documents of the specified endpoint', async () => {
-            const result: MySqlDocument[] = [
-                {
-                    constructor: { name: 'RowDataPacket' },
-                    uuid: '1',
-                    id: 'http://document/aas',
-                    endpoint: 'Endpoint 1',
-                    address: 'address',
-                    idShort: 'idShort',
-                    assetId: 'assetId',
-                    thumbnail: null,
-                    timestamp: 123,
-                },
-            ];
+        let data: MySqlDocument[];
 
-            connection.query.mockResolvedValue([result, []]);
-            await expect(index.getDocuments({ limit: 10 }, [])).resolves.toEqual({
-                documents: [
-                    {
+        beforeEach(() => {
+            data = createResults('Endpoint 1', 25);
+        });
+
+        describe('no filter applied', () => {
+            it('returns the 3 pages forward', async () => {
+                connection.query.mockResolvedValue([data.slice(0, 11), []]);
+                await expect(index.getDocuments({ previous: null, limit: 10 })).resolves.toEqual({
+                    documents: toDocuments(data.slice(0, 10)),
+                    next: {
                         endpoint: 'Endpoint 1',
-                        id: 'http://document/aas',
-                        address: 'address',
-                        idShort: 'idShort',
-                        assetId: 'assetId',
-                        content: null,
-                        timestamp: 123,
+                        id: 'http://document/aas-11',
                     },
-                ],
-                next: null,
-                previous: null,
+                    previous: null,
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    'SELECT * FROM documents ORDER BY endpoint, id LIMIT ?;',
+                    [11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(10, 21), []]);
+                await expect(
+                    index.getDocuments({ next: { endpoint: 'Endpoint 1', id: 'http://document/aas-11' }, limit: 10 }),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(10, 20)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-21',
+                    },
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-11',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    'SELECT * FROM documents WHERE (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;',
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-11', 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(20), []]);
+                await expect(
+                    index.getDocuments({ next: { endpoint: 'Endpoint 1', id: 'http://document/aas-21' }, limit: 10 }),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(20)),
+                    next: null,
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-21',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    'SELECT * FROM documents WHERE (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;',
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-21', 11],
+                );
+            });
+
+            it('returns the 3 pages backward', async () => {
+                connection.query.mockResolvedValue([data.slice(14).reverse(), []]);
+                await expect(index.getDocuments({ next: null, limit: 10 }, [])).resolves.toEqual({
+                    documents: toDocuments(data.slice(15)),
+                    next: null,
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-16',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    'SELECT * FROM documents ORDER BY endpoint DESC, id DESC LIMIT ?;',
+                    [11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(4, 15).reverse(), []]);
+                await expect(
+                    index.getDocuments({
+                        previous: { endpoint: 'Endpoint 1', id: 'http://document/aas-16' },
+                        limit: 10,
+                    }),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(5, 15)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-16',
+                    },
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-6',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    'SELECT * FROM documents WHERE (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint DESC, id DESC LIMIT ?;',
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-16', 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(0, 5).reverse(), []]);
+                await expect(
+                    index.getDocuments({
+                        previous: { endpoint: 'Endpoint 1', id: 'http://document/aas-6' },
+                        limit: 10,
+                    }),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(0, 5)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-6',
+                    },
+                    previous: null,
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    'SELECT * FROM documents WHERE (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint DESC, id DESC LIMIT ?;',
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-6', 11],
+                );
+            });
+        });
+
+        describe('Endpoint 1', () => {
+            it('returns the 3 pages forward', async () => {
+                connection.query.mockResolvedValue([data.slice(0, 11), []]);
+                await expect(index.getDocuments({ previous: null, limit: 10 }, ['Endpoint 1'])).resolves.toEqual({
+                    documents: toDocuments(data.slice(0, 10)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-11',
+                    },
+                    previous: null,
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') ORDER BY endpoint, id LIMIT ?;",
+                    [11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(10, 21), []]);
+                await expect(
+                    index.getDocuments({ next: { endpoint: 'Endpoint 1', id: 'http://document/aas-11' }, limit: 10 }, [
+                        'Endpoint 1',
+                    ]),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(10, 20)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-21',
+                    },
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-11',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-11', 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(20), []]);
+                await expect(
+                    index.getDocuments({ next: { endpoint: 'Endpoint 1', id: 'http://document/aas-21' }, limit: 10 }, [
+                        'Endpoint 1',
+                    ]),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(20)),
+                    next: null,
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-21',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-21', 11],
+                );
+            });
+
+            it('returns the 3 pages backward', async () => {
+                connection.query.mockResolvedValue([data.slice(14).reverse(), []]);
+                await expect(index.getDocuments({ next: null, limit: 10 }, ['Endpoint 1'])).resolves.toEqual({
+                    documents: toDocuments(data.slice(15)),
+                    next: null,
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-16',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') ORDER BY endpoint DESC, id DESC LIMIT ?;",
+                    [11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(4, 15).reverse(), []]);
+                await expect(
+                    index.getDocuments(
+                        { previous: { endpoint: 'Endpoint 1', id: 'http://document/aas-16' }, limit: 10 },
+                        ['Endpoint 1'],
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(5, 15)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-16',
+                    },
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-6',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint, id DESC LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-16', 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(0, 5).reverse(), []]);
+                await expect(
+                    index.getDocuments(
+                        { previous: { endpoint: 'Endpoint 1', id: 'http://document/aas-6' }, limit: 10 },
+                        ['Endpoint 1'],
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(0, 5)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-6',
+                    },
+                    previous: null,
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint, id DESC LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-6', 11],
+                );
+            });
+        });
+
+        describe('model type filter applied', () => {
+            it('returns the 3 pages forward', async () => {
+                connection.query.mockResolvedValue([data.slice(0, 11), []]);
+                await expect(
+                    index.getDocuments({ previous: null, limit: 10 }, undefined, '#prop:torque=114.7'),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(0, 10)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-11',
+                    },
+                    previous: null,
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?)) ORDER BY d.endpoint, d.id LIMIT ?;",
+                    ['%torque%', 114.7, 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(10, 21), []]);
+                await expect(
+                    index.getDocuments(
+                        { next: { endpoint: 'Endpoint 1', id: 'http://document/aas-11' }, limit: 10 },
+                        undefined,
+                        '#prop:torque=114.7',
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(10, 20)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-21',
+                    },
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-11',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?))) ORDER BY d.endpoint, d.id LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-11', '%torque%', 114.7, 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(20), []]);
+                await expect(
+                    index.getDocuments(
+                        { next: { endpoint: 'Endpoint 1', id: 'http://document/aas-21' }, limit: 10 },
+                        undefined,
+                        '#prop:torque=114.7',
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(20)),
+                    next: null,
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-21',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?))) ORDER BY d.endpoint, d.id LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-21', '%torque%', 114.7, 11],
+                );
+            });
+
+            it('returns the 3 pages backward', async () => {
+                connection.query.mockResolvedValue([data.slice(14).reverse(), []]);
+                await expect(
+                    index.getDocuments({ next: null, limit: 10 }, undefined, '#prop:torque=114.7'),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(15)),
+                    next: null,
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-16',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?)) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
+                    ['%torque%', 114.7, 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(4, 15).reverse(), []]);
+                await expect(
+                    index.getDocuments(
+                        {
+                            previous: { endpoint: 'Endpoint 1', id: 'http://document/aas-16' },
+                            limit: 10,
+                        },
+                        undefined,
+                        '#prop:torque=114.7',
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(5, 15)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-16',
+                    },
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-6',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-16', '%torque%', 114.7, 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(0, 5).reverse(), []]);
+                await expect(
+                    index.getDocuments(
+                        {
+                            previous: { endpoint: 'Endpoint 1', id: 'http://document/aas-6' },
+                            limit: 10,
+                        },
+                        undefined,
+                        '#prop:torque=114.7',
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(0, 5)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-6',
+                    },
+                    previous: null,
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-6', '%torque%', 114.7, 11],
+                );
+            });
+        });
+
+        describe('full text search, Endpoint 1', () => {
+            it('returns the 3 pages forward', async () => {
+                connection.query.mockResolvedValue([data.slice(0, 11), []]);
+                await expect(
+                    index.getDocuments({ previous: null, limit: 10 }, ['Endpoint 1'], 'hello world'),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(0, 10)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-11',
+                    },
+                    previous: null,
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND " +
+                        '(MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS ' +
+                        '(SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) ' +
+                        'AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint, d.id LIMIT ?;',
+                    ['"hello" "world"', '"hello" "world"', 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(10, 21), []]);
+                await expect(
+                    index.getDocuments(
+                        { next: { endpoint: 'Endpoint 1', id: 'http://document/aas-11' }, limit: 10 },
+                        ['Endpoint 1'],
+                        'hello world',
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(10, 20)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-21',
+                    },
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-11',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint, d.id LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-11', '"hello" "world"', '"hello" "world"', 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(20), []]);
+                await expect(
+                    index.getDocuments(
+                        { next: { endpoint: 'Endpoint 1', id: 'http://document/aas-21' }, limit: 10 },
+                        ['Endpoint 1'],
+                        'hello world',
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(20)),
+                    next: null,
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-21',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint, d.id LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-21', '"hello" "world"', '"hello" "world"', 11],
+                );
+            });
+
+            it('returns the 3 pages backward', async () => {
+                connection.query.mockResolvedValue([data.slice(14).reverse(), []]);
+                await expect(
+                    index.getDocuments({ next: null, limit: 10 }, ['Endpoint 1'], 'hello world'),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(15)),
+                    next: null,
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-16',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
+                    ['"hello" "world"', '"hello" "world"', 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(4, 15).reverse(), []]);
+                await expect(
+                    index.getDocuments(
+                        {
+                            previous: { endpoint: 'Endpoint 1', id: 'http://document/aas-16' },
+                            limit: 10,
+                        },
+                        ['Endpoint 1'],
+                        'hello world',
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(5, 15)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-16',
+                    },
+                    previous: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-6',
+                    },
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE documents.endpoint IN ('Endpoint 1') AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-16', '"hello" "world"', '"hello" "world"', 11],
+                );
+
+                connection.query.mockReset();
+                connection.query.mockResolvedValue([data.slice(0, 5).reverse(), []]);
+                await expect(
+                    index.getDocuments(
+                        {
+                            previous: { endpoint: 'Endpoint 1', id: 'http://document/aas-6' },
+                            limit: 10,
+                        },
+                        ['Endpoint 1'],
+                        'hello world',
+                    ),
+                ).resolves.toEqual({
+                    documents: toDocuments(data.slice(0, 5)),
+                    next: {
+                        endpoint: 'Endpoint 1',
+                        id: 'http://document/aas-6',
+                    },
+                    previous: null,
+                });
+
+                expect(connection.query).toHaveBeenCalledWith(
+                    "SELECT d.* FROM documents AS d WHERE documents.endpoint IN ('Endpoint 1') AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-6', '"hello" "world"', '"hello" "world"', 11],
+                );
             });
         });
     });
 
-    describe('nextPage', () => {
+    describe('getEndpointDocuments', () => {
         it('selects the first page', async () => {
             const results: MySqlDocument[] = [];
             connection.query.mockResolvedValue([results, []]);
@@ -408,7 +945,7 @@ describe('MySqlIndex', () => {
                 idShort: 'idShort',
                 assetId: 'assetId',
                 thumbnail: null,
-                timestamp: 123,
+                timestamp: new Date(123),
             };
 
             connection.query.mockResolvedValue([[result], []]);
@@ -479,9 +1016,7 @@ describe('MySqlIndex', () => {
 
             await expect(index.clear('Endpoint 1')).resolves.toEqual(void 0);
 
-            expect(connection.query).toHaveBeenCalledWith('DELETE FROM documents WHERE endpoint = ?;', [
-                'Endpoint 1',
-            ]);
+            expect(connection.query).toHaveBeenCalledWith('DELETE FROM documents WHERE endpoint = ?;', ['Endpoint 1']);
 
             expect(connection.query).toHaveBeenCalledWith(
                 'DELETE FROM `submodelConceptDescriptions` WHERE endpoint = ?;',

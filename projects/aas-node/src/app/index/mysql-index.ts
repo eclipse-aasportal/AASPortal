@@ -57,7 +57,7 @@ export interface MySqlDocument extends RowDataPacket {
     idShort: string;
     assetId: string | null;
     thumbnail: string | null;
-    timestamp: number;
+    timestamp: Date;
 }
 
 export interface MySqlConceptDescriptionIds extends RowDataPacket {
@@ -657,7 +657,7 @@ export class MySqlIndex implements AASIndex {
         language?: string,
     ): Promise<AASPagedResult> {
         let sql: string;
-        const values: unknown[] = [current.endpoint + current.id];
+        const values: unknown[] = [current.endpoint, current.endpoint, current.id];
 
         if (expression) {
             if (endpoints.length > 0) {
@@ -715,7 +715,7 @@ export class MySqlIndex implements AASIndex {
                     ') ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             } else {
                 sql =
-                    'SELECT documents.* FROM documents AS d WHERE ' +
+                    'SELECT d.* FROM documents AS d WHERE ' +
                     this.createWhereClause(expression, values, language) +
                     ' ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;';
             }
@@ -755,12 +755,11 @@ export class MySqlIndex implements AASIndex {
         values.push(query);
         values.push(query);
 
-        return `
-        MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE)
-        OR EXISTS (
-            SELECT 1
-            FROM elements AS e
-            WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort,e.stringValue) AGAINST(? IN BOOLEAN MODE))`;
+        return (
+            'MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR ' +
+            'EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) ' +
+            'AGAINST(? IN BOOLEAN MODE))'
+        );
     }
 
     private async selectEndpointDocument(
@@ -931,7 +930,7 @@ export class MySqlIndex implements AASIndex {
             endpoint: result.endpoint,
             id: result.id,
             idShort: result.idShort,
-            timestamp: Number(result.timestamp),
+            timestamp: result.timestamp.getTime(),
             content: null,
         };
 
