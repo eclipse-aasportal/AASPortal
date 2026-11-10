@@ -30,7 +30,7 @@ CREATE TABLE elements (
     modelType VARCHAR(5) NOT NULL,
     id VARCHAR(255),
     idShort VARCHAR(128) NOT NULL,
-    stringValue VARCHAR(512),
+    stringValue LONGTEXT,
     numberValue DOUBLE,
     bigintValue BIGINT,
     dateValue DATETIME,

@@ -23,8 +23,8 @@ export class LocalFileStorage extends FileStorage {
         return (await fs.promises.stat(resolve(this.root, path))).mtime;
     }
 
-    public override exists(path: string): Promise<boolean> {
-        return Promise.resolve(fs.existsSync(this.resolve(path)));
+    public override async exists(path: string): Promise<boolean> {
+        return fs.existsSync(this.resolve(path));
     }
 
     public override async createDir(path: string, recursive = false): Promise<void> {

@@ -27,7 +27,7 @@
         <label class="form-lable mt-3" for="div-endpoint-url" translate="AddEndpointForm.LABEL_URL"></label>
         <div class="input-group" ngbDropdown role="group" id="div-endpoint-url">
             <button type="button" class="btn btn-outline-secondary" ngbDropdownToggle>
-                {{ 'AddEndpointForm.' + template().type | translate }}
+                {{ 'AddEndpointForm.' + form.type().value() | translate }}
             </button>
             <div class="dropdown-menu" ngbDropdownMenu>
                 @for (item of templates(); track item) {
@@ -45,7 +45,7 @@
                 id="AID_ENDPOINT_URL"
                 type="text"
                 class="form-control"
-                placeholder="{{ template().placeholder | translate }}"
+                placeholder="{{ placeholder() | translate }}"
                 [formField]="form.url"
             />
         </div>
@@ -119,7 +119,7 @@
                 <fhg-form-error [field]="form.minutes()"></fhg-form-error>
             }
         </div>
-        @if (template().type === 'AAS_API') {
+        @if (this.form.type().value() === 'AAS_API') {
             <label
                 class="form-lable mt-2"
                 for="AID_SELECT_AUTHORIZATION"

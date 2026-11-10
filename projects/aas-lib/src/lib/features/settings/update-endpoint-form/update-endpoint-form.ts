@@ -100,10 +100,8 @@ export class UpdateEndpointForm {
     private readonly toDelete: string[] = [];
     private readonly _deleting = signal<string | undefined>(undefined);
     private readonly _templates = signal<EndpointTemplate[]>(templates);
-
-    private readonly _endpoints = httpResource<AASEndpoint[]>(() => '/api/v1/endpoints');
-
     private readonly _template = signal<EndpointTemplate>(this._templates()[0]);
+    private readonly _endpoints = httpResource<AASEndpoint[]>(() => '/api/v1/endpoints');
 
     private readonly model = signal<UpdateEndpointModel>({
         endpoint: '',

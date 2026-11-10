@@ -35,7 +35,7 @@
                         @if (item.schedule === 'manual' || item.schedule === 'once') {
                             <button
                                 type="button"
-                                class="btn btn-lg btn-outline-primary py-0 px-3 endpoint-index-icon-btn"
+                                class="btn btn-lg btn-outline-primary py-0 px-3 border-0 justify-content-center"
                                 [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
                                 [openDelay]="300"
                                 placement="top"
@@ -43,7 +43,7 @@
                                 (click)="startScan(item.name).subscribe()"
                             >
                                 <i class="bi bi-play-fill"></i>
-                                <span class="fw-light" style="font-size: 15px">Scan</span>
+                                <span class="fw-light fs-6">Scan</span>
                             </button>
                         } @else {
                             <div></div>
@@ -61,7 +61,7 @@
                         </button>
                     } @else {
                         @if (item.progress < 0) {
-                            <div class="text-center">
+                            <div class="justify-content-center d-flex">
                                 <div class="spinner-border spinner-border-sm text-info" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>

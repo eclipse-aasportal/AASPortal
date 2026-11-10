@@ -310,7 +310,7 @@ export class MySqlIndex implements AASIndex {
                     document.address,
                     document.idShort,
                     document.assetId ?? null,
-                    document.timestamp,
+                    new Date(document.timestamp),
                     document.thumbnail ?? null,
                     uuid,
                 ],
@@ -345,7 +345,7 @@ export class MySqlIndex implements AASIndex {
                     document.idShort,
                     document.assetId ?? null,
                     document.thumbnail ?? null,
-                    BigInt(Math.floor(document.timestamp)),
+                    new Date(document.timestamp),
                 ],
             );
 
