@@ -33,18 +33,20 @@
 
                     @if (item.status === 'idle') {
                         @if (item.schedule === 'manual' || item.schedule === 'once') {
-                            <button
-                                type="button"
-                                class="btn btn-lg btn-outline-primary py-0 px-3 border-0 justify-content-center"
-                                [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
-                                [openDelay]="300"
-                                placement="top"
-                                container="body"
-                                (click)="startScan(item.name).subscribe()"
-                            >
-                                <i class="bi bi-play-fill"></i>
-                                <span class="fw-light fs-6">Scan</span>
-                            </button>
+                            <div class="justify-content-end d-flex">
+                                <button
+                                    type="button"
+                                    class="btn btn-lg btn-outline-primary border-0"
+                                    [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
+                                    [openDelay]="300"
+                                    placement="top"
+                                    container="body"
+                                    (click)="startScan(item.name).subscribe()"
+                                >
+                                    <i class="bi bi-play-fill"></i>
+                                    <span class="fw-light fs-6">Scan</span>
+                                </button>
+                            </div>
                         } @else {
                             <div></div>
                         }

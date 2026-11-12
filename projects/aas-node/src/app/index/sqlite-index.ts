@@ -85,12 +85,12 @@ CREATE TABLE IF NOT EXISTS submodelConceptDescriptions (
     PRIMARY KEY (endpoint, id)
 );
 
-CREATE VIRTUAL TABLE IF NOT EXISTS documents_fts USING fts5(idShort, id, assetId);
-CREATE VIRTUAL TABLE IF NOT EXISTS elements_fts USING fts5(id, idShort, stringValue);
+CREATE VIRTUAL TABLE IF NOT EXISTS documents_fts USING fts5(idShort, id, assetId, tokenize = 'unicode61');
+CREATE VIRTUAL TABLE IF NOT EXISTS elements_fts USING fts5(id, idShort, stringValue, tokenize = 'unicode61');
 
 CREATE TRIGGER IF NOT EXISTS documents_fts_ai AFTER INSERT ON documents BEGIN
     INSERT INTO documents_fts(rowid, idShort, id, assetId)
-    VALUES (new.rowid, fold(new.idShort), fold(new.id), fold(new.assetId));
+    VALUES (new.rowid, new.idShort, new.id, new.assetId);
 END;
 
 CREATE TRIGGER IF NOT EXISTS documents_fts_ad AFTER DELETE ON documents BEGIN
@@ -100,12 +100,12 @@ END;
 CREATE TRIGGER IF NOT EXISTS documents_fts_au AFTER UPDATE ON documents BEGIN
     DELETE FROM documents_fts WHERE rowid = old.rowid;
     INSERT INTO documents_fts(rowid, idShort, id, assetId)
-    VALUES (new.rowid, fold(new.idShort), fold(new.id), fold(new.assetId));
+    VALUES (new.rowid, new.idShort, new.id, new.assetId);
 END;
 
 CREATE TRIGGER IF NOT EXISTS elements_fts_ai AFTER INSERT ON elements BEGIN
     INSERT INTO elements_fts(rowid, id, idShort, stringValue)
-    VALUES (new.rowid, fold(new.id), fold(new.idShort), fold(new.stringValue));
+    VALUES (new.rowid, new.id, new.idShort, new.stringValue);
 END;
 
 CREATE TRIGGER IF NOT EXISTS elements_fts_ad AFTER DELETE ON elements BEGIN
@@ -115,17 +115,9 @@ END;
 CREATE TRIGGER IF NOT EXISTS elements_fts_au AFTER UPDATE ON elements BEGIN
     DELETE FROM elements_fts WHERE rowid = old.rowid;
     INSERT INTO elements_fts(rowid, id, idShort, stringValue)
-    VALUES (new.rowid, fold(new.id), fold(new.idShort), fold(new.stringValue));
+    VALUES (new.rowid, new.id, new.idShort, new.stringValue);
 END;
 `;
-
-function fold(value: SQLInputValue, locale: string = 'en'): string | null {
-    if (!value || typeof value !== 'string') {
-        return null;
-    }
-
-    return value.normalize('NFKC').toLocaleLowerCase(locale);
-}
 
 @singleton()
 export class SqliteIndex implements AASIndex {
@@ -167,8 +159,6 @@ export class SqliteIndex implements AASIndex {
         this.db.exec('PRAGMA journal_mode = WAL');
         this.db.exec('PRAGMA foreign_keys = ON');
         this.db.exec('PRAGMA synchronous = NORMAL');
-
-        this.db.function('fold', { deterministic: true }, (value: SQLInputValue): SQLOutputValue => fold(value));
         this.db.exec(initDatabase);
 
         this.getCountAll = this.db.prepare('SELECT COUNT(*) FROM documents');
@@ -650,24 +640,29 @@ export class SqliteIndex implements AASIndex {
         if (expression) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT d.* FROM documents AS d
-                    WHERE d.endpoint IN ('${endpoints.join("','")}') 
-                        AND (${this.createWhereClause(expression, values, language)}) 
-                    ORDER BY d.endpoint, d.id LIMIT ?`,
+                    `SELECT d.* FROM documents AS d WHERE d.endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') AND (${this.createWhereClause(
+                        expression,
+                        values,
+                        language,
+                    )}) ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT d.* FROM documents AS d 
-                    WHERE ${this.createWhereClause(expression, values, language)} 
-                    ORDER BY d.endpoint, d.id LIMIT ?`,
+                    `SELECT d.* FROM documents AS d WHERE ${this.createWhereClause(
+                        expression,
+                        values,
+                        language,
+                    )} ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             }
         } else {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents 
-                    WHERE endpoint IN ('${endpoints.join("','")}') 
-                    ORDER BY endpoint, id LIMIT ?`,
+                    `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') ORDER BY endpoint, id LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare('SELECT * FROM documents ORDER BY endpoint, id LIMIT ?');
@@ -698,33 +693,33 @@ export class SqliteIndex implements AASIndex {
         if (expression) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT d.* FROM documents AS d 
-                    WHERE d.endpoint IN ('${endpoints.join('","')}') 
-                        AND (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) 
-                        AND (${this.createWhereClause(expression, values, language)}) 
-                    ORDER BY d.endpoint, d.id LIMIT ?`,
+                    `SELECT d.* FROM documents AS d WHERE d.endpoint IN ('${endpoints.join(
+                        '","',
+                    )}') AND (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) AND (${this.createWhereClause(
+                        expression,
+                        values,
+                        language,
+                    )}) ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT d.* FROM documents AS d 
-                    WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) 
-                        AND (${this.createWhereClause(expression, values, language)}) 
-                    ORDER BY d.endpoint, d.id LIMIT ?`,
+                    `SELECT d.* FROM documents AS d WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) AND (${this.createWhereClause(
+                        expression,
+                        values,
+                        language,
+                    )}) ORDER BY d.endpoint, d.id LIMIT ?`,
                 );
             }
         } else {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents 
-                    WHERE endpoint IN ('${endpoints.join("','")}') 
-                        AND (endpoint > ? OR (endpoint = ? AND id >= ?)) 
-                    ORDER BY endpoint, id LIMIT ?`,
+                    `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') AND (endpoint > ? OR (endpoint = ? AND id >= ?)) ORDER BY endpoint, id LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents 
-                    WHERE (endpoint > ? OR (endpoint = ? AND id >= ?)) 
-                    ORDER BY endpoint, id LIMIT ?`,
+                    'SELECT * FROM documents WHERE (endpoint > ? OR (endpoint = ? AND id >= ?)) ORDER BY endpoint, id LIMIT ?',
                 );
             }
         }
@@ -753,33 +748,33 @@ export class SqliteIndex implements AASIndex {
         if (expression) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT d.* FROM documents AS d 
-                    WHERE d.endpoint IN ('${endpoints.join("','")}') 
-                        AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) 
-                        AND (${this.createWhereClause(expression, values, language)}) 
-                    ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d WHERE d.endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (${this.createWhereClause(
+                        expression,
+                        values,
+                        language,
+                    )}) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT d.* FROM documents AS d
-                    WHERE (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?))
-                        AND (${this.createWhereClause(expression, values, language)}) 
-                    ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d WHERE (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (${this.createWhereClause(
+                        expression,
+                        values,
+                        language,
+                    )}) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             }
         } else {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents 
-                    WHERE endpoint IN ('${endpoints.join("','")}') 
-                        AND (endpoint < ? OR (endpoint = ? AND id < ?)) 
-                    ORDER BY endpoint DESC, id DESC LIMIT ?`,
+                    `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') AND (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint DESC, id DESC LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents 
-                    WHERE (endpoint < ? OR (endpoint = ? AND id < ?)) 
-                    ORDER BY endpoint DESC, id DESC LIMIT ?`,
+                    'SELECT * FROM documents WHERE (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint DESC, id DESC LIMIT ?',
                 );
             }
         }
@@ -801,24 +796,29 @@ export class SqliteIndex implements AASIndex {
         if (expression) {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents AS d
-                    WHERE d.endpoint IN ('${endpoints.join("','")}') 
-                        AND (${this.createWhereClause(expression, values, language)}) 
-                    ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d WHERE d.endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') AND (${this.createWhereClause(
+                        expression,
+                        values,
+                        language,
+                    )}) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare(
-                    `SELECT documents.* FROM documents AS d
-                    WHERE ${this.createWhereClause(expression, values, language)} 
-                    ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
+                    `SELECT d.* FROM documents AS d WHERE ${this.createWhereClause(
+                        expression,
+                        values,
+                        language,
+                    )} ORDER BY d.endpoint DESC, d.id DESC LIMIT ?`,
                 );
             }
         } else {
             if (endpoints.length > 0) {
                 sql = this.db.prepare(
-                    `SELECT * FROM documents 
-                    WHERE endpoint IN ('${endpoints.join("','")}') 
-                    ORDER BY endpoint DESC, id DESC LIMIT ?`,
+                    `SELECT * FROM documents WHERE endpoint IN ('${endpoints.join(
+                        "','",
+                    )}') ORDER BY endpoint DESC, id DESC LIMIT ?`,
                 );
             } else {
                 sql = this.db.prepare('SELECT * FROM documents ORDER BY endpoint DESC, id DESC LIMIT ?');
@@ -844,17 +844,21 @@ export class SqliteIndex implements AASIndex {
 
         const query = parser.clause
             .flatMap(item => item.andConditions)
-            .map(word => '"' + String(word).normalize('NFKC').toLocaleLowerCase(language) + '"')
-            .join(' ');
+            .map(word => {
+                const s = String(word);
+                return s.indexOf(' ') < 0 ? s : `"${s}"`;
+            })
+            .join(' OR ');
 
         values.push(query);
         values.push(query);
 
-        return `
-        (EXISTS (SELECT 1 FROM documents_fts df
-            WHERE df.rowid = d.rowid AND documents_fts MATCH ?)
-        OR EXISTS (SELECT 1 FROM elements e
-            JOIN elements_fts ef ON ef.rowid = e.rowid WHERE e.uuid = d.uuid AND elements_fts MATCH ?))`;
+        return (
+            '(EXISTS (SELECT 1 FROM documents_fts df ' +
+            'WHERE df.rowid = d.rowid AND documents_fts MATCH ?) OR ' +
+            'EXISTS (SELECT 1 FROM elements AS e JOIN elements_fts ef ON ef.rowid = e.rowid ' +
+            'WHERE e.uuid = d.uuid AND elements_fts MATCH ?))'
+        );
     }
 
     private traverseEnvironment(documentId: string, env: aas.Environment): void {

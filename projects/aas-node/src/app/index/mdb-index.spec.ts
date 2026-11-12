@@ -12,13 +12,13 @@ import { PoolConnection, ResultSetHeader } from 'mysql2/promise';
 import { AASDocument, AASEndpoint } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
 
-import { DocumentCount, MySqlConceptDescriptionIds, MySqlDocument, MySqlEndpoint, MySqlIndex } from './mysql-index.js';
+import { DocumentCount, MdbConceptDescriptionIds, MdbDocument, MdbEndpoint, MdbIndex } from './mdb-index.js';
 import { Variable } from '../variable.js';
 import { createSpyObj } from '../../test/mocks.js';
 import { container } from 'tsyringe';
 
-function createResults(endpoint: string, count: number, start: number = 1): MySqlDocument[] {
-    const results: MySqlDocument[] = [];
+function createResults(endpoint: string, count: number, start: number = 1): MdbDocument[] {
+    const results: MdbDocument[] = [];
     for (let i = start, n = start + count; i < n; i++) {
         {
             results.push({
@@ -38,7 +38,7 @@ function createResults(endpoint: string, count: number, start: number = 1): MySq
     return results;
 }
 
-function toDocuments(results: MySqlDocument[]): AASDocument[] {
+function toDocuments(results: MdbDocument[]): AASDocument[] {
     return results.map(
         result =>
             ({
@@ -54,8 +54,8 @@ function toDocuments(results: MySqlDocument[]): AASDocument[] {
     );
 }
 
-describe('MySqlIndex', () => {
-    let index: MySqlIndex;
+describe('MdbIndex', () => {
+    let index: MdbIndex;
     let logger: Mocked<Logger>;
     let variable: Mocked<Variable>;
     let connection: Mocked<PoolConnection>;
@@ -72,8 +72,8 @@ describe('MySqlIndex', () => {
         container.clearInstances();
         container.registerInstance(LOGGER, logger);
         container.registerInstance(Variable, variable);
-        container.registerSingleton(MySqlIndex);
-        index = container.resolve(MySqlIndex);
+        container.registerSingleton(MdbIndex);
+        index = container.resolve(MdbIndex);
         index['getConnection'] = vi.fn().mockResolvedValue(connection);
     });
 
@@ -129,7 +129,7 @@ describe('MySqlIndex', () => {
 
     describe('getEndpoints', () => {
         it('returns all registered endpoints', async () => {
-            const result: MySqlEndpoint[] = [
+            const result: MdbEndpoint[] = [
                 {
                     constructor: { name: 'RowDataPacket' },
                     name: 'Endpoint 1',
@@ -172,7 +172,7 @@ describe('MySqlIndex', () => {
 
     describe('getEndpoint', () => {
         it('returns the endpoint with the specified name', async () => {
-            const result: MySqlEndpoint = {
+            const result: MdbEndpoint = {
                 constructor: { name: 'RowDataPacket' },
                 name: 'Endpoint 1',
                 url: 'http://endpoint1.com',
@@ -202,7 +202,7 @@ describe('MySqlIndex', () => {
 
     describe('findEndpoint', () => {
         it('indicates that Endpoint 1 exists', async () => {
-            const result: MySqlEndpoint = {
+            const result: MdbEndpoint = {
                 constructor: { name: 'RowDataPacket' },
                 name: 'Endpoint 1',
                 url: 'http://endpoint1.com',
@@ -248,7 +248,7 @@ describe('MySqlIndex', () => {
                 type: 'AAS_API',
             };
 
-            const result: MySqlEndpoint = {
+            const result: MdbEndpoint = {
                 constructor: { name: 'RowDataPacket' },
                 name: 'Endpoint 1',
                 url: 'http://endpoint1.com',
@@ -293,7 +293,7 @@ describe('MySqlIndex', () => {
                         }
 
                         if (sql === 'SELECT uuid FROM documents WHERE endpoint = ?;') {
-                            return resolve([[{ uuid: 'uuid1' } as MySqlDocument], []]);
+                            return resolve([[{ uuid: 'uuid1' } as MdbDocument], []]);
                         }
 
                         if (sql === 'DELETE FROM documents WHERE endpoint = ?;') {
@@ -318,7 +318,7 @@ describe('MySqlIndex', () => {
     });
 
     describe('getDocuments', () => {
-        let data: MySqlDocument[];
+        let data: MdbDocument[];
 
         beforeEach(() => {
             data = createResults('Endpoint 1', 25);
@@ -358,7 +358,7 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    'SELECT * FROM documents WHERE (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;',
+                    'SELECT * FROM documents WHERE (endpoint > ? OR (endpoint = ? AND id >= ?)) ORDER BY endpoint, id LIMIT ?;',
                     ['Endpoint 1', 'Endpoint 1', 'http://document/aas-11', 11],
                 );
 
@@ -376,7 +376,7 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    'SELECT * FROM documents WHERE (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;',
+                    'SELECT * FROM documents WHERE (endpoint > ? OR (endpoint = ? AND id >= ?)) ORDER BY endpoint, id LIMIT ?;',
                     ['Endpoint 1', 'Endpoint 1', 'http://document/aas-21', 11],
                 );
             });
@@ -480,7 +480,7 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;",
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint > ? OR (endpoint = ? AND id >= ?)) ORDER BY endpoint, id LIMIT ?;",
                     ['Endpoint 1', 'Endpoint 1', 'http://document/aas-11', 11],
                 );
 
@@ -500,7 +500,7 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint > ? OR (endpoint = ? AND id > ?)) ORDER BY endpoint, id LIMIT ?;",
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint > ? OR (endpoint = ? AND id >= ?)) ORDER BY endpoint, id LIMIT ?;",
                     ['Endpoint 1', 'Endpoint 1', 'http://document/aas-21', 11],
                 );
             });
@@ -541,7 +541,7 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint, id DESC LIMIT ?;",
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint DESC, id DESC LIMIT ?;",
                     ['Endpoint 1', 'Endpoint 1', 'http://document/aas-16', 11],
                 );
 
@@ -562,7 +562,7 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint, id DESC LIMIT ?;",
+                    "SELECT * FROM documents WHERE endpoint IN ('Endpoint 1') AND (endpoint < ? OR (endpoint = ? AND id < ?)) ORDER BY endpoint DESC, id DESC LIMIT ?;",
                     ['Endpoint 1', 'Endpoint 1', 'http://document/aas-6', 11],
                 );
             });
@@ -608,7 +608,7 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT d.* FROM documents AS d WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?))) ORDER BY d.endpoint, d.id LIMIT ?;",
+                    "SELECT d.* FROM documents AS d WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) AND (EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?))) ORDER BY d.endpoint, d.id LIMIT ?;",
                     ['Endpoint 1', 'Endpoint 1', 'http://document/aas-11', '%torque%', 114.7, 11],
                 );
 
@@ -630,7 +630,7 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT d.* FROM documents AS d WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?))) ORDER BY d.endpoint, d.id LIMIT ?;",
+                    "SELECT d.* FROM documents AS d WHERE (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) AND (EXISTS (SELECT 1 FROM elements AS e WHERE d.uuid = e.uuid AND (e.modelType = 'prop' AND e.idShort LIKE ? AND e.numberValue = ?))) ORDER BY d.endpoint, d.id LIMIT ?;",
                     ['Endpoint 1', 'Endpoint 1', 'http://document/aas-21', '%torque%', 114.7, 11],
                 );
             });
@@ -727,7 +727,7 @@ describe('MySqlIndex', () => {
                         '(MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS ' +
                         '(SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) ' +
                         'AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint, d.id LIMIT ?;',
-                    ['"hello" "world"', '"hello" "world"', 11],
+                    ['hello world', 'hello world', 11],
                 );
 
                 connection.query.mockReset();
@@ -751,8 +751,8 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint, d.id LIMIT ?;",
-                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-11', '"hello" "world"', '"hello" "world"', 11],
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint, d.id LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-11', 'hello world', 'hello world', 11],
                 );
 
                 connection.query.mockReset();
@@ -773,8 +773,8 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (d.endpoint > ? OR (d.endpoint = ? AND d.id > ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint, d.id LIMIT ?;",
-                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-21', '"hello" "world"', '"hello" "world"', 11],
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (d.endpoint > ? OR (d.endpoint = ? AND d.id >= ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint, d.id LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-21', 'hello world', 'hello world', 11],
                 );
             });
 
@@ -793,7 +793,7 @@ describe('MySqlIndex', () => {
 
                 expect(connection.query).toHaveBeenCalledWith(
                     "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
-                    ['"hello" "world"', '"hello" "world"', 11],
+                    ['hello world', 'hello world', 11],
                 );
 
                 connection.query.mockReset();
@@ -820,8 +820,8 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT d.* FROM documents AS d WHERE documents.endpoint IN ('Endpoint 1') AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
-                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-16', '"hello" "world"', '"hello" "world"', 11],
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-16', 'hello world', 'hello world', 11],
                 );
 
                 connection.query.mockReset();
@@ -845,8 +845,8 @@ describe('MySqlIndex', () => {
                 });
 
                 expect(connection.query).toHaveBeenCalledWith(
-                    "SELECT d.* FROM documents AS d WHERE documents.endpoint IN ('Endpoint 1') AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
-                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-6', '"hello" "world"', '"hello" "world"', 11],
+                    "SELECT d.* FROM documents AS d WHERE d.endpoint IN ('Endpoint 1') AND (d.endpoint < ? OR (d.endpoint = ? AND d.id < ?)) AND (MATCH(d.idShort, d.id, d.assetId) AGAINST(? IN BOOLEAN MODE) OR EXISTS (SELECT 1 FROM elements AS e WHERE e.uuid = d.uuid AND MATCH(e.id, e.idShort, e.stringValue) AGAINST(? IN BOOLEAN MODE))) ORDER BY d.endpoint DESC, d.id DESC LIMIT ?;",
+                    ['Endpoint 1', 'Endpoint 1', 'http://document/aas-6', 'hello world', 'hello world', 11],
                 );
             });
         });
@@ -854,7 +854,7 @@ describe('MySqlIndex', () => {
 
     describe('getEndpointDocuments', () => {
         it('selects the first page', async () => {
-            const results: MySqlDocument[] = [];
+            const results: MdbDocument[] = [];
             connection.query.mockResolvedValue([results, []]);
             await expect(index.getEndpointDocuments('Endpoint 1', undefined, 10)).resolves.toEqual({
                 paging_metadata: { cursor: undefined },
@@ -875,7 +875,7 @@ describe('MySqlIndex', () => {
                     new Promise(resolve => {
                         const query = String(sql);
                         if (query === 'SELECT uuid FROM documents WHERE endpoint = ? AND id = ?;') {
-                            return resolve([[{ uuid: '1' } as MySqlDocument], []]);
+                            return resolve([[{ uuid: '1' } as MdbDocument], []]);
                         }
 
                         return resolve([[], []]);
@@ -936,7 +936,7 @@ describe('MySqlIndex', () => {
 
     describe('find', () => {
         it('finds a document in the index', async () => {
-            const result: MySqlDocument = {
+            const result: MdbDocument = {
                 constructor: { name: 'RowDataPacket' },
                 uuid: '1',
                 id: 'http://document/aas',
@@ -968,7 +968,7 @@ describe('MySqlIndex', () => {
                     new Promise(resolve => {
                         const query = String(sql);
                         if (query === 'SELECT uuid FROM documents WHERE endpoint = ? AND id = ?;') {
-                            return resolve([[{ uuid: '1' } as MySqlDocument], []]);
+                            return resolve([[{ uuid: '1' } as MdbDocument], []]);
                         }
 
                         if (query === 'DELETE FROM elements WHERE uuid = ?;') {
@@ -1005,7 +1005,7 @@ describe('MySqlIndex', () => {
         });
 
         it('clears all endpoint-scoped index data', async () => {
-            const document = { uuid: 'uuid1' } as MySqlDocument;
+            const document = { uuid: 'uuid1' } as MdbDocument;
             connection.query.mockImplementation((sql: string | object) => {
                 if (sql === 'SELECT uuid FROM documents WHERE endpoint = ?;') {
                     return Promise.resolve([[document], []]);
@@ -1031,7 +1031,7 @@ describe('MySqlIndex', () => {
         it('gets the identifiers of the concept descriptions that belongs to a submodel', async () => {
             const result = {
                 conceptDescriptionIds: JSON.stringify(['concept-description-1', 'concept-description-2']),
-            } as MySqlConceptDescriptionIds;
+            } as MdbConceptDescriptionIds;
 
             connection.query.mockResolvedValue([[result], []]);
             await expect(index.getSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1')).resolves.toEqual([
@@ -1054,7 +1054,7 @@ describe('MySqlIndex', () => {
         it('updates the identifiers of the concept descriptions that belongs to a submodel', async () => {
             const result = {
                 conceptDescriptionIds: JSON.stringify(['concept-description-1']),
-            } as MySqlConceptDescriptionIds;
+            } as MdbConceptDescriptionIds;
 
             connection.query.mockResolvedValue([[result], []]);
             await index.setSubmodelConceptDescriptionIds('Endpoint 1', 'submodel-1', ['concept-description-2']);

@@ -68,17 +68,17 @@ export class IndexChange implements OnDestroy {
     }
 
     /**
-     * Observable that emits the current count of documents in the index.
+     * The current count of documents in the index.
      */
     public readonly documentCount = this._documentCount.value.asReadonly();
 
     /**
-     * Observable that emits the current count of endpoints in the index.
+     * The current count of endpoints in the index.
      */
     public readonly endpointCount = this._endpointCount.value.asReadonly();
 
     /**
-     * Observable that emits the count of changed documents since the last reset.
+     * The count of changed documents since the last reset.
      */
     public readonly changedDocuments = this._changedDocuments.asReadonly();
 
