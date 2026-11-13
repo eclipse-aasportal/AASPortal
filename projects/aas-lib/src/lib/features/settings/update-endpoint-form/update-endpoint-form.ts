@@ -49,6 +49,7 @@ interface EndpointItem {
 
 interface UpdateEndpointModel {
     endpoint: string;
+    scheduleTypes: AASEndpointScheduleType[];
     items: EndpointItem[];
 }
 
@@ -66,6 +67,9 @@ function ItemSchema(item: SchemaPathTree<EndpointItem>): void {
         }
 
         return null;
+    });
+    required(item.schedule, {
+        message: 'UpdateEndpointForm.SCHEDULE_REQUIRED',
     });
     min(item.minutes, 0, { message: 'UpdateEndpointForm.ERROR_MINUTES' });
     max(item.minutes, 59, { message: 'UpdateEndpointForm.ERROR_MINUTES' });
@@ -105,6 +109,7 @@ export class UpdateEndpointForm {
 
     private readonly model = signal<UpdateEndpointModel>({
         endpoint: '',
+        scheduleTypes: ['disabled', 'manual', 'once', 'every'],
         items: [],
     });
 
@@ -119,7 +124,7 @@ export class UpdateEndpointForm {
                 .value()
                 .map(endpoint => {
                     const header = endpoint.headers ? Object.entries(endpoint.headers).at(0) : undefined;
-                    const schedule = endpoint.schedule ? endpoint.schedule.type : 'every';
+                    const schedule = endpoint.schedule?.type ?? 'every';
                     let hours = 0;
                     let minutes = 0;
                     if (schedule === 'every') {

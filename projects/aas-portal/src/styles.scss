@@ -15,7 +15,7 @@ $enable-cssgrid: true;
 $primary: #009374;
 $secondary: #19001e;
 $info: #1f82c0;
-$danger: #f0a091;
+$danger: rgb(187, 0, 86);
 
 $enable-negative-margins: true;
 
@@ -23,7 +23,7 @@ $enable-negative-margins: true;
 @import "../../../node_modules/bootstrap/scss/variables";
 @import "../../../node_modules/bootstrap/scss/variables-dark";
 
-// 4. Include any default map overrides here
+// 4. Include any default map overrides here 172, 39, 87
 $custom-colors: (
         "fhg-abc": #33B8CA,
         "fhg-def": #B1C800,

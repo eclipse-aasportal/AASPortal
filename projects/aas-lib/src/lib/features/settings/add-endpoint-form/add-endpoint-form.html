@@ -50,78 +50,39 @@
             />
         </div>
         <fhg-form-error [field]="form.url()"></fhg-form-error>
-        <label class="form-lable mt-3" for="schedule-options" translate="AddEndpointForm.SCHEDULE"></label>
-        <div class="border border-light-subtle rounded p-2 mb-2" id="schedule-options">
-            <div class="form-check form-check-inline">
-                <input
-                    class="form-check-input"
-                    type="radio"
-                    id="AID_SCHEDULE_DISABLED"
-                    value="disabled"
-                    [formField]="form.schedule"
-                />
-                <label
-                    class="form-check-label"
-                    for="AID_SCHEDULE_DISABLED"
-                    translate="AddEndpointForm.DISABLED"
-                ></label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input
-                    class="form-check-input"
-                    type="radio"
-                    id="AID_SCHEDULE_MANUAL"
-                    value="manual"
-                    [formField]="form.schedule"
-                />
-                <label class="form-check-label" for="AID_SCHEDULE_MANUAL" translate="AddEndpointForm.MANUAL"></label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input
-                    class="form-check-input"
-                    type="radio"
-                    id="AID_SCHEDULE_ONCE"
-                    value="once"
-                    [formField]="form.schedule"
-                />
-                <label class="form-check-label" for="AID_SCHEDULE_ONCE" translate="AddEndpointForm.ONCE"></label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input
-                    class="form-check-input"
-                    type="radio"
-                    id="AID_SCHEDULE_EVERY"
-                    value="every"
-                    [formField]="form.schedule"
-                />
-                <label class="form-check-label" for="AID_SCHEDULE_EVERY" translate="AddEndpointForm.EVERY"></label>
-            </div>
-            @if (form.schedule().value() === 'every') {
-                <div class="input-group mt-3">
-                    <input
-                        type="number"
-                        class="form-control awp-number-input"
-                        id="AID_SCHEDULE_HOURS"
-                        aria-label="Hours"
-                        [formField]="form.hours"
-                    />
-                    <span class="input-group-text" translate="AddEndpointForm.HOURS"></span>
-                    <input
-                        type="number"
-                        class="form-control awp-number-input"
-                        id="AID_SCHEDULE_MINUTES"
-                        aria-label="Minutes"
-                        [formField]="form.minutes"
-                    />
-                    <span class="input-group-text" translate="AddEndpointForm.MINUTES"></span>
-                </div>
-                <fhg-form-error [field]="form.hours()"></fhg-form-error>
-                <fhg-form-error [field]="form.minutes()"></fhg-form-error>
+        <label class="form-lable mt-3" for="AID_SELECT_SCHEDULE" translate="AddEndpointForm.SCHEDULE"></label>
+        <select id="AID_SELECT_SCHEDULE" class="form-select" [formField]="form.schedule">
+            @for (option of form.scheduleTypes().value(); track option) {
+                <option [value]="option">
+                    {{ 'UpdateEndpointForm.' + option.toUpperCase() | translate }}
+                </option>
             }
-        </div>
+        </select>
+        @if (form.schedule().value() === 'every') {
+            <div class="input-group mt-2">
+                <input
+                    type="number"
+                    class="form-control awp-number-input"
+                    id="AID_SCHEDULE_HOURS"
+                    aria-label="Hours"
+                    [formField]="form.hours"
+                />
+                <span class="input-group-text" translate="AddEndpointForm.HOURS"></span>
+                <input
+                    type="number"
+                    class="form-control awp-number-input"
+                    id="AID_SCHEDULE_MINUTES"
+                    aria-label="Minutes"
+                    [formField]="form.minutes"
+                />
+                <span class="input-group-text" translate="AddEndpointForm.MINUTES"></span>
+            </div>
+            <fhg-form-error [field]="form.hours()"></fhg-form-error>
+            <fhg-form-error [field]="form.minutes()"></fhg-form-error>
+        }
         @if (this.form.type().value() === 'AAS_API') {
             <label
-                class="form-lable mt-2"
+                class="form-lable mt-3"
                 for="AID_SELECT_AUTHORIZATION"
                 translate="AddEndpointForm.AUTHORIZATION"
             ></label>
@@ -167,6 +128,11 @@
             [disabled]="form().invalid()"
             translate="AddEndpointForm.OK"
         ></button>
-        <button type="button" class="btn btn-outline-secondary" (click)="cancel()" translate="AddEndpointForm.CANCEL"></button>
+        <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="cancel()"
+            translate="AddEndpointForm.CANCEL"
+        ></button>
     </div>
 </form>

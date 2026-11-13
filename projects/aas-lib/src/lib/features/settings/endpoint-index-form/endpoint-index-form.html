@@ -48,7 +48,9 @@
                                 </button>
                             </div>
                         } @else {
-                            <div></div>
+                            <div class="justify-content-end d-flex text-info">
+                                <i class="bi bi-stopwatch"></i>
+                            </div>
                         }
                         <button
                             type="button"
@@ -100,7 +102,7 @@
             [openDelay]="300"
             placement="top"
             container="body"
-            (click)="clearIndex()"
+            (click)="clearIndex().subscribe()"
         >
             <i class="bi bi-eraser-fill"></i>
             <span class="fw-light" style="font-size: 15px">Clear Entire Index</span>

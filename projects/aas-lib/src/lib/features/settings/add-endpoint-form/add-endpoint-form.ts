@@ -26,6 +26,7 @@ interface EndpointModel {
     key: string;
     value: string;
     token: string;
+    scheduleTypes: AASEndpointScheduleType[];
     schedule: AASEndpointScheduleType;
     hours: number;
     minutes: number;
@@ -52,6 +53,7 @@ export class AddEndpointForm {
         key: '',
         value: '',
         token: '',
+        scheduleTypes: ['disabled', 'manual', 'once', 'every'],
         schedule: 'every',
         hours: 1,
         minutes: 0,
