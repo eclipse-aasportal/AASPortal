@@ -89,7 +89,7 @@
                 ></label>
                 <select id="AID_SELECT_AUTHORIZATION" class="form-select" [formField]="item.authorization">
                     @for (auth of authorizations(); track auth) {
-                        <option [value]="item">{{ auth | translate }}</option>
+                        <option [value]="auth">{{ auth | translate }}</option>
                     }
                 </select>
                 <div class="row gx-3 mt-2">

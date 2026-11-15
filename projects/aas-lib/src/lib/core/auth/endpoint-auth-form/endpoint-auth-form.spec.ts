@@ -17,7 +17,7 @@ import { EndpointAuthForm } from './endpoint-auth-form';
 import { createSpyObj } from '../../../../test/mocks';
 import { FormError } from '../../../shared/components/form-error/form-error';
 
-describe.skip('EndpointAuthForm', () => {
+describe('EndpointAuthForm', () => {
     let component: EndpointAuthForm;
     let fixture: ComponentFixture<EndpointAuthForm>;
     let activeModal: Mocked<NgbActiveModal>;
@@ -79,6 +79,8 @@ describe.skip('EndpointAuthForm', () => {
             },
         ] satisfies AASEndpoint[]);
 
+        fixture.detectChanges();
+        httpController.verify();
         await TestBed.inject(ApplicationRef).whenStable();
         endpointSelect = fixture.debugElement.nativeElement.querySelector('#AID_SELECT_ENDPOINT');
         authSelect = fixture.debugElement.nativeElement.querySelector('#AID_SELECT_AUTHORIZATION');

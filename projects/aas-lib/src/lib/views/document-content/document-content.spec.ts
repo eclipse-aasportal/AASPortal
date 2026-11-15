@@ -176,7 +176,7 @@ describe('DocumentContent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('shows the document version', () => {
+    it('does not report a version when the document version is missing', () => {
         expect(component.version()).toBeUndefined();
     });
 
@@ -203,7 +203,7 @@ describe('DocumentContent', () => {
         });
     });
 
-    describe.skip('download', () => {
+    describe('download', () => {
         beforeEach(() => {
             vi.useFakeTimers();
             vi.stubGlobal('URL', URLMock);
@@ -218,7 +218,10 @@ describe('DocumentContent', () => {
         it('does nothing when there is no document content', () => {
             const dom = TestBed.inject(DOCUMENT) as Document;
             const createElSpy = vi.spyOn(dom, 'createElement');
+            vi.spyOn(component, 'document').mockReturnValue({ ...sampleDocument, content: undefined });
+
             component.download();
+
             expect(createElSpy).not.toHaveBeenCalled();
             createElSpy.mockRestore();
         });
@@ -255,7 +258,10 @@ describe('DocumentContent', () => {
             });
 
             const notify = TestBed.inject(NotifyService) as Mocked<NotifyService>;
+            vi.spyOn(component, 'document').mockReturnValue(badDoc);
+
             component.download();
+
             expect(notify.error).toHaveBeenCalled();
         });
 

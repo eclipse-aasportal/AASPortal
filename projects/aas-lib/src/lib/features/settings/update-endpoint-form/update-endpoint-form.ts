@@ -209,14 +209,9 @@ export class UpdateEndpointForm {
             return;
         }
 
-        // The confirm-by-typing-the-name prompt above is already the user's explicit confirmation,
-        // so the endpoint is removed immediately here instead of only being staged for the separate
-        // "OK" button -- previously, deleting only spliced the row out of this modal's local state,
-        // so dismissing the dialog (or simply forgetting to click "OK" afterward) silently discarded
-        // the deletion and the endpoint reappeared after a reload.
         this._deleting.set(name);
         try {
-            await firstValueFrom(this.api.removeEndpoint(name));
+            await firstValueFrom(this.api.deleteEndpoint(name));
             this.notify.info('Settings.AAS_ENDPOINT_DELETED', { endpoint: name });
             this._endpoints.reload();
         } catch (error) {
@@ -318,6 +313,11 @@ export class UpdateEndpointForm {
         }
 
         if (existing.url !== endpoint.url || existing.type !== endpoint.type) {
+            return true;
+        }
+
+        const existingVersion = existing.type === 'AAS_API' ? (existing.version ?? 'v3') : undefined;
+        if (existingVersion !== endpoint.version) {
             return true;
         }
 

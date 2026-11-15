@@ -221,7 +221,7 @@ describe('EndpointsApi', () => {
         it('should DELETE /api/v1/endpoints/:name', async () => {
             const endpointName = 'endpoint5';
             const encodedName = 'ZW5kcG9pbnQ1'; // encodeBase64Url('endpoint5')
-            const promise = lastValueFrom(service.removeEndpoint(endpointName));
+            const promise = lastValueFrom(service.deleteEndpoint(endpointName));
             const req = httpTestingController.expectOne(`/api/v1/endpoints/${encodedName}`);
             expect(req.request.method).toBe('DELETE');
             req.flush(null);

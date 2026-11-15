@@ -102,6 +102,7 @@ describe('DigitalProductPassportView', () => {
         );
 
         api.getDocument.mockReturnValue(of(sample as AASDocument));
+        start.save.mockReturnValue(of(undefined));
 
         await TestBed.configureTestingModule({
             providers: [
@@ -196,6 +197,35 @@ describe('DigitalProductPassportView', () => {
         const fixture = TestBed.createComponent(DigitalProductPassportView);
         const component = fixture.componentInstance;
         fixture.detectChanges();
-        expect(component.hazardSymbol).toBeTruthy();
+        expect(component.hazardSymbol()).toBe('/assets/resources/image.svg');
+    });
+
+    it('should show the empty state when no matching submodels are available', () => {
+        api.getDocument.mockReturnValue(
+            of({
+                ...sample,
+                content: { ...sample.content, submodels: [] },
+            } as AASDocument),
+        );
+
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.querySelector('.alert')).toBeTruthy();
+    });
+
+    it('should add the document to favorites', () => {
+        const fixture = TestBed.createComponent(DigitalProductPassportView);
+        const component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        expect(component.addToStart()).toBeTruthy();
+        expect(start.add).toHaveBeenCalledWith('Favorite', `DPP#${sample.endpoint}#${sample.id}`, {
+            endpoint: sample.endpoint,
+            id: sample.id,
+            caption: 'DigitalProductPassport.CAPTION',
+            href: `/view/DigitalProductPassport;endpoint=${encodeBase64Url(sample.endpoint)};id=${encodeBase64Url(sample.id)}`,
+        });
+        expect(start.save).toHaveBeenCalledOnce();
     });
 });
