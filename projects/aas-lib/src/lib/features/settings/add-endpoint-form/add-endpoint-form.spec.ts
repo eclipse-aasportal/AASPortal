@@ -11,11 +11,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ApplicationRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { AASEndpoint } from 'aas-core';
 
 import { AddEndpointForm } from './add-endpoint-form';
-import { createSpyObj, FakeLoader } from '../../../../test/mocks';
+import { createSpyObj } from '../../../../test/mocks';
 import { FormError } from '../../../shared/components/form-error/form-error';
 
 describe('AddEndpointForm', () => {
