@@ -32,6 +32,7 @@
                     </div>
 
                     @if (item.status === 'idle') {
+                        <div></div>
                         @if (item.schedule === 'manual' || item.schedule === 'once') {
                             <div class="justify-content-end d-flex">
                                 <button
@@ -48,7 +49,7 @@
                                 </button>
                             </div>
                         } @else {
-                            <div class="justify-content-end d-flex text-info">
+                            <div class="justify-content-center d-flex text-info">
                                 <i class="bi bi-stopwatch"></i>
                             </div>
                         }
@@ -75,6 +76,8 @@
                                 <ngb-progressbar class="w-100" [showValue]="true" type="info" [value]="item.progress" />
                             </div>
                         }
+
+                        <div></div>
 
                         <button
                             type="button"
