@@ -212,14 +212,14 @@ describe('EndpointController', () => {
         });
     });
 
-    describe('removeEndpoint', () => {
+    describe('deleteEndpoint', () => {
         it('removes endpoint, clears task and sends notification', async () => {
             index.getEndpoint.mockResolvedValue(endpoint);
             index.deleteEndpoint.mockResolvedValue(true);
             const task = taskHandler.createTask(endpoint.name, provider, 'ScanEndpoint');
             const deleteTaskSpy = vi.spyOn(taskHandler, 'delete');
 
-            await provider.removeEndpoint(endpoint.name);
+            await provider.deleteEndpoint(endpoint.name);
 
             expect(index.deleteEndpoint).toHaveBeenCalledWith(endpoint.name);
             expect(deleteTaskSpy).toHaveBeenCalledWith(task.id);

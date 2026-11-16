@@ -125,7 +125,7 @@ export class EndpointsController extends Controller {
     @Security('oauth2', ['admin'])
     @OperationId('DeleteEndpoint')
     public async deleteEndpoint(@Path() name: string): Promise<void> {
-        await this.provider.removeEndpoint(decodeBase64Url(name));
+        await this.provider.deleteEndpoint(decodeBase64Url(name));
     }
 
     /**

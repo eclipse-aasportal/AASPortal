@@ -134,10 +134,10 @@ export class EndpointProvider implements Disposable {
     }
 
     /**
-     * Removes the endpoint with the specified name.
-     * @param endpointName The name of the registry to remove.
+     * Deletes the endpoint with the specified name.
+     * @param endpointName The name of the endpoint to delete.
      */
-    public async removeEndpoint(endpointName: string): Promise<void> {
+    public async deleteEndpoint(endpointName: string): Promise<void> {
         const endpoint = await this.index.getEndpoint(endpointName);
         if (endpoint) {
             await this.index.deleteEndpoint(endpoint.name);

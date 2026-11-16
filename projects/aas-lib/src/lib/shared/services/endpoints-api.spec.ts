@@ -217,7 +217,7 @@ describe('EndpointsApi', () => {
         });
     });
 
-    describe('removeEndpoint', () => {
+    describe('deleteEndpoint', () => {
         it('should DELETE /api/v1/endpoints/:name', async () => {
             const endpointName = 'endpoint5';
             const encodedName = 'ZW5kcG9pbnQ1'; // encodeBase64Url('endpoint5')
