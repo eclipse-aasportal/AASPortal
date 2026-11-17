@@ -44,6 +44,7 @@ describe('SettingsComponent', () => {
 
         fixture = TestBed.createComponent(SettingsComponent);
         component = fixture.componentInstance;
+        fixture.detectChanges();
         await fixture.whenStable();
     });
 

@@ -8,16 +8,16 @@
 
 import { container, singleton } from 'tsyringe';
 import mongoose from 'mongoose';
+import { AASEndpointAuth, UserRole } from 'aas-core';
 import { Logger, LOGGER, MongoDBConnectionProvider } from 'aas-package';
 
 import { Rights, UserRights, UserRightsStore } from './user-rights-store.js';
 import { Variable } from '../variable.js';
-import { AASEndpointAuth, UserRole } from 'aas-core';
 
 interface UserRightsDocument extends UserRights, mongoose.Document {}
 
 @singleton()
-export class MongoDBUserRightsStore extends UserRightsStore {
+export class MongoDBUserRightsStore implements UserRightsStore {
     private readonly logger: Logger = container.resolve(LOGGER);
     private readonly variable = container.resolve(Variable);
     private readonly connectionProvider = container.resolve(MongoDBConnectionProvider);
@@ -29,16 +29,16 @@ export class MongoDBUserRightsStore extends UserRightsStore {
     });
 
     public constructor() {
-        super();
-
         this.model = this.connectionProvider
             .getConnection(this.variable.USER_RIGHTS_STORE)
             .model<UserRightsDocument>('UserRights', this.schema);
 
         this.logger.info(`Using MongoDB user rights store ${this.variable.USER_RIGHTS_STORE}.`);
+
+        this.setupDefaultAdmin();
     }
 
-    public override async getRole(userId: string): Promise<UserRole> {
+    public async getRole(userId: string): Promise<UserRole> {
         const value = await this.model.findOne({ id: userId }).exec();
         if (!value) {
             return 'viewer';
@@ -47,7 +47,7 @@ export class MongoDBUserRightsStore extends UserRightsStore {
         return value.role;
     }
 
-    public override async getEndpoints(userId: string): Promise<AASEndpointAuth[]> {
+    public async getEndpoints(userId: string): Promise<AASEndpointAuth[]> {
         const value = await this.model.findOne({ id: userId }).exec();
         if (!value) {
             return [];
@@ -56,11 +56,11 @@ export class MongoDBUserRightsStore extends UserRightsStore {
         return value.endpoints;
     }
 
-    public override async add(userId: string, rights: Rights): Promise<void> {
+    public async add(userId: string, rights: Rights): Promise<void> {
         await new this.model({ id: userId, ...rights }).save();
     }
 
-    public override async update(userId: string, rights: Partial<Rights>): Promise<void> {
+    public async update(userId: string, rights: Partial<Rights>): Promise<void> {
         if (rights.role !== undefined) {
             await this.model.updateOne({ id: userId }, { role: rights.role }).exec();
         }
@@ -70,7 +70,20 @@ export class MongoDBUserRightsStore extends UserRightsStore {
         }
     }
 
-    public override async delete(userId: string): Promise<void> {
+    public async delete(userId: string): Promise<void> {
         await this.model.deleteOne({ id: userId }).exec();
+    }
+
+    private async setupDefaultAdmin(): Promise<void> {
+        const adminId = this.variable.DEFAULT_ADMIN;
+        if (!adminId) {
+            return;
+        }
+
+        const value = await this.model.findOne({ id: adminId }).exec();
+        if (!value) {
+            await new this.model({ id: adminId, role: 'admin', endpoints: [] }).save();
+            this.logger.info(`"${adminId}" is set up as default admin.`);
+        }
     }
 }

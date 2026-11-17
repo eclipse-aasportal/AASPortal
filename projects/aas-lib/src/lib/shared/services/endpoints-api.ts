@@ -52,10 +52,10 @@ export class EndpointsApi {
     }
 
     /**
-     * Removes the specified endpoint.
+     * Deletes the specified endpoint.
      * @param name The name of the endpoint.
      */
-    public removeEndpoint(name: string): Observable<void> {
+    public deleteEndpoint(name: string): Observable<void> {
         return this.http.delete<void>(`/api/v1/endpoints/${encodeBase64Url(name)}`);
     }
 

@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 import { httpResource } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { form, FormField, max, min, required, validate } from '@angular/forms/signals';
 import { NgbActiveModal, NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
@@ -26,6 +26,7 @@ interface EndpointModel {
     key: string;
     value: string;
     token: string;
+    scheduleTypes: AASEndpointScheduleType[];
     schedule: AASEndpointScheduleType;
     hours: number;
     minutes: number;
@@ -44,8 +45,6 @@ export class AddEndpointForm {
         parse: values => (values as AASEndpoint[]).map(value => value.name).sort(),
     });
 
-    private readonly _template = signal<EndpointTemplate>(this._templates()[0]);
-
     private readonly model = signal<EndpointModel>({
         name: '',
         url: '',
@@ -54,6 +53,7 @@ export class AddEndpointForm {
         key: '',
         value: '',
         token: '',
+        scheduleTypes: ['disabled', 'manual', 'once', 'every'],
         schedule: 'every',
         hours: 1,
         minutes: 0,
@@ -108,10 +108,14 @@ export class AddEndpointForm {
 
     public readonly templates = this._templates.asReadonly();
 
-    public readonly template = this._template.asReadonly();
+    public readonly placeholder = computed(() => {
+        const type = this.form.type().value();
+        const template = this.templates().find(item => item.type === type);
+        return template ? template.placeholder : '';
+    });
 
     public selectTemplate(type: AASEndpointType): void {
-        this._template.set(this._templates().find(item => item.type === type)!);
+        this.form.type().value.set(type);
     }
 
     public submit(event: Event): void {
@@ -125,7 +129,7 @@ export class AddEndpointForm {
         const endpoint: AASEndpoint = {
             name: model.name,
             url: url.href,
-            type: this.template().type,
+            type: model.type,
             version,
         };
 

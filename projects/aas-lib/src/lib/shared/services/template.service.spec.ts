@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -19,10 +19,17 @@ import { createSpyObj, mockFetchJson, restoreFetch } from '../../../test/mocks';
 describe('TemplateService', () => {
     let service: TemplateService;
     let template: TemplateDescriptor;
+    let httpController: HttpTestingController;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        template = {
+            name: 'submodel-template',
+            url: 'http://read/the/template/file.json',
+        };
+
         TestBed.configureTestingModule({
             providers: [
+                TemplateService,
                 {
                     provide: NotifyService,
                     useValue: createSpyObj<NotifyService>(['error']),
@@ -32,14 +39,16 @@ describe('TemplateService', () => {
         });
 
         service = TestBed.inject(TemplateService);
-        template = {
-            name: 'submodel-template',
-            url: 'http://read/the/template/file.json',
-        };
+
+        httpController = TestBed.inject(HttpTestingController);
+        TestBed.tick();
+        httpController.expectOne('/assets/published-idta-templates.json').flush([template]);
+        await TestBed.inject(ApplicationRef).whenStable();
     });
 
     afterEach(() => {
-        vitest.clearAllMocks();
+        vi.clearAllMocks();
+        httpController.verify();
     });
 
     it('should be created', () => {
@@ -47,13 +56,8 @@ describe('TemplateService', () => {
     });
 
     describe('templates', () => {
-        it('returns the available templates', async () => {
-            const httpMock: HttpTestingController = TestBed.inject(HttpTestingController);
-            TestBed.tick();
-            httpMock.expectOne('/assets/published-idta-templates.json').flush([template]);
-            await TestBed.inject(ApplicationRef).whenStable();
+        it('returns the available templates', () => {
             expect(service.templates()).toEqual([template.name]);
-            httpMock.verify();
         });
     });
 
@@ -74,11 +78,6 @@ describe('TemplateService', () => {
                     },
                 ],
             };
-
-            const httpMock: HttpTestingController = TestBed.inject(HttpTestingController);
-            TestBed.tick();
-            httpMock.expectOne('/assets/published-idta-templates.json').flush([template]);
-            await TestBed.inject(ApplicationRef).whenStable();
 
             mockFetchJson(env);
 

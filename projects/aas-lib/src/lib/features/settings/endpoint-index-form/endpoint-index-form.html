@@ -32,21 +32,26 @@
                     </div>
 
                     @if (item.status === 'idle') {
+                        <div></div>
                         @if (item.schedule === 'manual' || item.schedule === 'once') {
-                            <button
-                                type="button"
-                                class="btn btn-lg btn-outline-primary py-0 px-3 endpoint-index-icon-btn"
-                                [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
-                                [openDelay]="300"
-                                placement="top"
-                                container="body"
-                                (click)="startScan(item.name).subscribe()"
-                            >
-                                <i class="bi bi-play-fill"></i>
-                                <span class="fw-light" style="font-size: 15px">Scan</span>
-                            </button>
+                            <div class="justify-content-end d-flex">
+                                <button
+                                    type="button"
+                                    class="btn btn-lg btn-outline-primary border-0"
+                                    [ngbTooltip]="'EndpointIndexForm.START_SCAN_TOOL_TIP' | translate"
+                                    [openDelay]="300"
+                                    placement="top"
+                                    container="body"
+                                    (click)="startScan(item.name).subscribe()"
+                                >
+                                    <i class="bi bi-play-fill"></i>
+                                    <span class="fw-light fs-6">Scan</span>
+                                </button>
+                            </div>
                         } @else {
-                            <div></div>
+                            <div class="justify-content-center d-flex text-info">
+                                <i class="bi bi-stopwatch"></i>
+                            </div>
                         }
                         <button
                             type="button"
@@ -61,7 +66,7 @@
                         </button>
                     } @else {
                         @if (item.progress < 0) {
-                            <div class="text-center">
+                            <div class="justify-content-center d-flex">
                                 <div class="spinner-border spinner-border-sm text-info" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
@@ -71,6 +76,8 @@
                                 <ngb-progressbar class="w-100" [showValue]="true" type="info" [value]="item.progress" />
                             </div>
                         }
+
+                        <div></div>
 
                         <button
                             type="button"
@@ -98,7 +105,7 @@
             [openDelay]="300"
             placement="top"
             container="body"
-            (click)="clearIndex()"
+            (click)="clearIndex().subscribe()"
         >
             <i class="bi bi-eraser-fill"></i>
             <span class="fw-light" style="font-size: 15px">Clear Entire Index</span>

@@ -131,6 +131,7 @@ describe('EndpointIndexForm', () => {
 
         fixture = TestBed.createComponent(EndpointIndexForm);
         component = fixture.componentInstance;
+        fixture.detectChanges();
         await fixture.whenStable();
     });
 

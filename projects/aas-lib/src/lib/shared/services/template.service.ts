@@ -20,12 +20,11 @@ export class TemplateService {
      * Gets the names of the available submodel-templates.
      */
     public readonly templates = computed(() => {
-        const values = this.templates$.value();
-        if (!values) {
+        if (this.templates$.hasValue() === false) {
             return [];
         }
 
-        return [...new Set(values.map(value => value.name))].sort();
+        return [...new Set(this.templates$.value().map(value => value.name))].sort();
     });
 
     /**

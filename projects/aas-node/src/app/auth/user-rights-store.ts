@@ -20,14 +20,37 @@ export interface UserRights extends Rights {
     id: string;
 }
 
-export abstract class UserRightsStore {
-    public abstract getRole(userId: string): Promise<UserRole>;
+/**
+ * Interface for the user rights store.
+ */
+export interface UserRightsStore {
+    /**
+     * Returns the role of the specified user.
+     * @param userId The ID of the user whose role is to be retrieved.
+     */
+    getRole(userId: string): Promise<UserRole>;
 
-    public abstract getEndpoints(userId: string): Promise<AASEndpointAuth[]>;
+    /**
+     * Returns the endpoints the specified user has access to.
+     * @param userId The ID of the user whose accessible endpoints are to be retrieved.
+     */
+    getEndpoints(userId: string): Promise<AASEndpointAuth[]>;
 
-    public abstract add(userId: string, rights: Rights): Promise<void>;
+    /** Adds the rights for the specified user.
+     * @param userId The ID of the user whose rights are to be added.
+     * @param rights The rights to be applied to the user.
+     */
+    add(userId: string, rights: Rights): Promise<void>;
 
-    public abstract update(userId: string, rights: Partial<Rights>): Promise<void>;
+    /** Updates the rights for the specified user.
+     * @param userId The ID of the user whose rights are to be updated.
+     * @param rights The new rights to be applied to the user.
+     */
+    update(userId: string, rights: Partial<Rights>): Promise<void>;
 
-    public abstract delete(userId: string): Promise<void>;
+    /**
+     * Deletes the rights for the specified user.
+     * @param userId The ID of the user whose rights are to be deleted.
+     */
+    delete(userId: string): Promise<void>;
 }

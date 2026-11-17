@@ -66,7 +66,7 @@ describe('ShellsComponent', () => {
             'addEndpoint',
             'deletePackage',
             'getEndpoints',
-            'removeEndpoint',
+            'deleteEndpoint',
             'getContent',
             'downloadPackage',
             'uploadPackage',
@@ -80,6 +80,14 @@ describe('ShellsComponent', () => {
             } as aas.Environment),
         );
         api.deletePackage.mockReturnValue(of(void 0));
+
+        api.deletePackage.mockReturnValue(of(void 0));
+        api.getEndpoints.mockReturnValue(
+            of([
+                { name: 'Endpoint A', url: 'http://endpoint-a', type: 'AAS_API' },
+                { name: 'Endpoint B', url: 'http://endpoint-b', type: 'AAS_API' },
+            ]),
+        );
 
         activeFavorites = signal('');
         favorites = createSpyObj<FavoritesService>(['add', 'delete', 'get', 'has', 'remove', 'save', 'setActive'], {
@@ -107,6 +115,8 @@ describe('ShellsComponent', () => {
             name: signal(''),
             user: signal(undefined),
         });
+        auth.checkAuthorized.mockReturnValue(of(void 0));
+
         auth.checkAuthorized.mockReturnValue(of(void 0));
 
         modal = createSpyObj<NgbModal>(['open']);
@@ -223,9 +233,7 @@ describe('ShellsComponent', () => {
 
     it('resets pagination when endpoint visibility changes', () => {
         state.update({ position: { next: 'next' as never, previous: undefined } });
-
         component.toggleCheckEndpoint(true, { name: 'endpoint-a', checked: false, locked: false });
-
         expect(state.position()).toEqual({ next: undefined, previous: null });
     });
 

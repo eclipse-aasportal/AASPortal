@@ -50,6 +50,7 @@ describe('RegisterForm', () => {
 
         fixture = TestBed.createComponent(RegisterForm);
         component = fixture.componentInstance;
+        fixture.detectChanges();
         await fixture.whenStable();
     });
 
