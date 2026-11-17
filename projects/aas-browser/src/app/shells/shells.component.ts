@@ -11,7 +11,6 @@ import { FormsModule } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
 import { catchError, concatMap, EMPTY, map, Observable, of } from 'rxjs';
 import {
-    ChangeDetectionStrategy,
     Component,
     computed,
     effect,
@@ -32,7 +31,6 @@ import { MaxLengthPipe } from '../max-length.pipe';
     templateUrl: './shells.component.html',
     styleUrl: './shells.component.scss',
     imports: [MaxLengthPipe, FormsModule, RouterLink],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellsComponent implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);

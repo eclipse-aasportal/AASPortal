@@ -1,0 +1,308 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+@if (items().length > 0) {
+    <!-- Desktop View (xxl)-->
+    <div class="d-none d-xxl-block table-responsive border border-black border-opacity-25 rounded-2 pb-0">
+        <table class="table table-hover">
+            <colgroup>
+                <col class="fhg-col-checkbox" />
+                <col class="fhg-col-thumbnail" />
+                <col />
+                <col />
+                <col />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="fhg-th-checkbox">
+                        <input
+                            id="AID_TOGGLE_SELECT_ALL"
+                            type="checkbox"
+                            class="form-check-input fs-6"
+                            [indeterminate]="someSelected()"
+                            [ngModel]="everySelected()"
+                            (ngModelChange)="toggleSelected($event)"
+                        />
+                    </th>
+                    <th scope="col"></th>
+                    <th scope="col">
+                        <div class="me-1" translate="AASTable.COLUMN_NAME"></div>
+                    </th>
+                    <th scope="col">
+                        <div class="me-1" translate="AASTable.COLUMN_ENDPOINT"></div>
+                    </th>
+                    <th scope="col">
+                        <div class="me-1" translate="AASTable.COLUMN_ID"></div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of items(); track getTrackId(item)) {
+                    <tr class="align-middle">
+                        <td>
+                            <input
+                                id="AID_TOGGLE_SELECT_{{ item.name }}"
+                                type="checkbox"
+                                class="form-check-input fs-6"
+                                [ngModel]="item.selected()"
+                                (ngModelChange)="toggleSelected($event, item)"
+                            />
+                        </td>
+                        <td class="text-center">
+                            @switch (item.state) {
+                                @case ('unloaded') {
+                                    <div class="position-relative">
+                                        <img
+                                            class="object-fit-contain opacity-50"
+                                            height="40"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                                        />
+                                        <div
+                                            class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info"
+                                        >
+                                            <i class="bi bi-cloud-arrow-down"></i>
+                                        </div>
+                                    </div>
+                                }
+                                @case ('unavailable') {
+                                    <div class="position-relative">
+                                        <img
+                                            class="object-fit-contain opacity-50"
+                                            height="40"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                                        />
+                                        <div
+                                            class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger"
+                                        >
+                                            <i class="bi bi-cone-striped"></i>
+                                        </div>
+                                    </div>
+                                }
+                                @default {
+                                    <img
+                                        class="object-fit-contain"
+                                        height="40"
+                                        [src]="item.thumbnail"
+                                        [alt]="item.name"
+                                        (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                                    />
+                                }
+                            }
+                        </td>
+                        <td>
+                            <a
+                                class="fs-6 text-primary text-decoration-none fw-semibold text-nowrap"
+                                [routerLink]="getRouterLink(item)"
+                                >{{ item.name | max: 60 }}</a
+                            >
+                        </td>
+                        <td>
+                            <div class="text-nowrap">{{ item.endpoint }}</div>
+                        </td>
+                        <td>
+                            <div class="text-nowrap font-monospace fs-7 text-body-secondary fw-lighter" placement="top">
+                                {{ item.id | max: 80 }}
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MediumView (lg, xl) -->
+    <div class="d-none d-md-block d-xxl-none table-responsive border border-black border-opacity-25 rounded-2 pb-0">
+        <table class="table table-hover">
+            <colgroup>
+                <col class="fhg-col-checkbox" />
+                <col class="fhg-col-thumbnail" />
+                <col />
+                <col />
+            </colgroup>
+
+            <thead>
+                <tr>
+                    <th class="fhg-th-checkbox">
+                        <input
+                            id="AID_TOGGLE_SELECT_ALL"
+                            type="checkbox"
+                            class="form-check-input fs-6"
+                            [indeterminate]="someSelected()"
+                            [ngModel]="everySelected()"
+                            (ngModelChange)="toggleSelected($event)"
+                        />
+                    </th>
+                    <th scope="col"></th>
+                    <th scope="col">
+                        <div class="me-1" translate="AASTable.COLUMN_NAME"></div>
+                    </th>
+                    <th scope="col">
+                        <div class="me-1" translate="AASTable.COLUMN_ENDPOINT"></div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of items(); track getTrackId(item)) {
+                    <tr class="align-middle">
+                        <td>
+                            <input
+                                id="AID_TOGGLE_SELECT_{{ item.name }}"
+                                type="checkbox"
+                                class="form-check-input fs-6"
+                                [ngModel]="item.selected()"
+                                (ngModelChange)="toggleSelected($event, item)"
+                            />
+                        </td>
+                        <td class="text-center">
+                            @switch (item.state) {
+                                @case ('unloaded') {
+                                    <div class="position-relative">
+                                        <img
+                                            class="object-fit-contain opacity-50"
+                                            height="40"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                                        />
+                                        <div
+                                            class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info"
+                                        >
+                                            <i class="bi bi-cloud-arrow-down"></i>
+                                        </div>
+                                    </div>
+                                }
+                                @case ('unavailable') {
+                                    <div class="position-relative">
+                                        <img
+                                            class="object-fit-contain opacity-50"
+                                            height="40"
+                                            [src]="item.thumbnail"
+                                            [alt]="item.name"
+                                            (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                                        />
+                                        <div
+                                            class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger"
+                                        >
+                                            <i class="bi bi-cone-striped"></i>
+                                        </div>
+                                    </div>
+                                }
+                                @default {
+                                    <img
+                                        class="object-fit-contain"
+                                        height="40"
+                                        [src]="item.thumbnail"
+                                        [alt]="item.name"
+                                        (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                                    />
+                                }
+                            }
+                        </td>
+                        <td>
+                            <a
+                                class="fs-6 text-primary text-decoration-none fw-semibold text-nowrap"
+                                [routerLink]="getRouterLink(item)"
+                            >
+                                <div class="d-flex flex-column">
+                                    <span class="fs-6 text-primary fw-semibold text-nowrap">{{ item.name }}</span>
+                                    <div
+                                        class="text-nowrap font-monospace fs-7 text-body-secondary fw-lighter"
+                                        placement="top"
+                                    >
+                                        {{ item.id | max: 60 }}
+                                    </div>
+                                </div>
+                            </a>
+                        </td>
+                        <td>
+                            <div class="text-nowrap">{{ item.endpoint }}</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile View (xs, sm) -->
+    <div class="d-block d-md-none">
+        @for (item of items(); track getTrackId(item)) {
+            <a
+                [routerLink]="getRouterLink(item)"
+                class="fhg-mobile-row py-2 d-flex flex-row align-items-center border-bottom border-black border-opacity-25 text-decoration-none text-body"
+            >
+                <div class="me-3">
+                    @switch (item.state) {
+                        @case ('unloaded') {
+                            <div class="position-relative">
+                                <img
+                                    class="object-fit-contain opacity-50"
+                                    width="80"
+                                    height="40"
+                                    [src]="item.thumbnail"
+                                    [alt]="item.name"
+                                    (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                                />
+                                <div
+                                    class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-info"
+                                >
+                                    <i class="bi bi-cloud-arrow-down"></i>
+                                </div>
+                            </div>
+                        }
+                        @case ('unavailable') {
+                            <div class="position-relative">
+                                <img
+                                    class="object-fit-contain opacity-50"
+                                    width="80"
+                                    height="40"
+                                    [src]="item.thumbnail"
+                                    [alt]="item.name"
+                                    (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                                />
+                                <div
+                                    class="position-absolute top-50 start-50 translate-middle p-2 bg-transparent rounded-circle text-danger"
+                                >
+                                    <i class="bi bi-cone-striped"></i>
+                                </div>
+                            </div>
+                        }
+                        @default {
+                            <div>
+                                <img
+                                    class="object-fit-contain"
+                                    width="80"
+                                    height="40"
+                                    [src]="item.thumbnail"
+                                    [alt]="item.name"
+                                    (error)="item.thumbnail = '/assets/resources/aas-idta.png'"
+                                />
+                            </div>
+                        }
+                    }
+                </div>
+
+                <div class="d-flex flex-column">
+                    <span class="fs-6 text-primary fw-semibold text-nowrap">{{ item.name | max: 30 }}</span>
+                    <div class="text-nowrap font-monospace fs-7 text-body-secondary fw-lighter" placement="top">
+                        {{ item.id | max: 40 }}
+                    </div>
+                </div>
+
+                <div class="ms-auto">
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+            </a>
+        }
+    </div>
+} @else {
+    <div class="alert alert-info text-center mt-2" role="alert" translate="AASTable.INFO_NO_SHELLS_AVAILABLE"></div>
+}

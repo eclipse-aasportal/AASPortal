@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
+import { container, singleton, Disposable } from 'tsyringe';
 import { WebSocket, WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
@@ -14,25 +14,28 @@ import EventEmitter from 'events';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { WebSocketData } from 'aas-core';
-import { LOGGER, Logger } from 'aas-package';
+import { AASNodeMessage, WebSocketData } from 'aas-core';
+import { LOGGER } from 'aas-package';
 
 import { App } from './app.js';
 import { Variable } from './variable.js';
 import { SocketClient } from './live/socket-client.js';
 
+const DELAY_MS = 1000;
+
 /* istanbul ignore next */
 @singleton()
-export class WSNode extends EventEmitter {
+export class WSNode extends EventEmitter implements Disposable {
+    private readonly app = container.resolve(App);
+    private readonly variable = container.resolve(Variable);
+    private readonly logger = container.resolve(LOGGER);
     private readonly wss: WebSocketServer;
     private readonly clients: Set<SocketClient> = new Set<SocketClient>();
     private readonly server: http.Server | https.Server;
+    private messages: AASNodeMessage[] = [];
+    private handle?: NodeJS.Timeout;
 
-    public constructor(
-        @inject(App) app: App,
-        @inject(Variable) private readonly variable: Variable,
-        @inject(LOGGER) private readonly logger: Logger,
-    ) {
+    public constructor() {
         super();
 
         if (this.variable.HTTPS_KEY_FILE && this.variable.HTTPS_CERT_FILE) {
@@ -43,21 +46,19 @@ export class WSNode extends EventEmitter {
         } else if (this.variable.HTTPS_PFX_FILE) {
             this.server = https.createServer({
                 pfx: fs.readFileSync(this.variable.HTTPS_PFX_FILE),
-                passphrase: this.variable.AAS_NODE_PASSWORD,
+                passphrase: this.variable.HTTPS_PFX_PASSWORD,
             });
         } else {
             this.server = http.createServer();
         }
 
         this.wss = new WebSocketServer({ server: this.server });
-        this.server.on('request', app.app);
+        this.server.on('request', this.app.app);
 
         this.wss.on('connection', this.onConnection);
         this.wss.on('close', this.onClose);
         this.wss.on('error', this.onError);
-    }
 
-    public run(): void {
         process.on('SIGTERM', () => {
             this.logger.info('Shutting down AASNode');
             this.server.close(() => {
@@ -75,10 +76,27 @@ export class WSNode extends EventEmitter {
                     const packageJson = JSON.parse(data);
                     version = packageJson.version ?? version;
                 })
+                .catch(error => {
+                    this.logger.error(`Failed to read package.json: ${error?.message}`);
+                })
                 .finally(() => {
                     this.logger.info(`AASNode v${version} listening on ${this.variable.AAS_NODE_PORT}`);
                 });
         });
+
+        this.handle = setInterval(() => {
+            if (this.messages.length === 0) {
+                return;
+            }
+
+            const messagesToSend = this.messages;
+            this.messages = [];
+
+            this.notify('IndexChange', {
+                type: 'AASNodeMessage[]',
+                data: messagesToSend,
+            });
+        }, DELAY_MS);
     }
 
     public notify(name: string, data: WebSocketData): void {
@@ -87,6 +105,10 @@ export class WSNode extends EventEmitter {
                 client.notify(data);
             }
         }
+    }
+
+    public send(message: AASNodeMessage): void {
+        this.messages.push(message);
     }
 
     public close(): Promise<void> {
@@ -100,6 +122,13 @@ export class WSNode extends EventEmitter {
                 }
             });
         });
+    }
+
+    public dispose(): void {
+        if (this.handle) {
+            clearInterval(this.handle);
+            this.handle = undefined;
+        }
     }
 
     private onConnection = (ws: WebSocket): void => {

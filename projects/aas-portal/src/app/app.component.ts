@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { MainComponent } from './main/main.component';
 
 @Component({
@@ -14,6 +14,5 @@ import { MainComponent } from './main/main.component';
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
     imports: [MainComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {}

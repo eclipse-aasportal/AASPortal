@@ -1,0 +1,60 @@
+[
+    {
+        "name": "Dashboard 1",
+        "items": [],
+        "requests": [],
+        "active": false
+    },
+    {
+        "name": "Test",
+        "items": [
+            {
+                "label": "Chart 1",
+                "chartType": "Line",
+                "id": "42",
+                "sources": [
+                    {
+                        "color": "#123456",
+                        "label": "RotationSpeed",
+                        "node": null,
+                        "element": "rotationSpeed"
+                    }
+                ],
+                "selected": false,
+                "source": "RotationSpeed"
+            },
+            {
+                "label": "Chart 2",
+                "chartType": "Line",
+                "id": "4711",
+                "sources": [
+                    {
+                        "color": "#654321",
+                        "label": "Torque",
+                        "node": null,
+                        "element": "torque"
+                    }
+                ],
+                "selected": false,
+                "source": "Torque"
+            },
+            {
+                "label": "Chart 3",
+                "chartType": "Line",
+                "id": "0815",
+                "sources": [
+                    {
+                        "color": "#987654",
+                        "label": "MaxRotationSpeed",
+                        "node": null,
+                        "element": "maxRotationSpeed"
+                    }
+                ],
+                "selected": false,
+                "source": "MaxRotationSpeed"
+            }
+        ],
+        "requests": [],
+        "active": true
+    }
+]

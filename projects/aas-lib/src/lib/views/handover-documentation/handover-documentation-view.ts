@@ -10,14 +10,14 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
-import { ToolbarService } from '../../services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { HandoverDocumentation } from './handover-documentation';
 import { LeafView } from '../leaf-view';
 import { HandoverDocumentationViewState } from './handover-documentation-view.state';
-import { StartService } from '../../services/start.service';
+import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 
@@ -29,8 +29,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './handover-documentation-view.html',
     styleUrls: ['./handover-documentation-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'HandoverDocumentation' }],
-    imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HandoverDocumentation, RouterModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslateDirective, NgbPaginationModule, DocumentHeader, HandoverDocumentation, RouterModule],
 })
 export class HandoverDocumentationView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
@@ -74,8 +73,9 @@ export class HandoverDocumentationView extends LeafView implements OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
+        const caption = 'HandoverDocumentation.CAPTION';
         const href = `/views/HandoverDocumentation;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
-        if (!this.start.add('Favorite', `HOD#${endpoint}#${id}`, { endpoint, id, href })) {
+        if (!this.start.add('Favorite', `HOD#${endpoint}#${id}`, { endpoint, id, caption, href })) {
             return of(void 0);
         }
 

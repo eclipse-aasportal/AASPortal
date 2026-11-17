@@ -55,8 +55,6 @@ export function createDocument(idShort: string): AASDocument {
         id: `http://aas/${idShort}`,
         idShort,
         address: 'address',
-        crc32: 0,
-        readonly: false,
         timestamp: 0,
         endpoint: 'Endpoint',
     };

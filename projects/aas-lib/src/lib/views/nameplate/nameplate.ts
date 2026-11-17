@@ -6,14 +6,14 @@
  *
  *****************************************************************************/
 
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import { AfterViewInit, Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateDirective } from '@ngx-translate/core';
 
 import { AASDocument } from 'aas-core';
 
 import { NameplateState } from './nameplate.state';
-import { ChildComponent } from '../../components/child-component';
+import { ChildComponent } from '../../shared/components/child-component';
 
 /**
  * Provides a component for submodels that belong to the IDTA specification "Digital Nameplate for industrial equipment".
@@ -24,7 +24,6 @@ import { ChildComponent } from '../../components/child-component';
     imports: [NgbAccordionModule, TranslateDirective],
     templateUrl: './nameplate.html',
     styleUrl: './nameplate.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Nameplate extends ChildComponent implements AfterViewInit {
     public constructor() {

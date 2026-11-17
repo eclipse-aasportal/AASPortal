@@ -8,6 +8,7 @@
 
 import { FileStat, WebDAVClient, createClient } from 'webdav';
 import { dirname, join, normalize, relative, sep } from 'path/posix';
+import { PassThrough } from 'stream';
 import { FileStorage, FileStorageEntry } from './file-storage.js';
 
 export class WebDAVStorage extends FileStorage {
@@ -63,7 +64,12 @@ export class WebDAVStorage extends FileStorage {
     }
 
     public override createReadStream(path: string): NodeJS.ReadableStream {
-        return this.client.createReadStream(this.resolve(path));
+        const stream = new PassThrough();
+        const source = this.client.createReadStream(this.resolve(path));
+        source.on('error', error => stream.destroy(error));
+        source.pipe(stream);
+
+        return stream;
     }
 
     private createClient(): WebDAVClient {

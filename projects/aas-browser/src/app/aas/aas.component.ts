@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, effect, TemplateRef, viewChild, inject, computed } from '@angular/core';
+import { Component, effect, TemplateRef, viewChild, inject, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { of, switchMap } from 'rxjs';
@@ -22,7 +22,6 @@ import { AASApi } from './aas-api';
     styleUrl: './aas.component.scss',
     imports: [FormsModule, BrowserComponent],
     providers: [BrowserState],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AASComponent {
     private readonly route = inject(ActivatedRoute);

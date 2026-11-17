@@ -6,6 +6,6 @@
         "isolatedModules": false,
     },
     "include": [
-        "./src/lib/**/*.ts"
+        "./src/**/*.ts"
     ]
 }

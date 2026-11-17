@@ -1,0 +1,66 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { beforeEach, describe, expect, it } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { provideTranslateService } from '@ngx-translate/core';
+
+import { Library } from 'aas-core';
+import { LicenseInfoComponent } from './license-info.component';
+
+describe('LicenseInfoComponent', () => {
+    let libraries: Library[];
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            providers: [provideTranslateService()],
+            imports: [LicenseInfoComponent],
+        }).compileComponents();
+
+        libraries = [
+            {
+                name: '@angular-devkit/build-angular',
+                version: '18.2.3',
+                description: 'Angular Webpack Build Facade',
+                license: 'MIT',
+                licenseText: 'License text...',
+                homepage: 'https://github.com/angular/angular-cli',
+            },
+            {
+                name: '@angular-eslint/builder',
+                version: '18.3.0',
+                description: 'Angular CLI builder for ESLint',
+                license: 'MIT',
+                licenseText: 'License text...',
+            },
+            {
+                name: '@angular-eslint/eslint-plugin',
+                version: '18.3.0',
+                description: 'ESLint plugin for Angular applications, following https://angular.dev/style-guide',
+                license: 'MIT',
+                licenseText: 'License text...',
+            },
+        ];
+    });
+
+    it('should create', () => {
+        const fixture = TestBed.createComponent(LicenseInfoComponent);
+        const component = fixture.componentInstance;
+        fixture.componentRef.setInput('libraries', libraries);
+        fixture.detectChanges();
+        expect(component).toBeTruthy();
+    });
+
+    it('provides a license text', () => {
+        const fixture = TestBed.createComponent(LicenseInfoComponent);
+        const component = fixture.componentInstance;
+        fixture.componentRef.setInput('libraries', libraries);
+        fixture.detectChanges();
+        expect(component.text()).toBeDefined();
+    });
+});

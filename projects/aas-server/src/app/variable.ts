@@ -27,6 +27,9 @@ export class Variable {
     /** The cache size. */
     public readonly CACHE_SIZE = Number(process.env.CACHE_SIZE ?? '100');
 
+    /** The directory where the AASServer script file is located. */
+    public readonly CONTENT_ROOT: string = path.resolve(process.env.CONTENT_ROOT ?? './');
+
     /** */
     public readonly CORS_ORIGIN: string | string[] = process.env.CORS_ORIGIN
         ? JSON.parse(process.env.CORS_ORIGIN)

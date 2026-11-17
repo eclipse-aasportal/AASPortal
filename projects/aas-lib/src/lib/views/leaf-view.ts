@@ -11,7 +11,7 @@ import { Params } from '@angular/router';
 import { combineLatest, first, from, map, mergeMap, Observable, of, toArray } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { aas, AASDocument, getSemanticId, isEnvironment } from 'aas-core';
+import { aas, AASDocument, getDocumentStatus, getSemanticId, isEnvironment } from 'aas-core';
 import { decodeBase64Url } from '../utilities';
 import { View } from './view';
 
@@ -110,7 +110,7 @@ export abstract class LeafView extends View {
 
     private *filter(documents: AASDocument[]): Generator<[AASDocument, aas.Submodel]> {
         for (const document of documents) {
-            if (!document.content) {
+            if (getDocumentStatus(document) !== 'loaded') {
                 continue;
             }
 
@@ -123,8 +123,18 @@ export abstract class LeafView extends View {
 
     private findSubmodel(document: AASDocument): aas.Submodel | undefined {
         const env = isEnvironment(document) ? document : document.content;
-        if (!env) {
+        if (!env || !env.submodels) {
             return undefined;
+        }
+
+        if (this.view.data.type === 'DefaultSubmodel') {
+            // Generic fallback views have no static semanticIds/idShorts to match against —
+            // the specific submodel is instead identified by the `submodel` (idShort) param
+            // the caller passed when navigating here (see aas.component.ts openSubmodelView).
+            const idShort =
+                this.route.snapshot.paramMap.get('submodel') ?? this.route.snapshot.queryParamMap.get('submodel');
+
+            return idShort ? env.submodels.find(submodel => submodel.idShort === idShort) : undefined;
         }
 
         for (const submodel of env.submodels) {

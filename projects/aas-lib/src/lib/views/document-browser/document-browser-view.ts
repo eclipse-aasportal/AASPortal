@@ -8,14 +8,14 @@
 
 import { Observable, of } from 'rxjs';
 import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { encodeBase64Url } from '../../utilities';
-import { ToolbarService } from '../../services/toolbar.service';
-import { StartService } from '../../services/start.service';
-import { BrowserComponent } from '../../components/browser/browser.component';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
+import { BrowserComponent } from '../../shared/components/browser/browser.component';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { DocumentBrowserViewState } from './document-browser-view.state';
 import { CompositeView } from '../composite-view';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
@@ -25,8 +25,7 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './document-browser-view.html',
     styleUrl: './document-browser-view.scss',
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'Browser' }],
-    imports: [TranslateDirective, TranslatePipe, NgbPaginationModule, BrowserComponent, ThumbnailQRCode],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslateDirective, TranslatePipe, NgbPaginationModule, NgbTooltip, BrowserComponent, DocumentHeader],
 })
 /**
  * The `DocumentBrowserView` component displays an AAS document in a hierarchical structure using the `BrowserComponent`.
@@ -52,7 +51,7 @@ export class DocumentBrowserView extends CompositeView implements OnDestroy {
     /**
      * A `TemplateRef` for the browser toolbar. It is used to set the toolbar content.
      */
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('browserToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     /**
      * The `BrowserState` instance used by the `BrowserComponent` to manage the browsing state.
@@ -76,8 +75,9 @@ export class DocumentBrowserView extends CompositeView implements OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
+        const caption = 'DocumentBrowser.CAPTION';
         const href = `/views/Browser;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
-        if (!this.start.add('Favorite', `DBV#${endpoint}#${id}`, { endpoint, id, href })) {
+        if (!this.start.add('Favorite', `DBV#${endpoint}#${id}`, { endpoint, id, caption, href })) {
             return of(void 0);
         }
 

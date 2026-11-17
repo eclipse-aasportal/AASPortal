@@ -1,0 +1,126 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { TranslateService } from '@ngx-translate/core';
+import { ApplicationError } from 'aas-core';
+import {
+    encodeBase64Url,
+    basename,
+    messageToString,
+    decodeBase64Url,
+    extension,
+    validateEndpointUrl,
+} from './utilities';
+import { createSpyObj } from '../test/mocks';
+
+describe('utilities', () => {
+    describe('basename', () => {
+        it('gets the file name of a file path', () => {
+            expect(basename('A:/hello/world/john.doe')).toEqual('john.doe');
+        });
+    });
+
+    describe('extension', () => {
+        it('gets the extension of a file path', () => {
+            expect(extension('A:/hello/world/john.doe')).toEqual('.doe');
+        });
+
+        it('gets "undefined" of no extension exits', () => {
+            expect(extension('A:/hello/world/john-doe')).toBeUndefined();
+        });
+    });
+
+    describe('messageToString', () => {
+        let translate: Mocked<TranslateService>;
+
+        beforeEach(() => {
+            translate = createSpyObj<TranslateService>(['instant']);
+            translate.instant.mockImplementation(key => key);
+        });
+
+        it('converts a message of type string', () => {
+            expect(messageToString('Hello World!', translate)).toEqual('Hello World!');
+        });
+
+        it('converts an ApplicationError', () => {
+            translate.instant.mockReturnValue('Hello World!');
+            const error = new ApplicationError('HELLO_WORLD', { arg: 'World' });
+            expect(messageToString(error, translate)).toEqual('Hello World!');
+        });
+    });
+
+    describe('encodeBase64Url', () => {
+        it('converts an URL to Base64Url string', () => {
+            const b64url = encodeBase64Url('https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237');
+            expect(b64url).toEqual('aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw');
+        });
+
+        it('converts ÄÖÜäöüß to Base64Url string', () => {
+            const b64url = encodeBase64Url('ÄÖÜäöüß');
+            expect(b64url).toEqual('w4TDlsOcw6TDtsO8w58');
+        });
+    });
+
+    describe('decodeBase64Url', () => {
+        it('converts a Base64Url string to an URL', () => {
+            const url = decodeBase64Url(
+                'aHR0cHM6Ly9pb3NiLWluYS5mcmF1bmhvZmVyLmRlL2lkcy9hYXMvNTE3NF83MDAxXzAxMjJfOTIzNw',
+            );
+            expect(url).toEqual('https://iosb-ina.fraunhofer.de/ids/aas/5174_7001_0122_9237');
+        });
+
+        it('converts Base64Url string of ÄÖÜäöüß to normal string', () => {
+            const str = decodeBase64Url('w4TDlsOcw6TDtsO8w58');
+            expect(str).toEqual('ÄÖÜäöüß');
+        });
+    });
+
+    describe('validateEndpointUrl', () => {
+        it('should return undefine for valid AAS_API URLs', () => {
+            expect(validateEndpointUrl('https://example.com/aas/', 'AAS_API')).toBeUndefined();
+            expect(validateEndpointUrl('https://example.com', 'AAS_API')).toBeUndefined();
+        });
+
+        it('should return ENDING_SLASH_REQUIRED for invalid AAS_API URL', () => {
+            expect(validateEndpointUrl('https://example.com/aas', 'AAS_API')).toBe('ENDING_SLASH_REQUIRED');
+        });
+
+        it('should return error message for invalid AAS_API URL', () => {
+            expect(validateEndpointUrl('invalid-url', 'AAS_API')).toBe('Invalid URL');
+        });
+
+        it('should return undefined for valid OPC_UA URL', () => {
+            expect(validateEndpointUrl('opc.tcp://example.com:4840', 'OPC_UA')).toBeUndefined();
+        });
+
+        it('should return error message for invalid OPC_UA URL', () => {
+            expect(validateEndpointUrl('invalid-url', 'OPC_UA')).toBe('Invalid URL');
+        });
+
+        it('should return undefined for valid WebDAV URL', () => {
+            expect(validateEndpointUrl('https://example.com/webdav', 'WebDAV')).toBeUndefined();
+        });
+
+        it('should return error message for invalid WebDAV URL', () => {
+            expect(validateEndpointUrl('invalid-url', 'WebDAV')).toBe('Invalid URL');
+        });
+
+        it('should return undefine for valid FileSystem URL', () => {
+            expect(validateEndpointUrl('file://C:/example/path', 'FileSystem')).toBeUndefined();
+        });
+
+        it('should return error message for invalid FileSystem URL', () => {
+            expect(validateEndpointUrl('invalid-path', 'FileSystem')).toBe('Invalid URL');
+        });
+
+        it('should return INVALID_VERSION for AAS_API URL', () => {
+            expect(validateEndpointUrl('https://example.com/aas/?version=invalid', 'AAS_API')).toBe('INVALID_VERSION');
+        });
+    });
+});

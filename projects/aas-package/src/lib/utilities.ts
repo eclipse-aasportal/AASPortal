@@ -51,67 +51,73 @@ export function computeCrc32(env: aas.Environment): number {
     const crc = new Crc32();
     crc.start();
 
-    for (const shell of env.assetAdministrationShells) {
-        crc.add(JSON.stringify(shell));
+    if (env.assetAdministrationShells) {
+        for (const shell of env.assetAdministrationShells) {
+            crc.add(JSON.stringify(shell));
+        }
     }
 
-    for (const conceptDescription of env.conceptDescriptions) {
-        crc.add(JSON.stringify(conceptDescription));
+    if (env.conceptDescriptions) {
+        for (const conceptDescription of env.conceptDescriptions) {
+            crc.add(JSON.stringify(conceptDescription));
+        }
     }
 
-    for (const submodel of env.submodels) {
-        for (const referable of flat(submodel)) {
-            switch (referable.modelType) {
-                case 'Property': {
-                    const property: aas.Property = { ...(referable as aas.Property) };
-                    if (property.category !== 'CONSTANT' && property.category !== 'PARAMETER') {
-                        delete property.value;
+    if (env.submodels) {
+        for (const submodel of env.submodels) {
+            for (const referable of flat(submodel)) {
+                switch (referable.modelType) {
+                    case 'Property': {
+                        const property: aas.Property = { ...(referable as aas.Property) };
+                        if (property.category !== 'CONSTANT' && property.category !== 'PARAMETER') {
+                            delete property.value;
+                        }
+
+                        crc.add(JSON.stringify(property));
+                        break;
                     }
+                    case 'Submodel': {
+                        const sm: aas.Submodel = { ...(referable as aas.Submodel) };
+                        delete sm.submodelElements;
+                        crc.add(JSON.stringify(sm));
+                        break;
+                    }
+                    case 'SubmodelElementCollection': {
+                        const collection: aas.SubmodelElementCollection = {
+                            ...(referable as aas.SubmodelElementCollection),
+                        };
+                        delete collection.value;
+                        crc.add(JSON.stringify(collection));
+                        break;
+                    }
+                    case 'SubmodelElementList': {
+                        const list: aas.SubmodelElementList = { ...(referable as aas.SubmodelElementList) };
+                        delete list.value;
+                        crc.add(JSON.stringify(list));
+                        break;
+                    }
+                    case 'AnnotatedRelationshipElement': {
+                        const element: aas.AnnotatedRelationshipElement = {
+                            ...(referable as aas.AnnotatedRelationshipElement),
+                        };
 
-                    crc.add(JSON.stringify(property));
-                    break;
-                }
-                case 'Submodel': {
-                    const sm: aas.Submodel = { ...(referable as aas.Submodel) };
-                    delete sm.submodelElements;
-                    crc.add(JSON.stringify(sm));
-                    break;
-                }
-                case 'SubmodelElementCollection': {
-                    const collection: aas.SubmodelElementCollection = {
-                        ...(referable as aas.SubmodelElementCollection),
-                    };
-                    delete collection.value;
-                    crc.add(JSON.stringify(collection));
-                    break;
-                }
-                case 'SubmodelElementList': {
-                    const list: aas.SubmodelElementList = { ...(referable as aas.SubmodelElementList) };
-                    delete list.value;
-                    crc.add(JSON.stringify(list));
-                    break;
-                }
-                case 'AnnotatedRelationshipElement': {
-                    const element: aas.AnnotatedRelationshipElement = {
-                        ...(referable as aas.AnnotatedRelationshipElement),
-                    };
+                        delete element.annotations;
+                        crc.add(JSON.stringify(element));
+                        break;
+                    }
+                    case 'Entity': {
+                        const entity: aas.Entity = {
+                            ...(referable as aas.Entity),
+                        };
 
-                    delete element.annotations;
-                    crc.add(JSON.stringify(element));
-                    break;
+                        delete entity.statements;
+                        crc.add(JSON.stringify(entity));
+                        break;
+                    }
+                    default:
+                        crc.add(JSON.stringify(referable));
+                        break;
                 }
-                case 'Entity': {
-                    const entity: aas.Entity = {
-                        ...(referable as aas.Entity),
-                    };
-
-                    delete entity.statements;
-                    crc.add(JSON.stringify(entity));
-                    break;
-                }
-                default:
-                    crc.add(JSON.stringify(referable));
-                    break;
             }
         }
     }

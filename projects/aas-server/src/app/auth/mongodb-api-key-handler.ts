@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import mongoose from 'mongoose';
-import { LOGGER, Logger, MongoDBConnectionProvider } from 'aas-package';
+import { LOGGER, MongoDBConnectionProvider } from 'aas-package';
 
 import { Variable } from '../variable.js';
 import { ApiKeyHandler, ApiKeyRecord } from './api-key-handler.js';
@@ -17,6 +17,7 @@ interface ApiKeyDocument extends ApiKeyRecord, mongoose.Document {}
 
 @singleton()
 export class MongoDBApiKeyManager extends ApiKeyHandler {
+    private readonly logger = container.resolve(LOGGER);
     private readonly connection: mongoose.Connection;
     private readonly model: mongoose.Model<ApiKeyDocument>;
 
@@ -27,13 +28,11 @@ export class MongoDBApiKeyManager extends ApiKeyHandler {
         createdAt: { type: String, required: true },
     });
 
-    public constructor(
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(MongoDBConnectionProvider) connectionProvider: MongoDBConnectionProvider,
-        @inject(Variable) variable: Variable,
-    ) {
+    public constructor() {
         super();
 
+        const connectionProvider = container.resolve(MongoDBConnectionProvider);
+        const variable = container.resolve(Variable);
         this.connection = connectionProvider.getConnection(variable.API_KEY_HANDLER!);
         this.model = this.connection.model<ApiKeyDocument>('ApiKeys', this.schema);
         this.logger.info('Using MongoDB API key handler');

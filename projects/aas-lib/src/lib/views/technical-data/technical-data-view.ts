@@ -10,31 +10,23 @@ import { TranslateDirective } from '@ngx-translate/core';
 import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
-import { ToolbarService } from '../../services/toolbar.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { TechnicalData } from './technical-data';
 import { TechnicalDataViewState } from './technical-data-view.state';
 import { LeafView } from '../leaf-view';
-import { StartService } from '../../services/start.service';
+import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url } from '../../utilities';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
 
 @Component({
     selector: 'fhg-technical-data-view',
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'TechnicalData' }],
-    imports: [
-        TranslateDirective,
-        NgbPaginationModule,
-        NgbAccordionModule,
-        ThumbnailQRCode,
-        TechnicalData,
-        RouterModule,
-    ],
+    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, DocumentHeader, TechnicalData, RouterModule],
     templateUrl: './technical-data-view.html',
     styleUrl: './technical-data-view.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TechnicalDataView extends LeafView implements OnDestroy {
     private readonly toolbar = inject(ToolbarService);
@@ -72,8 +64,9 @@ export class TechnicalDataView extends LeafView implements OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
+        const caption = 'TechnicalData.CAPTION';
         const href = `/views/TechnicalData;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
-        if (!this.start.add('Favorite', `TDV#${endpoint}#${id}`, { endpoint, id, href })) {
+        if (!this.start.add('Favorite', `TDV#${endpoint}#${id}`, { endpoint, id, caption, href })) {
             return of(void 0);
         }
 

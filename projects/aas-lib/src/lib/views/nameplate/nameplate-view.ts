@@ -6,29 +6,18 @@
  *
  *****************************************************************************/
 
-import { LangChangeEvent, TranslateDirective, TranslateService } from '@ngx-translate/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { NgbAccordionModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
+import { NgbAccordionModule, NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    inject,
-    OnDestroy,
-    Signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { Component, effect, inject, OnDestroy, TemplateRef, viewChild } from '@angular/core';
 
 import { aas, AASDocument, getReferable } from 'aas-core';
 
-import { ToolbarService } from '../../services/toolbar.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
 import { encodeBase64Url, getDisplayName, getDisplayValue } from '../../utilities';
-import { StartService } from '../../services/start.service';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { StartService } from '../../shared/services/start.service';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { Nameplate } from './nameplate';
 import { LeafView } from '../leaf-view';
 import { NameplateViewState } from './nameplate-view.state';
@@ -42,21 +31,24 @@ import { VIEW_ROUTE_NAME } from '../view-route-name';
     templateUrl: './nameplate-view.html',
     styleUrls: ['./nameplate-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'Nameplate' }],
-    imports: [TranslateDirective, NgbPaginationModule, NgbAccordionModule, ThumbnailQRCode, Nameplate, RouterModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TranslateDirective,
+        TranslatePipe,
+        NgbPaginationModule,
+        NgbAccordionModule,
+        DocumentHeader,
+        Nameplate,
+        RouterModule,
+        NgbTooltip,
+    ],
 })
 export class NameplateView extends LeafView implements OnDestroy {
-    private readonly langChange: Signal<LangChangeEvent | undefined>;
-    private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
     private readonly state = inject(NameplateViewState);
 
-    public constructor(translate: TranslateService) {
+    public constructor() {
         super();
-
-        this.langChange = toSignal(translate.onLangChange);
-        this.currentLang = computed(() => this.langChange()?.lang ?? translate.getCurrentLang());
 
         effect(() => {
             const template = this.toolbarTemplate();
@@ -69,7 +61,7 @@ export class NameplateView extends LeafView implements OnDestroy {
     /**
      * A `TemplateRef` for the nameplate toolbar. It is used to set the toolbar content.
      */
-    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('nameplateToolbar');
+    public readonly toolbarTemplate = viewChild<TemplateRef<unknown>>('toolbar');
 
     /**
      * The state of the nameplate child component.
@@ -99,6 +91,7 @@ export class NameplateView extends LeafView implements OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
+        const caption = 'Nameplate.CAPTION';
         const details = this.getFavoriteDetails(document, nameplate, [
             'ManufacturerName',
             'ManufacturerProductType',
@@ -109,7 +102,7 @@ export class NameplateView extends LeafView implements OnDestroy {
 
         const notes = this.getFavoriteNotes(document, nameplate, ['ManufacturerProductDesignation']);
         const href = `/views/Nameplate;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
-        if (!this.start.add('Favorite', `DNP#${endpoint}#${id}`, { endpoint, id, details, notes, href })) {
+        if (!this.start.add('Favorite', `DNP#${endpoint}#${id}`, { endpoint, id, caption, details, notes, href })) {
             return of(void 0);
         }
 

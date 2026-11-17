@@ -41,6 +41,7 @@ import { decodeOpaqueStructure } from './opaque-structure-decoder.js';
 import { OpcuaReader } from './opcua-reader.js';
 import { OpcuaDataTypeDictionary } from './opcua-data-type-dictionary.js';
 import { ClientFile, OpenFileMode } from './client-file.js';
+import { AASIndex } from '../../index/aas-index.js';
 
 export class OpcuaClient extends EndpointClient {
     private readonly options: OPCUAClientOptions;
@@ -49,8 +50,8 @@ export class OpcuaClient extends EndpointClient {
     private session: ClientSession | null = null;
     private reentry = 0;
 
-    public constructor(logger: Logger, endpoint: AASEndpoint, options?: OPCUAClientOptions) {
-        super(logger, endpoint);
+    public constructor(logger: Logger, index: AASIndex, endpoint: AASEndpoint, options?: OPCUAClientOptions) {
+        super(logger, index, endpoint);
 
         if (options) {
             this.options = this.resolveOpcuaClientOptions(options);
@@ -68,9 +69,9 @@ export class OpcuaClient extends EndpointClient {
         }
     }
 
-    public readonly readOnly = true;
+    public override readonly readOnly = true;
 
-    public readonly onlineReady = true;
+    public override readonly providesLiveData = true;
 
     public get isOpen(): boolean {
         return this.reentry > 0;
@@ -124,15 +125,23 @@ export class OpcuaClient extends EndpointClient {
         }
     }
 
-    public override async getDocuments(cursor: string | undefined): Promise<PagedResult<AASDocument>> {
-        noop(cursor);
+    public override async hasDocument(nodeId: string): Promise<boolean> {
+        try {
+            const component = await this.crawlAsync(nodeId);
+            return !!component;
+        } catch {
+            return false;
+        }
+    }
+
+    public override async getDocuments(): Promise<PagedResult<AASDocument>> {
         const documents: AASDocument[] = [];
         const dataTypes = new OpcuaDataTypeDictionary();
         await dataTypes.initializeAsync(this.getSession());
         for (const description of await this.browseAsync('ObjectsFolder')) {
             const nodeId = description.nodeId.toString();
             try {
-                const document = await this.createDocument(nodeId);
+                const document = await this.getDocument(nodeId);
                 documents.push(document);
             } catch (error) {
                 noop(error);
@@ -140,6 +149,29 @@ export class OpcuaClient extends EndpointClient {
         }
 
         return { result: documents, paging_metadata: {} };
+    }
+
+    public override async getSubmodels(): Promise<PagedResult<aas.Submodel>> {
+        const submodels: aas.Submodel[] = [];
+        for (const description of await this.browseAsync('ObjectsFolder')) {
+            const nodeId = description.nodeId.toString();
+            try {
+                const env = await this.getEnvironment(nodeId);
+                if (!env.submodels) {
+                    continue;
+                }
+
+                submodels.push(...env.submodels);
+            } catch (error) {
+                noop(error);
+            }
+        }
+
+        return { result: submodels, paging_metadata: {} };
+    }
+
+    public override async getConceptDescriptions(): Promise<PagedResult<aas.ConceptDescription>> {
+        throw new Error('Method not implemented.');
     }
 
     public override createSubscription(client: SocketClient, message: LiveRequest): SocketSubscription {
@@ -415,40 +447,5 @@ export class OpcuaClient extends EndpointClient {
         }
 
         return undefined;
-    }
-
-    private getIdentifier(component: OPCUAComponent, nodeId: string): string {
-        return this.readIdentifier(component) ?? nodeId;
-    }
-
-    private readIdentifier(component: OPCUAComponent): string | undefined {
-        const identification = this.selectComponent(component, 'Identification');
-        return identification ? this.getPropertyValue(identification, 'Id', '') : undefined;
-    }
-
-    private selectComponent(parent: OPCUAComponent, browseName: string): OPCUAComponent | undefined {
-        if (parent.hasComponent) {
-            for (const component of parent.hasComponent) {
-                if (component.browseName === browseName) {
-                    return component;
-                }
-            }
-        }
-
-        return undefined;
-    }
-
-    private getPropertyValue<T>(parent: OPCUAComponent, browseName: string, fallback: T): T {
-        let value: T = fallback;
-        if (parent.hasProperty) {
-            for (const property of parent.hasProperty) {
-                if (property.browseName === browseName) {
-                    value = property.dataValue.value?.value as T;
-                    break;
-                }
-            }
-        }
-
-        return value;
     }
 }

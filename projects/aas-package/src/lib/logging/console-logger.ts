@@ -6,66 +6,42 @@
  *
  *****************************************************************************/
 
-import { convertToString } from 'aas-core';
-import { Logger, LogLevel } from './logger.js';
+import { container, singleton } from 'tsyringe';
+import { LOG_LEVEL, Logger, LogLevel } from './logger.js';
 
 /** Provides a logger that writes messages to `stdout` and `stderr`. */
-export class ConsoleLogger extends Logger {
-    public constructor(
-        logLevel: LogLevel,
-        private readonly _console: Console = console,
-    ) {
-        super(logLevel);
+@singleton()
+export class ConsoleLogger implements Logger {
+    private readonly logLevel = container.isRegistered(LOG_LEVEL) ? container.resolve(LOG_LEVEL) : 'Info';
+
+    public error(error: Error | string): void {
+        if (!this.shouldLog('Error')) {
+            return;
+        }
+
+        const message = typeof error === 'string' ? error : error.stack || error.message || String(error);
+        console.error(this.getDateTime() + ' [Error]: ' + message);
     }
 
-    public override error(error: Error | string): void {
-        if (!error) {
+    public warning(message: string): void {
+        if (!this.shouldLog('Warning')) {
             return;
         }
 
-        let message = '';
-        if (typeof error === 'string') {
-            message = error;
-        } else if (error instanceof Error) {
-            message = error.message;
-        } else {
-            message = convertToString(error);
-        }
-
-        new Promise<void>(resolve => {
-            this._console.error(`${this.getDateTime()} [Error]: ${message}`);
-            resolve();
-        });
+        console.warn(this.getDateTime() + ' [Warning]: ' + message);
     }
 
-    public override warning(message: string): void {
-        if (this.logLevel === 'Error') {
+    public info(message: string): void {
+        if (!this.shouldLog('Info')) {
             return;
         }
 
-        if (!message) {
-            return;
-        }
-
-        new Promise<void>(resolve => {
-            this._console.warn(`${this.getDateTime()} [Warning]: ${message}`);
-            resolve();
-        });
+        console.info(this.getDateTime() + ' [Info]: ' + message);
     }
 
-    public override info(message: string): void {
-        if (this.logLevel !== 'Info') {
-            return;
-        }
-
-        if (!message) {
-            return;
-        }
-
-        new Promise<void>(resolve => {
-            this._console.info(`${this.getDateTime()} [Info]: ${message}`);
-            resolve();
-        });
+    private shouldLog(level: LogLevel): boolean {
+        const order: Record<LogLevel, number> = { Error: 0, Warning: 1, Info: 2 };
+        return order[level] <= order[this.logLevel];
     }
 
     private getDateTime(): string {

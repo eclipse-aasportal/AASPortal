@@ -100,11 +100,6 @@ async function readLibrariesAsync(project: Package): Promise<Library[]> {
             const version = getRawVersion(project.dependencies[name]);
             await readLibraryAsync(name, version, libraries);
         }
-
-        for (const name in project.devDependencies) {
-            const version = getRawVersion(project.devDependencies[name]);
-            await readLibraryAsync(name, version, libraries);
-        }
     }
 
     libraries.sort((a, b) => a.name.localeCompare(b.name));

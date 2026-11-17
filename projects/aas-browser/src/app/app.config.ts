@@ -12,7 +12,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@a
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
-import { API_URL, CacheInterceptor, WINDOW, WindowService } from 'aas-lib';
+import { API_URL, WINDOW, WindowService } from 'aas-lib';
 import { routes } from './app.routes';
 import { ApiUrlService } from './api-url.service';
 import { AuthInterceptor } from './auth/auth.interceptor';
@@ -23,11 +23,6 @@ export const appConfig: ApplicationConfig = {
             provide: API_URL,
             useFactory: (window: WindowService) => new ApiUrlService(window),
             deps: [WINDOW],
-        },
-        {
-            provide: HTTP_INTERCEPTORS,
-            useClass: CacheInterceptor,
-            multi: true,
         },
         {
             provide: HTTP_INTERCEPTORS,

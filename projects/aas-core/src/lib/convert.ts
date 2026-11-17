@@ -261,7 +261,7 @@ export function convertToString(value: unknown, localeId?: string): string {
     }
 
     if (value instanceof Error) {
-        return value.message;
+        return value.stack ?? value.message;
     }
 
     if (typeof value === 'object') {
@@ -422,12 +422,12 @@ export function parseDate(s: string | undefined, localeId?: string): Date | unde
         }
     } else {
         date = new Date(s);
-        if (date.toString() === 'Invalid Date') {
+        if (isNaN(date.getTime())) {
             date = parseDate(s, 'en');
         }
     }
 
-    return date;
+    return date === undefined || isNaN(date.getTime()) ? undefined : date;
 
     function splitDateTime(s: string): string[] {
         let index = s.indexOf(',');

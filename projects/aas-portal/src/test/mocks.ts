@@ -6,6 +6,8 @@
  *
  *****************************************************************************/
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Mocked, vi } from 'vitest';
 import { TranslateLoader, TranslationObject } from '@ngx-translate/core';
 import { noop } from 'aas-core';
@@ -57,22 +59,6 @@ export function createSpyObj<T extends object>(
 
     return obj as Mocked<T>;
 }
-
-export const createMockFileList = (files: File[]): FileList => {
-    const a: FileList = {
-        length: 0,
-        item: function (index: number): File | null {
-            throw new Error('Function not implemented.');
-        },
-    };
-
-    const fileList = {
-        length: files.length,
-        item: (index: number) => files[index],
-    };
-
-    return fileList;
-};
 
 export class MockWebSocketService {
     private mockSubject = new Subject<any>();

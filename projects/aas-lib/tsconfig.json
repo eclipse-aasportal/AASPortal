@@ -3,15 +3,11 @@
     "compileOnSave": false,
     "compilerOptions": {
         "outDir": "./dist/out-tsc",
+        "rootDir": "..",
         "declaration": false,
-        "lib": [
-            "ES2024",
-            "dom"
-        ],
         "types": [
             "@angular/localize"
-        ],
-        "paths": {}
+        ]
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,

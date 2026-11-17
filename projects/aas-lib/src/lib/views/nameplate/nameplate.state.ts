@@ -10,7 +10,7 @@ import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { aas, AASDocument, getReferable, isSubmodelElementCollection, isSubmodelElementList } from 'aas-core';
 import { createDataSheet, findSubmodel, getDisplayName } from '../../utilities';
-import { ChildState } from '../../components/child-state';
+import { ChildState } from '../../shared/components/child-state';
 import { NAMEPLATE_2_0, NAMEPLATE_3_0, NAMEPLATE_FHG, NAMEPLATE_HSU } from '../views-constants';
 import { DataSheetData } from '../../types';
 
@@ -48,6 +48,7 @@ export class NameplateState extends ChildState {
             if (!submodel) {
                 return;
             }
+
             this.update({ submodel, dataSheets: this.createDataSheets(document, submodel) });
         });
 
@@ -94,7 +95,7 @@ export class NameplateState extends ChildState {
             return dataSheets;
         }
 
-        let dataSheet = createDataSheet(document, submodel, this.translate.getCurrentLang(), {
+        let dataSheet = createDataSheet(document, submodel, this.currentLang(), {
             type: 'B',
             name: this.translate.instant('Nameplate.GENERAL'),
             exclude: ['Markings', 'AssetSpecificProperties'],
@@ -102,7 +103,7 @@ export class NameplateState extends ChildState {
                 {
                     type: 'format',
                     idShortPath: 'AddressInformation',
-                    format: '{Street} {NationalCode}-{ZipCode} {CityTown}',
+                    format: '{Street} {NationalCode}-{Zipcode} {CityTown}',
                 },
                 {
                     type: 'format',
@@ -120,7 +121,7 @@ export class NameplateState extends ChildState {
         if (isSubmodelElementList(markings) && markings.value) {
             let index = 1;
             for (const marking of markings.value) {
-                dataSheet = createDataSheet(document, marking, this.translate.getCurrentLang(), {
+                dataSheet = createDataSheet(document, marking, this.currentLang(), {
                     name: `${getDisplayName(marking, env)} [${index}]`,
                     type: 'B',
                 });
@@ -134,7 +135,7 @@ export class NameplateState extends ChildState {
 
         const assetProperties = getReferable(submodel, 'AssetSpecificProperties');
         if (isSubmodelElementCollection(assetProperties) && assetProperties.value) {
-            dataSheet = createDataSheet(document, assetProperties, this.translate.getCurrentLang());
+            dataSheet = createDataSheet(document, assetProperties, this.currentLang());
             if (dataSheet.items.length > 0) {
                 dataSheets.push(dataSheet);
             }

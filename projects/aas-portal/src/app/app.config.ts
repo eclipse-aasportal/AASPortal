@@ -14,7 +14,7 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import {
     API_URL,
     AuthInterceptor,
-    CacheInterceptor,
+    ChartComponent,
     CustomerFeedbackCardComponent,
     FavoriteComponent,
     NotifyService,
@@ -28,7 +28,6 @@ import {
 } from 'aas-lib';
 
 import { routes } from './app.routes';
-import { ChartComponent } from './dashboard/chart/chart.component';
 import { AboutCardComponent } from './about/about-card.component';
 import { ApiUrlService } from './api-url.service';
 
@@ -41,7 +40,6 @@ export const appConfig: ApplicationConfig = {
             loader: provideTranslateHttpLoader({ prefix: 'assets/i18n/', suffix: '.json' }),
         }),
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-        { provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true },
         {
             provide: START_TILE_TYPES,
             useValue: [

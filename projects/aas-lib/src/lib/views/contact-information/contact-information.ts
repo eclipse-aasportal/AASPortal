@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import { Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
 import { ContactInformationState } from './contact-information.state';
-import { ChildComponent } from '../../components/child-component';
+import { ChildComponent } from '../../shared/components/child-component';
 
 /**
  * Displays contact information for an AAS document.
@@ -22,7 +22,6 @@ import { ChildComponent } from '../../components/child-component';
     imports: [NgbAccordionModule],
     templateUrl: './contact-information.html',
     styleUrl: './contact-information.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContactInformation extends ChildComponent {
     /**
@@ -58,4 +57,25 @@ export class ContactInformation extends ChildComponent {
      * The computed list of contact data sheets.
      */
     public readonly contacts = computed(() => this.state().contacts());
+
+    public getContactInformationValue(index: number, names: string | string[]): string | string[] | undefined {
+        if (!this.contacts()) return '-1';
+        if (!this.contacts()[index]) return '-1';
+
+        if (Array.isArray(names)) {
+            for (const name of names) {
+                const value = this.contacts()[index].items.find(
+                    element => element.idShort.toLowerCase() == name.toLowerCase(),
+                );
+                if (value) return value.value;
+            }
+        } else {
+            const value = this.contacts()[index].items.find(
+                element => element.idShort.toLowerCase() == names.toLowerCase(),
+            );
+            if (value) return value.value;
+        }
+
+        return '-1';
+    }
 }
