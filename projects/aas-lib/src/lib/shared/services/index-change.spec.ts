@@ -9,7 +9,6 @@
 import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { firstValueFrom, lastValueFrom, Subject } from 'rxjs';
 import { ApplicationRef } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 

@@ -8,7 +8,6 @@
 
 import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ApplicationRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { provideTranslateService } from '@ngx-translate/core';
