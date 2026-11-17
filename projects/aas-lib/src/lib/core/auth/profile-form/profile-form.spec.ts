@@ -62,6 +62,7 @@ describe('ProfileForm', () => {
 
         fixture = TestBed.createComponent(ProfileForm);
         component = fixture.componentInstance;
+        fixture.detectChanges();
         await fixture.whenStable();
     });
 

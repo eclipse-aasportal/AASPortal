@@ -12,6 +12,8 @@ import { TestBed } from '@angular/core/testing';
 
 import { DashboardApiService } from './dashboard-api.service';
 import { encodeBase64Url } from '../../utilities';
+import { ApplicationRef } from '@angular/core';
+import { lastValueFrom } from 'rxjs';
 
 describe('DashboardApiService', () => {
     let service: DashboardApiService;
@@ -19,7 +21,7 @@ describe('DashboardApiService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [provideHttpClientTesting()],
+            providers: [DashboardApiService, provideHttpClientTesting()],
         });
 
         service = TestBed.inject(DashboardApiService);
@@ -34,20 +36,20 @@ describe('DashboardApiService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('GET: ', function () {
-        const container = encodeBase64Url('http://localhost/container');
-        const id = encodeBase64Url('http://localhost/document');
-        const smId = encodeBase64Url('http://localhost/submodel');
-        const path = 'Blob';
-        const url = `/api/v1/endpoints/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
-        const value = btoa('Hello World!');
+    describe('getBlobValue', () => {
+        it('should retrieve blob value', async () => {
+            const container = encodeBase64Url('http://localhost/container');
+            const id = encodeBase64Url('http://localhost/document');
+            const smId = encodeBase64Url('http://localhost/submodel');
+            const path = 'Blob';
+            const url = `/api/v1/endpoints/${container}/documents/${id}/submodels/${smId}/blobs/${path}/value`;
+            const value = btoa('Hello World!');
+            const promise = lastValueFrom(service.getBlobValue(url));
 
-        service.getBlobValue(url).subscribe(value => {
-            expect(value).toEqual(value);
+            TestBed.tick();
+            httpTestingController.expectOne(url).flush(value);
+            await TestBed.inject(ApplicationRef).whenStable();
+            expect(await promise).toBe(value);
         });
-
-        const req = httpTestingController.expectOne(url);
-        expect(req.request.method).toEqual('GET');
-        req.flush(value);
     });
 });

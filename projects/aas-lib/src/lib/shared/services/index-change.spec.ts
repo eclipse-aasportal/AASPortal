@@ -42,7 +42,6 @@ describe('IndexChange', () => {
                     provide: DocumentCache,
                     useValue: cache,
                 },
-                provideHttpClient(),
                 provideHttpClientTesting(),
             ],
         });

@@ -78,11 +78,11 @@ describe('UpdateEndpointForm', () => {
         ] satisfies AASEndpoint[]);
 
         fixture.detectChanges();
-        httpController.verify();
-        await TestBed.inject(ApplicationRef).whenStable();
+        await fixture.whenStable();
     });
 
     afterEach(() => {
+        httpController.verify();
         vi.restoreAllMocks();
         vi.resetAllMocks();
         vi.clearAllMocks();

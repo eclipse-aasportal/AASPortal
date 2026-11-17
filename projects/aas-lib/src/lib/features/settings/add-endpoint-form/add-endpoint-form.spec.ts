@@ -6,7 +6,7 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -56,8 +56,11 @@ describe('AddEndpointForm', () => {
         ] satisfies AASEndpoint[]);
 
         fixture.detectChanges();
+        await fixture.whenStable();
+    });
+
+    afterEach(() => {
         httpController.verify();
-        await TestBed.inject(ApplicationRef).whenStable();
     });
 
     it('should create', () => {

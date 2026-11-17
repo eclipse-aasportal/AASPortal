@@ -163,6 +163,7 @@ describe('DocumentContent', () => {
 
         fixture = TestBed.createComponent(DocumentContent);
         component = fixture.componentInstance;
+        fixture.detectChanges();
         await fixture.whenStable();
     });
 
