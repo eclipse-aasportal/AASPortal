@@ -9,11 +9,11 @@
 import { container } from 'tsyringe';
 import { DatabaseSync, StatementSync } from 'node:sqlite';
 import { AASEndpointAuth, UserRole } from 'aas-core';
+import { LOGGER, Logger } from 'aas-package';
 
 import { Rights, UserRightsStore } from './user-rights-store.js';
 import { SqliteConnectionProvider } from '../sqlite-connection-provider.js';
 import { Variable } from '../variable.js';
-import { LOGGER, Logger } from 'aas-package';
 
 const initDatabase = `
 CREATE TABLE IF NOT EXISTS userRights (
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS userRights (
 );
 `;
 
-export class SqliteUserRightsStore extends UserRightsStore {
+export class SqliteUserRightsStore implements UserRightsStore {
     private readonly logger: Logger = container.resolve(LOGGER);
     private readonly connectionProvider = container.resolve(SqliteConnectionProvider);
     private readonly variable = container.resolve(Variable);
@@ -36,8 +36,6 @@ export class SqliteUserRightsStore extends UserRightsStore {
     private readonly deleteUserRightsSql: StatementSync;
 
     public constructor() {
-        super();
-
         this.db = this.connectionProvider.getConnection(this.variable.USER_RIGHTS_STORE);
         this.db.exec(initDatabase);
         this.getUserRoleSql = this.db.prepare('SELECT role FROM userRights WHERE id = ?');
@@ -47,10 +45,12 @@ export class SqliteUserRightsStore extends UserRightsStore {
         this.updateUserRightsEndpointsSql = this.db.prepare('UPDATE userRights SET endpoints = ? WHERE id = ?');
         this.deleteUserRightsSql = this.db.prepare('DELETE FROM userRights WHERE id = ?');
 
+        this.setupDefaultAdmin();
+
         this.logger.info(`Using SQLite user rights store "${this.variable.USER_RIGHTS_STORE}".`);
     }
 
-    public override async getRole(userId: string): Promise<UserRole> {
+    public async getRole(userId: string): Promise<UserRole> {
         const value = this.getUserRoleSql.get(userId);
         if (!value) {
             return 'viewer';
@@ -59,7 +59,7 @@ export class SqliteUserRightsStore extends UserRightsStore {
         return value.role as UserRole;
     }
 
-    public override async getEndpoints(userId: string): Promise<AASEndpointAuth[]> {
+    public async getEndpoints(userId: string): Promise<AASEndpointAuth[]> {
         const value = this.getEndpointsSql.get(userId);
         if (!value) {
             return [];
@@ -68,11 +68,11 @@ export class SqliteUserRightsStore extends UserRightsStore {
         return JSON.parse(String(value.endpoints));
     }
 
-    public override async add(userId: string, rights: Rights): Promise<void> {
+    public async add(userId: string, rights: Rights): Promise<void> {
         this.addUserRightsSql.run(userId, rights.role, JSON.stringify(rights.endpoints));
     }
 
-    public override async update(userId: string, rights: Partial<Rights>): Promise<void> {
+    public async update(userId: string, rights: Partial<Rights>): Promise<void> {
         if (rights.role !== undefined) {
             this.updateUserRightsRoleSql.run(rights.role, userId);
         }
@@ -82,7 +82,20 @@ export class SqliteUserRightsStore extends UserRightsStore {
         }
     }
 
-    public override async delete(userId: string): Promise<void> {
+    public async delete(userId: string): Promise<void> {
         this.deleteUserRightsSql.run(userId);
+    }
+
+    private setupDefaultAdmin(): void {
+        const adminId = this.variable.DEFAULT_ADMIN;
+        if (!adminId) {
+            return;
+        }
+
+        const value = this.getUserRoleSql.get(adminId);
+        if (!value) {
+            this.addUserRightsSql.run(adminId, 'admin', JSON.stringify([]));
+            this.logger.info(`"${adminId}" is set up as default admin.`);
+        }
     }
 }

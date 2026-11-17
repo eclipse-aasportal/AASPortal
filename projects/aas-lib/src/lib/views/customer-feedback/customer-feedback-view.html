@@ -13,7 +13,7 @@
                 number}})</span>
         </div>
         <div class="col fs-3 text-warning text-end">
-            @for (starClassName of starClassNames(); track starClassName) {
+            @for (starClassName of starClassNames(); track $index) {
             <i [class]="starClassName"></i><span>&nbsp;</span>
             }
             <span class="text-body">{{stars() | number: '1.1-1'}}</span>
@@ -36,7 +36,7 @@
     <div [class]="i % 2 === 0 ? 'd-flex flex-column mb-3' : 'd-flex flex-column mb-3 bg-secondary bg-opacity-10'">
         <div class="d-flex">
             <div class="text-warning">
-                @for (star of feedback.stars; track star) {
+                @for (star of feedback.stars; track $index) {
                 <i [class]="star"></i><span>&nbsp;</span>
                 }
             </div>

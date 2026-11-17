@@ -12,7 +12,7 @@ import { parentPort } from 'worker_threads';
 import { LOGGER, LoggerProxy } from 'aas-package';
 import { IndexApp } from './index/index-app.js';
 import { AAS_INDEX } from './index/aas-index.js';
-import { MySqlIndex } from './index/mysql-index.js';
+import { MdbIndex } from './index/mdb-index.js';
 import { Variable } from './variable.js';
 import { SqliteIndex } from './index/sqlite-index.js';
 
@@ -25,7 +25,7 @@ container.register(AAS_INDEX, {
     useFactory: instanceCachingFactory(c => {
         const url = c.resolve(Variable).AAS_INDEX.toLocaleLowerCase();
         if (url.startsWith('mysql:')) {
-            return c.resolve(MySqlIndex);
+            return c.resolve(MdbIndex);
         }
 
         return c.resolve(SqliteIndex);

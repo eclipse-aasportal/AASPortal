@@ -11,7 +11,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { CustomerFeedbackViewState } from './customer-feedback-view.state';
 
-describe.skip('CustomerFeedbackViewState', () => {
+describe('CustomerFeedbackViewState', () => {
     let service: CustomerFeedbackViewState;
 
     beforeEach(() => {

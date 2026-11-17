@@ -6,10 +6,9 @@
  *
  *****************************************************************************/
 
-import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { ApplicationRef } from '@angular/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AASEndpoint, AASEndpointAuth } from 'aas-core';
@@ -79,9 +78,15 @@ describe.skip('EndpointAuthForm', () => {
             },
         ] satisfies AASEndpoint[]);
 
-        await TestBed.inject(ApplicationRef).whenStable();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
         endpointSelect = fixture.debugElement.nativeElement.querySelector('#AID_SELECT_ENDPOINT');
         authSelect = fixture.debugElement.nativeElement.querySelector('#AID_SELECT_AUTHORIZATION');
+    });
+
+    afterEach(() => {
+        httpController.verify();
     });
 
     it('should create', () => {

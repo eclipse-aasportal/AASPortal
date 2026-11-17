@@ -12,7 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { httpResource } from '@angular/common/http';
 import { catchError, from, lastValueFrom, map, mergeMap, Observable, of, Subject, switchMap } from 'rxjs';
 import { AASCursor, AASDocument, AASDocumentId, AASPagedResult } from 'aas-core';
-import { AuthService, CookieService, encodeBase64Url, EndpointsApi } from 'aas-lib';
+import { AuthService, CookieService, encodeBase64Url, EndpointsApi, IndexChange } from 'aas-lib';
 import { FavoritesService } from './favorites.service';
 
 export interface EndpointItem {
@@ -58,6 +58,7 @@ export class ShellsState {
     private readonly translate = inject(TranslateService);
     private readonly favorites = inject(FavoritesService);
     private readonly api = inject(EndpointsApi);
+    private readonly indexChange = inject(IndexChange);
     private readonly limit$ = signal(initialData.limit);
     private readonly selected$ = signal(initialData.selected);
     private readonly position$ = signal(initialData.position);
@@ -96,11 +97,13 @@ export class ShellsState {
             }
 
             const value = await lastValueFrom(this.cookies.getCookie(cookieName));
-            const items = (await lastValueFrom(this.api.getEndpoints())).map(endpoint => ({
-                name: endpoint.name,
-                checked: false,
-                locked: endpoint.headers ? Object.keys(endpoint.headers).length > 0 : false,
-            }));
+            const items = (await lastValueFrom(this.api.getEndpoints()))
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(endpoint => ({
+                    name: endpoint.name,
+                    checked: false,
+                    locked: endpoint.headers ? Object.keys(endpoint.headers).length > 0 : false,
+                }));
 
             if (value) {
                 const { limit, filterText, endpoints } = JSON.parse(value) as PageOptions;
@@ -114,6 +117,25 @@ export class ShellsState {
             } else {
                 this.update({ endpoints: items });
             }
+        });
+
+        effect(async () => {
+            this.indexChange.endpointCount();
+            const checked = new Set(
+                untracked(this.endpoints$)
+                    .filter(endpoint => endpoint.checked)
+                    .map(endpoint => endpoint.name),
+            );
+
+            const items = (await lastValueFrom(this.api.getEndpoints()))
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(endpoint => ({
+                    name: endpoint.name,
+                    checked: checked.has(endpoint.name),
+                    locked: endpoint.headers ? Object.keys(endpoint.headers).length > 0 : false,
+                }));
+
+            this.update({ endpoints: items });
         });
 
         this.subject

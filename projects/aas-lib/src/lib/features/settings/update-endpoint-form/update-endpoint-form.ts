@@ -49,6 +49,7 @@ interface EndpointItem {
 
 interface UpdateEndpointModel {
     endpoint: string;
+    scheduleTypes: AASEndpointScheduleType[];
     items: EndpointItem[];
 }
 
@@ -66,6 +67,9 @@ function ItemSchema(item: SchemaPathTree<EndpointItem>): void {
         }
 
         return null;
+    });
+    required(item.schedule, {
+        message: 'UpdateEndpointForm.SCHEDULE_REQUIRED',
     });
     min(item.minutes, 0, { message: 'UpdateEndpointForm.ERROR_MINUTES' });
     max(item.minutes, 59, { message: 'UpdateEndpointForm.ERROR_MINUTES' });
@@ -100,13 +104,12 @@ export class UpdateEndpointForm {
     private readonly toDelete: string[] = [];
     private readonly _deleting = signal<string | undefined>(undefined);
     private readonly _templates = signal<EndpointTemplate[]>(templates);
-
-    private readonly _endpoints = httpResource<AASEndpoint[]>(() => '/api/v1/endpoints');
-
     private readonly _template = signal<EndpointTemplate>(this._templates()[0]);
+    private readonly _endpoints = httpResource<AASEndpoint[]>(() => '/api/v1/endpoints');
 
     private readonly model = signal<UpdateEndpointModel>({
         endpoint: '',
+        scheduleTypes: ['disabled', 'manual', 'once', 'every'],
         items: [],
     });
 
@@ -121,7 +124,7 @@ export class UpdateEndpointForm {
                 .value()
                 .map(endpoint => {
                     const header = endpoint.headers ? Object.entries(endpoint.headers).at(0) : undefined;
-                    const schedule = endpoint.schedule ? endpoint.schedule.type : 'every';
+                    const schedule = endpoint.schedule?.type ?? 'every';
                     let hours = 0;
                     let minutes = 0;
                     if (schedule === 'every') {
@@ -206,14 +209,9 @@ export class UpdateEndpointForm {
             return;
         }
 
-        // The confirm-by-typing-the-name prompt above is already the user's explicit confirmation,
-        // so the endpoint is removed immediately here instead of only being staged for the separate
-        // "OK" button -- previously, deleting only spliced the row out of this modal's local state,
-        // so dismissing the dialog (or simply forgetting to click "OK" afterward) silently discarded
-        // the deletion and the endpoint reappeared after a reload.
         this._deleting.set(name);
         try {
-            await firstValueFrom(this.api.removeEndpoint(name));
+            await firstValueFrom(this.api.deleteEndpoint(name));
             this.notify.info('Settings.AAS_ENDPOINT_DELETED', { endpoint: name });
             this._endpoints.reload();
         } catch (error) {
@@ -315,6 +313,11 @@ export class UpdateEndpointForm {
         }
 
         if (existing.url !== endpoint.url || existing.type !== endpoint.type) {
+            return true;
+        }
+
+        const existingVersion = existing.type === 'AAS_API' ? (existing.version ?? 'v3') : undefined;
+        if (existingVersion !== endpoint.version) {
             return true;
         }
 
