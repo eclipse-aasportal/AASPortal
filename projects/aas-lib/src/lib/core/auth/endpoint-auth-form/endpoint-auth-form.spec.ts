@@ -57,6 +57,7 @@ describe('EndpointAuthForm', () => {
             },
         ] satisfies AASEndpointAuth[]);
 
+        TestBed.tick();
         httpController.expectOne('/api/v1/endpoints').flush([
             {
                 name: 'Endpoint A',
