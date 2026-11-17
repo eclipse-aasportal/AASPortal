@@ -12,12 +12,14 @@ import { ContactInformationView } from './contact-information/contact-informatio
 import { CustomerFeedbackView } from './customer-feedback/customer-feedback-view';
 import { DigitalProductPassportView } from './digital-product-passport/digital-product-passport-view';
 import { DocumentBrowserView } from './document-browser/document-browser-view';
+import { GenericSubmodelView } from './generic-submodel/generic-submodel-view';
 import { HandoverDocumentationView } from './handover-documentation/handover-documentation-view';
 import { NameplateView } from './nameplate/nameplate-view';
 import { OperationalDataView } from './operational-data/operational-data-view';
 import { TechnicalDataView } from './technical-data/technical-data-view';
 import { HierarchicalStructureView } from './hierarchical-structure/hierarchical-structure-view';
 import { ServiceRequestNotification } from './service-request-notification/service-request-notification';
+import { SensorMeasurementValueView } from './sensor-measurement-value/sensor-measurement-value-view';
 import {
     CARBON_FOOTPRINT_0_9,
     CARBON_FOOTPRINT_1_0,
@@ -32,8 +34,10 @@ import {
     NAMEPLATE_FHG,
     NAMEPLATE_HSU,
     TECHNICAL_DATA_1_2,
+    SENSOR_MEASUREMENT_VALUE_1_0,
 } from './views-constants';
 import { AssetStatus } from './asset-status/asset-status';
+import { DocumentContent } from './document-content/document-content';
 
 /** The routes to the specific views. */
 export const viewRoutes: ViewRoute[] = [
@@ -69,6 +73,13 @@ export const viewRoutes: ViewRoute[] = [
         },
     },
     {
+        path: 'content',
+        component: DocumentContent,
+        data: {
+            type: 'Default',
+        },
+    },
+    {
         path: 'CustomerFeedback',
         component: CustomerFeedbackView,
         data: {
@@ -82,6 +93,13 @@ export const viewRoutes: ViewRoute[] = [
         data: {
             type: 'Composition',
             routes: ['Nameplate', 'CarbonFootprint', 'HandoverDocumentation'],
+        },
+    },
+    {
+        path: 'generic-submodel',
+        component: GenericSubmodelView,
+        data: {
+            type: 'DefaultSubmodel',
         },
     },
     {
@@ -109,7 +127,7 @@ export const viewRoutes: ViewRoute[] = [
         },
     },
     {
-        path: 'OperationalData',
+        path: 'operational-data',
         component: OperationalDataView,
         data: {
             type: 'Leaf',
@@ -130,6 +148,14 @@ export const viewRoutes: ViewRoute[] = [
         data: {
             type: 'Leaf',
             idShorts: ['ServiceRequestNotification'],
+        },
+    },
+    {
+        path: 'sensor-measurement-value',
+        component: SensorMeasurementValueView,
+        data: {
+            type: 'Leaf',
+            semanticIds: [SENSOR_MEASUREMENT_VALUE_1_0],
         },
     },
     {

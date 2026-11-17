@@ -6,9 +6,8 @@
  *
  *****************************************************************************/
 
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, map, mergeMap, skipWhile } from 'rxjs';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { lastValueFrom, Observable } from 'rxjs';
 import { AASDocument } from 'aas-core';
 import { AuthService, CookieService } from 'aas-lib';
 
@@ -25,57 +24,57 @@ const cookieName = 'v2.Favorites';
 export class FavoritesService {
     private readonly auth = inject(AuthService);
     private readonly cookies = inject(CookieService);
-    private readonly state$ = signal<FavoritesState>({ active: '', items: [] });
+    private readonly state = signal<FavoritesState>({ active: '', items: [] });
 
     public constructor() {
-        this.auth.ready
-            .pipe(
-                skipWhile(ready => ready === false),
-                takeUntilDestroyed(),
-                mergeMap(() => this.cookies.getCookie(cookieName)),
-                map(value => {
-                    if (value) {
-                        this.state$.set(JSON.parse(value));
-                    }
-                }),
-            )
-            .subscribe();
+        effect(async () => {
+            this.auth.user();
+            const value = await lastValueFrom(this.cookies.getCookie(cookieName));
+            if (value) {
+                try {
+                    const state = JSON.parse(value) as FavoritesState;
+                    this.state.set(state);
+                } catch (error) {
+                    console.error(`Failed to parse favorites cookie: ${error}`);
+                }
+            }
+        });
     }
 
-    public readonly items = computed(() => this.state$().items);
+    public readonly items = computed(() => this.state().items);
 
-    public readonly active = computed(() => this.state$().active);
+    public readonly active = computed(() => this.state().active);
 
     public has(name: string): boolean {
-        return this.state$().items.some(list => list.name === name);
+        return this.state().items.some(list => list.name === name);
     }
 
     public get(name: string): FavoritesList | undefined {
-        return this.state$().items.find(list => list.name === name);
+        return this.state().items.find(list => list.name === name);
     }
 
     public add(documents: AASDocument[], name: string, newName?: string): void {
-        return this.state$.update(state => this.addFavorites(state, documents, name, newName));
+        return this.state.update(state => this.addFavorites(state, documents, name, newName));
     }
 
     public remove(documents: AASDocument[], name: string): void {
-        this.state$.update(state => this.removeFavorites(state, documents, name));
+        this.state.update(state => this.removeFavorites(state, documents, name));
     }
 
     public delete(name: string): void {
-        this.state$.update(state => this.deleteFavoritesList(state, name));
+        this.state.update(state => this.deleteFavoritesList(state, name));
     }
 
     public setActive(name: string): void {
-        this.state$.update(state => ({ ...state, active: name }));
+        this.state.update(state => ({ ...state, active: name }));
     }
 
     public save(): Observable<void> {
-        if (this.state$().items.length === 0) {
+        if (this.state().items.length === 0) {
             return this.cookies.deleteCookie(cookieName);
         }
 
-        return this.cookies.setCookie(cookieName, JSON.stringify(this.state$()));
+        return this.cookies.setCookie(cookieName, JSON.stringify(this.state()));
     }
 
     private addFavorites(

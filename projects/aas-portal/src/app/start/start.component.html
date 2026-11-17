@@ -6,7 +6,7 @@
  !
  !---------------------------------------------------------------------------->
 
-<div id="start-page" class="overflow-auto h-100 px-2">
+<div class="overflow-y-auto overflow-x-hidden h-100 w-100 px-3">
     @if (isEmpty()) {
         @let html = welcome();
         @if (html) {
@@ -19,10 +19,20 @@
             </div>
         }
     } @else {
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
-            @for (item of items(); track item; let i = $index) {
-                <div class="p-2 rounded col" [class.bg-info-subtle]="item.selected()" style="min-width: 380px">
-                    <div class="card" (click)="toggleSelected($event, item)" tabindex="0">
+        <div
+            class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-xl-3"
+            cdkDropList
+            cdkDropListOrientation="mixed"
+            (cdkDropListDropped)="drop($event)"
+        >
+            @for (item of items(); track item.id; let i = $index) {
+                <div class="p-2 rounded col" [class.bg-info-subtle]="item.selected()" cdkDrag>
+                    <div
+                        class="card overflow-hidden"
+                        (click)="toggleSelected($event, item)"
+                        tabindex="0"
+                        style="height: 280px"
+                    >
                         <ng-container
                             [ngComponentOutlet]="item.component"
                             [ngComponentOutletInputs]="item.inputs"
@@ -35,33 +45,66 @@
 </div>
 
 <ng-template #toolbar>
-    <div class="input-group me-2 my-1">
-        <button
-            id="AID_REMOVE"
-            class="btn btn-primary"
-            type="button"
-            (click)="remove().subscribe()"
-            [disabled]="!someSelected()"
-        >
-            <i class="bi bi-trash"></i>
-        </button>
-        <button
-            id="AID_MOVE_LEFT"
-            class="btn btn-primary"
-            type="button"
-            (click)="moveLeft().subscribe()"
-            [disabled]="!canMoveLeft()"
-        >
-            <i class="bi bi-arrow-left"></i>
-        </button>
-        <button
-            id="AID_MOVE_RIGHT"
-            class="btn btn-primary"
-            type="button"
-            (click)="moveRight().subscribe()"
-            [disabled]="!canMoveRight()"
-        >
-            <i class="bi bi-arrow-right"></i>
-        </button>
+    <div class="w-100">
+        <div class="mb-1">
+            <h2 translate="Start.CAPTION"></h2>
+        </div>
     </div>
+
+    @if (someSelected()) {
+        <div class="fhg-hidden-selected-bar">
+            <div
+                class="d-flex flex-row align-items-center px-3 bg-secondary-subtle me-2 my-1 border border-black border-opacity-25 rounded-3"
+            >
+                <div class="d-flex flex-row align-items-center text-white mx-2">
+                    <button type="button" class="btn text-primary" (click)="deselect()">
+                        <i class="bi bi-x fs-3"></i>
+                    </button>
+                    <span>{{ selectedItems().length }} selected</span>
+                </div>
+                <div class="vr vertical-line text-white"></div>
+                <button
+                    id="AID_REMOVE"
+                    class="btn text-danger bg-danger-subtle"
+                    type="button"
+                    (click)="remove().subscribe()"
+                    ngbTooltip="{{ 'Start.REMOVE_TOOLTIP' | translate }}"
+                    placement="top"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-trash"></i>
+                </button>
+                @if (canMoveLeft()) {
+                    <button
+                        id="AID_MOVE_LEFT"
+                        class="btn text-primary bg-primary-subtle ms-2"
+                        type="button"
+                        (click)="moveLeft().subscribe()"
+                        ngbTooltip="{{ 'Start.MOVE_LEFT_TOOLTIP' | translate }}"
+                        placement="top"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                }
+
+                @if (canMoveRight()) {
+                    <button
+                        id="AID_MOVE_RIGHT"
+                        class="btn text-primary bg-primary-subtle ms-2"
+                        type="button"
+                        (click)="moveRight().subscribe()"
+                        ngbTooltip="{{ 'Start.MOVE_RIGHT_TOOLTIP' | translate }}"
+                        placement="top"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    }
 </ng-template>

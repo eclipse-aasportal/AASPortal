@@ -457,7 +457,7 @@ app.get('/download/:id', (req, res) => {
 // Connection pooling
 const pool = mysql.createPool({
     host: 'localhost',
-    user: 'user',
+    user: 'viewer',
     database: 'aas',
     connectionLimit: 10,
     acquireTimeout: 60000,
@@ -541,13 +541,13 @@ npm run lint -ws
 **Multi-stage Dockerfile:**
 ```dockerfile
 # Build stage
-FROM node:24.15.0-alpine AS build
+FROM node:24.22.1-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
 # Production stage
-FROM node:24.15.0-alpine AS production
+FROM node:24.22.1-alpine AS production
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nodejs -u 1001
 USER nodejs

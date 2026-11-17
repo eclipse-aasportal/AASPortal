@@ -6,87 +6,170 @@
  !
  !---------------------------------------------------------------------------->
 
-<div id="fhg-dashboard-container" class="overflow-y-auto overflow-x-hidden container-fluid h-100 w-100">
-    @if (!isEmpty()) {
-    @if (firstItems().length > 0) {
-    <div class="row">
-        @for (item of firstItems(); track item) {
-        <div class="col" (click)="toggleSelection($event, item)" (keydown.enter)="toggleSelection($event, item)"
-            tabindex="-1">
-            <div class="h-auto my-1 w-auto border border-2 rounded" [class.border-info]="item.selected()">
-                @if (!editMode()) {
+<div class="overflow-y-auto overflow-x-hidden px-3 h-100 w-100">
+    @let chartItems = items();
+    @if (chartItems.length === 1) {
+        @let item = chartItems[0];
+        <div class="h-auto w-auto border border-2 rounded" [class.border-info]="item.selected()">
+            @if (!editMode()) {
                 <canvas #chart [id]="item.id"></canvas>
-                }
-                @else {
+            } @else {
                 <fhg-chart-edit [item]="item"></fhg-chart-edit>
-                }
-            </div>
+            }
         </div>
-        }
-    </div>
-    }
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
-        @for (item of items(); track item) {
-        <div class="col" (click)="toggleSelection($event, item)" (keydown.enter)="toggleSelection($event, item)"
-            tabindex="-1">
-            <div class="mx-auto my-1 h-auto w-auto border border-2 rounded" [class.border-info]="item.selected()">
-                @if (!editMode()) {
-                <canvas #chart [id]="item.id"></canvas>
-                }
-                @else {
-                <fhg-chart-edit [item]="item"></fhg-chart-edit>
-                }
-            </div>
+    } @else if (chartItems.length > 1) {
+        <div class="row row-cols-1 row-cols-lg-2">
+            @for (item of chartItems; track item.id) {
+                <div
+                    class="col"
+                    (click)="toggleSelection($event, item)"
+                    (keydown.enter)="toggleSelection($event, item)"
+                    tabindex="-1"
+                >
+                    <div class="my-1 h-auto w-auto border border-2 rounded" [class.border-info]="item.selected()">
+                        @if (!editMode()) {
+                            <canvas #chart [id]="item.id"></canvas>
+                        } @else {
+                            <fhg-chart-edit [item]="item"></fhg-chart-edit>
+                        }
+                    </div>
+                </div>
+            }
         </div>
-        }
-    </div>
     } @else {
-    <div class="alert alert-info text-center mt-2" role="alert">{{'Dashboard.EMPTY' | translate}}</div>
+        <div class="alert alert-info text-center mt-2" role="alert">{{ 'Dashboard.EMPTY' | translate }}</div>
     }
 </div>
 
 <ng-template #dashboardToolbar>
-    <div class="input-group me-2 my-1">
-        <button class="btn btn-primary" type="button" (click)="addToStart().subscribe()">
-            <i class="bi bi-house-add"></i>
-        </button>
-    </div>
-    <div class="input-group me-2 my-1">
-        <select #select class="form-select" [ngModel]="activePage()" (ngModelChange)="setActivePage($event)">
-            @for (page of pages(); track page) {
-            <option [ngValue]="page">{{page.name}}</option>
+    <div class="w-100 d-none d-sm-block">
+        <div class="mb-1">
+            <h2 translate="Dashboard.CAPTION"></h2>
+        </div>
+        <div class="d-flex flex-row">
+            <select
+                #select
+                class="form-select me-2 my-1 w-50"
+                [ngModel]="activePage()"
+                (ngModelChange)="setActivePage($event)"
+            >
+                @for (page of pages(); track page) {
+                    <option [ngValue]="page">{{ page.name }}</option>
+                }
+            </select>
+            <div class="form-check form-switch pt-2">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="toggleEditMode"
+                    [(ngModel)]="editMode"
+                />
+                <label class="form-check-label" for="toggleEditMode" translate="Dashboard.LABEL_EDIT_MODE"></label>
+            </div>
+
+            @if (editMode()) {
+                <div class="btn-group ms-2 my-1">
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="undo()"
+                        ngbTooltip="{{ 'Dashboard.UNDO_TOOLTIP' | translate }}"
+                        placement="top"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="redo()"
+                        ngbTooltip="{{ 'Dashboard.REDO_TOOLTIP' | translate }}"
+                        placement="top"
+                        [openDelay]="300"
+                        [closeDelay]="500"
+                    >
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+                <button type="button" class="btn btn-outline-primary ms-2 my-1" (click)="addNew()" [disabled]="">
+                    <i class="bi bi-plus"></i>
+                </button>
+                <button type="button" class="btn btn-outline-primary ms-2 my-1" (click)="rename()">
+                    <i class="bi bi-pen"></i>
+                </button>
+                <div class="btn-group ms-2 my-1">
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="movePrevious()"
+                        [disabled]="!canMovePrevious()"
+                    >
+                        <i class="bi bi-box-arrow-left"></i>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        (click)="moveNext()"
+                        [disabled]="!canMoveNext()"
+                    >
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </div>
             }
-        </select>
-        <button type="button" class="btn btn-primary" (click)="addNew()" [disabled]="!editMode()">
-            <i class="bi bi-plus"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="rename()" [disabled]="!editMode()">
-            <i class="bi bi-pen"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="delete()" [disabled]="!editMode()">
-            <i class="bi bi-trash"></i>
-        </button>
-    </div>
-    <div class="input-group me-2 my-1">
-        <div class="form-check form-switch pt-2">
-            <input class="form-check-input" type="checkbox" role="switch" id="toggleEditMode" [(ngModel)]="editMode">
-            <label class="form-check-label" for="toggleEditMode" translate>Dashboard.LABEL_EDIT_MODE</label>
         </div>
     </div>
-    <div class="btn-group me-2 my-1" [hidden]="!editMode()">
-        <button type="button" class="btn btn-primary" (click)="undo()" [disabled]="!canUndo()">
-            <i class="bi bi-arrow-counterclockwise"></i>
-        </button>
-        <button type="button" class="btn btn-primary" (click)="redo()" [disabled]="!canRedo()">
-            <i class="bi bi-arrow-clockwise"></i>
-        </button>
+
+    <!-- small screens -->
+    <div class="w-100 d-block d-sm-none">
+        <div class="mb-1">
+            <h2 translate="Dashboard.CAPTION"></h2>
+        </div>
+        <select #select class="form-select" [ngModel]="activePage()" (ngModelChange)="setActivePage($event)">
+            @for (page of pages(); track page) {
+                <option [ngValue]="page">{{ page.name }}</option>
+            }
+        </select>
     </div>
-    <div class="btn-group me-2 my-1" [hidden]="!editMode()">
-        <button type="button" class="btn btn-primary" (click)="movePrevious()" [disabled]="!canMovePrevious()">
-            <i class="bi bi-box-arrow-left"></i>
-       </button>
-        <button type="button" class="btn btn-primary" (click)="moveNext()" [disabled]="!canMoveNext()">
-            <i class="bi bi-box-arrow-right"></i>
-         </button>
-    </div>
+
+    @let selItem = selectedItem();
+    @if (selItem !== undefined) {
+        <div class="fhg-hidden-selected-bar">
+            <div
+                class="d-flex flex-row align-items-center px-3 bg-secondary-subtle me-2 my-1 border border-black border-opacity-25 rounded-3"
+            >
+                <div class="d-flex flex-row align-items-center text-white mx-2">
+                    <button type="button" class="btn text-primary" (click)="toggleSelection($event, selItem)">
+                        <i class="bi bi-x fs-3"></i>
+                    </button>
+                    <span>{{ selItem.label }} selected</span>
+                </div>
+
+                <div class="vr vertical-line text-white"></div>
+                <button
+                    class="btn text-primary bg-primary-subtle ms-2"
+                    type="button"
+                    (click)="addToStart().subscribe()"
+                    ngbTooltip="{{ 'Dashboard.ADD_TO_START_TOOLTIP' | translate }}"
+                    placement="top"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-house-add"></i>
+                </button>
+                <button
+                    type="button"
+                    class="btn text-primary bg-primary-subtle ms-2"
+                    (click)="delete()"
+                    ngbTooltip="{{ 'Dashboard.DELETE_TOOLTIP' | translate }}"
+                    placement="top"
+                    [openDelay]="300"
+                    [closeDelay]="500"
+                >
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    }
 </ng-template>

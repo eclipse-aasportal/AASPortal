@@ -6,9 +6,10 @@
  *
  *****************************************************************************/
 
-import { inject, singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import { AASEndpoint, ApplicationError } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
+import semver from 'semver';
 import { EndpointClient } from './endpoint-client.js';
 import { AasxDirectory } from './fs/aasx-directory.js';
 import { ApiClientV3 } from './api/api-client-v3.js';
@@ -17,36 +18,37 @@ import { ERRORS } from '../errors.js';
 import { FileStorageProvider } from '../file-storage/file-storage-provider.js';
 import { ApiClientV1 } from './api/api-client-v1.js';
 import { HttpClient } from '../http-client.js';
+import { AAS_INDEX } from '../index/aas-index.js';
 
 @singleton()
 export class EndpointClientFactory {
-    public constructor(
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(FileStorageProvider) private readonly fileStorageProvider: FileStorageProvider,
-        @inject(HttpClient) private readonly http: HttpClient,
-    ) {}
+    private readonly logger = container.resolve<Logger>(LOGGER);
+    private readonly index = container.resolve(AAS_INDEX);
+    private readonly fileStorageProvider = container.resolve(FileStorageProvider);
+    private readonly http = container.resolve(HttpClient);
 
     /**
      * Creates a concrete realization of an endpoint client.
      * @param endpoint The endpoint.
      * @returns A new instance of an endpoint client.
      */
-    public create(endpoint: AASEndpoint): EndpointClient {
+    public create(endpoint: AASEndpoint, auth?: Record<string, string>): EndpointClient {
         switch (endpoint.type) {
-            case 'AAS_API':
-                switch (endpoint.version) {
-                    case 'v3':
-                        return new ApiClientV3(this.logger, this.http, endpoint);
-                    case 'v1':
-                        return new ApiClientV1(this.logger, this.http, endpoint);
-                    default:
-                        throw new Error(`AASX server version ${endpoint.version} is not supported.`);
+            case 'AAS_API': {
+                const version = semver.coerce(endpoint.version) ?? '3.0.0';
+                if (semver.satisfies(version, ApiClientV3.version)) {
+                    return new ApiClientV3(this.logger, this.index, endpoint, auth, this.http);
+                } else if (semver.satisfies(version, ApiClientV1.version)) {
+                    return new ApiClientV1(this.logger, this.index, endpoint, auth, this.http);
                 }
+
+                throw new ApplicationError(`AAS server version ${version} is not supported.`, {}, 500);
+            }
             case 'OPC_UA':
-                return new OpcuaClient(this.logger, endpoint);
+                return new OpcuaClient(this.logger, this.index, endpoint);
             case 'WebDAV':
             case 'FileSystem': {
-                return new AasxDirectory(this.logger, this.fileStorageProvider.get(endpoint.url), endpoint);
+                return new AasxDirectory(this.logger, this.index, endpoint, this.fileStorageProvider.get(endpoint.url));
             }
             default:
                 throw new Error('Not implemented.');
@@ -57,31 +59,38 @@ export class EndpointClientFactory {
      * Tests whether the specified URL is a valid and supported AAS endpoint.
      * @param endpoint The endpoint to test.
      */
-    public async testAsync(endpoint: AASEndpoint): Promise<void> {
+    public async testAsync(endpoint: AASEndpoint, auth: Record<string, string> | undefined): Promise<void> {
         try {
             switch (endpoint.type) {
-                case 'AAS_API':
+                case 'AAS_API': {
                     switch (endpoint.version) {
                         case 'v3':
-                            await new ApiClientV3(this.logger, this.http, endpoint).test();
+                            await new ApiClientV3(this.logger, this.index, endpoint, auth, this.http).test();
                             break;
                         case 'v1':
-                            await new ApiClientV1(this.logger, this.http, endpoint).test();
+                            await new ApiClientV1(this.logger, this.index, endpoint, auth, this.http).test();
                             break;
                         default:
-                            throw new Error(`API server version ${endpoint.version} is not supported.`);
+                            throw new ApplicationError(
+                                `AAS server version ${endpoint.version} is not supported.`,
+                                {},
+                                500,
+                            );
                     }
+
                     break;
+                }
                 case 'OPC_UA':
-                    await new OpcuaClient(this.logger, endpoint).test();
+                    await new OpcuaClient(this.logger, this.index, endpoint).test();
                     break;
                 case 'WebDAV':
                 case 'FileSystem':
                     {
                         await new AasxDirectory(
                             this.logger,
-                            this.fileStorageProvider.get(endpoint.url),
+                            this.index,
                             endpoint,
+                            this.fileStorageProvider.get(endpoint.url),
                         ).test();
                     }
                     break;
@@ -102,7 +111,7 @@ export class EndpointClientFactory {
 
             this.logger.error(`Endpoint validation failed for ${endpoint.url}: ${error?.message || 'Unknown error'}`);
 
-            throw new ApplicationError(ERRORS.InvalidEndpointUrl, { message, url: endpoint.url });
+            throw new ApplicationError(ERRORS.INVALID_ENDPOINT_URL, { message, url: endpoint.url });
         }
     }
 }

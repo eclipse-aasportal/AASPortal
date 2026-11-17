@@ -20,6 +20,11 @@
         "FILE_SUCCESSFULLY_DOWNLOADED": "{{file}} was successfully downloaded.",
         "FILE_SUCCESSFULLY_UPLOADED": "{{file}} was successfully uploaded."
     },
+    "Main": {
+        "SHELLS": "Shells",
+        "AAS": "AAS",
+        "CONCEPT_DESCRIPTIONS": "Concept Descriptions"
+    },
     "Notify": {
         "CAPTION_INFO": "Info",
         "CAPTION_WARNING": "Warning",

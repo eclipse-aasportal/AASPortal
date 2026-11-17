@@ -79,7 +79,7 @@ export class Authentication {
 
         const data = await this.apiKeyHandler.get(apiKey);
         if (!data) {
-            throw new ApplicationError(ERROR.UNAUTHORIZED_ACCESS, {}, 401);
+            throw new ApplicationError(ERROR.UNAUTHENTICATED_ACCESS, {}, 401);
         }
 
         return { label: data.label };

@@ -6,12 +6,12 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { NgbActiveModal, NgbToast } from '@ng-bootstrap/ng-bootstrap';
 import { AASDocument, stringFormat } from 'aas-core';
 import { FavoritesService } from '../favorites.service';
 import { messageToString } from 'aas-lib';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective, TranslateService } from '@ngx-translate/core';
 
 export interface FavoritesItem {
     selected: boolean;
@@ -27,8 +27,7 @@ export interface FavoritesItem {
     selector: 'fhg-favorites-form',
     templateUrl: './favorites-form.component.html',
     styleUrls: ['./favorites-form.component.scss'],
-    imports: [NgbToast, TranslateModule],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgbToast, TranslateDirective],
 })
 export class FavoritesFormComponent {
     private _items = signal<FavoritesItem[]>([]);
@@ -82,14 +81,17 @@ export class FavoritesFormComponent {
         }
 
         if (this.documents.length === 0) {
-            return stringFormat(this.translate.instant('FavoritesForm.COUNT'), selectedItem.length);
+            return this.translate.instant('FavoritesForm.COUNT', { count: selectedItem.length });
         }
 
         if (this.documents.length === 1) {
-            return stringFormat(this.translate.instant('TEXT_ADD_FAVORITE'), selectedItem.length);
+            return this.translate.instant('FavoritesForm.ADD_FAVORITE', { count: selectedItem.length });
         }
 
-        return stringFormat(this.translate.instant('TEXT_ADD_FAVORITES'), this.documents.length, selectedItem.length);
+        return this.translate.instant('FavoritesForm.ADD_FAVORITES', {
+            length: this.documents.length,
+            count: selectedItem.length,
+        });
     });
 
     public delete(item: FavoritesItem): void {

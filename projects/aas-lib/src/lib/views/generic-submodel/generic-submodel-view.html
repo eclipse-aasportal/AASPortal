@@ -1,0 +1,57 @@
+<!-----------------------------------------------------------------------------
+ !
+ ! Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ ! eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ ! zur Foerderung der angewandten Forschung e.V.
+ !
+ !---------------------------------------------------------------------------->
+
+<div>
+    <div class="mt-1">
+        <fhg-doc-header [document]="document()"></fhg-doc-header>
+    </div>
+    <div class="mt-3">
+        <fhg-submodel-tree #submodelTree [submodel]="submodel()" [document]="document()"></fhg-submodel-tree>
+    </div>
+</div>
+
+<ng-template #toolbar>
+    <div class="w-100">
+        <div class="row mb-1">
+            <h2 class="col">{{ title() }}</h2>
+            <button
+                class="btn btn-outline-primary border-0 col-auto me-2"
+                type="button"
+                (click)="addToStart().subscribe()"
+                ngbTooltip="{{ 'GenericSubmodel.ADD_TO_START_TOOLTIP' | translate }}"
+                placement="bottom"
+                container="body"
+                [openDelay]="300"
+                [closeDelay]="500"
+            >
+                <i class="bi bi-house-add"></i>
+                <div class="d-none d-lg-inline px-2">
+                    <span translate="GenericSubmodel.ADD_TO_START"></span>
+                </div>
+            </button>
+        </div>
+        <div class="row mb-1">
+            <div class="col col-md-6 col-lg-4   ">
+                <div class="input-group">
+                    <i class="bi bi-search input-group-text"></i>
+                    <input
+                        type="search"
+                        class="form-control fs-7"
+                        placeholder="{{ 'GenericSubmodel.SEARCH_PLACEHOLDER' | translate }}"
+                        [ngModel]="submodelTree.query()"
+                        (ngModelChange)="submodelTree.setQuery($event)"
+                    />
+                    @let count = submodelTree.matchCount();
+                    @if (count >= 0) {
+                        <span class="fs-7 input-group-text">{{ count }} matches</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>

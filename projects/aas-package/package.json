@@ -1,6 +1,6 @@
 {
     "name": "aas-package",
-    "version": "3.7",
+    "version": "3.0.2",
     "description": "AASX package library.",
     "module": "./dist/aas-package.js",
     "main": "./dist/aas-package.js",
@@ -10,12 +10,14 @@
     "type": "module",
     "scripts": {
         "test": "rimraf src/test/assets/tmp && vitest --run",
+        "test:unit": "vitest --run --coverage=false",
         "watch": "vitest --watch --coverage=false",
-        "coverage": "node coverage-summary.js",
+        "coverage": "node merge-coverage.js",
         "build": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.prod.js",
         "build:debug": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.dev.js",
         "tsc": "rimraf build && tsc -p tsconfig.json",
         "lint": "eslint src/lib/**/*.ts",
-        "format": "eslint src/lib/**/*.ts --fix"
+        "format": "eslint src/lib/**/*.ts --fix",
+        "docs": "typedoc --out docs"
     }
 }

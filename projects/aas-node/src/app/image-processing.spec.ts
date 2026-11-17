@@ -1,0 +1,32 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { describe, it, expect } from 'vitest';
+import fs from 'fs';
+import { ImageProcessing } from './image-processing.js';
+import { fileURLToPath } from 'url';
+
+describe('image processing', function () {
+    it('resizes an image to 128 pixels in width', async () => {
+        const source = fs.createReadStream(fileURLToPath(new URL('../test/assets/thumbnail.jpg', import.meta.url)));
+        const stream = await ImageProcessing.resize(source, { w: 128 });
+        expect(stream).toBeTruthy();
+    });
+
+    it('resizes an image to 40 pixels in height', async () => {
+        const source = fs.createReadStream(fileURLToPath(new URL('../test/assets/thumbnail.jpg', import.meta.url)));
+        const stream = await ImageProcessing.resize(source, { h: 40 });
+        expect(stream).toBeTruthy();
+    });
+
+    it('converts a tiff-image to a png-image', async () => {
+        const source = fs.createReadStream(fileURLToPath(new URL('../test/assets/image.tiff', import.meta.url)));
+        const stream = await ImageProcessing.convert(source);
+        expect(stream).toBeTruthy();
+    });
+});

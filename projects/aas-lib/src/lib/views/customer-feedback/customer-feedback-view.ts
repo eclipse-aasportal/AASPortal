@@ -6,26 +6,15 @@
  *
  *****************************************************************************/
 
-import { TranslateDirective, TranslateService } from '@ngx-translate/core';
+import { TranslateDirective } from '@ngx-translate/core';
 import { DecimalPipe } from '@angular/common';
 import { EMPTY, Observable, Subscription } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    OnDestroy,
-    Signal,
-    TemplateRef,
-    computed,
-    effect,
-    inject,
-    viewChild,
-} from '@angular/core';
+import { Component, OnDestroy, TemplateRef, computed, effect, inject, viewChild } from '@angular/core';
 
 import { aas, AASDocument } from 'aas-core';
-import { ScoreComponent } from '../../components/score/score.component';
-import { ToolbarService } from '../../services/toolbar.service';
-import { StartService } from '../../services/start.service';
+import { ScoreComponent } from '../../shared/components/score/score.component';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
 import { encodeBase64Url, getDisplayName, hashCode } from '../../utilities';
 import { FeedbackItem, GeneralItem } from './customer-feedback.types';
 import { LeafView } from '../leaf-view';
@@ -40,22 +29,16 @@ const maxStars = 5;
     styleUrls: ['./customer-feedback-view.scss'],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'CustomerFeedback' }],
     imports: [ScoreComponent, DecimalPipe, TranslateDirective],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerFeedbackView extends LeafView implements OnDestroy {
     private readonly map = new Map<string, GeneralItem>();
     private readonly subscription = new Subscription();
-    private readonly currentLang: Signal<string>;
     private readonly toolbar = inject(ToolbarService);
     private readonly start = inject(StartService);
-    private readonly translate = inject(TranslateService);
     private readonly state = inject(CustomerFeedbackViewState);
 
     public constructor() {
         super();
-
-        const langChange = toSignal(this.translate.onLangChange);
-        this.currentLang = computed(() => langChange()?.lang ?? this.translate.getCurrentLang());
 
         effect(() => {
             const template = this.toolbarTemplate();

@@ -20,6 +20,7 @@
         "IDREFS",
         "IDTA",
         "Informations",
+        "innodb",
         "inoutput",
         "IOSB",
         "irdi",
@@ -35,7 +36,7 @@
         "NMTOKEN",
         "NMTOKENS",
         "nodebuffer",
-        "Oicd",
+        "Oidc",
         "opcua",
         "openxml",
         "opnxml",
@@ -50,6 +51,8 @@
         "rels",
         "selbstaendige",
         "Sematics",
+        "stopword",
+        "stopwords",
         "submodel",
         "submodels",
         "tseslint",
@@ -82,5 +85,10 @@
     "plantuml.exportOutDir": "read-the-docs/source/images",
     "plantuml.diagramsRoot": "read-the-docs/source",
     "plantuml.exportIncludeFolderHeirarchy": false,
-    "plantuml.exportSubFolder": false
+    "plantuml.exportSubFolder": false,
+    "editor.formatOnType": false,
+    "[sql]": {
+        "editor.defaultFormatter": "cweijan.vscode-mysql-client2"
+    },
+    "sqltools.useNodeRuntime": true
 }

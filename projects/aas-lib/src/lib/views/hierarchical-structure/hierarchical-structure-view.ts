@@ -11,17 +11,18 @@ import { Observable, of } from 'rxjs';
 
 import { LeafView } from '../leaf-view';
 import { encodeBase64Url } from '../../utilities';
-import { ToolbarService } from '../../services/toolbar.service';
-import { StartService } from '../../services/start.service';
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
 import { TranslateDirective } from '@ngx-translate/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { ThumbnailQRCode } from '../thumbnail-qrcode/thumbnail-qrcode';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
 import { HierarchicalStructure } from './hierarchical-structure';
 import { VIEW_ROUTE_NAME } from '../view-route-name';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'fhg-hierarchical-structure-view',
-    imports: [TranslateDirective, NgbPaginationModule, ThumbnailQRCode, HierarchicalStructure],
+    imports: [TranslateDirective, NgbPaginationModule, DocumentHeader, HierarchicalStructure, RouterLink],
     providers: [{ provide: VIEW_ROUTE_NAME, useValue: 'HierarchicalStructure' }],
     templateUrl: './hierarchical-structure-view.html',
     styleUrl: './hierarchical-structure-view.scss',
@@ -62,8 +63,9 @@ export class HierarchicalStructureView extends LeafView implements OnDestroy {
 
         const endpoint = document.endpoint;
         const id = document.id;
+        const caption = 'HierarchicalStructure.CAPTION';
         const href = `/views/HierarchicalStructures;endpoint=${encodeBase64Url(endpoint)};id=${encodeBase64Url(id)}`;
-        if (!this.start.add('Favorite', `HAS#${endpoint}#${id}`, { endpoint, id, href })) {
+        if (!this.start.add('Favorite', `HAS#${endpoint}#${id}`, { endpoint, id, caption, href })) {
             return of(void 0);
         }
 

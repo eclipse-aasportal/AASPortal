@@ -6,13 +6,13 @@
  *
  *****************************************************************************/
 
-import { ChangeDetectionStrategy, Component, computed, effect, input, untracked } from '@angular/core';
+import { Component, computed, effect, input, untracked } from '@angular/core';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AASDocument } from 'aas-core';
 
-import { DataSheet } from '../../components/data-sheet/data-sheet';
-import { ChildComponent } from '../../components/child-component';
+import { DataSheet } from '../../shared/components/data-sheet/data-sheet';
+import { ChildComponent } from '../../shared/components/child-component';
 import { TechnicalDataState } from './technical-data.state';
 
 /**
@@ -29,7 +29,6 @@ import { TechnicalDataState } from './technical-data.state';
     imports: [NgbAccordionModule, DataSheet],
     templateUrl: './technical-data.html',
     styleUrl: './technical-data.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TechnicalData extends ChildComponent {
     public constructor() {

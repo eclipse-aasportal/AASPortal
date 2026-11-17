@@ -7,13 +7,15 @@
  *****************************************************************************/
 
 import { Cache } from 'aas-core';
+import { singleton } from 'tsyringe';
 
 /**
  * Provides an AAS cache with a 2nd chance strategy.
  */
+@singleton()
 export class HttpCache extends Cache<string, unknown> {
-    public constructor(size: number = 100) {
-        super(size);
+    public constructor() {
+        super(100);
     }
 
     public get(url: string): unknown | undefined {

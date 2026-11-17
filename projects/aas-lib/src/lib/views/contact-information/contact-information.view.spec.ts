@@ -1,0 +1,138 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import { beforeEach, describe, expect, it, Mocked } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, input, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { provideTranslateService } from '@ngx-translate/core';
+import { of } from 'rxjs';
+
+import { aas, AASDocument } from 'aas-core';
+
+import { ToolbarService } from '../../shared/services/toolbar.service';
+import { StartService } from '../../shared/services/start.service';
+import { EndpointsApi } from '../../shared/services/endpoints-api';
+import { encodeBase64Url } from '../../utilities';
+import { VIEW_ROUTES } from '../views-routes';
+import { DocumentHeader } from '../../shared/components/document-header/document-header';
+import { ContactInformationView } from './contact-information-view';
+import { ContactInformation } from './contact-information';
+import { ContactInformationState } from './contact-information.state';
+import { createSpyObj } from '../../../test/mocks';
+import { CONTACT_INFORMATION_1_0 } from '../views-constants';
+
+import contactInformation from '../../../test/assets/contact-information-1-0.json';
+
+@Component({
+    selector: 'fhg-doc-header',
+    template: '<div></div>',
+    styleUrls: [],
+})
+export class TestDocumentHeader {
+    public readonly document = input<AASDocument>();
+}
+
+@Component({
+    selector: 'fhg-contact-information',
+    template: '<div></div>',
+    styleUrls: [],
+})
+export class TestContactInformation {
+    public readonly document = input<AASDocument>();
+    public readonly state = input<ContactInformationState>();
+}
+
+describe('ContactInformationsView', () => {
+    let component: ContactInformationView;
+    let fixture: ComponentFixture<ContactInformationView>;
+    let api: Mocked<EndpointsApi>;
+    let start: Mocked<StartService>;
+    let route: Mocked<ActivatedRoute>;
+    let document: AASDocument;
+
+    beforeEach(async () => {
+        api = createSpyObj<EndpointsApi>(['getDocument', 'getContent']);
+        start = createSpyObj<StartService>(['add', 'save']);
+        document = {
+            address: '',
+            idShort: 'ContactInformationAAS',
+            timestamp: 0,
+            id: 'https://admin-shell.io/idta/aas/ContactInformation/1/0',
+            endpoint: 'Test',
+            content: contactInformation as aas.Environment,
+        };
+
+        route = createSpyObj<ActivatedRoute>(
+            {},
+            {
+                params: of({ endpoint: encodeBase64Url(document.endpoint), id: encodeBase64Url(document.id) }),
+                queryParams: of({}),
+            },
+        );
+
+        api.getDocument.mockReturnValue(of(document));
+
+        await TestBed.configureTestingModule({
+            providers: [
+                {
+                    provide: ToolbarService,
+                    useValue: createSpyObj<ToolbarService>(['set', 'clear'], { toolbarTemplate: signal(null) }),
+                },
+                {
+                    provide: StartService,
+                    useValue: start,
+                },
+                {
+                    provide: EndpointsApi,
+                    useValue: api,
+                },
+                {
+                    provide: ActivatedRoute,
+                    useValue: route,
+                },
+                {
+                    provide: VIEW_ROUTES,
+                    useValue: [
+                        {
+                            path: 'ContactInformation',
+                            component: ContactInformationView,
+                            data: {
+                                type: 'Leaf',
+                                semanticIds: [CONTACT_INFORMATION_1_0],
+                            },
+                        },
+                    ],
+                },
+                provideTranslateService(),
+            ],
+            imports: [ContactInformationView],
+        }).compileComponents();
+
+        TestBed.overrideComponent(ContactInformationView, {
+            remove: { imports: [ContactInformation, DocumentHeader] },
+            add: { imports: [TestContactInformation, TestDocumentHeader] },
+        });
+
+        fixture = TestBed.createComponent(ContactInformationView);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+
+    it('should has a document', () => {
+        expect(component.document()).toBe(document);
+    });
+
+    it('should provide a state for the CarbonFootprint component', () => {
+        expect(component.contactInformationState).toBeInstanceOf(ContactInformationState);
+    });
+});

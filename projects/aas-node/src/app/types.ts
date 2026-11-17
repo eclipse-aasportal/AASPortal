@@ -6,96 +6,27 @@
  *
  *****************************************************************************/
 
-import { Endpoint, AASDocument, TemplateDescriptor, AASEndpoint, UserRole } from 'aas-core';
-import { aasV2 } from 'aas-package';
+import { AASEndpointAuth, SessionUser, UserRole } from 'aas-core';
 
-// Extend Express Request type to include 'user'
+/** Extend Express Request type to include 'user' */
 declare module 'express-serve-static-core' {
     interface Request {
-        user?: { id: string; name: string; role: UserRole };
+        user?: SessionUser;
     }
 }
 
 declare module 'express-session' {
     interface SessionData {
-        code_verifier?: string;
-        session_state?: string;
-        state?: string;
+        user_id: string;
+        name: string;
+        role: UserRole;
+        access_token: string;
+        refresh_token: string;
+        expires_at: number;
+        code_verifier: string;
+        endpoints: AASEndpointAuth[];
+        state: string;
     }
-}
-
-export interface AASRegistryModelType {
-    name: 'AssetAdministrationShellDescriptor' | 'Asset';
-}
-
-/** The self-describing information of a network resource. */
-export interface AASRegistryDescriptor {
-    endpoints: Endpoint[];
-}
-
-/** Descriptor of a Submodel. */
-export interface SubmodelDescriptor extends AASRegistryDescriptor {
-    identification: aasV2.Identifier;
-    idShort: string;
-}
-
-/** Descriptor of an Asset. */
-export interface AssetDescriptor extends AASRegistryDescriptor {
-    modelType: AASRegistryModelType;
-    identification: aasV2.Identifier;
-    idShort: string;
-}
-
-/** Descriptor of an Asset Administration Shell */
-export interface AssetAdministrationShellDescriptor extends AASRegistryDescriptor {
-    modelType: AASRegistryModelType;
-    identification: aasV2.Identifier;
-    idShort: string;
-    asset: AssetDescriptor;
-    submodels: SubmodelDescriptor[];
-}
-
-export enum ScanResultKind {
-    Add,
-    Remove,
-    Update,
-    End,
-}
-
-/** The result of an endpoint scan. */
-export interface ScanResult {
-    type: 'ScanEndResult' | 'ScanEndpointResult';
-    kind: ScanResultKind;
-    taskId: number;
-}
-
-/** The result of an endpoint scan. */
-export interface ScanEndpointResult extends ScanResult {
-    endpoint: AASEndpoint;
-    document: AASDocument;
-}
-
-export function isScanEndpointResult(result: ScanResult): result is ScanEndpointResult {
-    return result.type === 'ScanEndpointResult';
-}
-
-/** The result of a template scan. */
-export interface ScanTemplatesResult extends ScanResult {
-    templates: TemplateDescriptor[];
-}
-
-export interface WorkerData {
-    taskId: number;
-    type: 'ScanEndpointData';
-}
-
-export interface ScanEndpointData extends WorkerData {
-    type: 'ScanEndpointData';
-    endpoint: AASEndpoint;
-}
-
-export function isScanEndpointData(data: WorkerData): data is ScanEndpointData {
-    return data.type === 'ScanEndpointData';
 }
 
 export type EventListener = (...args: unknown[]) => void;

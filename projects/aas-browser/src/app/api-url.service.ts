@@ -29,7 +29,7 @@ export class ApiUrlService implements ApiUrl {
         return url.toString();
     }
 
-    public getFileUrl(endpoint: string | undefined, id: string, submodelId: string, idShortPath: string): string {
+    public getFileUrl(_endpoint: string | undefined, _id: string, submodelId: string, idShortPath: string): string {
         return this.join(`submodels/${encodeBase64Url(submodelId)}/submodel-elements/${idShortPath}/attachment`);
     }
 }

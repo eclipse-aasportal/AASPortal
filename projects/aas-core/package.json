@@ -1,6 +1,6 @@
 {
     "name": "aas-core",
-    "version": "3.7",
+    "version": "3.0.1",
     "description": "Common types and utilities for the Web-AAS project",
     "module": "./dist/aas-core.js",
     "main": "./dist/aas-core.js",
@@ -11,6 +11,7 @@
     "type": "module",
     "scripts": {
         "test": "vitest --run",
+        "test:unit": "vitest --run --coverage=false",
         "watch": "vitest --watch --coverage=false",
         "build": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.prod.js",
         "build:debug": "rimraf dist && tsc -p tsconfig.lib.json && node esbuild.dev.js",

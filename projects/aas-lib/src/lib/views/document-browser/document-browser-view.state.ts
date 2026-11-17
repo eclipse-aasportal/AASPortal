@@ -8,7 +8,7 @@
 
 import { Injectable } from '@angular/core';
 import { noop } from 'aas-core';
-import { BrowserState } from '../../components/browser/browser.state';
+import { BrowserState } from '../../shared/components/browser/browser.state';
 import { CompositeViewData, CompositeViewState } from '../composite-view-state';
 
 export type DocumentBrowserData = CompositeViewData;

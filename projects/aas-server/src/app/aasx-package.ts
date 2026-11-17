@@ -73,6 +73,10 @@ export class AasxPackage extends AasxFile {
     }
 
     private async preprocess(env: aas.Environment): Promise<void> {
+        if (!env.assetAdministrationShells) {
+            return;
+        }
+
         for (const shell of env.assetAdministrationShells) {
             if (!shell.assetInformation.defaultThumbnail) {
                 const thumbnail = await this.getPackageThumbnail();

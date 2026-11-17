@@ -9,32 +9,33 @@
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { inject, singleton } from 'tsyringe';
-import express, { Express, Request, Response, json, urlencoded } from 'express';
+import { container, singleton } from 'tsyringe';
+import express, { Express, Request, Response, json, text, urlencoded } from 'express';
 import cors from 'cors';
-import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
 import compression from 'compression';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 
-import { LOGGER, Logger } from 'aas-package';
+import { LOGGER, requestLogger } from 'aas-package';
 
 import { RegisterRoutes } from './routes/routes.js';
 import { Variable } from './variable.js';
 import { errorHandler } from './error-handler.js';
-import { IDENTITY_PROVIDER, IdentityProviderClient } from './auth/identity-provider-client.js';
+import { IDENTITY_PROVIDER } from './auth/identity-provider-client.js';
+import { SESSION_STORE } from './session/session-store.js';
+import { checkIsDefined } from './utilities.js';
 
 @singleton()
 export class App {
+    private readonly logger = container.resolve(LOGGER);
+    private readonly variable = container.resolve(Variable);
+    private readonly identityProvider = container.resolve(IDENTITY_PROVIDER);
+    private readonly sessionStore = container.resolve(SESSION_STORE);
     private swaggerHtml?: string;
 
-    public constructor(
-        @inject(LOGGER) private readonly logger: Logger,
-        @inject(Variable) private readonly variable: Variable,
-        @inject(IDENTITY_PROVIDER) private readonly identityProvider: IdentityProviderClient,
-    ) {
+    public constructor() {
         this.app = express();
         this.setup();
     }
@@ -51,7 +52,6 @@ export class App {
         });
 
         this.app.set('trust proxy', true);
-
         this.app.use(
             cors({
                 origin: this.variable.CORS_ORIGIN,
@@ -65,16 +65,24 @@ export class App {
         this.app.use(
             session({
                 saveUninitialized: false,
-                secret: this.variable.SESSION_SECRET,
-                resave: true,
+                secret: checkIsDefined(this.variable.SESSION_SECRET, 'SESSION_SECRET'),
+                resave: false,
+                store: this.sessionStore,
+                cookie: {
+                    secure: 'auto',
+                    httpOnly: true,
+                    sameSite: 'lax',
+                    maxAge: this.variable.SESSION_TTL * 1000,
+                },
             }),
         );
 
         this.app.use(this.identityProvider.middleware());
         this.app.use(compression());
         this.app.use(json());
+        this.app.use(text());
         this.app.use(urlencoded({ extended: true }));
-        this.app.use(morgan('dev'));
+        this.app.use(requestLogger(this.logger));
         this.app.use(
             ['/api/swagger', '/api/docs'],
             swaggerUi.serve,
@@ -83,30 +91,37 @@ export class App {
             },
         );
 
-        this.app.get('/api/me', async (req, res) => {
+        this.app.get('/auth/me', async (req, res) => {
             await this.identityProvider.me(req, res);
         });
 
-        this.app.get('/api/login', async (req, res) => {
+        this.app.get('/auth/login', async (req, res) => {
             await this.identityProvider.login(req, res);
         });
 
-        this.app.use('/api/callback', async (req, res) => {
+        this.app.use('/auth/callback', async (req, res) => {
             await this.identityProvider.callback(req, res);
         });
 
-        this.app.post('/api/logout', async (req, res) => {
+        this.app.post('/auth/logout', async (req, res) => {
             await this.identityProvider.logout(req, res);
         });
 
-        this.app.post('/api/accounts', async (req, res) => {
+        this.app.post('/auth/accounts', async (req, res) => {
             await this.identityProvider.createAccount(req, res);
+        });
+
+        this.app.patch('/auth/accounts', async (req, res) => {
+            await this.identityProvider.updateAccount(req, res);
+        });
+
+        this.app.delete('/auth/accounts', async (req, res) => {
+            await this.identityProvider.deleteAccount(req, res);
         });
 
         RegisterRoutes(this.app, { multer: multer({ dest: os.tmpdir() }) });
 
         this.app.use(express.static(this.variable.WEB_ROOT));
-        this.app.use(errorHandler);
         this.app.use((req: Request, res: Response) => {
             if (req.method === 'GET' && req.accepts('html')) {
                 const file = path.join(this.variable.WEB_ROOT, 'index.html');
@@ -117,6 +132,8 @@ export class App {
 
             return res.status(404).send({ name: 'ApplicationError', message: 'Not Found' });
         });
+
+        this.app.use(errorHandler);
     }
 
     private async getSwaggerHtml(): Promise<string> {

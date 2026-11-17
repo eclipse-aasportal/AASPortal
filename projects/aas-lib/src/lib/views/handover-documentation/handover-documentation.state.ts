@@ -22,7 +22,7 @@ import {
     toDisplayValue,
 } from 'aas-core';
 
-import { ChildState } from '../../components/child-state';
+import { ChildState } from '../../shared/components/child-state';
 import { basename, extension, findSubmodel, getUrl } from '../../utilities';
 import { HANDOVER_DOCUMENTATION_1_2, HANDOVER_DOCUMENTATION_2_0 } from '../views-constants';
 
@@ -249,11 +249,11 @@ export class HandoverDocumentationState extends ChildState {
         }
 
         if (isProperty(referable)) {
-            return toDisplayValue(referable.value, referable.valueType, this.translate.getCurrentLang()) ?? '-';
+            return toDisplayValue(referable.value, referable.valueType, this.currentLang()) ?? '-';
         }
 
         if (isMultiLanguageProperty(referable)) {
-            return getLocaleValue(referable.value, this.translate.getCurrentLang()) ?? '-';
+            return getLocaleValue(referable.value, this.currentLang()) ?? '-';
         }
 
         if (isFile(referable)) {

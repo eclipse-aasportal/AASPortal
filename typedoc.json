@@ -13,9 +13,10 @@
     "includeVersion": false,
     "includeHierarchySummary": true,
     "exclude": [
-        "**/node_modules/**/*",
+        "node_modules/**/*",
         "**/dist/**/*",
         "**/build/**/*",
-        "**/test/**/*"
+        "**/test/**/*",
+        "**/*.spec.ts"
     ]
 }
