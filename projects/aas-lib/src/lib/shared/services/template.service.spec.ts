@@ -22,6 +22,11 @@ describe('TemplateService', () => {
     let httpController: HttpTestingController;
 
     beforeEach(async () => {
+        template = {
+            name: 'submodel-template',
+            url: 'http://read/the/template/file.json',
+        };
+
         TestBed.configureTestingModule({
             providers: [
                 TemplateService,
@@ -39,11 +44,6 @@ describe('TemplateService', () => {
         TestBed.tick();
         httpController.expectOne('/assets/published-idta-templates.json').flush([template]);
         await TestBed.inject(ApplicationRef).whenStable();
-
-        template = {
-            name: 'submodel-template',
-            url: 'http://read/the/template/file.json',
-        };
     });
 
     afterEach(() => {
