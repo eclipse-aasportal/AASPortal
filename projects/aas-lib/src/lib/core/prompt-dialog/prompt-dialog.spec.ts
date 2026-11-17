@@ -41,6 +41,7 @@ describe('PromptDialog', () => {
 
         fixture = TestBed.createComponent(PromptDialog);
         component = fixture.componentInstance;
+        fixture.detectChanges();
         await fixture.whenStable();
     });
 

@@ -11,7 +11,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { OperationalDataViewState } from './operational-data-view.state';
 
-describe.skip('OperationalDataViewState', () => {
+describe('OperationalDataViewState', () => {
     let service: OperationalDataViewState;
 
     beforeEach(() => {

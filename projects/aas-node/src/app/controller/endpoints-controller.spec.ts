@@ -37,7 +37,7 @@ describe('EndpointsController', () => {
             'getEndpointDocumentCount',
             'getEndpoints',
             'getUpdateStatus',
-            'removeEndpoint',
+            'deleteEndpoint',
             'startEndpointScan',
             'updateEndpoint',
         ]);
@@ -128,10 +128,10 @@ describe('EndpointsController', () => {
     });
 
     it('DELETE: /api/v1/endpoints/{name}', async () => {
-        provider.removeEndpoint.mockReturnValue(new Promise<void>(resolve => resolve()));
+        provider.deleteEndpoint.mockReturnValue(new Promise<void>(resolve => resolve()));
         const response = await request(app).delete('/api/v1/endpoints/U2FtcGxlcw');
         expect(response.statusCode).toBe(204);
-        expect(provider.removeEndpoint).toHaveBeenCalledWith('Samples');
+        expect(provider.deleteEndpoint).toHaveBeenCalledWith('Samples');
     });
 
     it('PUT: /api/v1/endpoints/{name}/start-scan', async () => {

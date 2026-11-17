@@ -36,6 +36,7 @@ describe('DocumentHeader', () => {
 
         fixture = TestBed.createComponent(DocumentHeader);
         component = fixture.componentInstance;
+        fixture.detectChanges();
         await fixture.whenStable();
     });
 

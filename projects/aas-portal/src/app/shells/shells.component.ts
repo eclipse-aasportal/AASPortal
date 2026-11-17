@@ -64,21 +64,6 @@ import { INFO } from '../messages';
 })
 /**
  * Component responsible for managing AAS (Asset Administration Shell) documents and endpoints.
- * Provides functionality for:
- * - Document management (upload, download, delete)
- * - Endpoint management (add, update, remove)
- * - Favorites management
- * - Document filtering and pagination
- * - Toolbar integration
- *
- * Key features:
- * - Document selection and bulk operations
- * - Favorites list management
- * - Pagination controls
- * - Search filtering with query parsing
- * - Authorization checks for privileged operations
- * - Integration with start menu and toolbar
- * - Modal dialogs for user interactions
  */
 export class ShellsComponent implements OnDestroy {
     private readonly state = inject(ShellsState);

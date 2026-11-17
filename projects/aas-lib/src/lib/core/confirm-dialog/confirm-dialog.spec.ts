@@ -42,6 +42,7 @@ describe('ConfirmDialog', () => {
 
         fixture = TestBed.createComponent(ConfirmDialog);
         component = fixture.componentInstance;
+        fixture.detectChanges();
         await fixture.whenStable();
     });
 

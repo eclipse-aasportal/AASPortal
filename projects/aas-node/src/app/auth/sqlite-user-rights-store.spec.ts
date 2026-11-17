@@ -24,13 +24,21 @@ describe('SqliteUserRightsStore', () => {
         container.registerInstance(LOGGER, createSpyObj<Logger>(['error', 'warning', 'info']));
         container.registerInstance(
             Variable,
-            createSpyObj<Variable>([], { USER_RIGHTS_STORE: ':memory:', CONTENT_ROOT: '' }),
+            createSpyObj<Variable>([], {
+                USER_RIGHTS_STORE: ':memory:',
+                CONTENT_ROOT: '',
+                DEFAULT_ADMIN: 'admin@example.com',
+            }),
         );
 
         container.registerSingleton(SqliteConnectionProvider);
         container.registerSingleton(SqliteUserRightsStore);
 
         store = container.resolve(SqliteUserRightsStore);
+    });
+
+    it('should setup the default admin if not present', async () => {
+        expect(await store.getRole('admin@example.com')).toBe('admin');
     });
 
     it('should add, retrieve, update, and delete user rights', async () => {

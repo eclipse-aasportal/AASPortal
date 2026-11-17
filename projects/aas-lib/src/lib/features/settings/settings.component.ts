@@ -99,7 +99,7 @@ export class SettingsComponent {
                     ),
                     of(...result.delete).pipe(
                         mergeMap(name =>
-                            this.api.removeEndpoint(name).pipe(
+                            this.api.deleteEndpoint(name).pipe(
                                 tap(() => this.notify.info('Settings.AAS_ENDPOINT_DELETED', { endpoint: name })),
                                 catchError(error => {
                                     this.notify.error(error);
