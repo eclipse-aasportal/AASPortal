@@ -7,18 +7,30 @@
  *****************************************************************************/
 
 import 'reflect-metadata';
-import { container } from 'tsyringe';
+import { container, instanceCachingFactory } from 'tsyringe';
 import { parentPort } from 'worker_threads';
 import { LOGGER, LoggerProxy } from 'aas-package';
 import { ScanApp } from './scan/scan-app.js';
 import { AAS_INDEX } from './index/aas-index.js';
-import { AASIndexClient } from './index/aas-index-client.js';
+import { Variable } from './variable.js';
+import { MdbIndex } from './index/mdb-index.js';
+import { SqliteIndex } from './index/sqlite-index.js';
 
 parentPort?.on('close', () => {
     container.dispose();
 });
 
 container.registerSingleton(LOGGER, LoggerProxy);
-container.registerSingleton(AAS_INDEX, AASIndexClient);
+
+container.register(AAS_INDEX, {
+    useFactory: instanceCachingFactory(c => {
+        const url = c.resolve(Variable).AAS_INDEX.toLocaleLowerCase();
+        if (url.startsWith('mysql:')) {
+            return c.resolve(MdbIndex);
+        }
+
+        return c.resolve(SqliteIndex);
+    }),
+});
 
 container.resolve(ScanApp);

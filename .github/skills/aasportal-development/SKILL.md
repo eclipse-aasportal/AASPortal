@@ -68,3 +68,29 @@ For local end-to-end development, use `npm run serve`. It builds all workspaces 
 ## Validation
 
 Use the most focused validation available first. For changes to shared models, public APIs, generated TSOA routes, schema contracts, or cross-workspace imports, additionally run the relevant workspace build. Do not repair unrelated test failures; report them with their command and failure summary.
+
+## Testing with Vitest
+
+- Place each test next to or near the implementation it exercises and use the existing `*.spec.ts` naming and workspace conventions.
+- Import Vitest APIs explicitly from `vitest`, following neighboring tests (for example `describe`, `beforeEach`, `it`, `expect`, `vi`).
+- Test public behavior and observable outcomes. Keep mocks at external boundaries and avoid assertions that only restate implementation details or framework behavior.
+- Keep tests deterministic and isolated. Restore mocks and spies in `afterEach` or use `vi.restoreAllMocks()` when a suite mutates shared state.
+- Prefer a few focused behavioral cases with edge coverage over broad snapshots. Cover the changed behavior and its failure or boundary case when applicable.
+- Use `toBe`, `toEqual`, `toBeTruthy`, `toBeFalsy`, `toContain`, and async rejection/resolution matchers appropriate to the assertion instead of boolean wrapper assertions.
+- Use `await` for asynchronous work and Vitest fake timers or the repository's existing asynchronous patterns for timing-dependent code.
+- For Node workspaces, use the existing Vitest configuration and `.spec.ts` test files. Node tests run under the `node` environment unless a workspace config declares otherwise.
+- For Angular workspaces, test components and services through `TestBed` and public APIs. Use `provideZonelessChangeDetection()` and Angular signal or standalone-component patterns consistently with neighboring tests.
+- For Angular component tests, import the standalone component into `TestBed`, create it with `TestBed.createComponent`, call `fixture.detectChanges()`, and assert rendered or public behavior.
+- Mock HTTP, routing, DI providers, timers, browser APIs, and external services only at the boundary needed by the test; provide real repository implementations for reusable unit behavior.
+- Do not change a Vitest config merely to hide a failing test or to bypass coverage requirements. Add or adjust config only when the test environment or discovery rule is genuinely missing.
+- Avoid using the `any` data type.
+- Run the narrowest test first:
+
+```bash
+npm run test:unit -w <workspace> -- <spec-path>
+npm run test -w <workspace>
+npm run test
+```
+
+- Example: `npm run test:unit -w aas-core -- src/lib/cache.spec.ts`
+- `test:unit` disables coverage for a fast focused run; workspace `test` retains the package's normal coverage configuration. Run the workspace test or build after behavior or public API changes.
