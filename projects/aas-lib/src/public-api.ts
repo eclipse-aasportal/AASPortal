@@ -68,7 +68,6 @@ export * from './lib/shared/services/cookie.service';
 export * from './lib/shared/services/endpoints-api';
 export * from './lib/shared/services/index-change';
 export * from './lib/shared/services/start.service';
-export * from './lib/shared/services/template.service';
 export * from './lib/shared/services/theme.service';
 export * from './lib/shared/services/toolbar.service';
 export * from './lib/shared/services/web-socket.service';
