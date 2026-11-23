@@ -38,7 +38,7 @@ export async function startSqliteHost(dbPath: string, endpoint = defaultEndpoint
             }
         });
 
-        child.once('exit', (code: number | null): void => reject(new Error(`db-server : ${code}`)));
+        child.once('exit', (code: number | null): void => reject(new Error(`sqlite-server : ${code}`)));
     });
 
     const stop = (): Promise<void> =>
