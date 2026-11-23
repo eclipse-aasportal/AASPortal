@@ -87,7 +87,7 @@ describe('startSqliteHost', () => {
 
         child.emit('exit', 23);
 
-        await expect(promise).rejects.toThrow('db-server : 23');
+        await expect(promise).rejects.toThrow('sqlite-server : 23');
     });
 
     it('stops the child process and resolves after exit', async () => {
