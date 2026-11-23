@@ -18,4 +18,18 @@ await esbuild.build({
     tsconfig: 'tsconfig.lib.json',
     packages: 'external',
     minify: false,
+    preserveSymlinks: false,
+});
+
+await esbuild.build({
+    entryPoints: ['./src/lib/sqlite/sqlite-server.ts'],
+    outfile: './dist/sqlite-server.js',
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'es2024',
+    tsconfig: 'tsconfig.lib.json',
+    packages: 'external',
+    minify: false,
+    preserveSymlinks: false,
 });

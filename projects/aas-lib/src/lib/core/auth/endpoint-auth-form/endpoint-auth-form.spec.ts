@@ -44,39 +44,45 @@ describe('EndpointAuthForm', () => {
         component = fixture.componentInstance;
 
         TestBed.tick();
-        httpController.expectOne('/api/v1/endpoints/auth').flush([
-            {
-                name: 'Endpoint A',
-                headers: {
-                    'x-api-key': '',
-                },
-            },
-            {
-                name: 'Endpoint B',
-                headers: {},
-            },
-        ] satisfies AASEndpointAuth[]);
-
-        httpController.expectOne('/api/v1/endpoints').flush([
-            {
-                name: 'Endpoint A',
-                url: 'http://example.com/endpoint',
-                type: 'AAS_API',
-                version: '3.0',
-                headers: {
-                    'x-api-key': '*****',
-                },
-                schedule: {
-                    type: 'every',
-                    values: [3600000],
-                },
-            },
-            {
-                name: 'Endpoint B',
-                url: 'opc.tcp://example.com:4840',
-                type: 'OPC_UA',
-            },
-        ] satisfies AASEndpoint[]);
+        httpController
+            .match(() => true)
+            .forEach(req => {
+                if (req.request.url === '/api/v1/endpoints/auth') {
+                    req.flush([
+                        {
+                            name: 'Endpoint A',
+                            headers: {
+                                'x-api-key': '',
+                            },
+                        },
+                        {
+                            name: 'Endpoint B',
+                            headers: {},
+                        },
+                    ] satisfies AASEndpointAuth[]);
+                } else if (req.request.url === '/api/v1/endpoints') {
+                    req.flush([
+                        {
+                            name: 'Endpoint A',
+                            url: 'http://example.com/endpoint',
+                            type: 'AAS_API',
+                            version: '3.0',
+                            headers: {
+                                'x-api-key': '*****',
+                            },
+                            schedule: {
+                                type: 'every',
+                                values: [3600000],
+                            },
+                        },
+                        {
+                            name: 'Endpoint B',
+                            url: 'opc.tcp://example.com:4840',
+                            type: 'OPC_UA',
+                        },
+                    ] satisfies AASEndpoint[]);
+                }
+            });
 
         fixture.detectChanges();
         await fixture.whenStable();

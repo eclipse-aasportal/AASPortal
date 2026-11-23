@@ -26,3 +26,6 @@ export * from './utilities.js';
 export * from './writer/json-writer-v2.js';
 export * from './writer/json-writer-v3.js';
 export * from './writer/xml-writer-v3.js';
+export * from './sqlite/sqlite-client.js';
+export * from './sqlite/sqlite-protocols.js';
+export * from './sqlite/sqlite-host.js';

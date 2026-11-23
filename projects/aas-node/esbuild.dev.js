@@ -33,18 +33,6 @@ await esbuild.build({
 });
 
 await esbuild.build({
-    entryPoints: ['./src/app/aas-idx.ts'],
-    outdir: './dist',
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'es2024',
-    tsconfig: 'tsconfig.app.json',
-    packages: 'external',
-    minify: false,
-});
-
-await esbuild.build({
     entryPoints: ['./src/app/aas-log.ts'],
     outdir: './dist',
     bundle: true,
