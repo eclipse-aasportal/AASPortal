@@ -1,0 +1,36 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2019-2026 Fraunhofer IOSB-INA Lemgo,
+ * eine rechtlich nicht selbstaendige Einrichtung der Fraunhofer-Gesellschaft
+ * zur Foerderung der angewandten Forschung e.V.
+ *
+ *****************************************************************************/
+
+import 'reflect-metadata';
+import { container, instanceCachingFactory } from 'tsyringe';
+import { parentPort } from 'worker_threads';
+import { createEndpoint, LogClient, LOGGER } from 'aas-package';
+import { ScanApp } from './scan/scan-app.js';
+import { AAS_INDEX } from './index/aas-index.js';
+import { Variable } from './variable.js';
+import { MdbIndex } from './index/mdb-index.js';
+import { SqliteIndex } from './index/sqlite-index.js';
+
+parentPort?.on('close', () => {
+    container.dispose();
+});
+
+container.register(LOGGER, { useValue: new LogClient(createEndpoint('aas-node-log')) });
+
+container.register(AAS_INDEX, {
+    useFactory: instanceCachingFactory(c => {
+        const url = c.resolve(Variable).AAS_INDEX.toLocaleLowerCase();
+        if (url.startsWith('mysql:')) {
+            return c.resolve(MdbIndex);
+        }
+
+        return c.resolve(SqliteIndex);
+    }),
+});
+
+container.resolve(ScanApp);
