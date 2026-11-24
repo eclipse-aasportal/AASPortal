@@ -55,14 +55,14 @@ export class SqliteClient {
     public static connect(endpoint: string, retries = 50): Promise<SqliteClient> {
         return new Promise((resolve, reject) => {
             const attempt = (n: number): void => {
-                const s = net.connect(endpoint);
-                s.once('connect', () => {
-                    s.removeAllListeners('error');
-                    resolve(new SqliteClient(s));
+                const socket = net.connect(endpoint);
+                socket.once('connect', () => {
+                    socket.removeAllListeners('error');
+                    resolve(new SqliteClient(socket));
                 });
 
-                s.once('error', e => {
-                    s.destroy();
+                socket.once('error', e => {
+                    socket.destroy();
                     if (n <= 0) {
                         reject(e);
                     } else {

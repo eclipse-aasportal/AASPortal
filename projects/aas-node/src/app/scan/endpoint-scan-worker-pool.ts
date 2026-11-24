@@ -12,10 +12,9 @@ import { Worker, SHARE_ENV } from 'worker_threads';
 import fs from 'fs';
 import path from 'path/posix';
 import { noop } from 'aas-core';
-import { CommandData, EventData, isConnectable, isEventData, LOGGER, ResponseData } from 'aas-package';
+import { CommandData, EventData, isEventData, LOGGER, ResponseData } from 'aas-package';
 
 import { Variable } from '../variable.js';
-import { AAS_INDEX } from '../index/aas-index.js';
 
 /**
  * Represents a worker for scanning an endpoint.
@@ -76,7 +75,6 @@ class EndpointScanWorker extends EventEmitter {
 export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
     private readonly logger = container.resolve(LOGGER);
     private readonly variable = container.resolve(Variable);
-    private readonly index = container.resolve(AAS_INDEX);
     private readonly script: string;
     private readonly waiting = new Array<EndpointScanWorker>();
     private readonly pool = new Map<Worker, EndpointScanWorker | null>();
@@ -164,34 +162,6 @@ export class EndpointScanWorkerPool extends EventEmitter implements Disposable {
             const name = `ScanApp Worker ${this.pool.size + 1}`;
             const worker = new Worker(this.script, { env: SHARE_ENV, name });
             this.pool.set(worker, task);
-            const indexChannel = new MessageChannel();
-            if (isConnectable(this.index)) {
-                this.index.connect(indexChannel.port1, name);
-            }
-
-            const loggerChannel = new MessageChannel();
-            if (isConnectable(this.logger)) {
-                this.logger.connect(loggerChannel.port1, name);
-            }
-
-            worker.postMessage(
-                {
-                    type: 'command',
-                    name: 'ConnectIndex',
-                    args: { port: indexChannel.port2, name },
-                } satisfies CommandData,
-                [indexChannel.port2],
-            );
-
-            worker.postMessage(
-                {
-                    type: 'command',
-                    name: 'ConnectLogger',
-                    args: { port: loggerChannel.port2, name },
-                } satisfies CommandData,
-                [loggerChannel.port2],
-            );
-
             return worker;
         }
 

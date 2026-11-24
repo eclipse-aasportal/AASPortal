@@ -128,6 +128,7 @@ const server = net.createServer(socket => {
             socket.write(encode({ id: -1, ok: false, error: { message: 'invalid JSON' } }) + '\n');
             return;
         }
+
         try {
             const result = handle(req, tx);
             socket.write(encode({ id: req.id, ok: true, result }) + '\n');

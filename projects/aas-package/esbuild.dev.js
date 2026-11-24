@@ -33,3 +33,16 @@ await esbuild.build({
     minify: false,
     preserveSymlinks: false,
 });
+
+await esbuild.build({
+    entryPoints: ['./src/lib/logging/log-server.ts'],
+    outfile: './dist/log-server.js',
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'es2024',
+    tsconfig: 'tsconfig.lib.json',
+    packages: 'external',
+    minify: false,
+    preserveSymlinks: false,
+});

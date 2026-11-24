@@ -14,10 +14,15 @@ export const LOGGER: InjectionToken<Logger> = Symbol('LOGGER');
 
 export const LOG_LEVEL: InjectionToken<LogLevel> = Symbol('LOG_LEVEL');
 
-export const LOGGER_SCRIPT: InjectionToken<string> = Symbol('LOGGER_SCRIPT');
-
 /** The logging levels. */
 export type LogLevel = 'Error' | 'Warning' | 'Info';
+
+export interface LogMessage {
+    readonly type: 'Error' | 'Warning' | 'Info';
+    readonly text: string;
+    readonly timestamp: number;
+    readonly pid: number;
+}
 
 /**
  * Defines a logger interface.

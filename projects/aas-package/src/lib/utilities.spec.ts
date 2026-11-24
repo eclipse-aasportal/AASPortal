@@ -7,7 +7,9 @@
  *****************************************************************************/
 
 import { describe, expect, it } from 'vitest';
-import { decodeBase64Url, encodeBase64Url } from './utilities.js';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { createEndpoint, decodeBase64Url, encodeBase64Url } from './utilities.js';
 
 describe('utilities', () => {
     describe('encodeBase64Url', () => {
@@ -33,6 +35,18 @@ describe('utilities', () => {
         it('converts Base64Url string of ÄÖÜäöüß to normal string', () => {
             const str = decodeBase64Url('w4TDlsOcw6TDtsO8w58');
             expect(str).toEqual('ÄÖÜäöüß');
+        });
+    });
+
+    describe('createEndpoint', () => {
+        it('creates a platform-specific endpoint string', () => {
+            const name = 'test-endpoint';
+            const endpoint = createEndpoint(name);
+            if (process.platform === 'win32') {
+                expect(endpoint).toEqual(`\\\\.\\pipe\\${name}`);
+            } else {
+                expect(endpoint).toEqual(join(tmpdir(), `${name}.sock`));
+            }
         });
     });
 });

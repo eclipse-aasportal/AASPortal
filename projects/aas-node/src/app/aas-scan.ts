@@ -9,7 +9,7 @@
 import 'reflect-metadata';
 import { container, instanceCachingFactory } from 'tsyringe';
 import { parentPort } from 'worker_threads';
-import { LOGGER, LoggerProxy } from 'aas-package';
+import { createEndpoint, LogClient, LOGGER } from 'aas-package';
 import { ScanApp } from './scan/scan-app.js';
 import { AAS_INDEX } from './index/aas-index.js';
 import { Variable } from './variable.js';
@@ -20,7 +20,7 @@ parentPort?.on('close', () => {
     container.dispose();
 });
 
-container.registerSingleton(LOGGER, LoggerProxy);
+container.register(LOGGER, { useValue: new LogClient(createEndpoint('aas-node-log')) });
 
 container.register(AAS_INDEX, {
     useFactory: instanceCachingFactory(c => {
