@@ -15,6 +15,9 @@
         },
         "./sqlite-server.js": {
             "default": "./dist/sqlite-server.js"
+        },
+        "./log-server.js": {
+            "default": "./dist/log-server.js"
         }
     },
     "scripts": {

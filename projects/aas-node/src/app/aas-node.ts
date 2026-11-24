@@ -8,8 +8,7 @@
 
 import 'reflect-metadata';
 import { container, instanceCachingFactory } from 'tsyringe';
-import path from 'path';
-import { LOGGER, LoggerProxy, LOGGER_SCRIPT } from 'aas-package';
+import { createEndpoint, LogClient, LOGGER } from 'aas-package';
 import { Variable } from './variable.js';
 import { IDENTITY_PROVIDER } from './auth/identity-provider-client.js';
 import { COOKIE_STORE } from './cookie-storage/cookie-store.js';
@@ -32,8 +31,7 @@ import { EndpointProvider } from './provider/endpoint-provider.js';
 import { MdbIndex } from './index/mdb-index.js';
 import { SqliteIndex } from './index/sqlite-index.js';
 
-container.registerSingleton(LOGGER, LoggerProxy);
-container.register(LOGGER_SCRIPT, { useFactory: c => path.join(c.resolve(Variable).CONTENT_ROOT, 'aas-log.js') });
+container.register(LOGGER, { useValue: new LogClient(createEndpoint('aas-node-log'), true) });
 
 container.register(COOKIE_STORE, {
     useFactory: instanceCachingFactory(c => {

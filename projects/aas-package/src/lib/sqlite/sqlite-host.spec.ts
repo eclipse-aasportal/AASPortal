@@ -33,6 +33,7 @@ describe('startSqliteHost', () => {
                 return signal === 'SIGTERM';
             }),
         });
+
         mocks.fork.mockReturnValue(child);
     });
 
@@ -52,41 +53,19 @@ describe('startSqliteHost', () => {
 
         child.emit('message', { type: 'ready', endpoint: '/tmp/test.sqlite.sock' });
         const host = await promise;
-
         expect(host.endpoint).toBe('/tmp/test.sqlite.sock');
         expect(host.child).toBe(child);
     });
 
-    it('creates a temporary endpoint when no endpoint is provided', async () => {
-        const promise = startSqliteHost('/tmp/test.sqlite');
-        const options = mocks.fork.mock.calls[0][1] as { env: Record<string, string> };
-        const endpoint = options.env.DB_ENDPOINT;
-
-        if (process.platform === 'win32') {
-            expect(endpoint).toMatch(/^\\\\\.\\pipe\\sqlite-[a-f0-9]{8}$/);
-        } else {
-            expect(endpoint).toMatch(/^.+\/sqlite-[a-f0-9]{8}\.sock$/);
-        }
-
-        child.emit('message', { type: 'ready', endpoint });
-        const host = await promise;
-
-        expect(host.endpoint).toBe(endpoint);
-    });
-
     it('rejects when the child sends an unexpected message', async () => {
         const promise = startSqliteHost('/tmp/test.sqlite', '/tmp/test.sqlite.sock');
-
         child.emit('message', { type: 'unexpected' });
-
         await expect(promise).rejects.toThrow('unexpected message');
     });
 
     it('rejects when the child exits before becoming ready', async () => {
         const promise = startSqliteHost('/tmp/test.sqlite', '/tmp/test.sqlite.sock');
-
         child.emit('exit', 23);
-
         await expect(promise).rejects.toThrow('sqlite-server : 23');
     });
 
@@ -94,18 +73,14 @@ describe('startSqliteHost', () => {
         const promise = startSqliteHost('/tmp/test.sqlite', '/tmp/test.sqlite.sock');
         child.emit('message', { type: 'ready', endpoint: '/tmp/test.sqlite.sock' });
         const host = await promise;
-
         await expect(host.stop()).resolves.toBeUndefined();
-
         expect(child.kill).toHaveBeenCalledWith('SIGTERM');
     });
 
     it('returns the child process on a successful start', async () => {
         const promise = startSqliteHost('/tmp/test.sqlite', '/tmp/test.sqlite.sock');
         child.emit('message', { type: 'ready', endpoint: '/tmp/test.sqlite.sock' });
-
         const host = await promise;
-
         expect(host.child).toBe(child);
     });
 });

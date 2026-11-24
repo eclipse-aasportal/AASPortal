@@ -7,10 +7,8 @@
  *****************************************************************************/
 
 import { container, singleton } from 'tsyringe';
-import { tmpdir } from 'os';
-import { join } from 'path';
 import { nanoid } from 'nanoid';
-import { LOGGER, SqliteClient, type SqlParam } from 'aas-package';
+import { createEndpoint, LOGGER, SqliteClient, type SqlParam } from 'aas-package';
 import {
     AASEndpoint,
     AASCursor,
@@ -125,9 +123,6 @@ export class SqliteIndex implements AASIndex {
     private readonly logger = container.resolve(LOGGER);
     private readonly variable = container.resolve(Variable);
     private readonly connectionProvider = container.resolve(SqliteConnectionProvider);
-    private readonly endpoint =
-        process.platform === 'win32' ? `\\\\.\\pipe\\aas-index` : join(tmpdir(), `aas-index.sock`);
-
     private readonly db: Promise<SqliteClient>;
     private readonly getCountAll = 'SELECT COUNT(*) FROM documents';
     private readonly getCountEndpoint = 'SELECT COUNT(*) FROM documents WHERE endpoint = ?';
@@ -167,10 +162,12 @@ export class SqliteIndex implements AASIndex {
         'DELETE FROM submodelConceptDescriptions WHERE endpoint = ?';
 
     public constructor() {
-        this.db = this.connectionProvider.getClient(this.variable.AAS_INDEX, this.endpoint).then(async db => {
-            await db.exec(initDatabase);
-            return db;
-        });
+        this.db = this.connectionProvider
+            .getClient(this.variable.AAS_INDEX, createEndpoint('aas-index'))
+            .then(async db => {
+                await db.exec(initDatabase);
+                return db;
+            });
 
         this.logger.info(`AAS index connected to ${this.variable.AAS_INDEX} (SQLite).`);
     }

@@ -7,7 +7,6 @@
  *****************************************************************************/
 
 import { Disposable } from 'tsyringe';
-import { MessagePort } from 'worker_threads';
 
 export type FileResult = {
     filename: string;
@@ -25,28 +24,6 @@ export interface HTMLDocumentElement extends HTMLElement {
 export function isDisposable(obj: unknown): obj is Disposable {
     return (
         typeof obj === 'object' && obj !== null && 'dispose' in obj && typeof (obj as Disposable).dispose === 'function'
-    );
-}
-
-/**
- * Represents an object that can be connected to a worker thread.
- */
-export interface Connectable {
-    /**
-     * Connects the object to a worker thread using the specified message port.
-     * @param port The message port used to connect to the worker thread.
-     * @param name The name of the worker thread.
-     */
-    connect(port: MessagePort, name?: string): void;
-}
-
-/** Checks if an object is connectable. */
-export function isConnectable(obj: unknown): obj is Connectable {
-    return (
-        typeof obj === 'object' &&
-        obj !== null &&
-        'connect' in obj &&
-        typeof (obj as Connectable).connect === 'function'
     );
 }
 

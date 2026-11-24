@@ -7,8 +7,8 @@
  *****************************************************************************/
 
 import { container, singleton } from 'tsyringe';
-import { parentPort, MessagePort } from 'worker_threads';
-import { CommandData, EventData, isConnectable, LOGGER } from 'aas-package';
+import { parentPort } from 'worker_threads';
+import { CommandData, EventData, LOGGER } from 'aas-package';
 import { AASDocument, AASEndpoint } from 'aas-core';
 
 import { EndpointScanFactory } from './endpoint-scan-factory.js';
@@ -44,14 +44,6 @@ export class ScanApp {
                 this.taskId = Number(data.args.taskId);
                 this.endpoint = String(data.args.endpoint);
                 await this.cancel();
-            } else if (data.name === 'ConnectIndex') {
-                if (isConnectable(this.index)) {
-                    this.index.connect(data.args.port as MessagePort);
-                }
-            } else if (data.name === 'ConnectLogger') {
-                if (isConnectable(this.logger)) {
-                    this.logger.connect(data.args.port as MessagePort);
-                }
             }
         } catch (error) {
             this.logger.error(error);

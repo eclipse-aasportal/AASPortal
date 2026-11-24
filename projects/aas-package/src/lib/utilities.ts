@@ -17,6 +17,8 @@ import { HTMLDocumentElement } from './types.js';
 import { AASReader } from './aas-reader.js';
 import { JsonReaderV2 } from './reader/json-reader-v2.js';
 import { JsonReaderV3 } from './reader/json-reader-v3.js';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 /**
  * Decodes a base64url encoded string into an ASCII string.
@@ -227,4 +229,13 @@ export function createJsonReader(data: object, createReferenceToParent: boolean 
     function isSubmodelElementV2(value: unknown): value is aasV2.Referable {
         return typeof (value as aasV2.Referable).modelType?.name === 'string';
     }
+}
+
+/**
+ * Creates an endpoint string for inter-process communication based on the platform.
+ * @param name The base name of the endpoint.
+ * @returns The platform-specific endpoint string.
+ */
+export function createEndpoint(name: string): string {
+    return process.platform === 'win32' ? `\\\\.\\pipe\\${name}` : join(tmpdir(), `${name}.sock`);
 }
