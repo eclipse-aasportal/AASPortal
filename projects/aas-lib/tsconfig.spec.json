@@ -7,9 +7,8 @@
         "outDir": "./out-tsc/spec",
         "types": ["node"]
     },
-    "include": [
-        "src/**/*.ts"
-    ],
+    "exclude": ["dist"],
+    "include": ["**/*.ts"],
     "angularCompilerOptions": {
         "extendedDiagnostics": {
             "checks": {

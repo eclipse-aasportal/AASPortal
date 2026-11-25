@@ -7,7 +7,7 @@
  *****************************************************************************/
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { expect, Mocked, vitest } from 'vitest';
+import { Mocked, vitest } from 'vitest';
 
 type Func = () => any;
 
@@ -47,10 +47,4 @@ export function createSpyObj<T extends object>(
     }
 
     return obj as Mocked<T>;
-}
-
-export type DoneFn = () => void;
-
-export function fail(): void {
-    expect(false).toBe(true);
 }

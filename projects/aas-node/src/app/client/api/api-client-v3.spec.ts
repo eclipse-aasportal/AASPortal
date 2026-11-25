@@ -15,17 +15,17 @@ import { createSpyObj } from '../../../test/mocks.js';
 import { aasEnvironment as env } from '../../../test/assets/aas-environment.js';
 import { ApiClientV3, OperationResult } from './api-client-v3.js';
 import { HttpClient } from '../../http-client.js';
-import { AASIndexClient } from '../../index/aas-index-client.js';
+import { AASIndex } from '../../index/aas-index.js';
 
 describe('ApiClientV3', () => {
     let logger: Mocked<Logger>;
     let client: ApiClientV3;
     let http: Mocked<HttpClient>;
-    let index: Mocked<AASIndexClient>;
+    let index: Mocked<AASIndex>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        index = createSpyObj<AASIndexClient>(['getConceptDescriptionRefs']);
+        index = createSpyObj<AASIndex>(['getConceptDescriptionRefs']);
         http = createSpyObj<HttpClient>(['get', 'getReadable', 'post', 'postFormData', 'put', 'delete']);
         client = new ApiClientV3(
             logger,

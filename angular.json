@@ -252,20 +252,21 @@
         "aas-lib": {
             "projectType": "library",
             "root": "projects/aas-lib",
-            "sourceRoot": "projects/aas-lib/src",
+            "sourceRoot": "projects/aas-lib",
             "prefix": "fhg",
             "architect": {
                 "build": {
-                    "builder": "@angular/build:ng-packagr",
+                    "builder": "@angular/build:library",
                     "options": {
-                        "project": "projects/aas-lib/ng-package.json"
+                        "tsConfig": "projects/aas-lib/tsconfig.lib.json",
+                        "outputPath": "projects/aas-lib/dist"
                     },
                     "configurations": {
                         "production": {
                             "tsConfig": "projects/aas-lib/tsconfig.lib.prod.json"
                         },
                         "development": {
-                            "tsConfig": "projects/aas-lib/tsconfig.lib.json"
+                            "compilationMode": "full"
                         }
                     },
                     "defaultConfiguration": "production"

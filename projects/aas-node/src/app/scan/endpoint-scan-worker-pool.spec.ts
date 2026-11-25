@@ -10,11 +10,10 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CommandData, EventData, LOGGER, Logger } from 'aas-package';
-import { EndpointScanWorkerPool } from './endpoint-scan-worker-pool';
-import { createSpyObj } from '../../test/mocks';
-import { AAS_INDEX } from '../index/aas-index';
-import { Variable } from '../variable';
-import { AASIndexClient } from '../index/aas-index-client';
+import { EndpointScanWorkerPool } from './endpoint-scan-worker-pool.js';
+import { createSpyObj } from '../../test/mocks.js';
+import { AAS_INDEX, AASIndex } from '../index/aas-index.js';
+import { Variable } from '../variable.js';
 
 vi.mock(import('worker_threads'), () => {
     class WorkerMock {
@@ -95,7 +94,7 @@ describe('EndpointScanWorkerPool', () => {
         container.registerSingleton(EndpointScanWorkerPool, EndpointScanWorkerPool);
         container.registerInstance(LOGGER, createSpyObj<Logger>(['info', 'warning', 'error']));
         container.registerInstance(Variable, createSpyObj<Variable>([], { CONTENT_ROOT: '/tmp', MAX_WORKERS: 2 }));
-        container.registerInstance(AAS_INDEX, createSpyObj<AASIndexClient>(['connect', 'execute', 'cancel']));
+        container.registerInstance(AAS_INDEX, createSpyObj<AASIndex>(['connect', 'execute', 'cancel']));
         workerPool = container.resolve(EndpointScanWorkerPool);
     });
 

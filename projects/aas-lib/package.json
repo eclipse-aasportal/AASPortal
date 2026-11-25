@@ -1,4 +1,7 @@
 {
+    "exports": {
+        ".": "./src/public-api.ts"
+    },
     "name": "aas-lib",
     "version": "5.0.0",
     "sideEffects": false,
