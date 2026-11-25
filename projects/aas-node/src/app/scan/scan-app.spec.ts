@@ -14,7 +14,7 @@ import { AASDocument, AASEndpoint } from 'aas-core';
 import { LOGGER, Logger } from 'aas-package';
 
 import { createSpyObj } from '../../test/mocks.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AASIndex } from '../index/aas-index.js';
 import { EndpointScan } from './endpoint-scan.js';
 import { EndpointScanFactory } from './endpoint-scan-factory.js';
 import { ScanApp } from './scan-app.js';
@@ -38,7 +38,7 @@ describe('ScanApp', () => {
         vi.spyOn(Date, 'now').mockReturnValue(1234567890);
         factory = createSpyObj<EndpointScanFactory>(['create']);
         container.registerInstance(LOGGER, createSpyObj<Logger>(['info', 'warning', 'error']));
-        container.registerInstance(AAS_INDEX, createSpyObj<AASIndexClient>([]));
+        container.registerInstance(AAS_INDEX, createSpyObj<AASIndex>([]));
         container.registerInstance(EndpointScanFactory, factory);
         container.registerSingleton(ScanApp, ScanApp);
     });

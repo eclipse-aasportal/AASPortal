@@ -40,7 +40,7 @@ describe('SQLite protocols', () => {
             result: { changes: 1, lastInsertRowid: 9007199254740993n },
         };
 
-        expect(decode<Request>(encode(request)).params?.[0]).toBe(9007199254740993n);
+        expect(decode<Request>(encode(request))).toEqual(request);
         const decoded = decode<Response>(encode(response));
         expect(decoded).toEqual(response);
     });

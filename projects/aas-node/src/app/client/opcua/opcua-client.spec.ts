@@ -15,18 +15,18 @@ import { LiveRequest, aas } from 'aas-core';
 import { createSpyObj } from '../../../test/mocks.js';
 import { OpcuaClient } from './opcua-client.js';
 import { SocketClient } from '../../live/socket-client.js';
-import { AASIndexClient } from '../../index/aas-index-client.js';
+import { AASIndex } from '../../index/aas-index.js';
 
 type CallMethod = (methodToCall: CallMethodRequestLike) => Promise<CallMethodResult>;
 
 describe('OpcuaClient', () => {
     let server: OpcuaClient;
     let logger: Mocked<Logger>;
-    let index: Mocked<AASIndexClient>;
+    let index: Mocked<AASIndex>;
 
     beforeEach(() => {
         logger = createSpyObj<Logger>(['error', 'warning', 'info']);
-        index = createSpyObj<AASIndexClient>(['getEndpoint']);
+        index = createSpyObj<AASIndex>(['getEndpoint']);
         server = new OpcuaClient(logger, index, {
             url: 'opc.tcp://localhost:1234/I4AASServer',
             name: 'OPCUA Server',

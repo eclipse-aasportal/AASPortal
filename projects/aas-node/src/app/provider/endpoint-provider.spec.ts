@@ -17,14 +17,14 @@ import { EndpointProvider } from './endpoint-provider.js';
 import { EndpointScanWorkerPool } from '../scan/endpoint-scan-worker-pool.js';
 import { TaskHandler } from './task-handler.js';
 import { Variable } from '../variable.js';
-import { AASIndexClient } from '../index/aas-index-client.js';
+import { AASIndex } from '../index/aas-index.js';
 import { container } from 'tsyringe';
 import { AAS_INDEX } from '../index/aas-index.js';
 import { WSNode } from '../ws-node.js';
 
 describe('EndpointController', () => {
     let provider: EndpointProvider;
-    let index: Mocked<AASIndexClient>;
+    let index: Mocked<AASIndex>;
     let logger: Mocked<Logger>;
     let workerPool: Mocked<EndpointScanWorkerPool>;
     let clientFactory: Mocked<EndpointClientFactory>;
@@ -48,7 +48,7 @@ describe('EndpointController', () => {
         clientFactory = createSpyObj<EndpointClientFactory>(['create', 'testAsync']);
         clientFactory.testAsync.mockResolvedValue();
 
-        index = createSpyObj<AASIndexClient>([
+        index = createSpyObj<AASIndex>([
             'insertEndpoint',
             'updateEndpoint',
             'clear',

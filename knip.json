@@ -1,0 +1,42 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "ignoreBinaries": ["podman"],
+    "workspaces": {
+        ".": {
+            "entry": ["*.ts", "*.js"],
+            "project": ["*.ts", "*.js"]
+        },
+        "projects/aas-core": {
+            "entry": ["src/lib/index.ts"],
+            "project": ["src/**/*.ts", "*.ts", "*.js"]
+        },
+        "projects/aas-lib": {
+            "entry": ["src/public-api.ts"],
+            "project": ["src/**/*.ts", "*.ts", "*.js"]
+        },
+        "projects/aas-package": {
+            "entry": [
+                "src/lib/index.ts",
+                "src/lib/sqlite/sqlite-server.ts",
+                "src/lib/logging/log-server.ts"
+            ],
+            "project": ["src/**/*.ts", "*.ts", "*.js"]
+        },
+        "projects/aas-node": {
+            "entry": ["src/app/aas-node.ts", "src/app/aas-scan.ts"],
+            "project": ["src/**/*.ts", "*.ts", "*.js"]
+        },
+        "projects/aas-portal": {
+            "entry": ["src/main.ts"],
+            "project": ["src/**/*.ts", "*.ts", "*.js"]
+        },
+        "projects/aas-server": {
+            "entry": ["src/app/aas-server.ts"],
+            "project": ["src/**/*.ts", "*.ts", "*.js"]
+        },
+        "projects/aas-browser": {
+            "entry": ["src/main.ts"],
+            "project": ["src/**/*.ts", "*.ts", "*.js"]
+        }
+    }
+}
